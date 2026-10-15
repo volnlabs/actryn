@@ -13,6 +13,8 @@ import stat
 import struct
 import subprocess
 import sys
+# Installed tools are signed immutable payloads, including when invoked without -B.
+sys.dont_write_bytecode = True
 import tarfile
 import tempfile
 import tomllib

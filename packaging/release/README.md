@@ -22,8 +22,8 @@ pins. The release builder never guesses a missing artifact or hashes an
 unselected file to invent an approval.
 
 ```sh
-python3 packaging/release/release.py build --spec inputs.json --out candidate
-python3 packaging/release/release.py inspect --bundle candidate
+python3 -B -E -s packaging/release/release.py build --spec inputs.json --out candidate
+python3 -B -E -s packaging/release/release.py inspect --bundle candidate
 ```
 
 `source` is a local file and `sha256` is its independently selected lowercase
@@ -50,7 +50,7 @@ commands describe the interface; do not create an ad hoc release identity:
 openssl pkeyutl -sign -rawin -inkey EXTERNALLY_MANAGED_ED25519_KEY \
   -in candidate/manifest.json -out candidate/signature.ed25519
 openssl pkey -pubin -in release-public.pem -outform DER | sha256sum
-python3 packaging/release/release.py inspect --bundle candidate \
+python3 -B -E -s packaging/release/release.py inspect --bundle candidate \
   --public-key release-public.pem --key-sha256 EXTERNALLY_VERIFIED_SPKI_SHA256
 ```
 
@@ -160,15 +160,15 @@ Each action requires the signed bundle, separately provided public key, external
 verified fingerprint and explicit role:
 
 ```sh
-python3 packaging/release/release.py stage --role robot --bundle candidate \
+python3 -B -E -s packaging/release/release.py stage --role robot --bundle candidate \
   --public-key release-public.pem --key-sha256 VERIFIED_FINGERPRINT
-python3 packaging/release/release.py activate --role robot --bundle candidate \
+python3 -B -E -s packaging/release/release.py activate --role robot --bundle candidate \
   --public-key release-public.pem --key-sha256 VERIFIED_FINGERPRINT
 # After an interrupted action, inspect retained state, then explicitly finish:
-python3 packaging/release/release.py recover --role robot --bundle candidate \
+python3 -B -E -s packaging/release/release.py recover --role robot --bundle candidate \
   --public-key release-public.pem --key-sha256 VERIFIED_FINGERPRINT
 # Select an already retained, compatible slot; never restore its old state:
-python3 packaging/release/release.py rollback --role robot --bundle OLD_BUNDLE \
+python3 -B -E -s packaging/release/release.py rollback --role robot --bundle OLD_BUNDLE \
   --public-key release-public.pem --key-sha256 VERIFIED_FINGERPRINT
 ```
 
@@ -233,7 +233,12 @@ DTB at guest boot; installation never changes boot firmware or a running DTB.
 No credentials, mutable configuration or automatic activation route belongs in a
 bundle. These local operator steps are required before `resume`. Resume/startup verify
 the configured service UID against the actual named noninteractive sysusers
-account and group; they never silently rewrite an identity mismatch.
+account and group; they never silently rewrite an identity mismatch. Server
+resume/startup additionally invokes the installed `actryn-serverd --check-config`
+route after these checks. It runs the daemon's actual `LauncherConfig::read`
+validation, including I/O-device syntax and approved artifact properties, without
+binding listeners, opening accounting databases, acquiring the daemon lock or
+starting work. Failure leaves the installation gate in place during resume.
 
 After trusted robot quiescence and service stop, explicitly unload the old module.
 Only then may `resume` clear the installation gate. It does **not** infer
@@ -242,7 +247,17 @@ quiescence from unloading. Next load the exact signed
 start the manager and then gateway units. Resume never loads a module or starts a
 service itself. Server resume likewise only permits a later explicit unit start.
 
-Every unit startup has a root, read-only `ExecStartPre` (systemd `+` prefix) that re-verifies the
+The installed entry is `/opt/actryn/ROLE/current/tools/release.py`; invoke it as
+`/usr/bin/python3 -B -E -s /opt/actryn/ROLE/current/tools/release.py ...`.
+`-B` disables bytecode writes, `-E` ignores Python environment overrides, and
+`-s` excludes user site packages. The script itself also disables bytecode before
+importing its sibling installer, so direct invocation cannot add `__pycache__`
+to the immutable signed slot. Keep the separately verified bootstrap scripts
+available: an interrupted initial publication can leave the installed CLI/current
+pointer absent, and recovery must use that external trusted entry.
+
+Every unit startup has a root, read-only `ExecStartPre` (systemd `+` prefix), with
+`/usr/bin/python3 -B -E -s`, that re-verifies the
 installed signed tuple, actual host pins and local configuration. Startup verification
 streams archive hashes and installed files; it does not buffer the entire release
 inside a service memory limit. Robot startup

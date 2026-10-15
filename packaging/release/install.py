@@ -88,6 +88,14 @@ class SystemPlatform:
                 and account.pw_shell == '/usr/sbin/nologin'
                 and account.pw_uid == config['server_uid' if role == 'server' else 'gateway_uid'],
                 'local configuration differs from noninteractive service identity')
+        if role == 'server':
+            # Reuse the daemon's actual approval/configuration validator without
+            # opening its database, listeners, service lock or dispatch routes.
+            report = strict_json(command(['/usr/bin/actryn-serverd', '--check-config']))
+            fields(report, ('result', 'artifact_count', 'authority_issued'), 'daemon configuration report')
+            require(report['result'] == 'configuration_valid' and report['authority_issued'] is False
+                    and type(report['artifact_count']) is int and 1 <= report['artifact_count'] <= 8,
+                    'installed daemon configuration check failed')
 
     def check_resume(self, role):
         if role == 'robot':
@@ -194,7 +202,7 @@ class Installer:
 
     def gate_bytes(self):
         return (f'[Unit]\nConditionPathExists=!/var/lib/actryn-install/{self.role}/INHIBITED\n'
-                f'[Service]\nExecStartPre=+/usr/bin/python3 /opt/actryn/{self.role}/current/tools/release.py preflight --role {self.role}\n').encode()
+                f'[Service]\nExecStartPre=+/usr/bin/python3 -B -E -s /opt/actryn/{self.role}/current/tools/release.py preflight --role {self.role}\n').encode()
 
     def validate_paths(self, manifest):
         for target, link in self.bindings(manifest).items():

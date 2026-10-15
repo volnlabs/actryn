@@ -391,6 +391,55 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(rejected['result'], 'rejected')
         self.assertIn('matching role', rejected['error'])
 
+    def test_installed_direct_entry_never_writes_bytecode_into_signed_slot(self):
+        spec = self.spec('server')
+        for name in ('release.py', 'install.py'):
+            data = Path(release.__file__).with_name(name).read_bytes()
+            source = Path(spec['files']['tools/' + name]['source'])
+            source.write_bytes(data)
+            spec['files']['tools/' + name]['sha256'] = release.digest(data)
+        bundle = self.root / 'actual-tools-bundle'
+        release.build(spec, bundle); self.sign(bundle)
+        root = self.install_root()
+        installer = self.installer(root, spec)
+        identity = self.run_install(installer, 'activate', bundle)['manifest_sha256']
+        slot = installer.slots / identity
+        before = self.tree(slot)
+        result = subprocess.run([sys.executable, str(slot / 'payload/tools/release.py'), 'stage',
+            '--role', 'robot', '--bundle', str(bundle), '--public-key', str(self.public),
+            '--key-sha256', self.fingerprint], capture_output=True, timeout=5,
+            env={'PATH': '/usr/bin:/bin'})
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('matching role', json.loads(result.stderr)['error'])
+        self.assertEqual(before, self.tree(slot))
+        self.assertFalse((slot / 'payload/tools/__pycache__').exists())
+        installer.verify_slot(slot, {'manifest_sha256': identity, 'key_fingerprint': self.fingerprint})
+
+    def test_server_config_check_uses_installed_daemon_before_accepting_readiness(self):
+        adapter = SystemPlatform()
+        account = mock.Mock(pw_uid=987, pw_gid=987, pw_shell='/usr/sbin/nologin')
+        group = mock.Mock(gr_gid=987)
+        config = {'server_uid': 987, 'operator_uid': 1000, 'io_device': '8:0', 'artifacts': {}}
+        with mock.patch('install.pwd.getpwnam', return_value=account), mock.patch('install.grp.getgrnam', return_value=group):
+            with mock.patch('install.command', return_value=b'{"result":"configuration_valid","artifact_count":1,"authority_issued":false}') as command:
+                adapter.check_config('server', config)
+                command.assert_called_once_with(['/usr/bin/actryn-serverd', '--check-config'])
+            for reply in (b'{"result":"wrong"}', b'invalid JSON',
+                          b'{"result":"configuration_valid","artifact_count":1}',
+                          b'{"result":"configuration_valid","artifact_count":0,"authority_issued":false}',
+                          b'{"result":"configuration_valid","artifact_count":true,"authority_issued":false}',
+                          b'{"result":"configuration_valid","artifact_count":1,"authority_issued":true}'):
+                with mock.patch('install.command', return_value=reply):
+                    with self.assertRaises(release.ReleaseError): adapter.check_config('server', config)
+            with mock.patch('install.command', side_effect=release.ReleaseError('daemon rejects configuration')):
+                with self.assertRaises(release.ReleaseError): adapter.check_config('server', config)
+            with mock.patch('install.command') as command:
+                with self.assertRaises(release.ReleaseError): adapter.check_config('server', dict(config, server_uid=986))
+                command.assert_not_called()
+            with mock.patch('install.command') as command:
+                adapter.check_config('robot', {'gateway_uid': 987, 'operator_uid': 1000})
+                command.assert_not_called()
+
     def test_production_start_checks_loaded_build_identity_and_resume_requires_unload(self):
         spec, bundle = self.bundle()
         root = self.install_root()
@@ -413,7 +462,7 @@ class ReleaseTests(unittest.TestCase):
         with mock.patch('install.Path') as path:
             path.return_value.exists.return_value = True
             with self.assertRaises(release.ReleaseError): adapter.check_resume('robot')
-        self.assertIn(b'ExecStartPre=+/usr/bin/python3', installer.gate_bytes())
+        self.assertIn(b'ExecStartPre=+/usr/bin/python3 -B -E -s ', installer.gate_bytes())
         self.assertIn(b'current/tools/release.py preflight --role robot', installer.gate_bytes())
         with self.assertRaises(release.ReleaseError): installer.preflight()
 
