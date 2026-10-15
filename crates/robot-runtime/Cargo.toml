@@ -1,0 +1,18 @@
+[package]
+name = "robot-runtime"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+authority-client = { path = "../authority-client" }
+robot-intent = { path = "../robot-intent" }
+evidence = { path = "../evidence" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+libc.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
