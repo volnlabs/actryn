@@ -54,7 +54,8 @@ separate and do not reset or conceal source gaps.
 wheel targets. Each wheel is limited to 100 ticks, duration to 10 seconds, and
 duty to 100 permille. A wheel stops permanently when its target is crossed;
 there is no reversal after overshoot. Samples have 100 ms minimum cadence,
-receipt-aware 100 ms slew credit, finite <=300 ms horizons and the original
+receipt-aware 100 ms slew credit (including STARTED, with conservative mapped
+controller time rather than observed timestamps), finite <=300 ms horizons and the original
 operation/session/grant/observation ceilings. Only one unknown sample can exist.
 External snapshots withhold the allocated ID until its binding is durable;
 the stable key remains available for pending queries/cancellation. The registry

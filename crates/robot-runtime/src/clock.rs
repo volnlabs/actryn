@@ -18,6 +18,24 @@ impl Mapping {
             controller,
         })
     }
+    /// Conservative current controller time for preflighting kernel slew credit.
+    /// Accepted HELLO event capture is no earlier than the kernel's map_host;
+    /// using it and rounding drift outward cannot grant extra elapsed credit.
+    pub fn controller_lower(&self, host: u64) -> Result<u64> {
+        let age = host
+            .checked_sub(self.sent)
+            .ok_or(Error::Denied("clock moved backwards"))?;
+        if age >= 60_000 * MS {
+            return Err(Error::Denied("clock mapping expired"));
+        }
+        let elapsed = host
+            .checked_sub(self.received)
+            .ok_or(Error::Denied("clock moved backwards"))?;
+        self.controller
+            .checked_add(elapsed)
+            .and_then(|v| v.checked_sub(age.div_ceil(10_000)))
+            .ok_or(Error::Denied("controller clock overflow"))
+    }
     pub fn acquisition(&self, controller: u64, received: u64) -> Result<(u64, u64)> {
         let age = received
             .checked_sub(self.sent)
@@ -57,5 +75,30 @@ mod tests {
         assert!(m.acquisition(1000 * MS, 61_000 * MS).is_err());
         assert!(m.acquisition(899 * MS, 204 * MS).is_err());
         assert!(Mapping::new(0, 11 * MS, 0).is_err());
+    }
+}
+
+#[cfg(test)]
+mod slew_tests {
+    use super::*;
+    #[test]
+    fn delayed_start_has_no_credit_from_old_baseline() {
+        let mapping = Mapping::new(990 * MS, 1000 * MS, 2000 * MS).unwrap();
+        let baseline = 2000 * MS;
+        let started = 2200 * MS; // START delayed by durable writer, then just accepted
+        let now = 1201 * MS;
+        assert!(mapping.controller_lower(now).unwrap() - baseline >= 100 * MS);
+        assert!(mapping.controller_lower(now).unwrap() - started < 100 * MS);
+        assert!(mapping.controller_lower(1301 * MS).unwrap() - started >= 100 * MS);
+    }
+    #[test]
+    fn observed_hundred_ms_is_not_conservative_hundred_ms() {
+        let mapping = Mapping::new(990 * MS, 1000 * MS, 2000 * MS).unwrap();
+        let started = 2000 * MS;
+        let actual_observation = 2100 * MS;
+        assert_eq!(actual_observation - started, 100 * MS);
+        assert!(mapping.controller_lower(1100 * MS).unwrap() - started < 100 * MS);
+        assert!(mapping.controller_lower(1101 * MS).unwrap() - started >= 100 * MS);
+        assert!(mapping.controller_lower(60_990 * MS).is_err());
     }
 }

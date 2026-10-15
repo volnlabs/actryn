@@ -920,8 +920,10 @@ impl Engine {
                 if status.flags & 6 != 0
                     || status.sequence < active.last_sequence
                     || now.saturating_sub(active.last_sample_ns) < 100 * MS
-                    || observation
-                        .controller_ns
+                    || core
+                        .mapping
+                        .ok_or(Error::Denied("clock mapping missing"))?
+                        .controller_lower(now)?
                         .saturating_sub(core.last_applied_ctl)
                         < 100 * MS
                 {
@@ -989,14 +991,16 @@ impl Engine {
             core.recovery = None;
             core.recover_reset = false;
         }
+        // Kernel receipt handling advances its slew reference for STARTED too.
+        // Track it without promoting a status poll/START receipt to encoder input.
+        if matches!(event.kind, 0x20004 | 0x20006 | 0x20008 | 0x2000a) {
+            core.last_applied_ctl = event.status.controller_ns;
+        }
         if !matches!(event.kind, 0x20004 | 0x20008 | 0x2000a | 0x2000c) {
             return Ok(());
         }
         if event.status.runtime_nonce != self.bridge.admin.status()?.runtime_nonce {
             return Ok(());
-        }
-        if event.kind != 0x2000c {
-            core.last_applied_ctl = event.status.controller_ns;
         }
         let mapping = core
             .mapping
