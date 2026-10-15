@@ -3,6 +3,7 @@ mod bindings;
 mod bridge;
 mod capture;
 mod clock;
+mod events;
 mod skill;
 mod types;
 use authority_client::{boottime_ns, AuthorityDevice, Event, Opcode, Request, Role, Status};
@@ -75,9 +76,18 @@ struct Core {
     rearm_pending: bool,
     observations: VecDeque<Observation>,
     next_observation: u64,
-    event_sequence: Option<u64>,
+    event_stream: Option<events::Continuity>,
     registered_observation: u64,
     last_applied_ctl: u64,
+}
+impl Core {
+    fn event_stream_ready(&self, status: &Status) -> bool {
+        self.event_stream.as_ref().is_some_and(|stream| {
+            !stream.faulted
+                && stream.epoch == status.runtime_nonce
+                && stream.lost_baseline == status.events_lost
+        })
+    }
 }
 /// One prepared instance at a time, including construction and retirement. The
 /// library has no network decoder or agent-controlled device path.
@@ -150,7 +160,7 @@ impl Engine {
                 rearm_pending: false,
                 observations: VecDeque::with_capacity(32),
                 next_observation: 0,
-                event_sequence: None,
+                event_stream: None,
                 registered_observation: 0,
                 last_applied_ctl: 0,
             }),
@@ -210,8 +220,10 @@ impl Engine {
             *self.context.write().unwrap() = None;
             self.reserved.store(false, Ordering::Release);
         }
+        let status = self.bridge.admin.status()?;
         if !core.recover_reset
-            && recovered_mapping_ready(core.mapping, &self.bridge.admin.status()?, boottime_ns()?)
+            && core.event_stream_ready(&status)
+            && recovered_mapping_ready(core.mapping, &status, boottime_ns()?)
         {
             return Ok(Progress::Ready);
         }
@@ -225,6 +237,27 @@ impl Engine {
         core.observations.clear();
         core.registered_observation = 0;
         core.rearm_pending = false;
+        core.event_stream = None;
+        // Old captures stay incomplete. Drain their bounded FIFO before taking
+        // the cumulative loss baseline for the explicit new exchange.
+        let mut drained = false;
+        for _ in 0..256 {
+            match self.events.read_event() {
+                Ok(_) => (),
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                    drained = true;
+                    break;
+                }
+                Err(error) => return Err(error.into()),
+            }
+        }
+        if !drained {
+            return Err(Error::Denied("kernel event recovery drain capacity"));
+        }
+        let lost_baseline = self.bridge.admin.status()?.events_lost;
+        if lost_baseline == u32::MAX {
+            return Err(Error::Denied("kernel event loss counter exhausted"));
+        }
         let sent = boottime_ns()?;
         core.recovery = Some((
             sent,
@@ -236,13 +269,19 @@ impl Engine {
             core.recovery = None;
             return Err(e.into());
         }
+        core.event_stream = Some(events::Continuity::new(
+            self.bridge.admin.status()?.runtime_nonce,
+            lost_baseline,
+        )?);
         Ok(Progress::Pending)
     }
     fn recovery_progress(&self) -> Result<Progress> {
         let c = self.core.lock().unwrap();
+        let status = self.bridge.admin.status()?;
         Ok(
             if c.recovery.is_none()
-                && recovered_mapping_ready(c.mapping, &self.bridge.admin.status()?, boottime_ns()?)
+                && c.event_stream_ready(&status)
+                && recovered_mapping_ready(c.mapping, &status, boottime_ns()?)
             {
                 Progress::Ready
             } else {
@@ -257,7 +296,7 @@ impl Engine {
         }
         let status = self.bridge.admin.status()?;
         core.mapping.unwrap().controller_lower(boottime_ns()?)?;
-        if status.flags & 1 == 0 {
+        if status.flags & 1 == 0 || !core.event_stream_ready(&status) {
             return Err(Error::Denied("matched recovery required"));
         }
         if status.state == 1 {
@@ -286,6 +325,9 @@ impl Engine {
         let status = self.bridge.admin.status()?;
         if status.state != 1 || status.flags & 1 == 0 {
             return Err(Error::Denied("explicit rearm required"));
+        }
+        if !self.core.lock().unwrap().event_stream_ready(&status) {
+            return Err(Error::Denied("matched event recovery required"));
         }
         if self
             .reserved
@@ -328,6 +370,13 @@ impl Engine {
                 &String::from_utf8_lossy(CONFIG),
             )?;
             capture.record(0, now, EventKind::Transition, &prepared)?;
+            capture.record(
+                0,
+                now,
+                EventKind::Configuration,
+                &serde_json::json!({"kernel_historical_events_lost":status.events_lost,
+                    "recovery_epoch":status.runtime_nonce,"old_capture_repaired":false}),
+            )?;
             let context = Arc::new(Context {
                 prepared: prepared.clone(),
                 registry,
@@ -781,6 +830,11 @@ impl Engine {
             prepared,
             retiring: core.slot.as_ref().is_some_and(|s| s.retiring),
             recovery_pending: core.recovery.is_some(),
+            recovery_ready: core.recovery.is_none()
+                && core.event_stream_ready(&kernel)
+                && recovered_mapping_ready(core.mapping, &kernel, boottime_ns()?),
+            event_loss_baseline: core.event_stream.as_ref().map(|s| s.lost_baseline),
+            event_stream_healthy: core.event_stream_ready(&kernel),
             health,
             operation,
         })
@@ -973,14 +1027,17 @@ impl Engine {
         Ok(())
     }
     fn event(&self, core: &mut Core, event: Event) -> Result<()> {
-        if event.status.events_lost != 0
-            || core
-                .event_sequence
-                .is_some_and(|last| last.checked_add(1) != Some(event.sequence))
-        {
-            return Err(Error::Denied("kernel event source gap"));
+        let Some(stream) = core.event_stream.as_mut() else {
+            return Ok(());
+        };
+        match stream.accept(&event) {
+            Ok(false) => return Ok(()),
+            Ok(true) => (),
+            Err(error) => {
+                core.mapping = None;
+                return Err(error);
+            }
         }
-        core.event_sequence = Some(event.sequence);
         if let Some(slot) = core.slot.as_ref().filter(|s| {
             !s.stop.load(Ordering::Acquire) && !s.context.capture.recorder.health().revoke_required
         }) {

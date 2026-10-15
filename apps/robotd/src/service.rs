@@ -37,6 +37,15 @@ fn fixed<const N: usize>(bytes: &[u8]) -> Result<[u8; N]> {
         .try_into()
         .map_err(|_| anyhow::anyhow!("identity size"))
 }
+fn checked_clock(
+    clock: &Mutex<ClockGuard>,
+    sample: impl FnOnce() -> Result<(u64, u64)>,
+) -> Result<(u64, u64)> {
+    let mut clock = clock.lock().unwrap();
+    let (wall, boot) = sample()?;
+    clock.check(wall, boot)?;
+    Ok((wall, boot))
+}
 fn report(value: impl serde::Serialize) -> Result<Reply> {
     let value = serde_json::to_value(value)?;
     let value = if value.is_object() {
@@ -76,6 +85,7 @@ pub struct State {
     clock: Mutex<ClockGuard>,
     clock_writer: Mutex<()>,
     clock_ok: AtomicBool,
+    clock_error: RwLock<Option<String>>,
     durable_clock_boot: AtomicU64,
     floor: AtomicU64,
     maintenance: Arc<Semaphore>,
@@ -420,9 +430,8 @@ pub async fn serve(state: Arc<State>, operator: u32, gateway_uid: u32) -> Result
                         .durable_clock_boot
                         .store(boottime_ns().unwrap_or(0), Ordering::Release);
                 }
-                Err(_) => {
-                    checkpoint.clock_ok.store(false, Ordering::Release);
-                    checkpoint.close();
+                Err(error) => {
+                    checkpoint.clock_fault(format!("clock checkpoint persistence: {error}"));
                 }
             }
         }
@@ -515,6 +524,7 @@ impl State {
             clock: Mutex::new(clock),
             clock_writer: Mutex::new(()),
             clock_ok: AtomicBool::new(true),
+            clock_error: RwLock::new(None),
             durable_clock_boot: AtomicU64::new(now),
             floor: AtomicU64::new(wall),
             maintenance: Arc::new(Semaphore::new(1)),
@@ -561,16 +571,34 @@ impl State {
             self.clock_ok.load(Ordering::Acquire),
             "clock unhealthy; local recovery required"
         );
-        let now = boottime_ns()?;
-        let wall = wall_ns()?;
-        if self.clock.lock().unwrap().check(wall, now).is_err()
-            || now.saturating_sub(self.durable_clock_boot.load(Ordering::Acquire)) > 10 * NS
-        {
-            self.clock_ok.store(false, Ordering::Release);
-            self.close();
-            bail!("clock continuity/durability lost");
+        let sampled = checked_clock(&self.clock, || {
+            let now = boottime_ns()?;
+            Ok((wall_ns()?, now))
+        });
+        let (wall, now) = match sampled {
+            Ok(value) => value,
+            Err(error) => {
+                self.clock_fault(format!("clock continuity: {error}"));
+                return Err(error);
+            }
+        };
+        let age = now.saturating_sub(self.durable_clock_boot.load(Ordering::Acquire));
+        if age > 10 * NS {
+            self.clock_fault(format!(
+                "clock checkpoint age {age} ns exceeds 10000000000 ns"
+            ));
+            bail!("clock durability lost");
         }
         Ok((wall, now))
+    }
+    fn clock_fault(&self, reason: String) {
+        self.clock_ok.store(false, Ordering::Release);
+        self.close();
+        let mut saved = self.clock_error.write().unwrap();
+        if saved.is_none() {
+            eprintln!("clock inhibited: {reason}");
+            *saved = Some(reason);
+        }
     }
     fn gateway_live(&self, now: u64) -> bool {
         self.gateway.lock().unwrap().as_ref().is_some_and(|g| {
@@ -747,7 +775,7 @@ impl State {
         );
         match command {
             Command::Describe(_) => report(
-                json!({"version":"0.0.1", "profile_sha256":robot_runtime::profile_digest(), "configuration_digest":robot_runtime::configuration_digest(), "physical_acceptance":false,"live_actuation":false,"clock_healthy":self.clock_ok.load(Ordering::Acquire),"identity":self.identity.read().unwrap().as_ref().map(enrollment::report),"identity_error":self.identity_error.read().unwrap().clone(),"runtime":self.engine.status()?}),
+                json!({"version":"0.0.1", "profile_sha256":robot_runtime::profile_digest(), "configuration_digest":robot_runtime::configuration_digest(), "physical_acceptance":false,"live_actuation":false,"clock_healthy":self.clock_ok.load(Ordering::Acquire),"clock_error":self.clock_error.read().unwrap().clone(),"identity":self.identity.read().unwrap().as_ref().map(enrollment::report),"identity_error":self.identity_error.read().unwrap().clone(),"runtime":self.engine.status()?}),
             ),
             Command::Observe(h) => {
                 self.binding(h, authentication)?;
@@ -876,6 +904,7 @@ impl State {
                 self.durable_clock_boot
                     .store(boottime_ns()?, Ordering::Release);
                 *self.clock.lock().unwrap() = clock;
+                *self.clock_error.write().unwrap() = None;
                 self.clock_ok.store(true, Ordering::Release);
                 let result = self.engine.recover()?;
                 if self.engine.status()?.prepared.is_none() {
@@ -971,5 +1000,33 @@ impl State {
                 report(json!({"revoked":p.principal,"durable":true}))
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod clock_tests {
+    use super::*;
+    #[test]
+    fn competing_clock_calls_sample_only_after_the_ordering_lock() {
+        let clock = Arc::new(Mutex::new(ClockGuard::new(10_000, 100, 0).unwrap()));
+        let held = clock.lock().unwrap();
+        let shared = clock.clone();
+        let (entered, entry) = std::sync::mpsc::channel();
+        let (sampled, sample) = std::sync::mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            entered.send(()).unwrap();
+            checked_clock(&shared, || {
+                sampled.send(()).unwrap();
+                Ok((10_100, 200))
+            })
+        });
+        entry.recv().unwrap();
+        let sampled_before_ordering = sample.recv_timeout(Duration::from_millis(50)).is_ok();
+        drop(held);
+        assert_eq!(worker.join().unwrap().unwrap(), (10_100, 200));
+        assert!(
+            !sampled_before_ordering,
+            "sampling before lock can reverse concurrent clock observations"
+        );
     }
 }

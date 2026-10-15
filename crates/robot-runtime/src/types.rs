@@ -199,6 +199,9 @@ pub struct RuntimeStatus {
     pub prepared: Option<Prepared>,
     pub retiring: bool,
     pub recovery_pending: bool,
+    pub recovery_ready: bool,
+    pub event_loss_baseline: Option<u32>,
+    pub event_stream_healthy: bool,
     pub health: Health,
     pub operation: Option<Snapshot>,
 }
