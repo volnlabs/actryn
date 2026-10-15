@@ -76,6 +76,9 @@ fn native_reply_must_match_requested_operation_and_identity() {
         calls: vec![],
         evidence_gaps: vec![],
         denials: vec![],
+        denials_omitted: 0,
+        robot_binding: None,
+        robot_requests: vec![],
     };
     let response = Response::Ok {
         inspection: inspection(),

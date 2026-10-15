@@ -248,16 +248,66 @@ pub fn validate_server_response(
             );
             bundle.validate_bound()
         }
+        (
+            Request::BindRobot {
+                attempt_id,
+                namespace,
+            },
+            Response::RobotBinding { binding },
+        ) => {
+            binding.validate()?;
+            ensure!(
+                binding.attempt_id == *attempt_id && binding.namespace == *namespace,
+                "Robot binding response identity mismatch"
+            );
+            Ok(())
+        }
+        (
+            Request::RobotQuery {
+                attempt_id,
+                request_key,
+            }
+            | Request::RobotCancel {
+                attempt_id,
+                request_key,
+            },
+            Response::RobotResult { request },
+        ) => {
+            ensure!(
+                request.request_key == *request_key && request.handle.attempt == *attempt_id,
+                "Robot request response identity mismatch"
+            );
+            actryn_server::robot::unhex::<16>(&request.handle.namespace)?;
+            actryn_server::robot::unhex::<32>(&request.handle.key)?;
+            actryn_server::robot::unhex::<16>(&request.robot_epoch)?;
+            Ok(())
+        }
         _ => anyhow::bail!("server response does not match operation"),
+    }
+}
+pub fn server_mutation(request: &actryn_server::protocol::Request) -> bool {
+    use actryn_server::protocol::Request;
+    matches!(
+        request,
+        Request::Prepare { .. }
+            | Request::Start { .. }
+            | Request::Stop { .. }
+            | Request::BindRobot { .. }
+            | Request::RobotCancel { .. }
+    )
+}
+pub fn server_socket(request: &actryn_server::protocol::Request) -> &'static str {
+    use actryn_server::protocol::{self, Request};
+    if matches!(request, Request::Stop { .. } | Request::RobotCancel { .. }) {
+        protocol::CLOSURE_SOCKET
+    } else {
+        actryn_server::launcher::SERVER_SOCKET
     }
 }
 pub async fn server(
     request: &actryn_server::protocol::Request,
 ) -> std::result::Result<actryn_server::protocol::Response, ExchangeError> {
-    use actryn_server::{
-        launcher::SERVER_SOCKET,
-        protocol::{self, Request},
-    };
+    use actryn_server::protocol;
     let connect = async {
         let bytes = robot_rpc::read_protected(Path::new("/etc/actryn/server.json"), 65536, false)?;
         let config: Value = serde_json::from_slice(&bytes)?;
@@ -266,7 +316,8 @@ pub async fn server(
             .and_then(|v| u32::try_from(v).ok())
             .filter(|v| *v != 0)
             .context("configured server identity missing")?;
-        let stream = tokio::time::timeout(DEADLINE, UnixStream::connect(SERVER_SOCKET)).await??;
+        let stream =
+            tokio::time::timeout(DEADLINE, UnixStream::connect(server_socket(request))).await??;
         ensure!(
             stream.peer_cred()?.uid() == uid,
             "server daemon peer mismatch"
@@ -276,10 +327,7 @@ pub async fn server(
     let mut stream = connect
         .await
         .map_err(|error| ExchangeError::new(error, false))?;
-    let outcome_unknown = matches!(
-        request,
-        Request::Prepare { .. } | Request::Start { .. } | Request::Stop { .. }
-    );
+    let outcome_unknown = server_mutation(request);
     let result = tokio::time::timeout(DEADLINE, async {
         protocol::write_frame(&mut stream, &serde_json::to_vec(request)?).await?;
         let data = protocol::read_frame(&mut stream).await?;

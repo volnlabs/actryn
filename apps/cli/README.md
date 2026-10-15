@@ -15,11 +15,15 @@ Run these on the server as its configured operator (or root):
 
 ```sh
 actryn server prepare --artifact sha256:REVIEWED_DIGEST
+# Optional trusted Robot delegation, before launch:
+actryn server bind-robot --attempt ATTEMPT_ID --namespace NAMESPACE_ID
 actryn server launch --attempt ATTEMPT_ID
 actryn server status --attempt ATTEMPT_ID
 actryn server result --attempt ATTEMPT_ID --key REQUEST_KEY
 actryn server cancel --attempt ATTEMPT_ID
 actryn server export --attempt ATTEMPT_ID --out evidence.json
+actryn server robot-query --attempt ATTEMPT_ID --key AGENT_REQUEST_KEY
+actryn server robot-cancel --attempt ATTEMPT_ID --key AGENT_REQUEST_KEY
 ```
 
 `prepare` returns the generated attempt ID; `launch` starts that prepared attempt.
@@ -42,7 +46,15 @@ Import verifies the manifest, blobs, fixed files and artifact policy before addi
 the digest to the allowlist. `discard-incomplete` removes only that digest's
 incomplete import; it cannot remove a complete installed artifact.
 
-The server socket is fixed at `/run/actryn-server/server.sock`; the CLI verifies
+Robot binding uses the locally installed peer, certificate pins and workload
+credential. It issues no grant; explicit local Robot preparation and authority
+are required before launch. The broker obtains the observation and preserves a
+separate stable Robot handle before model inference. `robot-query` and
+`robot-cancel` use the agent's original request key to inspect or close that handle;
+they never call the model again. Unknown remote work remains charged.
+
+The server socket is fixed at `/run/actryn-server/server.sock`; cancellation uses
+the reserved `/run/actryn-server/closure.sock`. The CLI verifies
 its peer UID against the root-protected `/etc/actryn/server.json`. The service
 account is allocated during installation, not assumed to have a fixed numeric UID.
 

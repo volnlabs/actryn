@@ -40,6 +40,8 @@ MemoryMax=256M
 LimitNOFILE=256
 # Live inference is opt-in via an operator-installed drop-in using LoadCredential=
 # openai-api-key:/etc/actryn/credentials/openai-api-key. No credential is needed offline.
+# Robot delegation separately uses an operator-installed LoadCredential=
+# robot-client-key:/etc/actryn/credentials/robot-client-key drop-in.
 
 [Install]
 WantedBy=multi-user.target

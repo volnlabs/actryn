@@ -9,6 +9,46 @@ async fn help_is_finite_json_without_connecting_to_services() {
     assert!(serde_json::to_vec(&help).unwrap().len() < 16384);
 }
 #[tokio::test]
+async fn robot_delegation_routes_validate_before_transport() {
+    let attempt = "1".repeat(32);
+    for verb in ["bind-robot", "robot-query", "robot-cancel"] {
+        let error = run(args(&[
+            "server",
+            verb,
+            "--attempt",
+            &attempt,
+            "--endpoint",
+            "127.0.0.1:1",
+        ]))
+        .await
+        .unwrap_err();
+        assert!(
+            error.to_string().contains("unsupported option"),
+            "{error:?}"
+        );
+    }
+    let error = run(args(&[
+        "server",
+        "bind-robot",
+        "--attempt",
+        &attempt,
+        "--namespace",
+        "bad",
+    ]))
+    .await
+    .unwrap_err();
+    assert!(
+        error.to_string().contains("delegation identity"),
+        "{error:?}"
+    );
+    for verb in ["robot-query", "robot-cancel"] {
+        let error = run(args(&["server", verb, "--attempt", &attempt, "--key", ""]))
+            .await
+            .unwrap_err();
+        assert!(error.to_string().contains("request key"), "{error:?}");
+    }
+}
+#[tokio::test]
 async fn invalid_mutations_fail_before_transport_or_state_change() {
     let epoch = "1".repeat(32);
     let error = run(args(&[

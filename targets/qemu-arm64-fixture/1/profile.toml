@@ -71,6 +71,29 @@ retained_output_bytes = 262144
 max_output_tokens = 1024
 max_calls_per_attempt = 4
 request_deadline_ms = 30000
+keys_per_attempt = 16
+retained_attempts = 128
+denials_per_attempt = 64
+
+[delegation]
+per_attempt_jobs = 1
+global_jobs = 4
+keys_per_attempt = 16
+closure_jobs = 16
+binding_lifetime_ms = 120000
+max_original_observation_receipt_age_ms = 1000
+remote_report_bytes = 4096
+retained_intent_bytes = 8192
+rpc_deadline_ms = 5000
+retained_lookup_deadline_ms = 8000
+
+[server_rpc]
+operator_ordinary_connections = 4
+operator_closure_connections = 2
+agent_ordinary_connections = 4
+agent_closure_connections = 2
+evidence_bytes = 61440
+robot_evidence_summary_bytes = 4096
 
 [gateway]
 connections = 8

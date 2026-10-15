@@ -102,6 +102,7 @@ fn help() -> Value {
     json!({"result":"help","version":env!("CARGO_PKG_VERSION"),"commands":[
  "server status --attempt ID","server prepare --artifact sha256:DIGEST","server launch --attempt ID","server cancel --attempt ID","server result --attempt ID --key KEY","server export --attempt ID --out FILE",
  "server import --layout DIRECTORY --digest sha256:DIGEST","server discard-incomplete --digest sha256:DIGEST",
+ "server bind-robot --attempt ID --namespace ID","server robot-query|robot-cancel --attempt ID --key AGENT_REQUEST_KEY",
  "robot describe|status|doctor","robot enroll-request --dns NAME","robot enroll-install --cert FILE --ca FILE",
  "robot install-principal --epoch EPOCH --principal NAME --pin LEAF_SHA256 [--can-propose]","robot revoke-principal --epoch EPOCH --principal NAME",
  "robot pair --endpoint IP:PORT --dns NAME --pin LEAF_SHA256 --ca FILE --cert FILE --key FILE --out FILE",
@@ -175,6 +176,29 @@ async fn server(verb: &str, flags: &Flags) -> Result<Value> {
                 attempt_id: flags.get("attempt")?.into(),
             }
         }
+        "bind-robot" => {
+            flags.allow(&["attempt", "namespace"])?;
+            Request::BindRobot {
+                attempt_id: flags.get("attempt")?.into(),
+                namespace: flags.get("namespace")?.into(),
+            }
+        }
+        "robot-query" | "robot-cancel" => {
+            flags.allow(&["attempt", "key"])?;
+            let attempt_id = flags.get("attempt")?.into();
+            let request_key = flags.get("key")?.into();
+            if verb == "robot-cancel" {
+                Request::RobotCancel {
+                    attempt_id,
+                    request_key,
+                }
+            } else {
+                Request::RobotQuery {
+                    attempt_id,
+                    request_key,
+                }
+            }
+        }
         "result" => {
             flags.allow(&["attempt", "key"])?;
             Request::Result {
@@ -197,10 +221,7 @@ async fn server(verb: &str, flags: &Flags) -> Result<Value> {
         Err(error) => return Ok(error.json()),
     };
     if let Response::Error { message } = &response {
-        let mutation = matches!(
-            request,
-            Request::Prepare { .. } | Request::Start { .. } | Request::Stop { .. }
-        );
+        let mutation = rpc::server_mutation(&request);
         return Ok(
             json!({"result":"error","code":"server_error","message":message,"outcome_unknown":mutation,"automatic_retry":false,"next_action":"inspect_existing_attempt"}),
         );
