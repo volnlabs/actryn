@@ -47,6 +47,17 @@ fn trusted(path: &Path) -> Result<()> {
     Ok(())
 }
 
+fn drop_capabilities() -> Result<()> {
+    // capset applies to this thread; both the loader and IPC thread drop theirs.
+    let header = [0x20080522_u32, 0];
+    let data = [0_u32; 6];
+    ensure!(
+        unsafe { libc::syscall(libc::SYS_capset, header.as_ptr(), data.as_ptr()) } == 0,
+        "could not drop loader capabilities"
+    );
+    Ok(())
+}
+
 fn collector(commands: mpsc::Receiver<Command>, ready: mpsc::SyncSender<Result<()>>) -> Result<()> {
     ensure!(
         std::env::consts::ARCH == "x86_64"
@@ -117,6 +128,7 @@ fn collector(commands: mpsc::Receiver<Command>, ready: mpsc::SyncSender<Result<(
         0
     })?;
     let ring = builder.build()?;
+    drop_capabilities()?;
     ready.send(Ok(()))?;
     loop {
         ring.poll(Duration::from_millis(10))?;
@@ -296,6 +308,7 @@ fn main() -> Result<()> {
     });
     wait.recv_timeout(Duration::from_secs(10))
         .context("collector startup failed")??;
+    drop_capabilities()?;
     fs::create_dir_all("/run/actryn")?;
     trusted(Path::new("/run/actryn"))?;
     let socket = UnixListener::bind(SOCKET)?;

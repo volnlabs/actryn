@@ -28,7 +28,12 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   actual process/syscall tracepoints, allowed and failed access, identity rejection,
   bounded retention and reported loss. A storage-delayed unregister response was
   observed; identical retries complete, and failed durability retains the registration.
-  The restricted systemd unit starts successfully. Logs remain diagnostic metadata,
+  The initial restricted unit failed attachment under Debian's
+  `perf_event_paranoid=3`; SYS_ADMIN is required during attachment and both threads
+  now drop all capabilities before serving. The actual guest suite also passes
+  with `--service`; both threads report zero permitted/effective capabilities
+  and `NoNewPrivs=1`, and authenticated registration returns ready.
+  Logs remain diagnostic metadata,
   with no complete-episode or policy-attributed denial claim.
 - Both QEMU guests boot Debian 13.7, cloud image `20261015-2632`, kernel package
   `6.12.111-1`. Image SHA-512 values match the Debian published manifest.

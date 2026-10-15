@@ -39,8 +39,11 @@ management must preserve incomplete files and is part of release packaging.
 Build the BPF object with `make -C bpf` and Rust with
 `cargo build -p actryn-observer`. Install the binary, fixed object and
 `packaging/systemd/actryn-observer.service` on the supported Debian server.
-Tracefs must be mounted for attachment. The service uses only BPF/perf/resource
-capabilities and cannot modify cgroups or load kernel modules.
+Tracefs must be mounted for attachment. Debian's `perf_event_paranoid=3` patch
+also requires `CAP_SYS_ADMIN` during perf attachment. The service retains the
+system default and grants that startup capability alongside BPF/perf/resource;
+both threads clear all capabilities before serving requests. Cgroups remain
+read-only and kernel module loading is unavailable under the systemd unit.
 
 Run `cargo test -p actryn-observer` for decode/registration checks.
 `tests/observer/guest.py` runs actual attach/process/syscall/retention tests as
@@ -48,6 +51,8 @@ root in a disposable supported guest, with no existing observer service.
 It checks successful and failed OS access, lifecycle events, rejected identity
 changes and loss at the retention cap. These are software diagnostics, not
 robot, physical or complete-isolation acceptance.
+Use `--service` against the installed running unit to check the same behavior
+and verify both threads have dropped their capabilities with no-new-privileges.
 
 API sources: [libbpf lifecycle](https://docs.kernel.org/bpf/libbpf/libbpf_overview.html)
 and [libbpf-rs 0.27.2](https://docs.rs/libbpf-rs/0.27.2/libbpf_rs/).

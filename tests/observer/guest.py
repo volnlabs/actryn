@@ -34,18 +34,27 @@ def exchange(request):
 def main():
     assert os.geteuid() == 0
     assert os.uname().release == '6.12.111+deb13-amd64'
-    assert not SOCKET.exists(), 'stop the existing observer through its service before testing'
+    service = sys.argv[1:] == ['--service']
+    assert service or not sys.argv[1:], 'only --service is supported'
+    assert service or not SOCKET.exists(), 'stop the existing observer through its service before testing'
+    if service:
+        pid = int(subprocess.check_output(['systemctl', 'show', 'actryn-observer', '-p', 'MainPID', '--value']))
+        assert pid > 0
+        for thread in Path(f'/proc/{pid}/task').iterdir():
+            values = dict(line.split(':', 1) for line in (thread / 'status').read_text().splitlines())
+            assert int(values['CapEff'], 16) == int(values['CapPrm'], 16) == 0
+            assert values['NoNewPrivs'].strip() == '1'
     root = Path('/sys/fs/cgroup/actryn')
     root.mkdir(exist_ok=True)
     boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
     groups = []
     with tempfile.TemporaryDirectory() as tmp:
         with open(Path(tmp) / 'stderr', 'wb') as stderr:
-            observer = subprocess.Popen(['/usr/bin/actryn-observer'], stderr=stderr)
+            observer = None if service else subprocess.Popen(['/usr/bin/actryn-observer'], stderr=stderr)
             try:
                 deadline = time.monotonic() + 10
                 while not SOCKET.exists():
-                    assert observer.poll() is None, Path(tmp, 'stderr').read_text()
+                    assert observer is None or observer.poll() is None, Path(tmp, 'stderr').read_text()
                     assert time.monotonic() < deadline
                     time.sleep(.02)
                 for exhaust in (False, True):
@@ -91,9 +100,10 @@ def main():
             finally:
                 if sys.exc_info()[0]:
                     print(Path(tmp, 'stderr').read_text(), file=sys.stderr)
-                observer.terminate()
-                observer.wait(timeout=5)
-                SOCKET.unlink(missing_ok=True)
+                if observer:
+                    observer.terminate()
+                    observer.wait(timeout=5)
+                    SOCKET.unlink(missing_ok=True)
                 for cg in groups:
                     (cg / 'cgroup.kill').write_text('1')
                     cg.rmdir()

@@ -15,7 +15,9 @@ StateDirectory=actryn-observer
 StateDirectoryMode=0700
 UMask=0077
 NoNewPrivileges=yes
-CapabilityBoundingSet=CAP_BPF CAP_PERFMON CAP_SYS_RESOURCE
+# Debian perf_event_paranoid=3 additionally requires SYS_ADMIN during attachment.
+# The loader and IPC threads clear all capabilities before serving requests.
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_BPF CAP_PERFMON CAP_SYS_RESOURCE
 ProtectSystem=strict
 ProtectHome=yes
 ProtectControlGroups=yes
