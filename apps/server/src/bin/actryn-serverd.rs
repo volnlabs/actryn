@@ -16,11 +16,20 @@ use tokio::{net::UnixListener, sync::Semaphore};
 async fn main() -> Result<()> {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
     let recovery_only = args.len() == 1 && args[0] == "--recover-only";
+    let check_config = args.len() == 1 && args[0] == "--check-config";
     ensure!(
-        args.is_empty() || recovery_only,
-        "server accepts only the fixed recovery mode"
+        args.is_empty() || recovery_only || check_config,
+        "server accepts only --recover-only or --check-config"
     );
     let config = LauncherConfig::read(Path::new("/etc/actryn/server.json"))?;
+    if check_config {
+        println!(
+            "{}",
+            serde_json::json!({"result":"configuration_valid",
+            "artifact_count":config.artifacts.len(),"authority_issued":false})
+        );
+        return Ok(());
+    }
     let operator = config.operator_uid;
     let _lifetime = actryn_server::launcher::lock_service(Path::new(
         "/var/lib/actryn-server/broker/server.lock",

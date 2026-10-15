@@ -3,6 +3,11 @@
 This crate implements the independent server launch/accounting path. It does not
 establish D2 qualification by compilation or unit tests alone.
 
+`actryn-serverd --check-config` validates the fixed protected configuration and
+all approved artifacts using the daemon's normal validator, then exits with JSON.
+It does not acquire a service lock, open a database, recover work, or bind sockets.
+The installer uses this read-only check before reporting startup readiness.
+
 ## Processes and local protocol
 
 `actryn-launcher` runs as root and exclusively holds the containerd connection.

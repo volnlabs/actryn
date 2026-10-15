@@ -103,6 +103,8 @@ fn help() -> Value {
  "server status --attempt ID","server prepare --artifact sha256:DIGEST","server launch --attempt ID","server cancel --attempt ID","server result --attempt ID --key KEY","server export --attempt ID --out FILE",
  "server import --layout DIRECTORY --digest sha256:DIGEST","server discard-incomplete --digest sha256:DIGEST",
  "server bind-robot --attempt ID --namespace ID","server robot-query|robot-cancel --attempt ID --key AGENT_REQUEST_KEY",
+ "install inspect|stage|activate|recover|rollback|resume --role server|robot --bundle DIRECTORY --public-key FILE --key-sha256 SPKI_SHA256",
+ "install preflight --role server|robot",
  "robot describe|status|doctor","robot enroll-request --dns NAME","robot enroll-install --cert FILE --ca FILE",
  "robot install-principal --epoch EPOCH --principal NAME --pin LEAF_SHA256 [--can-propose]","robot revoke-principal --epoch EPOCH --principal NAME",
  "robot pair --endpoint IP:PORT --dns NAME --pin LEAF_SHA256 --ca FILE --cert FILE --key FILE --out FILE",
@@ -112,8 +114,109 @@ fn help() -> Value {
  "robot propose --pair FILE --cert FILE --key FILE --handle FILE --observation ID --parent-digest HEX --left TICKS --right TICKS --duration-ms MS",
  "robot query|cancel --pair FILE --cert FILE --key FILE --handle FILE","robot query|cancel --local --handle FILE [--epoch EPOCH]"
  ,"robot export --local --handle FILE --out DIRECTORY","robot export --pair FILE --cert FILE --key FILE --handle FILE --out DIRECTORY"
- ],"rules":["All output is JSON; errors exit nonzero.","Local epoch-based commands also accept --pair FILE instead of --epoch.","A handle is durable before proposal transmission. A proposal is never retried.","After uncertainty, query or cancel the same handle. Pairing never grants or rearms.","Installation and execution replay are separate release tooling; this CLI does not infer replay eligibility."]})
+ ],"rules":["All output is JSON; errors exit nonzero.","Local epoch-based commands also accept --pair FILE instead of --epoch.","A handle is durable before proposal transmission. A proposal is never retried.","After uncertainty, query or cancel the same handle. Pairing never grants or rearms.","Install delegates to the protected installed release tooling; first bootstrap uses the verified release scripts. Execution replay eligibility is never inferred."]})
 }
+
+fn installer_arguments(verb: &str, flags: &Flags) -> Result<(String, Vec<String>)> {
+    ensure!(
+        [
+            "inspect",
+            "stage",
+            "activate",
+            "recover",
+            "rollback",
+            "resume",
+            "preflight"
+        ]
+        .contains(&verb),
+        "unknown installation action"
+    );
+    flags.allow(if verb == "preflight" {
+        &["role"]
+    } else {
+        &["role", "bundle", "public-key", "key-sha256"]
+    })?;
+    let role = flags.get("role")?;
+    ensure!(
+        matches!(role, "server" | "robot"),
+        "invalid installation role"
+    );
+    let mut args = vec![verb.to_owned()];
+    if verb != "inspect" {
+        args.extend(["--role".into(), role.into()]);
+    }
+    if verb != "preflight" {
+        ensure!(
+            flags.yes("public-key") == flags.yes("key-sha256"),
+            "supply both public key and trust pin"
+        );
+        if verb != "inspect" || flags.yes("key-sha256") {
+            unhex(flags.get("key-sha256")?, 32)?;
+            flags.get("public-key")?;
+        }
+        for name in ["bundle", "public-key", "key-sha256"] {
+            let value = if name == "bundle" {
+                Some(flags.get(name)?)
+            } else {
+                flags.optional(name)
+            };
+            if let Some(value) = value {
+                ensure!(!value.is_empty(), "empty installer argument");
+                // Equals form keeps a caller path beginning with '-' a value.
+                args.push(format!("--{name}={value}"));
+            }
+        }
+    }
+    Ok((role.into(), args))
+}
+
+/// Main replaces itself with the existing installer, preserving its exit status
+/// and interruption behavior; the CLI never retries or interprets a lost install.
+pub fn installation_command(args: &[String]) -> Result<Option<std::process::Command>> {
+    if args.first().map(String::as_str) != Some("install") {
+        return Ok(None);
+    }
+    ensure!(
+        args.len() <= 64 && args.iter().map(String::len).sum::<usize>() <= 16384,
+        "command arguments exceed bound"
+    );
+    let verb = args.get(1).context("missing installation action")?;
+    let (role, arguments) = installer_arguments(verb, &Flags::parse(&args[2..])?)?;
+    let root = std::path::PathBuf::from(format!("/opt/actryn/{role}"));
+    let script = root
+        .join("current/tools/release.py")
+        .canonicalize()
+        .context(
+            "installed release tooling absent; first bootstrap uses the verified release scripts",
+        )?;
+    let relative = script.strip_prefix(root.join("releases"))?;
+    let parts: Vec<_> = relative.components().collect();
+    ensure!(
+        parts.len() == 4
+            && parts[1].as_os_str() == "payload"
+            && parts[2].as_os_str() == "tools"
+            && parts[3].as_os_str() == "release.py",
+        "installer outside immutable role slot"
+    );
+    unhex(
+        parts[0]
+            .as_os_str()
+            .to_str()
+            .context("invalid slot identity")?,
+        32,
+    )?;
+    robot_rpc::read_protected(&script, 65536, false)?;
+    robot_rpc::read_protected(&script.with_file_name("install.py"), 65536, false)?;
+    let mut command = std::process::Command::new("/usr/bin/python3");
+    command
+        .args(["-B", "-E", "-s"])
+        .arg(script)
+        .args(arguments)
+        .env_clear()
+        .env("PATH", "/usr/sbin:/usr/bin:/sbin:/bin");
+    Ok(Some(command))
+}
+
 pub async fn run(args: Vec<String>) -> Result<Value> {
     ensure!(
         args.len() <= 64 && args.iter().map(String::len).sum::<usize>() <= 16384,
@@ -623,4 +726,54 @@ async fn remote_operation(verb: &str, flags: &Flags) -> Result<Value> {
     result["handle"] =
         json!({"namespace":handle.namespace,"attempt":handle.attempt,"key":handle.key});
     Ok(result)
+}
+
+#[cfg(test)]
+mod installer_tests {
+    use super::*;
+    #[test]
+    fn fixed_installer_route_preserves_paths_and_requires_paired_trust() {
+        let flags = |values: &[&str]| {
+            Flags::parse(&values.iter().map(|v| (*v).into()).collect::<Vec<_>>()).unwrap()
+        };
+        let pin = "11".repeat(32);
+        let (role, args) = installer_arguments(
+            "activate",
+            &flags(&[
+                "--role",
+                "robot",
+                "--bundle",
+                "-strange path",
+                "--public-key",
+                "key.pem",
+                "--key-sha256",
+                &pin,
+            ]),
+        )
+        .unwrap();
+        assert_eq!(role, "robot");
+        assert!(args.contains(&"--bundle=-strange path".into()));
+        assert!(
+            installer_arguments("activate", &flags(&["--role", "robot", "--bundle", "x"])).is_err()
+        );
+        assert!(installer_arguments(
+            "inspect",
+            &flags(&[
+                "--role",
+                "server",
+                "--bundle",
+                "x",
+                "--public-key",
+                "key.pem"
+            ])
+        )
+        .is_err());
+        assert!(installer_arguments("preflight", &flags(&["--role", "../server"])).is_err());
+        assert!(installer_arguments(
+            "preflight",
+            &flags(&["--role", "robot", "--script", "/tmp/other.py"])
+        )
+        .is_err());
+        assert!(installer_arguments("build", &flags(&["--role", "robot"])).is_err());
+    }
 }

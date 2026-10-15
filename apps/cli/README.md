@@ -3,11 +3,32 @@
 `actryn` is the native JSON CLI for the installed v0.0.1 server and robot services.
 Run `actryn --help` for the complete command list. Each invocation makes at most
 one operation request; it never retries a mutation or implicitly grants/rearms.
-An error report exits nonzero. Installation belongs to release packaging.
+An error report exits nonzero. Installation delegates to the signed release tooling.
 
 Build with `cargo build -p actryn-cli --bin actryn --locked`. The CLI uses the same
 bounded protobuf and TLS implementation as the robot daemon/gateway. Local server
 RPC uses its native bounded JSON framing.
+
+## Installation and updates
+
+First bootstrap uses the independently verified release scripts as documented in
+`packaging/release/README.md`. Once a complete role is installed, use the same CLI:
+
+```sh
+actryn install inspect --role robot --bundle candidate
+actryn install activate --role robot --bundle candidate \
+  --public-key release-public.pem --key-sha256 VERIFIED_SPKI_SHA256
+actryn install preflight --role robot
+```
+
+`stage`, `recover`, `rollback` and `resume` take the same signed-bundle arguments
+as `activate`. Role is explicitly `server` or `robot`. The CLI executes only the
+protected scripts in that role's current immutable slot, clears inherited Python
+configuration, and preserves the installer's JSON/exit status. It never starts
+services, issues authority or retries installation. If initial installation was
+interrupted before the current slot exists, recover with the original verified
+bootstrap scripts. `preflight` is a read-only startup check; `resume` only permits
+a later explicit service start.
 
 ## Server
 

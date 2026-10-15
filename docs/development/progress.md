@@ -151,6 +151,30 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   observations and advancing durable frontiers. Preparation readiness now requires
   the durable initial records and namespace; queued new observations need not be
   empty. Full lifecycle, manager crash, rotation and CLI export remain pending.
+- Manager guest run 06, binary SHA-256
+  `99570ba5b4ccaa775b656ed2d599b9e849d3a737ab3867246bc6c8780b03c5c6`,
+  completes two natural operations under one grant and verifies durable absent-key
+  and CLI pre-send cancellation. It fails at gateway death: two grant-revocation
+  transitions replace the pending quiescence transaction and the fixture reports
+  stale work, causing TRANSPORT. The complete run is FAILED; manager crash,
+  identity rotation and export phases were not reached. Raw records, decoded
+  diagnostics, journal and source/binary provenance remain in
+  `artifacts/robotd-guest06*`. Kernel correction and regression are in progress.
+- Trusted server delegation `0ce363d` adds immutable fixed-peer bindings, actual
+  Robot observations, separately charged remote requests and reserved closure
+  transport. Initial host checks pass 43 server and three agent tests. Independent
+  review found terminal-durability, closure-worker capacity, malformed report and
+  operator key-exhaustion gaps; these require corrections before acceptance.
+  CLI integration `4d6cca8` passes 18 tests and strict Clippy, including identity
+  substitution rejection and reserved cancellation routing. Updated finite profile
+  SHA-256 is `6b9f174af8b018e0cf95bfd282ed52b5385d364ebe7e372d54ce6a91d1d99be8`;
+  prior guest results retain their original profile and binary identities.
+- Release tooling `52f3fbb` adds deterministic role bundles, external Ed25519
+  verification, explicit qualification attestations and inhibited immutable
+  installation/update/rollback. Eighteen isolated filesystem/cryptographic tests
+  pass. Review found bytecode pollution of installed slots and an incomplete
+  server configuration readiness check; corrections are in progress. No actual
+  role installation or release signing is established by these component tests.
 - No host kernel module was loaded and no physical interface was attached.
 
 ## Decisions
