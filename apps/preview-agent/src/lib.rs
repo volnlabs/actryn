@@ -11,10 +11,37 @@ use std::{
 };
 pub const BROKER: &str = "/run/actryn-broker/broker.sock";
 pub const INPUT: &str = "/etc/actryn/input.json";
+pub const LIVE_MODEL: &str = "gpt-5.4-mini-2026-03-17";
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum Mode {
+    #[default]
+    Offline,
+    Live,
+}
+impl Mode {
+    pub fn method(&self) -> &'static str {
+        match self {
+            Self::Offline => "model.offline",
+            Self::Live => "model.propose",
+        }
+    }
+    fn model(&self) -> &'static str {
+        match self {
+            Self::Offline => "offline-fixture",
+            Self::Live => LIVE_MODEL,
+        }
+    }
+    fn timeout(&self) -> Duration {
+        Duration::from_secs(if *self == Self::Live { 35 } else { 5 })
+    }
+}
 #[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Input {
     pub schema: u32,
+    #[serde(default)]
+    pub mode: Mode,
     pub goal: String,
     pub observation_id: String,
     pub request_key: String,
@@ -56,7 +83,7 @@ pub fn decode_reply(input: &Input, bytes: &[u8]) -> Result<Value> {
     ensure!(
         value["origin"] == "server_attested"
             && value["request_key"] == input.request_key
-            && value["model"] == "offline-fixture",
+            && value["model"] == input.mode.model(),
         "broker response binding mismatch"
     );
     let attempt = value["attempt_id"]
@@ -109,11 +136,11 @@ pub fn run() -> Result<Value> {
     let input: Input = serde_json::from_slice(&data)?;
     input.validate()?;
     let request = serde_json::to_vec(
-        &json!({"op":"call","method":"model.offline","request_key":input.request_key,"input":{"goal":input.goal,"observation_id":input.observation_id}}),
+        &json!({"op":"call","method":input.mode.method(),"request_key":input.request_key,"input":{"goal":input.goal,"observation_id":input.observation_id}}),
     )?;
     mark_submitted(Path::new("/tmp/actryn-preview-submitted"))?;
     let mut stream = UnixStream::connect(BROKER)?;
-    stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+    stream.set_read_timeout(Some(input.mode.timeout()))?;
     stream.set_write_timeout(Some(Duration::from_secs(5)))?;
     stream.write_all(&(request.len() as u32).to_be_bytes())?;
     stream.write_all(&request)?;
@@ -147,6 +174,16 @@ mod tests {
         let mut bad = result;
         bad["value"]["request_key"] = serde_json::json!("different");
         assert!(decode_reply(&input, &serde_json::to_vec(&bad).unwrap()).is_err());
+    }
+    #[test]
+    fn live_input_never_accepts_offline_or_different_provider_result() {
+        let input:Input=serde_json::from_str(r#"{"schema":1,"mode":"live","goal":"one index","observation_id":"live-reference","request_key":"live-preview-1"}"#).unwrap();
+        input.validate().unwrap();
+        assert_eq!(input.mode.method(), "model.propose");
+        let mut reply = serde_json::json!({"result":"ok","value":{"origin":"server_attested","attempt_id":"a".repeat(32),"request_key":"live-preview-1","model":"offline-fixture","output":{"left_delta_ticks":10,"right_delta_ticks":10,"duration_ms":1000}}});
+        assert!(decode_reply(&input, &serde_json::to_vec(&reply).unwrap()).is_err());
+        reply["value"]["model"] = serde_json::json!(LIVE_MODEL);
+        assert!(decode_reply(&input, &serde_json::to_vec(&reply).unwrap()).is_ok());
     }
     #[test]
     fn one_submission_marker_prevents_restart_resend() {

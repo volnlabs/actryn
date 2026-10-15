@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::time::Duration;
 pub const MODEL: &str = "gpt-5.4-mini-2026-03-17";
+const ENDPOINT: &str = "https://api.openai.com/v1/responses";
+const CONNECT_TIMEOUT_SECONDS: u64 = 5;
+const REQUEST_TIMEOUT_SECONDS: u64 = 30;
+const RESPONSE_BYTE_LIMIT: usize = 65536;
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ModelInput {
@@ -38,12 +42,31 @@ pub fn request_body(input: &ModelInput) -> Result<Value> {
         "invalid observation identity"
     );
     Ok(
-        json!({"model":MODEL,"store":false,"background":false,"max_output_tokens":1024,"tools":[],
+        json!({"model":MODEL,"store":false,"background":false,"max_output_tokens":1024,"tools":[],"reasoning":{"effort":"none"},
         "instructions":"Propose one restrained simulated wheel index step. Return signed left_delta_ticks and right_delta_ticks in [-100,100] and duration_ms in [1,10000]. This proposal grants no authority. No tools are available.",
         "input":input.goal,"text":{"format":{"type":"json_schema","name":"wheel_index_step","strict":true,
             "schema":{"type":"object","additionalProperties":false,"required":["left_delta_ticks","right_delta_ticks","duration_ms"],
                 "properties":{"left_delta_ticks":{"type":"integer","minimum":-100,"maximum":100},"right_delta_ticks":{"type":"integer","minimum":-100,"maximum":100},"duration_ms":{"type":"integer","minimum":1,"maximum":10000}}}}}}),
     )
+}
+/// Digest of the fixed provider/model/prompt/schema/limits, excluding the caller's goal text.
+pub fn policy_digest() -> Result<String> {
+    use sha2::{Digest, Sha256};
+    let mut policy = request_body(&ModelInput {
+        goal: "policy template".into(),
+        observation_id: "policy-template".into(),
+    })?;
+    policy
+        .as_object_mut()
+        .context("model policy object")?
+        .remove("input");
+    Ok(format!(
+        "sha256:{:x}",
+        Sha256::digest(serde_json::to_vec(&json!({"request":policy,"transport":{
+            "endpoint":ENDPOINT,"connect_timeout_seconds":CONNECT_TIMEOUT_SECONDS,
+            "request_timeout_seconds":REQUEST_TIMEOUT_SECONDS,"response_byte_limit":RESPONSE_BYTE_LIMIT,
+            "proxies":false,"redirects":false,"retries":0}}))?)
+    ))
 }
 pub fn decode_completed(response: &Value) -> Result<(Proposal, i64)> {
     ensure!(
@@ -89,11 +112,11 @@ pub async fn live(input: &ModelInput, key: &str) -> Result<(Proposal, i64)> {
         .no_proxy()
         .redirect(reqwest::redirect::Policy::none())
         .retry(reqwest::retry::never())
-        .connect_timeout(Duration::from_secs(5))
-        .timeout(Duration::from_secs(30))
+        .connect_timeout(Duration::from_secs(CONNECT_TIMEOUT_SECONDS))
+        .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECONDS))
         .build()?;
     let mut response = client
-        .post("https://api.openai.com/v1/responses")
+        .post(ENDPOINT)
         .bearer_auth(key)
         .json(&body)
         .send()
@@ -103,7 +126,7 @@ pub async fn live(input: &ModelInput, key: &str) -> Result<(Proposal, i64)> {
         "provider returned HTTP {}; reservation unresolved",
         response.status()
     );
-    let mut output = BoundedOutput::new(65536)?;
+    let mut output = BoundedOutput::new(RESPONSE_BYTE_LIMIT)?;
     while let Some(chunk) = response.chunk().await? {
         output.push(&chunk)?;
     }

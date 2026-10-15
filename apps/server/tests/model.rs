@@ -9,6 +9,7 @@ fn model_request_has_fixed_destination_policy_and_finite_output() {
     let body = request_body(&input).unwrap();
     assert_eq!(body["model"], "gpt-5.4-mini-2026-03-17");
     assert_eq!(body["max_output_tokens"], 1024);
+    assert_eq!(body["reasoning"]["effort"], "none");
     assert_eq!(body["tools"], json!([]));
     assert_eq!(body["store"], false);
     assert!(request_body(&ModelInput {

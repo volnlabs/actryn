@@ -39,3 +39,21 @@ fn offline_artifact_never_enables_live_or_unknown_tools() {
     );
     assert!(actryn_server::artifact::methods_for_profile("caller-selected").is_err());
 }
+#[test]
+fn live_profile_is_explicit_and_pins_the_model_request_policy() {
+    let methods = actryn_server::artifact::methods_for_profile("live-preview-v1").unwrap();
+    assert!(methods.contains(&"model.propose") && !methods.contains(&"model.offline"));
+    let config = actryn_server::artifact::image_configuration("live-preview-v1").unwrap();
+    assert_eq!(
+        config["Labels"]["org.actryn.model"],
+        actryn_server::model::MODEL
+    );
+    assert_eq!(
+        config["Labels"]["org.actryn.model-policy"],
+        actryn_server::model::policy_digest().unwrap()
+    );
+    assert_ne!(
+        config,
+        actryn_server::artifact::image_configuration("offline-preview-v1").unwrap()
+    );
+}

@@ -14,12 +14,16 @@ def run_import(pin,ok=True):
 
 config_path=pathlib.Path('/etc/actryn/server.json')
 config=json.loads(config_path.read_text());assert config['operator_uid']==1000
-# Only legacy fixture approvals are replaced; attempt/evidence history remains intact.
-config['artifacts']={};config_path.write_text(json.dumps(config));config_path.chmod(0o644)
+# The installed approval map and all retained attempt/evidence history remain intact.
 before=config_path.read_bytes()
 run_import('sha256:'+'0'*64,ok=False);assert config_path.read_bytes()==before
 imported=run_import(digest);assert imported['artifact_digest']==digest
 assert run_import(digest)['artifact_digest']==digest,'identical verified import should be idempotent'
+unfinished='sha256:'+'f'*64
+staging=pathlib.Path('/var/lib/actryn-artifacts')/('.incomplete-'+unfinished[7:])
+staging.mkdir();(staging/'partial').write_bytes(b'interrupted import fixture')
+subprocess.run(['/usr/bin/actryn-artifact','discard-incomplete','--digest',unfinished],check=True,capture_output=True,timeout=20)
+assert not staging.exists() and pathlib.Path(imported['rootfs']).is_dir()
 subprocess.run(['systemctl','start','actryn-serverd'],check=True)
 run_import(digest,ok=False) # Lifetime locks prohibit registry/config changes under live daemons.
 root=pathlib.Path(imported['rootfs'])

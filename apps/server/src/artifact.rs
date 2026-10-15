@@ -108,6 +108,7 @@ fn static_elf(bytes: &[u8]) -> Result<()> {
 }
 struct Verified {
     hash: String,
+    profile: String,
     blobs: BTreeMap<String, Vec<u8>>,
     files: BTreeMap<String, Vec<u8>>,
     index: Vec<u8>,
@@ -149,9 +150,12 @@ impl Verified {
                 && value["rootfs"] == json!({"type":"layers","diff_ids":[layer_hash]}),
             "unsupported image platform/rootfs"
         );
+        let profile = value["config"]["Labels"]["org.actryn.profile"]
+            .as_str()
+            .context("artifact profile missing")?
+            .to_owned();
         ensure!(
-            value["config"]
-                == json!({"Entrypoint":["/bin/agent"],"User":"65532:65532","WorkingDir":"/tmp","Labels":{"org.actryn.profile":"offline-preview-v1"}}),
+            value["config"] == image_configuration(&profile)?,
             "unapproved image process configuration"
         );
         let mut archive = tar::Archive::new(layer.as_slice());
@@ -189,10 +193,20 @@ impl Verified {
         }
         ensure!(files.len() == FILES.len(), "preview file set incomplete");
         static_elf(&files["bin/agent"])?;
-        let _: Value = serde_json::from_slice(&files["etc/actryn/input.json"])?;
+        let input: Value = serde_json::from_slice(&files["etc/actryn/input.json"])?;
+        let expected_mode = if profile == "live-preview-v1" {
+            "live"
+        } else {
+            "offline"
+        };
+        ensure!(
+            input.get("mode").unwrap_or(&json!("offline")) == expected_mode,
+            "input mode differs from approved artifact profile"
+        );
         let _: Value = serde_json::from_slice(&files["etc/actryn/input.schema.json"])?;
         Ok(Self {
             hash,
+            profile,
             blobs: BTreeMap::from([
                 (expected.into(), manifest),
                 (config_hash, config),
@@ -287,7 +301,7 @@ fn available(registry: &Path, cap: usize) -> Result<()> {
     }
     Ok(())
 }
-fn verify_installed(installed: &Path, expected: &str, trusted: bool) -> Result<()> {
+fn verify_installed(installed: &Path, expected: &str, trusted: bool) -> Result<Verified> {
     if trusted {
         trusted_path(installed)?;
     }
@@ -339,7 +353,7 @@ fn verify_installed(installed: &Path, expected: &str, trusted: bool) -> Result<(
         seen == FILES.len() + DIRS.len(),
         "rootfs file set incomplete"
     );
-    Ok(())
+    Ok(v)
 }
 /// Every prepare and start must validate the fixed installed path and its original OCI content.
 pub fn validate_approved(hash: &str, artifact: &Artifact) -> Result<()> {
@@ -349,7 +363,7 @@ pub fn validate_approved(hash: &str, artifact: &Artifact) -> Result<()> {
         artifact.rootfs == installed.join("rootfs") && artifact.argv == ["/bin/agent"],
         "artifact must refer to the verified import registry"
     );
-    verify_installed(&installed, hash, true)
+    verify_installed(&installed, hash, true).map(|_| ())
 }
 fn lock_broker(uid: u32) -> Result<File> {
     use std::os::fd::AsRawFd;
@@ -386,20 +400,28 @@ fn lock_broker(uid: u32) -> Result<File> {
     Ok(file)
 }
 pub fn methods_for_profile(profile: &str) -> Result<&'static [&'static str]> {
-    ensure!(
-        profile == "offline-preview-v1",
-        "unapproved broker artifact profile"
-    );
-    Ok(&["model.offline", "diagnostic.echo"])
+    match profile {
+        "offline-preview-v1" => Ok(&["model.offline", "diagnostic.echo"]),
+        "live-preview-v1" => Ok(&["model.propose", "diagnostic.echo"]),
+        _ => anyhow::bail!("unapproved broker artifact profile"),
+    }
+}
+pub fn image_configuration(profile: &str) -> Result<Value> {
+    methods_for_profile(profile)?;
+    let mut labels = json!({"org.actryn.profile":profile});
+    if profile == "live-preview-v1" {
+        labels["org.actryn.model"] = json!(crate::model::MODEL);
+        labels["org.actryn.model-policy"] = json!(crate::model::policy_digest()?);
+    }
+    Ok(
+        json!({"Entrypoint":["/bin/agent"],"User":"65532:65532","WorkingDir":"/tmp","Labels":labels}),
+    )
 }
 pub fn broker_methods(hash: &str) -> Result<&'static [&'static str]> {
     ensure!(crate::store::valid_digest(hash), "invalid artifact digest");
-    let artifact = Artifact {
-        rootfs: Path::new(REGISTRY).join(&hash[7..]).join("rootfs"),
-        argv: vec!["/bin/agent".into()],
-    };
-    validate_approved(hash, &artifact)?;
-    methods_for_profile("offline-preview-v1")
+    let installed = Path::new(REGISTRY).join(&hash[7..]);
+    let verified = verify_installed(&installed, hash, true)?;
+    methods_for_profile(&verified.profile)
 }
 /// Administrator-only, offline import. Daemons must be stopped to publish an approval map.
 pub fn import(layout: &Path, expected: &str) -> Result<Value> {
@@ -494,6 +516,13 @@ mod tests {
         builder.into_inner().unwrap()
     }
     fn image(dir: &std::path::Path, layer: &[u8]) -> String {
+        configured_image(
+            dir,
+            layer,
+            image_configuration("offline-preview-v1").unwrap(),
+        )
+    }
+    fn configured_image(dir: &std::path::Path, layer: &[u8], config: Value) -> String {
         std::fs::create_dir_all(dir.join("blobs/sha256")).unwrap();
         let add = |bytes: &[u8], media: &str| {
             let digest = digest(bytes);
@@ -501,7 +530,7 @@ mod tests {
             json!({"mediaType":media,"digest":digest,"size":bytes.len()})
         };
         let layer = add(layer, LAYER);
-        let config = json!({"architecture":"amd64","os":"linux","config":{"Entrypoint":["/bin/agent"],"User":"65532:65532","WorkingDir":"/tmp","Labels":{"org.actryn.profile":"offline-preview-v1"}},"rootfs":{"type":"layers","diff_ids":[layer["digest"]]}});
+        let config = json!({"architecture":"amd64","os":"linux","config":config,"rootfs":{"type":"layers","diff_ids":[layer["digest"]]}});
         let config = add(&serde_json::to_vec(&config).unwrap(), CONFIG);
         let manifest = add(
             &serde_json::to_vec(
@@ -523,6 +552,9 @@ mod tests {
         manifest["digest"].as_str().unwrap().into()
     }
     fn valid_layer() -> Vec<u8> {
+        input_layer(b"{}")
+    }
+    fn input_layer(input: &[u8]) -> Vec<u8> {
         let mut elf = vec![0u8; 120];
         elf[..6].copy_from_slice(b"\x7fELF\x02\x01");
         elf[18..20].copy_from_slice(&62u16.to_le_bytes());
@@ -532,13 +564,39 @@ mod tests {
         elf[64..68].copy_from_slice(&1u32.to_le_bytes());
         layer(&[
             ("bin/agent", elf.as_slice(), tar::EntryType::Regular),
-            ("etc/actryn/input.json", b"{}", tar::EntryType::Regular),
+            ("etc/actryn/input.json", input, tar::EntryType::Regular),
             (
                 "etc/actryn/input.schema.json",
                 b"{}",
                 tar::EntryType::Regular,
             ),
         ])
+    }
+    #[test]
+    fn live_content_cannot_change_model_policy_or_claim_offline_profile() {
+        let source = tempfile::tempdir().unwrap();
+        let layer = input_layer(br#"{"mode":"live"}"#);
+        let config = image_configuration("live-preview-v1").unwrap();
+        let hash = configured_image(source.path(), &layer, config.clone());
+        assert_eq!(
+            Verified::read(source.path(), &hash).unwrap().profile,
+            "live-preview-v1"
+        );
+        let mut different_policy = config;
+        different_policy["Labels"]["org.actryn.model-policy"] =
+            json!(format!("sha256:{}", "0".repeat(64)));
+        let hash = configured_image(source.path(), &layer, different_policy);
+        assert!(Verified::read(source.path(), &hash).is_err());
+        let hash = image(source.path(), &layer);
+        assert!(Verified::read(source.path(), &hash).is_err());
+        let hash = configured_image(
+            source.path(),
+            &valid_layer(),
+            image_configuration("live-preview-v1").unwrap(),
+        );
+        assert!(Verified::read(source.path(), &hash).is_err());
+        let hash = image(source.path(), &input_layer(br#"{"mode":null}"#));
+        assert!(Verified::read(source.path(), &hash).is_err());
     }
     #[test]
     fn digest_is_real_and_malformed_or_oversized_layers_never_publish() {

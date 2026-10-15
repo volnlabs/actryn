@@ -46,6 +46,58 @@ The software guest campaign `oci-preview-guest01.log` used:
 
 Those are evidence pins for that build, not universal hashes for later source changes.
 
+## Separately pinned live profile
+
+`live-preview-v1` permits only `model.propose` and `diagnostic.echo`; it does not
+permit the offline model method. The same static client reads the digest-bound
+`mode: live` input, sends one request, and accepts only the pinned
+`gpt-5.4-mini-2026-03-17` result. Generate the policy description with the exact
+server release that will import and run the artifact:
+
+```sh
+actryn-artifact describe-live-policy > live-policy.json
+python3 packaging/agent/build_oci.py \
+  --agent target/x86_64-unknown-linux-gnu/release/actryn-preview-agent \
+  --profile live-preview-v1 --live-policy live-policy.json --out live-preview.oci
+```
+
+The OCI configuration includes the fixed model and server policy SHA-256. Import,
+prepare and start reject a different policy, even if the image itself has a valid
+content digest. The policy covers the OpenAI Responses endpoint, model snapshot,
+prompt, strict target schema, explicit `reasoning.effort: none`, output-token and
+transport limits. The supported reasoning setting is documented in the
+[official model reference](https://developers.openai.com/api/docs/models/gpt-5.4-mini).
+It is a latency choice, not a guarantee of response time or Robot freshness.
+
+Only the server reads the fixed systemd `openai-api-key` credential. An operator
+must install the protected credential and the documented service drop-in before
+live inference. The image, agent, launcher and OCI metadata contain no credential.
+The client has no direct network access, and the broker uses one fixed HTTPS
+destination without proxies, redirects, hosted tools or retries. Requests have a
+30-second transport deadline, 64 KiB response limit and 1,024 output-token ceiling;
+the durable broker additionally bounds calls, concurrent jobs and retained bytes.
+These are token/call/byte limits, not an invoice ceiling. Unknown external outcomes
+retain their reservations, and cancellation suppresses late output.
+
+The supplied `live-preview-reference` remains diagnostic input, not trusted Robot
+sensor evidence. The combined workflow must acquire and retain an actual Robot
+observation before inference and keep its original one-second freshness limit.
+No delayed model result may substitute or silently refresh that observation.
+
+`guest_live_acceptance.py OCI_DIR DIGEST --expect missing-credential` verifies the
+installed real sandbox fails closed without a provider credential and performs no
+external debit. `--expect completed` requires an operator-installed credential and
+makes one real provider call; it never substitutes a fixture result or retries a
+failed/unknown call. The harness preserves and reports the attempt and result.
+Neither a successful model proposal nor a software fixture qualifies physical motion.
+
+The missing-credential campaign `oci-live-missing-credential-guest01.log` passed
+with manifest `sha256:a16322353bf2af48ecbc2d0fac50ce19ddacd3d3138283b6d739efa7e4559c89`,
+static agent `sha256:64a3c208a94616dc161b5adb73909b79bad76e831810ef7ab55e52e4615294a9`,
+and model policy `sha256:af9412c8b9c37edc8e9aaeb4d4aec098bb787748f6e8142592814874e7eaf7c5`.
+No live provider success is claimed by that test. `oci-preview-guest02.log` also
+passed the offline workflow with the updated server and the earlier offline pin.
+
 ## Install and approve
 
 The release installer must supply a root-owned OCI directory whose path ancestors
@@ -119,9 +171,9 @@ is not durable host-restart storage.
 `python3 packaging/agent/test_build_oci.py` checks deterministic content-addressed
 packaging and rejects an ELF interpreter. `guest_acceptance.py OCI_DIR DIGEST` is
 for the disposable installed Debian server guest with the imported binaries and
-stopped services. It replaces legacy fixture approvals, preserves attempt history,
+stopped services and an already-valid approval map. It preserves approval and attempt history,
 checks wrong-pin rejection, idempotence, lifetime-lock denial, tamper-before-start
-rejection, the real isolated broker proposal, cancellation, result suppression and
+rejection, incomplete-slot cleanup, the real isolated broker proposal, cancellation, result suppression and
 cgroup cleanup. It requires the native CLI at `/usr/local/bin/actryn` and configured
 operator UID 1000. Software fixture success does not qualify physical actuation.
 
