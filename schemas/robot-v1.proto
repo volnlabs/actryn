@@ -1,0 +1,83 @@
+syntax = "proto3";
+package actryn.robot.v1;
+
+// TLS 1.3 with mutual authentication, ALPN actryn-rpc/1. Each frame is a
+// four-byte big-endian length followed by canonical Protobuf, at most 65536B.
+// One in-flight request per connection. No automatic retries after timeout.
+message Request {
+  uint32 version = 1;
+  bytes request_id = 2; // 16 bytes, correlation only; never authorizes execution.
+  bytes robot_epoch = 3; // Required for mutations except local enrollment.
+  oneof command {
+    Empty describe = 10;
+    Handle observe = 11;
+    Proposal propose = 12;
+    Handle query = 13;
+    Handle cancel = 14;
+    Prepare prepare = 20; // Local operator only.
+    Empty rearm = 21;
+    Grant grant = 22;
+    Empty activate = 23;
+    Empty reconcile = 24;
+    Empty recover = 25;
+    Empty revoke = 26;
+    Empty retire = 27;
+    EnrollmentRequest enroll_request = 30;
+    EnrollmentInstall enroll_install = 31;
+    PrincipalRevoke revoke_principal = 32;
+  }
+}
+message Empty {}
+message Handle {
+  bytes namespace = 1; // 16 bytes; authority is bound to authenticated principal.
+  bytes key = 2; // 32 bytes; empty only for observe.
+}
+message Target {
+  sint64 left_delta_ticks = 1;
+  sint64 right_delta_ticks = 2;
+  uint64 duration_ms = 3;
+}
+message Proposal {
+  Handle handle = 1;
+  uint64 observation_id = 2;
+  Target target = 3;
+  bytes parent_digest = 4; // 32-byte retained proposal lineage, not authorization.
+}
+message Prepare {
+  bytes attempt = 1;
+  bytes namespace = 2;
+  string principal = 3; // Local operator selects an installed authenticated policy.
+}
+message Grant { uint64 duration_ms = 1; }
+message EnrollmentRequest { string dns_name = 1; }
+message EnrollmentInstall { bytes certificate_pem = 1; bytes ca_pem = 2; }
+message PrincipalRevoke { string principal = 1; }
+message Response {
+  uint32 version = 1;
+  bytes request_id = 2;
+  bytes robot_epoch = 3;
+  oneof result {
+    Report report = 10;
+    Observation observation = 11;
+    Failure failure = 12;
+  }
+}
+// A read-only inspection document. Its documented fields never become a command
+// or authority token; applications must retain explicit uncertainty/gap fields.
+message Report { bytes json = 1; }
+message Observation {
+  uint64 id = 1;
+  uint64 acquired_earliest_ns = 2;
+  uint64 acquired_latest_ns = 3;
+  uint64 valid_until_ns = 4;
+  uint64 controller_ns = 5;
+  sint64 left_ticks = 6;
+  sint64 right_ticks = 7;
+  bool simulated = 8;
+  uint64 context_revision = 9;
+}
+message Failure {
+  enum Code { UNSPECIFIED = 0; REJECTED = 1; CAPACITY = 2; UNAVAILABLE = 3; OUTCOME_UNKNOWN = 4; }
+  Code code = 1;
+  string message = 2;
+}

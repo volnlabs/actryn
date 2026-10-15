@@ -1,0 +1,26 @@
+[package]
+name = "robot-rpc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+libc.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+prost = "=0.14.4"
+rustls = { version = "=0.23.46", default-features = false, features = ["ring", "std"] }
+tokio-rustls = { version = "=0.26.6", default-features = false, features = ["ring"] }
+rustls-pemfile = "=2.2.0"
+x509-parser = "=0.18.1"
+
+[build-dependencies]
+prost-build = "=0.14.4"
+
+[dev-dependencies]
+rcgen = "=0.14.10"
+tempfile.workspace = true
