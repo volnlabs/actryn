@@ -145,7 +145,15 @@ fn collector(commands: mpsc::Receiver<Command>, ready: mpsc::SyncSender<Result<(
                     Path::new("/sys/fs/cgroup").join(request.cgroup_path.trim_start_matches('/'));
                 let unknown_unregister = request.op == "unregister"
                     && !registrations.borrow().contains_key(&request.cgroup_id);
-                if !unknown_unregister {
+                // A runtime may remove its empty cgroup before retirement/recovery.
+                // Only unregister accepts absence; boot/path/registration still bind it.
+                let removed_cgroup = request.op == "unregister"
+                    && match fs::symlink_metadata(&cg) {
+                        Err(error) if error.kind() == std::io::ErrorKind::NotFound => true,
+                        Err(error) => return Err(error.into()),
+                        Ok(_) => false,
+                    };
+                if !unknown_unregister && !removed_cgroup {
                     trusted(&cg)?;
                     ensure!(
                         fs::metadata(&cg)?.ino() == request.cgroup_id,
@@ -206,9 +214,10 @@ fn collector(commands: mpsc::Receiver<Command>, ready: mpsc::SyncSender<Result<(
                     && registrations.borrow().contains_key(&request.cgroup_id)
                 {
                     ensure!(
-                        fs::read_to_string(cg.join("cgroup.events"))?
-                            .lines()
-                            .any(|line| line == "populated 0"),
+                        removed_cgroup
+                            || fs::read_to_string(cg.join("cgroup.events"))?
+                                .lines()
+                                .any(|line| line == "populated 0"),
                         "cgroup still populated"
                     );
                     if counts.is_some() {

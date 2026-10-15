@@ -40,6 +40,15 @@ def main():
     if service:
         pid = int(subprocess.check_output(['systemctl', 'show', 'actryn-observer', '-p', 'MainPID', '--value']))
         assert pid > 0
+        deadline = time.monotonic() + 10
+        while True:
+            try:
+                with socket.socket(socket.AF_UNIX) as ready:
+                    ready.connect(str(SOCKET))
+                break
+            except OSError:
+                assert time.monotonic() < deadline, 'observer IPC did not become ready'
+                time.sleep(.02)
         for thread in Path(f'/proc/{pid}/task').iterdir():
             values = dict(line.split(':', 1) for line in (thread / 'status').read_text().splitlines())
             assert int(values['CapEff'], 16) == int(values['CapPrm'], 16) == 0
@@ -81,6 +90,9 @@ def main():
                     assert status['ready'] is not exhaust, status
                     assert (status['lost'] > 0) is exhaust, status
                     log = Path('/var/lib/actryn-observer') / status['collector_epoch'] / (attempt + '.jsonl')
+                    # containerd deletes the empty cgroup before observer retirement.
+                    if not exhaust:
+                        cg.rmdir()
                     deadline = time.monotonic() + 5
                     while exchange(dict(request, op='unregister')) is None:
                         assert time.monotonic() < deadline, Path(tmp, 'stderr').read_text()
@@ -95,8 +107,9 @@ def main():
                         assert any(r['event']['classification'] == 'access_failed' for r in records)
                         assert any(r['event']['kind'] == 2 and r['event']['result'] >= 0 for r in records)
                     assert log.with_suffix('.summary.json').exists()
-                    assert not exchange(dict(request, op='health'))['ready']
-                print('actual BPF lifecycle/syscall attribution, malformed identity, finite retention and loss checks passed')
+                    health = exchange(dict(request, op='health'))
+                    assert health is None if not exhaust else not health['ready']
+                print('actual BPF lifecycle/syscall attribution, removed-cgroup retirement, malformed identity, finite retention and loss checks passed')
             finally:
                 if sys.exc_info()[0]:
                     print(Path(tmp, 'stderr').read_text(), file=sys.stderr)
@@ -105,8 +118,9 @@ def main():
                     observer.wait(timeout=5)
                     SOCKET.unlink(missing_ok=True)
                 for cg in groups:
-                    (cg / 'cgroup.kill').write_text('1')
-                    cg.rmdir()
+                    if cg.exists():
+                        (cg / 'cgroup.kill').write_text('1')
+                        cg.rmdir()
 
 if __name__ == '__main__':
     main()
