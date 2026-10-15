@@ -107,7 +107,7 @@ impl Store {
             CREATE TABLE checkpoints(batch INTEGER NOT NULL,producer INTEGER NOT NULL,sequence BLOB NOT NULL,PRIMARY KEY(batch,producer));")?;
         let tx = db.transaction()?;
         for (key, value) in [
-            ("format", b"ACTRYN-EVIDENCE-1".as_slice()),
+            ("format", b"ACTRYN-EVIDENCE-2".as_slice()),
             ("attempt", spec.attempt.as_slice()),
             ("profile", spec.profile_digest.as_slice()),
             ("configuration", spec.configuration_digest.as_slice()),
@@ -213,7 +213,7 @@ impl Store {
             .compression(None)
             .emit_summary_records(false)
             .emit_summary_offsets(false)
-            .profile("actryn-evidence-v1")
+            .profile("actryn-evidence-v2")
             .create(BoundedFile {
                 file,
                 maximum: reservation,
@@ -231,7 +231,7 @@ impl Store {
             channels.push(writer.add_channel(
                 0,
                 &format!("actryn/{id}"),
-                "actryn-evidence-v1",
+                "actryn-evidence-v2",
                 &metadata,
             )?);
         }
@@ -302,10 +302,10 @@ impl Store {
 fn encode(r: &CapturedRecord) -> Vec<u8> {
     let data = r.payload.as_deref().unwrap_or_default();
     let mut out = Vec::with_capacity(80 + data.len());
-    out.extend_from_slice(b"EVR1");
+    out.extend_from_slice(b"EVR2");
     out.extend_from_slice(&(r.producer as u16).to_le_bytes());
     out.push(r.kind as u8);
-    out.push(u8::from(r.payload.is_some()));
+    out.push(u8::from(r.payload.is_some()) | (u8::from(r.metadata) << 1));
     for n in [r.sequence, r.source_time_ns, r.captured_ns, r.input_bytes] {
         out.extend_from_slice(&n.to_le_bytes());
     }
@@ -315,7 +315,7 @@ fn encode(r: &CapturedRecord) -> Vec<u8> {
     out
 }
 fn decode(bytes: &[u8], spec: &CaptureSpec) -> Result<CapturedRecord> {
-    if bytes.len() < 80 || &bytes[..4] != b"EVR1" {
+    if bytes.len() < 80 || &bytes[..4] != b"EVR2" {
         return Err(Error::Rejected("invalid event encoding"));
     }
     let producer = u16::from_le_bytes(bytes[4..6].try_into().unwrap()) as usize;
@@ -332,15 +332,26 @@ fn decode(bytes: &[u8], spec: &CaptureSpec) -> Result<CapturedRecord> {
     let get = |offset| u64::from_le_bytes(bytes[offset..offset + 8].try_into().unwrap());
     let len = usize::try_from(get(72)).map_err(|_| Error::Rejected("event length overflow"))?;
     if len != bytes.len() - 80
-        || bytes[7] > 1
-        || (bytes[7] == 0 && len != 0)
+        || bytes[7] > 3
+        || (bytes[7] & 1 == 0 && len != 0)
         || get(8) == 0
         || get(32) > 1_048_576
     {
         return Err(Error::Rejected("invalid event payload length/sequence"));
     }
     let digest: [u8; 32] = bytes[40..72].try_into().unwrap();
-    let payload = (bytes[7] == 1).then(|| bytes[80..].to_vec());
+    let metadata = bytes[7] & 2 != 0;
+    if metadata
+        && (bytes[7] & 1 == 0
+            || p.origin == Origin::Agent
+            || matches!(
+                kind,
+                EventKind::Input | EventKind::ModelOutput | EventKind::AgentPayload
+            ))
+    {
+        return Err(Error::Rejected("invalid structural metadata flag"));
+    }
+    let payload = (bytes[7] & 1 == 1).then(|| bytes[80..].to_vec());
     if let Some(payload) = &payload {
         if Sha256::digest(payload).as_slice() != digest || payload.len() as u64 != get(32) {
             return Err(Error::Rejected("payload integrity/length mismatch"));
@@ -359,6 +370,7 @@ fn decode(bytes: &[u8], spec: &CaptureSpec) -> Result<CapturedRecord> {
         captured_ns: get(24),
         kind,
         payload,
+        metadata,
         digest,
         input_bytes: get(32),
     })
@@ -384,6 +396,7 @@ pub struct SourceSummary {
     pub requested: Vec<EventKind>,
     pub retained_streams: Vec<EventKind>,
     pub payload_streams: Vec<EventKind>,
+    pub metadata_streams: Vec<EventKind>,
     pub first_sequence: Option<u64>,
     pub last_sequence: Option<u64>,
     pub gaps: Vec<(u64, u64)>,
@@ -405,13 +418,20 @@ impl Recovery {
                     .collect::<Vec<_>>();
                 let mut retained = Vec::new();
                 let mut payload = Vec::new();
+                let mut metadata = Vec::new();
                 let mut gaps = Vec::new();
                 let mut previous = 0u64;
                 for record in &records {
                     if !retained.contains(&record.kind) {
                         retained.push(record.kind);
                     }
-                    if record.payload.is_some() && !payload.contains(&record.kind) {
+                    if record.metadata && !metadata.contains(&record.kind) {
+                        metadata.push(record.kind);
+                    }
+                    if record.payload.is_some()
+                        && !record.metadata
+                        && !payload.contains(&record.kind)
+                    {
                         payload.push(record.kind);
                     }
                     if previous
@@ -427,6 +447,7 @@ impl Recovery {
                     requested: spec.requested.clone(),
                     retained_streams: retained,
                     payload_streams: payload,
+                    metadata_streams: metadata,
                     first_sequence: records.first().map(|r| r.sequence),
                     last_sequence: records.last().map(|r| r.sequence),
                     gaps,
@@ -540,7 +561,7 @@ fn meta(db: &Connection, key: &str) -> Result<Vec<u8>> {
     Ok(db.query_row("SELECT value FROM meta WHERE key=?1", [key], |r| r.get(0))?)
 }
 fn load_manifest(db: &Connection) -> Result<CaptureSpec> {
-    if meta(db, "format")? != b"ACTRYN-EVIDENCE-1" {
+    if meta(db, "format")? != b"ACTRYN-EVIDENCE-2" {
         return Err(Error::Rejected("unsupported capture format"));
     }
     let policy = match meta(db, "policy")?.as_slice() {

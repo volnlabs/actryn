@@ -178,6 +178,7 @@ pub struct CapturedRecord {
     pub captured_ns: u64,
     pub kind: EventKind,
     pub payload: Option<Vec<u8>>,
+    pub metadata: bool,
     pub digest: [u8; 32],
     pub input_bytes: u64,
 }
@@ -381,7 +382,31 @@ impl Producer {
         if kind == EventKind::Prefix {
             return Err(Error::Rejected("use trusted seal_prefix API"));
         }
-        self.copy(sequence, source_time_ns, kind, payload)
+        self.copy(sequence, source_time_ns, kind, payload, false)
+    }
+    /// Retains bounded trusted structural metadata, without changing raw payload
+    /// policy. Agent, input and model-output bytes cannot use this path.
+    pub fn read_metadata(
+        &self,
+        sequence: u64,
+        source_time_ns: u64,
+        kind: EventKind,
+        metadata: &[u8],
+    ) -> Result<()> {
+        if self.origin() == Origin::Agent
+            || matches!(
+                kind,
+                EventKind::Input
+                    | EventKind::ModelOutput
+                    | EventKind::AgentPayload
+                    | EventKind::Prefix
+            )
+        {
+            return Err(Error::Rejected(
+                "source/kind cannot claim structural metadata",
+            ));
+        }
+        self.copy(sequence, source_time_ns, kind, metadata, true)
     }
     /// Trusted source asserts its complete stream prefix through a recorder-clock
     /// interval. A seal is evidence from that capability, not independent proof.
@@ -394,6 +419,7 @@ impl Producer {
             through_ns,
             EventKind::Prefix,
             &through_ns.to_le_bytes(),
+            true,
         )
     }
     fn copy(
@@ -402,6 +428,7 @@ impl Producer {
         source_time_ns: u64,
         kind: EventKind,
         payload: &[u8],
+        metadata: bool,
     ) -> Result<()> {
         let spec = &self.shared.spec.producers[self.index];
         let limits = &self.shared.limits;
@@ -411,8 +438,9 @@ impl Producer {
             return Err(Error::Rejected("kind outside source capability"));
         }
         let reserved = kind.reserved() && spec.origin != Origin::Agent;
-        let retained =
-            self.shared.spec.policy == CapturePolicy::FullPayload || kind == EventKind::Prefix;
+        let retained = metadata
+            || self.shared.spec.policy == CapturePolicy::FullPayload
+            || kind == EventKind::Prefix;
         let charge = std::mem::size_of::<Pending>()
             .checked_add(if retained { payload.len() } else { 32 })
             .ok_or(Error::Rejected("record size overflow"))?;
@@ -457,6 +485,7 @@ impl Producer {
             captured_ns,
             kind,
             payload: retained.then(|| payload.to_vec()),
+            metadata,
             digest: Sha256::digest(payload).into(),
             input_bytes: payload.len() as u64,
         };

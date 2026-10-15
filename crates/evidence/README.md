@@ -15,7 +15,11 @@ selector. An agent capability accepts only `AgentPayload`, cannot produce an
 activation or completeness seal, and is never a required replay source.
 
 `CapturePolicy::default()` is metadata-only: payload bytes are replaced by a
-SHA-256 digest and original length. Full payload retention requires explicit
+SHA-256 digest and original length. Trusted non-agent capabilities can call `read_metadata` for bounded structural
+activation/configuration/execution/observation/intervention facts. These retained
+bytes carry an explicit metadata flag; input, model output and agent payload kinds
+cannot use this API. They are reported separately from retained raw payloads and
+never make metadata-only captures eligible for execution replay. Full payload retention requires explicit
 `FullPayload`. Hashes establish content identity, not authorship or missing state.
 A supplied input is bounded by the volatile-byte policy even in metadata mode.
 
@@ -75,6 +79,10 @@ Committed MCAP file sizes consume the remaining recording budget. Exhaustion
 latches `DiskCapacity`; no unfunded next file is created. These are application
 logical-file reservations, not a filesystem quota or a bound on filesystem
 metadata/allocator overhead. The selected filesystem must still be qualified.
+
+Recording format 2 (manifest `ACTRYN-EVIDENCE-2`, envelope `EVR2`) adds the
+explicit metadata flag. Older manifests are rejected as unsupported, never
+silently interpreted with the new meaning.
 
 Each flush writes one complete, uncompressed, unchunked MCAP batch using maintained
 [`mcap` 0.25.0](https://docs.rs/mcap/0.25.0/mcap/write/struct.Writer.html), with

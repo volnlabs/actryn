@@ -337,3 +337,52 @@ fn disk_and_batch_reservations_fail_before_creating_unfunded_files() {
     assert!(matches!(writer.flush(), Err(Error::DiskBudget)));
     assert!(!dir.0.join("batch-00000000000000000001.mcap").exists());
 }
+
+#[test]
+fn trusted_metadata_is_retained_but_does_not_enable_execution_replay() {
+    let dir = Temp::new();
+    let (recorder, mut writer) =
+        Recorder::create(&dir.0, spec(CapturePolicy::MetadataOnly), Limits::default()).unwrap();
+    let producer = recorder.producer(0).unwrap();
+    producer
+        .read_metadata(1, 0, EventKind::Activation, b"trusted activation metadata")
+        .unwrap();
+    producer
+        .read(2, 0, EventKind::Execution, b"raw execution payload")
+        .unwrap();
+    assert!(producer
+        .read_metadata(3, 0, EventKind::ModelOutput, b"not metadata")
+        .is_err());
+    assert!(producer
+        .read_metadata(3, 0, EventKind::Input, b"not metadata")
+        .is_err());
+    recorder.queue_read();
+    writer.flush().unwrap();
+    let recovery = Recorder::recover(&dir.0).unwrap();
+    assert_eq!(
+        recovery.records[0].payload.as_deref(),
+        Some(b"trusted activation metadata".as_slice())
+    );
+    assert!(recovery.records[0].metadata);
+    assert!(!recovery.records[1].metadata);
+    assert!(recovery.records[1].payload.is_none());
+    assert!(!recovery.execution_replay(0).eligible);
+    let summary = recovery.source_summary();
+    assert!(summary[0].metadata_streams.contains(&EventKind::Activation));
+    assert!(!summary[0].payload_streams.contains(&EventKind::Activation));
+}
+
+#[test]
+fn agent_capability_cannot_claim_metadata() {
+    let dir = Temp::new();
+    let mut capture = spec(CapturePolicy::MetadataOnly);
+    capture.producers[0].origin = Origin::Agent;
+    capture.producers[0].required_for_replay = false;
+    capture.producers[0].requested = vec![EventKind::AgentPayload];
+    let (recorder, _writer) = Recorder::create(&dir.0, capture, Limits::default()).unwrap();
+    assert!(recorder
+        .producer(0)
+        .unwrap()
+        .read_metadata(1, 0, EventKind::AgentPayload, b"forged")
+        .is_err());
+}
