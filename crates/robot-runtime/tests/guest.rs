@@ -50,10 +50,18 @@ fn actual_module_two_steps_and_pre_id_tombstone() {
             right_ticks: -5,
             duration_ms: 5000,
         };
-        let first = engine
+        engine
             .propose(&binding, key, [6; 32], target, observation.id)
             .unwrap();
-        assert!(first.operation.is_some());
+        poll(&engine, Duration::from_secs(2), || {
+            engine
+                .query(&binding, key)
+                .unwrap()
+                .unwrap()
+                .operation
+                .is_some()
+        });
+        let first = engine.query(&binding, key).unwrap().unwrap();
         let duplicate = engine
             .propose(&binding, key, [6; 32], target, observation.id)
             .unwrap();

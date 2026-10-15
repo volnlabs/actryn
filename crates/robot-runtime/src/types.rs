@@ -158,7 +158,11 @@ impl Snapshot {
             namespace: v.namespace,
             key: v.key,
             digest: v.digest,
-            operation: v.operation.map(Into::into),
+            operation: if v.durable_revision > 0 {
+                v.operation.map(Into::into)
+            } else {
+                None
+            },
             revision: v.revision,
             durable_revision: v.durable_revision,
             phase: format!("{:?}", v.phase),
@@ -209,4 +213,43 @@ pub struct Historical {
     pub prepared: Prepared,
     pub snapshot: Option<Snapshot>,
     pub live_authority: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn external_id_is_withheld_until_its_binding_is_durable() {
+        let id = robot_intent::OperationId {
+            device: [1; 16],
+            boot: 1,
+            session: 1,
+            runtime_nonce: [2; 16],
+            grant: 1,
+            instance: 1,
+            operation: 1,
+            stream: 1,
+        };
+        let mut raw = robot_intent::Snapshot {
+            namespace: [3; 16],
+            key: [4; 32],
+            digest: Some([5; 32]),
+            operation: Some(id),
+            revision: 1,
+            durable_revision: 0,
+            phase: robot_intent::Phase::PendingIntent,
+            terminal: false,
+            closure: robot_intent::Closure::NotRequested,
+            persistence_failed: false,
+        };
+        assert!(
+            Snapshot::from_registry(raw.clone(), Verdict::Pending, false)
+                .operation
+                .is_none()
+        );
+        raw.durable_revision = 1;
+        assert!(Snapshot::from_registry(raw, Verdict::Pending, false)
+            .operation
+            .is_some());
+    }
 }

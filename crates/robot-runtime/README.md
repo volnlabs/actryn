@@ -56,7 +56,9 @@ duty to 100 permille. A wheel stops permanently when its target is crossed;
 there is no reversal after overshoot. Samples have 100 ms minimum cadence,
 receipt-aware 100 ms slew credit, finite <=300 ms horizons and the original
 operation/session/grant/observation ceilings. Only one unknown sample can exist.
-The registry allocates without transport, commits the immutable intent on its
+External snapshots withhold the allocated ID until its binding is durable;
+the stable key remains available for pending queries/cancellation. The registry
+allocates without transport, commits the immutable intent on its
 writer thread, then performs a serialized fresh check before START. Duplicates
 are lookups and cannot refresh deadlines or dispatch; changed digests conflict.
 
