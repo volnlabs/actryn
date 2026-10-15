@@ -31,6 +31,17 @@ attempt identity and 60 KiB bound, then creates a new mode-0600 file with fsync.
 An existing destination is never overwritten. The bundle explicitly says it is
 not execution replay evidence. There is no caller-selected helper filesystem path.
 
+With the launcher and broker stopped, root imports the reviewed offline OCI layout:
+
+```sh
+actryn server import --layout image-layout --digest sha256:REVIEWED_DIGEST
+actryn server discard-incomplete --digest sha256:INCOMPLETE_DIGEST
+```
+
+Import verifies the manifest, blobs, fixed files and artifact policy before adding
+the digest to the allowlist. `discard-incomplete` removes only that digest's
+incomplete import; it cannot remove a complete installed artifact.
+
 The server socket is fixed at `/run/actryn-server/server.sock`; the CLI verifies
 its peer UID against the root-protected `/etc/actryn/server.json`. The service
 account is allocated during installation, not assumed to have a fixed numeric UID.
@@ -135,11 +146,28 @@ cancellation; query the same key and use explicit local closure if required.
 `outcome_unknown` describes this invocation, not the outcome of an earlier proposal.
 The retained handle state remains visible in remote query/cancel output.
 
-After daemon epoch retirement, pair again into a **new** file with the current
-reviewed device pin. Query/cancel may use that current pairing epoch with the old
-immutable handle namespace/attempt/key. A stale handle can never be rebound for
-proposal or observation. Historical cancellation reports do not imply live
-authority. Recovery, rearm, grant and activation remain separate explicit actions.
+After daemon epoch retirement, network query/cancel/export first discovers the
+current epoch using Describe on the same pinned TLS connection, then accesses the
+original immutable handle namespace/attempt/key. This does not change the pairing
+or handle file. Proposal and observation retain their selected epoch and cannot
+revive an old binding. A changed device certificate requires explicit pairing into
+a new file with the newly reviewed pin. Historical cancellation reports do not
+imply live authority. Recovery, rearm, grant and activation remain explicit actions.
+
+After retiring the namespace and recovering to an inhibited state, export its
+retained capture using any handle from that namespace:
+
+```sh
+actryn robot export --pair session/pair.json --cert client.pem --key client.key \
+  --handle session/operation.json --out evidence
+# Or on the robot:
+actryn robot export --local --handle session/operation.json --out evidence
+```
+
+Export creates a private directory, verifies each bounded file's SHA-256 and
+keeps `INCOMPLETE.json` until all bytes and the manifest are durable. An existing
+destination is never overwritten. The exported capture preserves unknown tails
+and does not claim execution replay eligibility or physical qualification.
 
 ## File and transport bounds
 

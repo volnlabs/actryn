@@ -98,7 +98,7 @@ impl PreparedRpc {
         .await?
     }
 
-    /// Exactly one nonblocking write, with no allocation or async wait. A partial
+    /// Exactly one nonblocking write, with no async wait. A partial
     /// write or error consumes and closes the transport; delivery remains unknown.
     pub fn try_send_once(self) -> Result<SentRpc> {
         send_packet(&self.ciphertext, self.sent.deadline, |bytes| {
