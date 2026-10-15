@@ -248,8 +248,17 @@ impl Controller {
             return self.response(f, Kind::Fault, Status::Protocol, now);
         }
         if f.kind == Kind::Hello {
-            if matches!(self.state, State::Active | State::Ready) {
+            if self.state == State::Active
+                || (self.state == State::Ready
+                    && (self.duties() != (0, 0, false) || self.active.is_some()))
+            {
                 return self.response(f, Kind::Fault, Status::Busy, now);
+            }
+            // A fresh host owner may meet an already-quiesced controller. Confirm
+            // its disabled-zero sink before retiring that READY session; HELLO
+            // still cannot replace an active operation or imply baseline/rearm.
+            if self.state == State::Ready && sink.update(0, 0, false).is_err() {
+                return self.fault(f, Status::SinkUnknown, now, sink);
             }
             let Some(session) = self.session.checked_add(1) else {
                 return self.fault(f, Status::Persistence, now, sink);
@@ -262,8 +271,11 @@ impl Controller {
             self.op_high = 0;
             self.stream_high = 0;
             self.tx_high = f.transaction;
+            self.active = None;
+            self.started = None;
             self.close = None;
             self.sample = None;
+            self.applied_at = now;
             self.observation_sequence = 0;
             return self.response(f, Kind::HelloAck, Status::Inhibited, now);
         }

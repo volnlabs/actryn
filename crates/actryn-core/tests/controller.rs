@@ -199,3 +199,108 @@ fn finite_horizons_slew_credit_and_counter_exhaustion() {
     assert_eq!(c.session, u64::MAX);
     assert_eq!(c.state, State::Faulted);
 }
+
+#[test]
+fn disabled_ready_accepts_fresh_hello_but_retires_old_commands() {
+    let (mut c, mut sink, old_start) = setup();
+    let old_sample = sample(old_start);
+    let mut hello = Frame::new(Kind::Hello);
+    hello.nonce = [8; 16];
+    hello.transaction = 1;
+    let before = sink.updates;
+    let ack = c.handle(hello, MS, &mut sink);
+    assert_eq!(
+        (ack.kind, ack.status, ack.session, ack.nonce),
+        (Kind::HelloAck, Status::Inhibited, 2, [8; 16])
+    );
+    assert_eq!(
+        sink.updates,
+        before + 1,
+        "READY must confirm disabled-zero through its sink"
+    );
+    assert_eq!(c.state, State::Inhibited);
+    assert_eq!(c.duties(), (0, 0, false));
+    assert_eq!(c.handle(old_start, 2 * MS, &mut sink).status, Status::Stale);
+    assert_eq!(
+        c.handle(old_sample, 2 * MS, &mut sink).status,
+        Status::Stale
+    );
+    let mut fresh_start = old_start;
+    fresh_start.session = ack.session;
+    fresh_start.nonce = ack.nonce;
+    assert_eq!(
+        c.handle(fresh_start, 3 * MS, &mut sink).status,
+        Status::Inhibited
+    );
+    let mut rearm = Frame::new(Kind::Rearm);
+    rearm.device = ack.device;
+    rearm.boot = ack.boot;
+    rearm.session = ack.session;
+    rearm.nonce = ack.nonce;
+    rearm.transaction = 2;
+    rearm.context = 1;
+    assert_eq!(c.handle(rearm, 4 * MS, &mut sink).kind, Kind::Baseline);
+    assert_eq!(c.handle(old_start, 5 * MS, &mut sink).status, Status::Stale);
+    assert_eq!(
+        c.handle(old_sample, 5 * MS, &mut sink).status,
+        Status::Stale
+    );
+    assert_eq!(c.handle(fresh_start, 5 * MS, &mut sink).kind, Kind::Started);
+}
+
+#[test]
+fn ready_hello_sink_failure_is_unknown_and_cannot_publish_a_session() {
+    let (mut c, mut sink, old_start) = setup();
+    let mut hello = Frame::new(Kind::Hello);
+    hello.nonce = [8; 16];
+    hello.transaction = 1;
+    sink.fail_next = true;
+    let result = c.handle(hello, MS, &mut sink);
+    assert_eq!(
+        (result.kind, result.status),
+        (Kind::Fault, Status::SinkUnknown)
+    );
+    assert_eq!(c.session, old_start.session);
+    assert_eq!(c.state, State::Faulted);
+    assert_ne!(c.handle(old_start, 2 * MS, &mut sink).kind, Kind::Started);
+}
+
+#[test]
+fn hello_cannot_replace_an_active_session_even_before_first_output() {
+    let (mut c, mut sink, old_start) = setup();
+    assert_eq!(c.handle(old_start, 0, &mut sink).kind, Kind::Started);
+    let before = sink.updates;
+    let mut hello = Frame::new(Kind::Hello);
+    hello.nonce = [8; 16];
+    hello.transaction = 1;
+    assert_eq!(c.handle(hello, MS, &mut sink).status, Status::Busy);
+    assert_eq!(c.session, old_start.session);
+    assert_eq!(c.state, State::Active);
+    assert_eq!(sink.updates, before);
+    assert_eq!(
+        c.handle(sample(old_start), 100 * MS, &mut sink).kind,
+        Kind::SampleApplied
+    );
+    assert_eq!(c.handle(hello, 101 * MS, &mut sink).status, Status::Busy);
+    assert_eq!(c.duties(), (100, -100, true));
+}
+
+#[test]
+fn quiesced_ready_can_retire_session_without_replaying_old_receipts() {
+    let (mut c, mut sink, op) = setup();
+    c.handle(op, 0, &mut sink);
+    let applied = sample(op);
+    c.handle(applied, 100 * MS, &mut sink);
+    let quiesce = close(op, 5);
+    assert_eq!(c.handle(quiesce, 200 * MS, &mut sink).kind, Kind::Quiesced);
+    assert_eq!(c.state, State::Ready);
+    let mut hello = Frame::new(Kind::Hello);
+    hello.nonce = [8; 16];
+    hello.transaction = 1;
+    assert_eq!(c.handle(hello, 201 * MS, &mut sink).kind, Kind::HelloAck);
+    for old in [op, applied, quiesce] {
+        assert_eq!(c.handle(old, 202 * MS, &mut sink).status, Status::Stale);
+    }
+    assert_eq!(c.state, State::Inhibited);
+    assert_eq!(c.duties(), (0, 0, false));
+}
