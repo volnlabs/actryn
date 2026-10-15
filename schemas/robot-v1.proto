@@ -31,6 +31,7 @@ message Empty {}
 message Handle {
   bytes namespace = 1; // 16 bytes; authority is bound to authenticated principal.
   bytes key = 2; // 32 bytes; empty only for observe.
+  bytes attempt = 3; // 16 bytes; checked against the retained namespace binding.
 }
 message Target {
   sint64 left_delta_ticks = 1;

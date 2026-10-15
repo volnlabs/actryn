@@ -21,3 +21,5 @@ Module.symvers
 modules.order
 /artifacts/
 /runtime/
+/sdk/python/build/
+/sdk/python/*.egg-info/

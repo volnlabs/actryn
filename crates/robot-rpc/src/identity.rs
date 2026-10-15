@@ -182,6 +182,7 @@ pub fn client_tls(ca: &[u8], certificate: &[u8], key: &[u8]) -> Result<Arc<rustl
 pub struct ClockGuard {
     wall_ns: u64,
     boot_ns: u64,
+    last_boot_ns: u64,
     faulted: bool,
 }
 impl ClockGuard {
@@ -193,6 +194,7 @@ impl ClockGuard {
         Ok(Self {
             wall_ns,
             boot_ns,
+            last_boot_ns: boot_ns,
             faulted: false,
         })
     }
@@ -201,10 +203,13 @@ impl ClockGuard {
             .checked_sub(self.boot_ns)
             .and_then(|delta| self.wall_ns.checked_add(delta));
         // One second is a conservative administrative uncertainty bound, not robot timing.
-        if expected.is_none_or(|value| value.abs_diff(wall_ns) > 1_000_000_000) {
+        if boot_ns < self.last_boot_ns
+            || expected.is_none_or(|value| value.abs_diff(wall_ns) > 1_000_000_000)
+        {
             self.faulted = true;
         }
         ensure!(!self.faulted, "wall/boot clock discontinuity");
+        self.last_boot_ns = boot_ns;
         Ok(())
     }
 }

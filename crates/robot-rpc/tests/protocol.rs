@@ -13,6 +13,7 @@ fn proposal() -> wire::Request {
             handle: Some(wire::Handle {
                 namespace: vec![3; 16],
                 key: vec![4; 32],
+                attempt: vec![6; 16],
             }),
             observation_id: 1,
             target: Some(wire::Target {
@@ -68,4 +69,8 @@ fn clock_discontinuity_is_sticky_and_restart_floor_is_enforced() {
     guard.check(10_100_000_000, 100_000_001).unwrap();
     assert!(guard.check(8_000_000_000, 200_000_001).is_err());
     assert!(guard.check(10_300_000_000, 300_000_001).is_err());
+    let mut guard = ClockGuard::new(10_000_000_000, 1_000_000_000, 0).unwrap();
+    guard.check(10_500_000_000, 1_500_000_000).unwrap();
+    assert!(guard.check(10_500_000_000, 1_400_000_000).is_err());
+    assert!(guard.check(10_600_000_000, 1_600_000_000).is_err());
 }

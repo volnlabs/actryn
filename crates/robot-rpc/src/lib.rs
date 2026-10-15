@@ -57,7 +57,9 @@ impl wire::Request {
         );
         let handle = |h: &wire::Handle, has_key: bool| -> Result<()> {
             ensure!(
-                h.namespace.len() == 16 && h.key.len() == if has_key { 32 } else { 0 },
+                h.namespace.len() == 16
+                    && h.attempt.len() == 16
+                    && h.key.len() == if has_key { 32 } else { 0 },
                 "invalid stable handle"
             );
             Ok(())
