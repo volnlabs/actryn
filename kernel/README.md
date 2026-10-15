@@ -48,6 +48,15 @@ One administrator recovery after a partial-frame fault waits for the immutable
 old host cutoff, emits a delimiter to retire the abandoned COBS prefix, then
 sends HELLO. This can never extend the old sample's horizon. Recovery stays
 inhibited until an explicit rearm and new authorization.
+During that fresh, authority-free handshake only, malformed incoming prefixes
+are discarded through their delimiter within the unchanged absolute HELLO
+timeout. A validated reply carrying the fresh nonce ends this synchronization
+phase. RX capacity stays strict, and malformed traffic after mapping still
+faults. This handles retained UART bytes when a new attachment starts inside
+an old observation; the fixture also delimits its fresh HELLO reply.
+An observed higher boot counter or higher session in the same boot from the
+paired device closes current authority as a transport fault. Older epochs and
+foreign nonces cannot refresh, acknowledge or reconcile current work.
 
 The owner is the referenced original leader, credential object and exec ID.
 Inherited/transferred descriptors do not gain authority. Binding and open-file
@@ -83,17 +92,22 @@ would outlive recorder health or the observation's maximum age.
 On a kernel built with `CONFIG_KUNIT=y`, build with
 `CONFIG_ACTRYN_AUTHORITY_KUNIT_TEST=m`. Codec/control tests and the actual driver
 transmit/close path then test every encoded byte offset with an injected serdev
-writer. These KUnit translation units have been compile-checked, but their
-runtime results require a KUnit kernel. Both suites are compiled into the
+writer. Snapshot 13 passed fourteen cases in each of four separate x86 diagnostic
+kernels: plain KUnit, lockdep, KASAN and KCSAN. [Campaign evidence](DIAGNOSTICS.md)
+records exact source identities and preserved earlier failures. Both suites are compiled into the
 authority component only for that diagnostic build; the normal profile omits them.
 The tests additionally cover every fault/recovery byte offset, including a
 missing final delimiter, and reject applied/quiescence receipts past their
 fresh deadlines. The recovery test supplies deterministic time snapshots to
 the production transmit implementation; it makes no scheduling-bound claim.
+The receive tests cover retained incomplete incoming frames, bounded fresh
+handshake synchronization, strict post-mapping parsing and stale ACK rejection.
+Older epochs cannot acknowledge current work. Newer controller epochs
+close authority. RX-capacity/counter tests and direct PM callback tests exercise
+bounded storage, nonwrapping accounting and inhibition.
 
-Still required for D1: running KUnit on the selected diagnostic kernel,
-lockdep/KASAN/KCSAN campaigns, concurrent lifecycle/teardown/FD-lifetime races,
-zero/error/retained-byte fault campaigns, queue/exhaustion campaigns, PM failure
-tests and quantified software latency. The successful normal guest selftest
-does not close these gates. All physical limits and physical qualification
-remain outside this target.
+The separate [actual ARM64 regressions](tests/ADVERSARIAL.md) exercise the
+installed module through real ioctl/serdev/PL011 paths. Their software results
+do not establish exhaustive concurrent lifecycle/teardown stress, actual
+platform PM behavior, or a software latency bound. All physical limits and
+physical qualification remain outside this target.

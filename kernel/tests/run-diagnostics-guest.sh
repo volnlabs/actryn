@@ -77,7 +77,7 @@ import re
 import sys
 data = json.loads(pathlib.Path(sys.argv[1]).read_text())
 text = pathlib.Path(sys.argv[2]).read_text()
-expected = {"wire_roundtrip", "urgent_monotonic", "every_cancel_offset", "concurrent_closure", "late_receipts", "every_fault_recovery_offset", "stalled_parser_timeout"}
+expected = {"wire_roundtrip", "urgent_monotonic", "every_cancel_offset", "concurrent_closure", "late_receipts", "every_fault_recovery_offset", "stalled_parser_timeout", "inhibited_revoke", "retained_rx_recovery", "stale_epoch_receipts", "new_controller_epoch", "bounded_queues_counters", "pm_inhibition", "handshake_rx_sync"}
 found = set()
 def visit(node):
     if isinstance(node, dict):

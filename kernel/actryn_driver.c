@@ -58,6 +58,7 @@ struct actryn_endpoint {
  u8 parser[ACTRYN_ENCODED_MAX];
  size_t parser_len;
  bool parser_discard;
+ u64 parser_sync_deadline;
  struct actryn_frame rx[RX_COUNT];
  unsigned int rx_head, rx_tail, rx_count;
  struct actryn_event events[EVENT_COUNT];
@@ -194,6 +195,10 @@ static void apply_close(struct actryn_endpoint *e)
  if(!c.rank) return;
  if(e->s.state==ACTRYN_DETACHED ||
     (e->s.state==ACTRYN_FAULT_LATCHED && c.rank<CTRL_FAULT)) goto clear;
+ if(e->s.state==ACTRYN_INHIBITED && c.rank==CTRL_GRANT) {
+  /* Closure cannot substitute for an acknowledged baseline/rearm. */
+  e->grant_authorized=false; e->s.instance=0; goto clear;
+ }
  if(c.rank==CTRL_OPERATION && c.operation==e->s.operation &&
     (e->s.operation_state==ACTRYN_OP_CLOSING || e->s.operation_state==ACTRYN_OP_RECONCILED))
   goto clear;
@@ -218,6 +223,8 @@ static void apply_close(struct actryn_endpoint *e)
    e->s.state=ACTRYN_READY; e->close_deadline=0;
   }
   if(c.rank>=CTRL_FAULT) {
+   spin_lock_irqsave(&e->rx_lock,flags); e->parser_sync_deadline=0;
+   spin_unlock_irqrestore(&e->rx_lock,flags);
    /* The final missing byte can be the delimiter: never complete an old
     * effect-bearing frame while its immutable expiry is still valid. */
    if(e->tx_busy && e->tx_off && e->tx_frame.expiry)
@@ -236,7 +243,7 @@ static void fault(struct actryn_endpoint *e,u32 reason)
 
 static int handshake(struct actryn_endpoint *e)
 {
- struct actryn_frame f={.kind=AW_HELLO};
+ struct actryn_frame f={.kind=AW_HELLO}; unsigned long flags;
  if(e->tx_busy) return -EBUSY;
  e->await=false; e->quiesce_needed=false; e->mailbox_valid=false;
  e->s.state=ACTRYN_INHIBITED; e->s.operation_state=ACTRYN_OP_NONE;
@@ -247,6 +254,12 @@ static int handshake(struct actryn_endpoint *e)
  memset(&e->observation,0,sizeof(e->observation));
  e->close_deadline=0; e->handshake=false; e->grant_authorized=false;
  if(get_random_bytes_wait(e->s.runtime_nonce,16)) return -ERESTARTSYS;
+ /* A new UART attachment may start in a retained frame. Only this explicit
+  * no-authority handshake may discard malformed prefixes. The existing
+  * absolute HELLO timeout and RX queue capacity remain fail-closed. */
+ spin_lock_irqsave(&e->rx_lock,flags);
+ e->parser_sync_deadline=max(now_ns(),e->resync_after)+1000*MS;
+ spin_unlock_irqrestore(&e->rx_lock,flags);
  memcpy(f.nonce,e->s.runtime_nonce,16);
  e->next_transaction=0; next_transaction(e,&f.transaction);
  publish_identity(e); return queue_frame(e,&f);
@@ -254,7 +267,7 @@ static int handshake(struct actryn_endpoint *e)
 
 static void receive_frame(struct actryn_endpoint *e,const struct actryn_frame *f)
 {
- u64 now=now_ns(); const struct actryn_frame *a=&e->awaited;
+ u64 now=now_ns(); unsigned long flags; const struct actryn_frame *a=&e->awaited;
  lockdep_assert_held(&e->authority);
  if(f->kind==AW_HELLO_ACK && e->await && a->kind==AW_HELLO &&
     f->transaction==a->transaction && !memcmp(f->nonce,e->s.runtime_nonce,16)) {
@@ -265,8 +278,17 @@ static void receive_frame(struct actryn_endpoint *e,const struct actryn_frame *f
   }
   memcpy(e->s.device_identity,f->device,16);
   e->s.controller_boot=f->boot; e->s.controller_session=f->session;
+  spin_lock_irqsave(&e->rx_lock,flags); e->parser_sync_deadline=0;
+  spin_unlock_irqrestore(&e->rx_lock,flags);
   e->map_host=now; e->map_ctl=f->controller_ns; e->handshake=true;
   e->await=false; e->s.controller_ns=f->controller_ns; event(e,ACTRYN_EVENT_WIRE|AW_HELLO_ACK); return;
+ }
+ /* A newer durable epoch from this endpoint is positive reset evidence.
+  * Older epochs and foreign nonces cannot renew or reconcile current work. */
+ if(e->handshake && !memcmp(f->device,e->s.device_identity,16) &&
+    (f->boot>e->s.controller_boot ||
+     (f->boot==e->s.controller_boot && f->session>e->s.controller_session))) {
+  fault(e,ACTRYN_TRANSPORT); return;
  }
  if(!same_epoch(e,f)) return;
  if(f->kind==AW_FAULT) { fault(e,ACTRYN_TRANSPORT); return; }
@@ -397,7 +419,7 @@ static void endpoint_work(struct work_struct *work)
  apply_close(e); check_health(e);
  spin_lock_irqsave(&e->rx_lock,flags);
  if(e->parser_len && !e->parser_discard && now_ns()-e->parser_started>=500*MS) {
-  e->parser_discard=true; parser_timeout=true;
+  e->parser_discard=true; parser_timeout=now_ns()>=e->parser_sync_deadline;
  }
  if(e->rx_count) { f=e->rx[e->rx_tail]; e->rx_tail=(e->rx_tail+1)%RX_COUNT; e->rx_count--; have=true; }
  spin_unlock_irqrestore(&e->rx_lock,flags);
@@ -417,13 +439,18 @@ static size_t receive_buf(struct serdev_device *serdev,const u8 *data,size_t n)
  for(i=0;i<n;i++) {
   if(!data[i]) {
    if(e->parser_len && !e->parser_discard) {
-    if(now_ns()-e->parser_started>=500*MS || e->rx_count==RX_COUNT ||
-       actryn_decode(e->parser,e->parser_len,&e->rx[e->rx_head])) bad=true;
+    if(e->rx_count==RX_COUNT) bad=true;
+    else if(now_ns()-e->parser_started>=500*MS ||
+       actryn_decode(e->parser,e->parser_len,&e->rx[e->rx_head])) {
+     if(now_ns()>=e->parser_sync_deadline) bad=true;
+    }
     else { e->rx_head=(e->rx_head+1)%RX_COUNT; e->rx_count++; }
    }
    e->parser_len=0; e->parser_discard=false;
   } else if(!e->parser_discard) {
-   if(e->parser_len>=ACTRYN_ENCODED_MAX-1) { e->parser_discard=true; bad=true; }
+   if(e->parser_len>=ACTRYN_ENCODED_MAX-1) {
+    e->parser_discard=true; if(now_ns()>=e->parser_sync_deadline) bad=true;
+   }
    else { if(!e->parser_len) e->parser_started=now_ns(); e->parser[e->parser_len++]=data[i]; }
   }
  }
@@ -573,7 +600,7 @@ static int do_request(struct actryn_file *file,struct actryn_request *r)
   ret=request_close(e,CTRL_OPERATION,r->opcode==ACTRYN_FINISH?ACTRYN_SKILL_FINISHED:ACTRYN_CANCELLED,r->grant,r->operation);
   apply_close(e); break;
  case ACTRYN_REVOKE:
-  if(file->role!=ACTRYN_ADMIN || !request_epoch(e,r) || r->grant!=e->s.grant) return -ESTALE;
+  if(file->role!=ACTRYN_ADMIN || !r->grant || !request_epoch(e,r) || r->grant!=e->s.grant) return -ESTALE;
   ret=request_close(e,CTRL_GRANT,ACTRYN_GRANT_REVOKED,r->grant,0); apply_close(e);
   if(e->s.state==ACTRYN_REVOKING &&
      (!e->s.operation || e->s.operation_state==ACTRYN_OP_RECONCILED)) e->s.state=ACTRYN_READY;
@@ -591,6 +618,7 @@ static int urgent_request(struct actryn_file *f,const struct actryn_request *r)
  if(f->role==ACTRYN_ADMIN) { if(!admin()) return -EPERM; }
  else if(f->role!=ACTRYN_RUNTIME || !is_owner(e) ||
          f->runtime_generation!=READ_ONCE(e->runtime_generation) || r->opcode==ACTRYN_REVOKE) return -EPERM;
+ if(r->opcode==ACTRYN_REVOKE && !r->grant) return -ESTALE;
  rank=r->opcode==ACTRYN_REVOKE?CTRL_GRANT:CTRL_OPERATION;
  reason=r->opcode==ACTRYN_REVOKE?ACTRYN_GRANT_REVOKED:
         r->opcode==ACTRYN_FINISH?ACTRYN_SKILL_FINISHED:ACTRYN_CANCELLED;
