@@ -25,3 +25,17 @@ fn duplicate_service_lifetime_cannot_take_existing_store() {
     drop(first);
     assert!(actryn_server::launcher::lock_service(&path).is_ok());
 }
+#[test]
+fn offline_artifact_never_enables_live_or_unknown_tools() {
+    assert!(
+        actryn_server::artifact::methods_for_profile("offline-preview-v1")
+            .unwrap()
+            .contains(&"model.offline")
+    );
+    assert!(
+        !actryn_server::artifact::methods_for_profile("offline-preview-v1")
+            .unwrap()
+            .contains(&"model.propose")
+    );
+    assert!(actryn_server::artifact::methods_for_profile("caller-selected").is_err());
+}

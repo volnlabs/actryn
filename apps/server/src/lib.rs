@@ -34,3 +34,5 @@ pub fn notify_ready() -> anyhow::Result<()> {
     );
     Ok(())
 }
+
+pub mod artifact;

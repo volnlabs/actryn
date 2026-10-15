@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Destructive only inside the disposable Debian server VM; requires root and real observer/containerd."""
 import json, os, pathlib, shutil, socket, struct, subprocess, sys, time
+from guest_artifact import import_fixture
 
 
 def rpc(request, path='/run/actryn/launcher.sock'):
@@ -41,18 +42,17 @@ def main():
     assert pathlib.Path('/run/actryn/observer.sock').exists(),'real observer required'
     assert pathlib.Path('/run/containerd/containerd.sock').exists(),'real containerd required'
     root=pathlib.Path('/var/lib/actryn-test-rootfs')
-    for name in ['bin','tmp','dev','proc','run/actryn-broker']:(root/name).mkdir(parents=True,exist_ok=True)
-    shutil.copyfile('/usr/bin/busybox',root/'bin/busybox');(root/'bin/busybox').chmod(0o755)
-    (root/'bin/sh').symlink_to('busybox') if not (root/'bin/sh').exists() else None
-    artifact='sha256:'+'a'*64
+    (root/'bin').mkdir(parents=True,exist_ok=True)
+    subprocess.run(['cc','-O2','-static','-Wall','-Wextra','-Werror','-o',str(root/'bin/agent'),str(pathlib.Path(__file__).with_name('launcher_agent.c'))],check=True)
     device=os.stat('/').st_dev
     block=pathlib.Path(f'/sys/dev/block/{os.major(device)}:{os.minor(device)}').resolve()
     io_device=(block.parent/'dev').read_text().strip() if (block/'partition').exists() else f'{os.major(device)}:{os.minor(device)}'
     config={'server_uid':991,'operator_uid':1000,'io_device':io_device,
-        'artifacts':{artifact:{'rootfs':str(root),'argv':['/bin/busybox','sh','-c','echo AGENT_STARTED; /bin/busybox cat /proc/self/status; /bin/busybox sleep 30']}}}
+        'artifacts':{}}
     pathlib.Path('/etc/actryn').mkdir(exist_ok=True)
     pathlib.Path('/etc/actryn/server.json').write_text(json.dumps(config))
     pathlib.Path('/etc/actryn/server.json').chmod(0o644)
+    artifact=import_fixture(root/'bin/agent',*(sys.argv[2:4]))
     log=open('/root/actryn-launcher-test.log','w')
     process=subprocess.Popen([str(binary)],stdout=log,stderr=log)
     active=None;broker=None

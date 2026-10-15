@@ -2,6 +2,7 @@
 """Run only as root in the disposable server VM with real containerd + observer."""
 import json,os,pathlib,shutil,subprocess,sys,time
 from guest_launcher import rpc,wait_for,socket_ready
+from guest_artifact import import_fixture
 
 assert os.geteuid()==0
 install=pathlib.Path('/usr/local/libexec/actryn-test')
@@ -18,11 +19,11 @@ subprocess.run(['cc','-O2','-static','-Wall','-Wextra','-Werror','-o',str(root/'
 device=os.stat('/').st_dev
 block=pathlib.Path(f'/sys/dev/block/{os.major(device)}:{os.minor(device)}').resolve()
 io_device=(block.parent/'dev').read_text().strip() if (block/'partition').exists() else f'{os.major(device)}:{os.minor(device)}'
-artifact='sha256:'+'c'*64
-config={'server_uid':991,'operator_uid':1000,'io_device':io_device,'artifacts':{artifact:{'rootfs':str(root),'argv':['/bin/agent']}}}
+config={'server_uid':991,'operator_uid':1000,'io_device':io_device,'artifacts':{}}
 pathlib.Path('/etc/actryn').mkdir(exist_ok=True)
 pathlib.Path('/etc/actryn/server.json').write_text(json.dumps(config))
 pathlib.Path('/etc/actryn/server.json').chmod(0o644)
+artifact=import_fixture(root/'bin/agent',*(sys.argv[3:5]))
 logs=[open('/root/actryn-broker-launcher.log','w'),open('/root/actryn-broker-server.log','w')]
 launcher=subprocess.Popen([str(binary)],stdout=logs[0],stderr=logs[0]);server=None;active=None
 try:

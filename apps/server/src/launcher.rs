@@ -97,6 +97,7 @@ impl LauncherConfig {
                 "invalid artifact digest"
             );
             artifact.validate()?;
+            crate::artifact::validate_approved(digest, artifact)?;
         }
         Ok(config)
     }
@@ -305,6 +306,7 @@ impl Launcher {
             .context("artifact is not installed/approved")?
             .clone();
         artifact.validate()?;
+        crate::artifact::validate_approved(digest, &artifact)?;
         let attempt = self.store.prepare(digest, now_ms()?)?;
         let id = attempt.id;
         if let Err(error) = self.prepare_runtime(&id, digest, &artifact).await {
@@ -454,6 +456,12 @@ impl Launcher {
     }
     async fn start(&mut self, id: &str) -> Result<()> {
         let a = self.store.inspect(id)?.attempt;
+        let artifact = self
+            .config
+            .artifacts
+            .get(&a.artifact_digest)
+            .context("artifact approval missing")?;
+        crate::artifact::validate_approved(&a.artifact_digest, artifact)?;
         ensure!(a.state == "prepared", "attempt is not prepared");
         let binding: Binding =
             serde_json::from_str(a.binding.as_deref().context("missing binding")?)?;

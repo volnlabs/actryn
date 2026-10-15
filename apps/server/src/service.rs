@@ -46,6 +46,7 @@ pub enum BrokerResponse {
 }
 struct ContextState {
     attempt_id: String,
+    methods: &'static [&'static str],
     gate: PublicationGate,
     keys: Mutex<BTreeMap<String, Arc<PublicationGate>>>,
 }
@@ -379,6 +380,7 @@ impl Server {
         fs::set_permissions(&path, fs::Permissions::from_mode(0o666))?;
         let context = Arc::new(ContextState {
             attempt_id: attempt.id.clone(),
+            methods: crate::artifact::broker_methods(&attempt.artifact_digest)?,
             gate: PublicationGate::default(),
             keys: Mutex::new(BTreeMap::new()),
         });
@@ -499,8 +501,7 @@ impl Server {
                 let key_gate = context.key(&request_key)?;
                 key_gate.publish(|| ())?;
                 ensure!(method.len() <= 128, "method name too large");
-                if !["diagnostic.echo", "model.offline", "model.propose"].contains(&method.as_str())
-                {
+                if !context.methods.contains(&method.as_str()) {
                     let id = context.attempt_id.clone();
                     let key = request_key.clone();
                     let denied = method.clone();
