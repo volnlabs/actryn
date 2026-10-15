@@ -8,6 +8,7 @@ use std::{
     path::Path,
     sync::{Arc, Mutex},
 };
+pub use store::inspect;
 pub use types::*;
 pub use writer::Writer;
 #[derive(Clone)]

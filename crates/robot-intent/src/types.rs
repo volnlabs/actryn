@@ -183,3 +183,11 @@ pub struct Health {
     pub namespaces: usize,
     pub persistence_failed: bool,
 }
+
+/// Historical projection only; unfinished durable records are OUTCOME_UNKNOWN.
+/// This does not mutate a durable revision or claim downstream reconciliation.
+#[derive(Clone, Debug)]
+pub struct Inspection {
+    pub namespace_exists: bool,
+    pub snapshot: Option<Snapshot>,
+}

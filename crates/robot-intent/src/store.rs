@@ -316,32 +316,104 @@ impl Store {
         key: RequestKey,
         max_payload: usize,
     ) -> Result<Option<Entry>> {
-        let stored=self.db.query_row("SELECT revision,terminal,phase,intent,operation,closure FROM records WHERE namespace=?1 AND key=?2",
-            params![ns.as_slice(),key.as_slice()],|r|Ok((r.get::<_,i64>(0)?,r.get::<_,bool>(1)?,r.get::<_,u8>(2)?,r.get::<_,Option<Vec<u8>>>(3)?,r.get::<_,Option<Vec<u8>>>(4)?,r.get::<_,Vec<u8>>(5)?))).optional()?;
-        let Some((revision, terminal, phase, intent, operation, closure)) = stored else {
-            return Ok(None);
-        };
-        if revision <= 0 {
-            return Err(Error::Rejected("invalid key revision"));
-        }
-        let intent = intent.map(|b| decode_intent(b, max_payload)).transpose()?;
-        Ok(Some(Entry {
-            snapshot: Snapshot {
-                namespace: ns,
-                key,
-                digest: intent.as_ref().map(|i| i.digest),
-                operation: operation.map(decode_operation).transpose()?,
-                revision: revision as u64,
-                durable_revision: revision as u64,
-                phase: Phase::parse(phase)?,
-                terminal,
-                closure: decode_close(closure)?,
-                persistence_failed: false,
-            },
-            intent,
-        }))
+        read_key(&self.db, ns, key, max_payload)
     }
 }
+fn read_key(
+    db: &Connection,
+    ns: NamespaceId,
+    key: RequestKey,
+    max_payload: usize,
+) -> Result<Option<Entry>> {
+    let stored=db.query_row("SELECT revision,terminal,phase,intent,operation,closure FROM records WHERE namespace=?1 AND key=?2",
+            params![ns.as_slice(),key.as_slice()],|r|Ok((r.get::<_,i64>(0)?,r.get::<_,bool>(1)?,r.get::<_,u8>(2)?,r.get::<_,Option<Vec<u8>>>(3)?,r.get::<_,Option<Vec<u8>>>(4)?,r.get::<_,Vec<u8>>(5)?))).optional()?;
+    let Some((revision, terminal, phase, intent, operation, closure)) = stored else {
+        return Ok(None);
+    };
+    if revision <= 0 {
+        return Err(Error::Rejected("invalid key revision"));
+    }
+    let intent = intent.map(|b| decode_intent(b, max_payload)).transpose()?;
+    Ok(Some(Entry {
+        snapshot: Snapshot {
+            namespace: ns,
+            key,
+            digest: intent.as_ref().map(|i| i.digest),
+            operation: operation.map(decode_operation).transpose()?,
+            revision: revision as u64,
+            durable_revision: revision as u64,
+            phase: Phase::parse(phase)?,
+            terminal,
+            closure: decode_close(closure)?,
+            persistence_failed: false,
+        },
+        intent,
+    }))
+}
+
+/// Read-only historical inspection. No Authority object or recovery mutation is
+/// available on this route. Authentication/principal scope belongs to the caller.
+pub fn inspect(
+    path: &Path,
+    attempt: [u8; 16],
+    namespace: NamespaceId,
+    key: RequestKey,
+    limits: Limits,
+) -> Result<Inspection> {
+    if fs::metadata(path)?.len() > limits.database_bytes {
+        return Err(Error::Capacity);
+    }
+    let db = Connection::open_with_flags(
+        path,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )?;
+    db.busy_timeout(std::time::Duration::ZERO)?;
+    let tx = db.unchecked_transaction()?;
+    let versions: Vec<i64> = tx
+        .prepare("SELECT version FROM format LIMIT 2")?
+        .query_map([], |r| r.get(0))?
+        .collect::<std::result::Result<_, _>>()?;
+    if versions != [1] {
+        return Err(Error::Rejected("unsupported registry format"));
+    }
+    let (namespaces,keys,big):(i64,i64,bool)=tx.query_row("SELECT (SELECT COUNT(*) FROM namespaces),(SELECT COUNT(*) FROM records),EXISTS(SELECT 1 FROM records WHERE length(intent)>?1 OR length(operation)>80 OR length(closure)!=9 OR length(key)!=32 OR length(namespace)!=16)",[(104+limits.max_payload_bytes) as i64],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?)))?;
+    if namespaces < 0
+        || keys < 0
+        || namespaces as usize > limits.namespaces
+        || keys as usize > limits.keys
+        || big
+    {
+        return Err(Error::Capacity);
+    }
+    let owner: Option<Vec<u8>> = tx
+        .query_row(
+            "SELECT attempt FROM namespaces WHERE id=?1",
+            [namespace.as_slice()],
+            |r| r.get(0),
+        )
+        .optional()?;
+    let Some(owner) = owner else {
+        return Ok(Inspection {
+            namespace_exists: false,
+            snapshot: None,
+        });
+    };
+    if owner != attempt {
+        return Err(Error::Rejected("historical attempt mismatch"));
+    }
+    let mut snapshot = read_key(&tx, namespace, key, limits.max_payload_bytes)?.map(|v| v.snapshot);
+    if let Some(value) = snapshot.as_mut() {
+        if !value.terminal {
+            value.phase = Phase::OutcomeUnknown;
+            value.terminal = true;
+        }
+    }
+    Ok(Inspection {
+        namespace_exists: true,
+        snapshot,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

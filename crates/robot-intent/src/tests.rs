@@ -498,3 +498,56 @@ fn sqlite_exclusive_writer_lock_cannot_block_urgent_allocated_cancel() {
         .key_cancelled_durable());
     assert_eq!(kernel.count("submit"), 0);
 }
+
+#[test]
+fn read_only_history_never_dispatches_or_promotes_unfinished_work() {
+    let path = Temp::new();
+    let kernel = Kernel::new(1);
+    let (registry, mut writer) =
+        Registry::open(&path.0, [1; 16], Limits::default(), kernel.clone()).unwrap();
+    let ns = registry.prepare_namespace([2; 16], [3; 16]).unwrap();
+    writer.flush().unwrap();
+    registry.propose(&ns, [4; 32], intent()).unwrap();
+    writer.flush().unwrap();
+    registry.cancel(&ns, [5; 32]).unwrap();
+    writer.flush().unwrap();
+    assert!(
+        inspect(&path.0, [2; 16], [3; 16], [5; 32], Limits::default())
+            .unwrap()
+            .snapshot
+            .unwrap()
+            .key_cancelled_durable()
+    );
+    let before = fs::read(&path.0).unwrap();
+    let calls = kernel.events.lock().unwrap().len();
+    let inspected = inspect(&path.0, [2; 16], [3; 16], [4; 32], Limits::default()).unwrap();
+    assert!(inspected.namespace_exists);
+    assert_eq!(inspected.snapshot.unwrap().phase, Phase::OutcomeUnknown);
+    assert!(inspect(&path.0, [9; 16], [3; 16], [4; 32], Limits::default()).is_err());
+    assert!(
+        inspect(&path.0, [2; 16], [3; 16], [9; 32], Limits::default())
+            .unwrap()
+            .snapshot
+            .is_none()
+    );
+    assert!(
+        !inspect(&path.0, [2; 16], [9; 16], [9; 32], Limits::default())
+            .unwrap()
+            .namespace_exists
+    );
+    assert_eq!(fs::read(&path.0).unwrap(), before);
+    assert_eq!(kernel.events.lock().unwrap().len(), calls);
+    drop(writer);
+    drop(registry);
+    assert_eq!(
+        inspect(&path.0, [2; 16], [3; 16], [4; 32], Limits::default())
+            .unwrap()
+            .snapshot
+            .unwrap()
+            .phase,
+        Phase::OutcomeUnknown
+    );
+    let absent = Temp::new();
+    assert!(inspect(&absent.0, [2; 16], [3; 16], [4; 32], Limits::default()).is_err());
+    assert!(!absent.0.exists());
+}

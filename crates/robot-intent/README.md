@@ -171,3 +171,11 @@ passes alongside the real transaction and interleaving tests.
 These callback fixtures do not establish actual kernel/UART behavior. Production
 ioctl wiring, process-death integration, power-cut durability, manager credentials,
 controller reconciliation and physical qualification remain separate evidence.
+
+`inspect(path, attempt, namespace, key, limits)` opens SQLite read-only with zero
+busy wait, validates the bounded supported format, and distinguishes a missing
+namespace from an absent key. It accepts no Authority callback. Unfinished
+records are projected as `OutcomeUnknown` without writing a new revision,
+resending or restoring authority; terminal durable tombstones remain terminal.
+The embedding manager must authenticate the principal/attempt association using
+its retained preparation binding before exposing this historical route.
