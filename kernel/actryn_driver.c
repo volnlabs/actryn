@@ -202,6 +202,17 @@ static void apply_close(struct actryn_endpoint *e)
  if(c.rank==CTRL_OPERATION && c.operation==e->s.operation &&
     (e->s.operation_state==ACTRYN_OP_CLOSING || e->s.operation_state==ACTRYN_OP_RECONCILED))
   goto clear;
+ if(c.rank==CTRL_GRANT && c.grant==e->s.grant &&
+    e->s.operation_state==ACTRYN_OP_CLOSING) {
+  /* Urgent publication can be applied before the same ioctl takes authority.
+   * Revocation also escalates an operation close without replacing its one
+   * immutable QUIESCE, pending receipt, or original absolute deadline. */
+  bool changed=e->s.state!=ACTRYN_REVOKING;
+  e->s.state=ACTRYN_REVOKING; e->s.reason=c.reason;
+  e->grant_authorized=false; e->s.instance=0;
+  if(changed) event(e,ACTRYN_EVENT_CLOSURE|c.reason);
+  goto clear;
+ }
  if(c.rank>=CTRL_FAULT || (c.grant==e->s.grant &&
     (c.rank!=CTRL_OPERATION || c.operation==e->s.operation))) {
   if(c.rank>=CTRL_FAULT) { e->s.state=c.rank==CTRL_DETACH?ACTRYN_DETACHED:ACTRYN_FAULT_LATCHED;

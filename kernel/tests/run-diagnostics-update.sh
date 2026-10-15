@@ -100,7 +100,7 @@ expected = {'wire_roundtrip', 'urgent_monotonic', 'every_cancel_offset',
             'concurrent_closure', 'late_receipts', 'every_fault_recovery_offset',
             'stalled_parser_timeout', 'inhibited_revoke', 'retained_rx_recovery',
             'stale_epoch_receipts', 'new_controller_epoch', 'bounded_queues_counters',
-            'pm_inhibition', 'handshake_rx_sync'}
+            'pm_inhibition', 'handshake_rx_sync', 'grant_closure_idempotence'}
 suites = {'actryn-authority', 'actryn-serdev-recovery'}
 found, found_suites = set(), set()
 def visit(node):
@@ -120,7 +120,7 @@ visit(data)
 assert found == expected, (found, expected)
 assert found_suites == suites, (found_suites, suites)
 assert not re.search(r'BUG:|WARNING:|KASAN:|KCSAN:|possible circular locking|Kernel panic|not ok|# SKIP', text), text
-print('All fourteen cases and both suites passed; no skip or kernel diagnostic pattern')
+print('All fifteen cases and both suites passed; no skip or kernel diagnostic pattern')
 PY
   test "$run_status" = 0
   sha256sum -c "$output/before.sha256"

@@ -40,7 +40,7 @@ unloading the module between them. The second handshake must retain the
 controller boot identity, advance its session and use a fresh runtime nonce.
 Both lifetimes explicitly rearm and authorize before activation.
 
-Four additional scenarios synchronize with the fixture's existing private
+Six additional scenarios synchronize with the fixture's existing private
 admin socket. Run the bridge on the host that owns that socket, passing the
 actual SSH invocation and guest command after `--`. For example:
 
@@ -51,7 +51,7 @@ python3 kernel/tests/fixture_bridge.py --admin /absolute/path/fixture.admin -- \
 ```
 
 Repeat with a fresh fixture/module for `late-barrier`, `delayed-handoff` and
-`controller-restart`. The bridge accepts only the five fixed delay/replay/restart instructions emitted by
+`controller-restart`, `repeated-revoke` and `cancel-revoke`. The bridge accepts only the five fixed delay/replay/restart instructions emitted by
 these tests and acknowledges each fixture command before the guest proceeds.
 `late-sample` delays the applied receipt beyond the sample cutoff. `late-barrier`
 delays quiescence beyond operation expiry. Both require UNKNOWN to survive the
@@ -62,6 +62,10 @@ operation, sends a zero-duty sample under the old epoch, and requires a
 transport fault with UNKNOWN before the generic missing-receipt timeout. It
 checks that the old operation identity remains preserved and replay cannot
 revive it. Its 500 ms observation window is a test timeout, not a latency bound.
+`repeated-revoke` delays a closure receipt by 250 ms, revokes repeatedly while
+that receipt is pending, and requires one unchanged QUIESCE transaction to
+reconcile. `cancel-revoke` adds escalation from operation cancellation to grant
+revocation. Both require revoked authority to stay revoked after receipt replay.
 
 Retain each scenario's stdout/stderr, exit status, exact source/module hashes,
 fixture identity and kernel log. Compilation is not a runtime pass. These
@@ -87,7 +91,7 @@ Any interruption stays labeled as such; completed functional checks do not
 turn an interrupted campaign into an overall pass.
 
 Optional `--trace` enables guest-only kprobes in the actual receive/decode
-path. The helper records bounded frame prefixes, lengths and protocol-fault
+path. The helper records bounded frame prefixes, lengths and transport/protocol-fault
 stack traces, then removes its probes and triggers. These instrumented runs
 are diagnosis, never latency measurements. Trace setup requires an idle `nop`
 tracer with no existing kprobes; preserve tracing failures separately from
@@ -125,3 +129,45 @@ successful diagnostic 05 and failed diagnostic 06/07 attempts. The cleanup
 failure was in the tracing harness: attached stacktrace triggers had to be
 removed before deleting kprobe events. None of these earlier attempts is
 relabeled as passing by the snapshot 13 results.
+
+## Recorded snapshot 14 results
+
+Snapshot 14 fixes a separately observed duplicate-revocation failure. Manager
+guest06 recorded closure at transaction 18, another closure at 19, then a
+transport fault at 20 only 7.333330 ms after the first closure. Source inspection
+showed that the urgent publication and mutex side of one REVOKE ioctl could
+both apply grant closure, discard an awaited QUIESCE receipt and allocate a new
+barrier transaction. A separate actual ARM RED run with the unchanged snapshot
+13 module reproduced the failure. Its trace captured QUIESCED followed by
+AW_FAULT with Stale status and transport closure, distinguishing that path from
+a missing-receipt timeout. The fixture's exact-duplicate rule remains unchanged.
+
+The clean snapshot 14 ARM64 build has module SHA-256
+`9bb5a8150172f5750eda6e07b56c44ff569bcaeb78f9c736e114b12ae5ce44cf`.
+Both new cases passed, retaining QUIESCE transaction 4 through repeated revoke
+and cancellation-to-revocation escalation. The full selftest and inhibited-revoke
+case also passed. Campaign 01 then stopped at a `dup` handshake setup failure:
+PROTOCOL, no established controller epoch, request-to-closure interval
+11.11 ms. That interval is consistent with the unchanged 10 ms HELLO exchange
+guard, but the untraced attempt does not establish its precise cause. The actual
+duplicate-FD assertions were not reached in that attempt.
+
+Separately labeled diagnostic continuation 02 passed eight cases: dup, rights,
+owner-exit, unbind-rebind, event-capacity, late-sample, late-barrier and
+delayed-handoff. It then stopped when controller-restart's SAMPLE ioctl returned
+EINVAL after the fixture restart acknowledgment. That test did not reach its
+reset-closure assertion; the original harness lacked a request-time status
+snapshot, so the failing admission predicate is unresolved. Ready-recovery did
+not run in snapshot 14. No more continuation or deadline widening was used.
+The narrow closure fix has actual RED/GREEN evidence; the wider snapshot 14
+campaign is incomplete and is not an overall acceptance pass.
+
+Guest boot remained `5a7d94ab-b572-4a54-90f7-388669c10b2b`; the same fixture
+executable used for snapshot 13 remained installed. Services stayed stopped and
+manager persistence was untouched. No kernel warning/panic diagnostic pattern
+appeared in the recorded stock ARM logs. The evidence archive
+`actryn-kernel14-arm-evidence.tar.gz` has SHA-256
+`cc257b9feced57a11eeeacac130ff2499b553fa069b38bfaa250f530b5da40e4`.
+It preserves the RED trace, both subsequent campaign failures and successes,
+exact source/build identities and a separately labeled post-campaign host
+resource snapshot; that late snapshot does not establish conditions at failure.

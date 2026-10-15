@@ -13,6 +13,8 @@ evidence; diagnostic KUnit does not exercise the physical PL011 lifetime path.
 | 12 | Plain, lockdep, KASAN and KCSAN passed thirteen cases each after the narrow controller-epoch fix. |
 | 13-red | Fourteen cases ran; only `handshake_rx_sync` failed on the captured truncated-observation sequence. |
 | 13 | Plain, lockdep, KASAN and KCSAN passed fourteen cases each with bounded handshake synchronization. |
+| 14-red | Fifteen cases ran; only `grant_closure_idempotence` failed, with replaced barrier bytes/transaction and lost receipt wait. |
+| 14 | Plain, lockdep, KASAN and KCSAN passed fifteen cases each, retaining the original barrier across grant closure. |
 
 Snapshot 12 records are retained in the disposable server guest under
 `/var/tmp/actryn-diag-12`; its RED evidence is under `actryn-diag-12-red`.
@@ -38,6 +40,17 @@ its driver-test header SHA-256 is
 The new test preserves inhibition across a truncated old observation followed
 by a valid fresh ACK, requires malformed traffic after mapping to fault, and
 checks that noise cannot extend the absolute timeout or bypass RX capacity.
+
+Snapshot 14 records remain under `/var/tmp/actryn-diag-14`, with the original
+driver's RED run in `actryn-diag-14-red`. The exported evidence archive SHA-256
+is `80a432cf5c1ed8a00a01300d4aee0e2f4362b3c01fa3ad5ca704deaf78bdb129`.
+Its production driver SHA-256 is
+`820d6e5003eec10ec7b7343c21b6554090772320753ee226962dc4c0f5ac0f12`;
+its driver-test header SHA-256 is
+`d41115d7c601e9726d2860a32ea9d1bcd2ebe7e3cee441664dcdb11da4e6b0ef`.
+The fifteen-case validator rejected the RED failure and checked both suites,
+zero skips and absence of kernel diagnostic patterns separately for each GREEN
+configuration. Source and binary artifacts from earlier campaigns remain intact.
 
 Use the authenticated Debian `linux-source-6.12=6.12.111-1` package, whose
 source tarball includes the Debian patches, not a mutable checkout or the host
@@ -80,6 +93,11 @@ the actual production transmit, receive, close and PM functions. Tests cover
 each encoded TX recovery offset, each retained RX prefix, explicit recovery,
 late receipts, old/new epochs, RX capacity, nonwrapping counters, PM callbacks
 and two concurrent close/fault publishers with mutex-side closure.
+The grant-closure regression repeats revocation and operation-to-grant
+escalation at every QUIESCE write offset, including no accepted bytes and a
+fully sent frame awaiting its receipt. It requires the original bytes,
+transaction and absolute close deadline to survive, then accepts that original
+matching receipt. Stronger faults still dominate subsequent revocation.
 This is different evidence from the ARM64 PL011 end-to-end path.
 
 Run four **separate** builds from the source root, retaining each generated

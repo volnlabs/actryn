@@ -14,9 +14,10 @@ import fixture_bridge
 SCENARIOS = {
     "selftest", "inhibited-revoke", "dup", "rights", "owner-exit",
     "unbind-rebind", "event-capacity", "late-sample", "late-barrier",
-    "delayed-handoff", "controller-restart", "ready-recovery",
+    "delayed-handoff", "controller-restart", "ready-recovery", "repeated-revoke", "cancel-revoke",
 }
-CONTROLLED = {"late-sample", "late-barrier", "delayed-handoff", "controller-restart"}
+CONTROLLED = {"late-sample", "late-barrier", "delayed-handoff", "controller-restart",
+              "repeated-revoke", "cancel-revoke"}
 
 
 def main():

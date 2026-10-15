@@ -36,6 +36,10 @@ then acquire the mutex directly. The first normal close reason wins; stronger
 grant/fault/detach closure dominates; stale revision clearing cannot erase a
 newer request. The write-wakeup callback may run inline under the UART lock and
 only schedules work. RX uses bounded parsing and a separate fixed queue.
+Repeated grant revocation, including the urgent and mutex sides of one ioctl,
+preserves an existing close barrier and its receipt wait. Escalating operation
+closure to grant revocation invalidates authorization without replacing that
+immutable barrier or renewing its absolute deadline.
 
 One immutable started frame and one replaceable unsent sample are retained.
 Cancellation drops unsent work, finishes only the exact old suffix within the
@@ -92,7 +96,7 @@ would outlive recorder health or the observation's maximum age.
 On a kernel built with `CONFIG_KUNIT=y`, build with
 `CONFIG_ACTRYN_AUTHORITY_KUNIT_TEST=m`. Codec/control tests and the actual driver
 transmit/close path then test every encoded byte offset with an injected serdev
-writer. Snapshot 13 passed fourteen cases in each of four separate x86 diagnostic
+writer. Snapshot 14 passed fifteen cases in each of four separate x86 diagnostic
 kernels: plain KUnit, lockdep, KASAN and KCSAN. [Campaign evidence](DIAGNOSTICS.md)
 records exact source identities and preserved earlier failures. Both suites are compiled into the
 authority component only for that diagnostic build; the normal profile omits them.

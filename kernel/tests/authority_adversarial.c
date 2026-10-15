@@ -247,6 +247,35 @@ static void event_capacity(void)
 }
 static void fixture_control(const char *command)
 { char answer; printf("CONTROL %s\n",command); fflush(stdout); assert(read(STDIN_FILENO,&answer,1)==1 && answer=='Y'); }
+static void repeated_revoke(bool escalate)
+{
+ struct handles h=start(); struct actryn_request r; struct actryn_status s;
+ unsigned long long end,barrier_transaction; unsigned int i;
+ begin(&h,5000*MS); fixture_control("delay 250000000");
+ r=operation(&h,escalate?ACTRYN_CANCEL:ACTRYN_REVOKE);
+ if(!escalate) { r.operation=0; r.stream=0; }
+ submit(escalate?h.runtime:h.admin,&r); end=now()+200*MS;
+ do {
+  s=status(h.admin); drain(h.events);
+  if(s.flags&ACTRYN_STATUS_AWAITING) break;
+  if(s.state==ACTRYN_FAULT_LATCHED) break;
+  pause_ms(1);
+ } while(now()<end);
+ if(!(s.flags&ACTRYN_STATUS_AWAITING)) { diagnostic("barrier never pending",s,end); abort(); }
+ barrier_transaction=s.transaction;
+ r=operation(&h,ACTRYN_REVOKE); r.operation=0; r.stream=0;
+ for(i=0;i<10;i++) { submit(h.admin,&r); drain(h.events); pause_ms(5); }
+ s=await_state(&h,ACTRYN_READY,ACTRYN_OP_RECONCILED,true);
+ assert(s.reason==ACTRYN_GRANT_REVOKED);
+ assert(s.transaction==barrier_transaction);
+ assert(!(s.flags&ACTRYN_STATUS_GRANT_AUTHORIZED));
+ assert(!s.left_permille && !s.right_permille);
+ fixture_control("delay 0"); fixture_control("replay"); pause_ms(30);
+ s=status(h.admin); assert(s.state==ACTRYN_READY && s.operation_state==ACTRYN_OP_RECONCILED);
+ printf("one immutable QUIESCE transaction=%llu across repeated revoke%s\n",
+  barrier_transaction,escalate?" after cancel":"");
+ finish_handles(&h);
+}
 static void controller_restart(void)
 {
  struct handles h=start(); struct actryn_request r; struct actryn_status original,s;
@@ -308,6 +337,8 @@ int main(int argc,char **argv)
  else if(!strcmp(argv[1],"late-barrier")) delayed_fixture(true,true);
  else if(!strcmp(argv[1],"delayed-handoff")) delayed_fixture(true,false);
  else if(!strcmp(argv[1],"controller-restart")) controller_restart();
+ else if(!strcmp(argv[1],"repeated-revoke")) repeated_revoke(false);
+ else if(!strcmp(argv[1],"cancel-revoke")) repeated_revoke(true);
  else { fputs("unknown scenario\n",stderr); return 2; }
  printf("PASS authority scenario %s\n",argv[1]); return 0;
 }

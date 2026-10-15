@@ -16,9 +16,9 @@ start)
  printf '%s\n' 'p:actryn_close actryn_authority:request_close rank=$arg2:u32 reason=$arg3:u32' >> kprobe_events
  printf '%s\n' 'r:actryn_decode actryn_authority:actryn_decode result=$retval:s32' >> kprobe_events
  printf '%s\n' 'p:actryn_decode_input actryn_authority:actryn_decode length=$arg2:u64 head=+0($arg1):x8[16] tail=+142($arg1):x8[16]' >> kprobe_events
- echo 'reason == 7' > events/kprobes/actryn_close/filter
+ echo 'reason == 6 || reason == 7' > events/kprobes/actryn_close/filter
  echo 'result < 0' > events/kprobes/actryn_decode/filter
- echo 'stacktrace if reason == 7' > events/kprobes/actryn_close/trigger
+ echo 'stacktrace if reason == 6 || reason == 7' > events/kprobes/actryn_close/trigger
  echo 'stacktrace if result < 0' > events/kprobes/actryn_decode/trigger
  echo 1 > events/kprobes/actryn_close/enable
  echo 1 > events/kprobes/actryn_decode/enable

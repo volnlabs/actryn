@@ -424,6 +424,72 @@ static void pm_inhibition(struct kunit *test)
  KUNIT_EXPECT_EQ(test,e->s.state,(u32)ACTRYN_FAULT_LATCHED);
  KUNIT_EXPECT_EQ(test,e->s.operation_state,(u32)ACTRYN_OP_UNKNOWN);
 }
-static struct kunit_case driver_cases[]={KUNIT_CASE(every_cancel_offset),KUNIT_CASE(concurrent_closure),KUNIT_CASE(late_receipts),KUNIT_CASE(every_fault_recovery_offset),KUNIT_CASE(stalled_parser_timeout),KUNIT_CASE(inhibited_revoke),KUNIT_CASE(retained_rx_recovery),KUNIT_CASE(stale_epoch_receipts),KUNIT_CASE(handshake_rx_sync),KUNIT_CASE(new_controller_epoch),KUNIT_CASE(bounded_queues_counters),KUNIT_CASE(pm_inhibition),{}};
+static void grant_closure_idempotence(struct kunit *test)
+{
+ unsigned int initial_rank; size_t cut;
+ /* Includes zero accepted bytes, every partial prefix, and receipt pending.
+  * The operation-close branch tests escalation as well as repeated revoke. */
+ for(initial_rank=CTRL_OPERATION;initial_rank<=CTRL_GRANT;initial_rank++)
+ for(cut=0;cut<=ACTRYN_ENCODED_MAX;cut++) {
+  struct actryn_endpoint *e=test_endpoint(test);
+  struct serdev_controller *ctrl=kunit_kzalloc(test,sizeof(*ctrl),GFP_KERNEL);
+  struct serdev_device *serdev=kunit_kzalloc(test,sizeof(*serdev),GFP_KERNEL);
+  struct test_uart *uart=kunit_kzalloc(test,sizeof(*uart),GFP_KERNEL);
+  struct actryn_frame barrier,receipt; u8 bytes[ACTRYN_ENCODED_MAX];
+  u64 now=now_ns(),deadline,transaction; size_t length; bool awaiting;
+  KUNIT_ASSERT_NOT_NULL(test,e); KUNIT_ASSERT_NOT_NULL(test,ctrl);
+  KUNIT_ASSERT_NOT_NULL(test,serdev); KUNIT_ASSERT_NOT_NULL(test,uart);
+  ctrl->ops=&test_uart_ops; serdev->ctrl=ctrl; e->serdev=serdev;
+  serdev_controller_set_drvdata(ctrl,uart); uart->limit=cut;
+  e->handshake=true; e->grant_authorized=true;
+  e->s.state=ACTRYN_ACTIVE; e->s.operation_state=ACTRYN_OP_RUNNING;
+  e->s.grant=e->published_grant=1; e->s.operation=e->published_operation=1;
+  e->s.stream=e->published_stream=1; e->s.instance=1;
+  e->grant_deadline=e->health_deadline=e->operation_deadline=now+10000*MS;
+  mutex_lock(&e->authority);
+  KUNIT_EXPECT_EQ(test,request_close(e,initial_rank,
+   initial_rank==CTRL_OPERATION?ACTRYN_CANCELLED:ACTRYN_GRANT_REVOKED,1,1),0);
+  apply_close(e); deadline=e->close_deadline; transmit_at(e,now);
+  barrier=e->tx_frame; transaction=e->next_transaction;
+  length=actryn_encode(&barrier,bytes); awaiting=e->await;
+  KUNIT_EXPECT_EQ(test,barrier.kind,(u16)AW_QUIESCE);
+  KUNIT_EXPECT_EQ(test,uart->count,min(cut,length));
+  /* Mirrors urgent publication, worker dispatch, then ioctl publication. */
+  KUNIT_EXPECT_EQ(test,request_close(e,CTRL_GRANT,ACTRYN_GRANT_REVOKED,1,0),0);
+  apply_close(e);
+  KUNIT_EXPECT_EQ(test,request_close(e,CTRL_GRANT,ACTRYN_GRANT_REVOKED,1,0),0);
+  apply_close(e);
+  KUNIT_EXPECT_EQ(test,e->s.state,(u32)ACTRYN_REVOKING);
+  KUNIT_EXPECT_EQ(test,e->s.reason,(u32)ACTRYN_GRANT_REVOKED);
+  KUNIT_EXPECT_FALSE(test,e->grant_authorized);
+  KUNIT_EXPECT_EQ(test,e->s.instance,0ULL);
+  KUNIT_EXPECT_EQ(test,e->close_deadline,deadline);
+  KUNIT_EXPECT_EQ(test,e->await,awaiting);
+  KUNIT_EXPECT_FALSE(test,e->quiesce_needed);
+  uart->limit=ACTRYN_ENCODED_MAX; transmit_at(e,now); transmit_at(e,now);
+  KUNIT_EXPECT_EQ(test,e->next_transaction,transaction);
+  KUNIT_EXPECT_EQ(test,uart->count,length);
+  KUNIT_EXPECT_EQ(test,memcmp(uart->bytes,bytes,length),0);
+  KUNIT_EXPECT_TRUE(test,e->await);
+  KUNIT_EXPECT_EQ(test,memcmp(&e->awaited,&barrier,sizeof(barrier)),0);
+  KUNIT_EXPECT_EQ(test,request_close(e,CTRL_GRANT,ACTRYN_GRANT_REVOKED,1,0),0);
+  apply_close(e); KUNIT_EXPECT_TRUE(test,e->await);
+  KUNIT_EXPECT_EQ(test,e->close_deadline,deadline);
+  receipt=barrier; receipt.kind=AW_QUIESCED; receipt.controller_ns=now;
+  receive_frame(e,&receipt);
+  KUNIT_EXPECT_EQ(test,e->s.state,(u32)ACTRYN_READY);
+  KUNIT_EXPECT_EQ(test,e->s.operation_state,(u32)ACTRYN_OP_RECONCILED);
+  KUNIT_EXPECT_FALSE(test,e->grant_authorized);
+  /* Idempotence never suppresses a stronger fault or resurrects authority. */
+  fault(e,ACTRYN_TRANSPORT);
+  KUNIT_EXPECT_EQ(test,request_close(e,CTRL_GRANT,ACTRYN_GRANT_REVOKED,1,0),0);
+  apply_close(e);
+  KUNIT_EXPECT_EQ(test,e->s.state,(u32)ACTRYN_FAULT_LATCHED);
+  KUNIT_EXPECT_EQ(test,e->s.reason,(u32)ACTRYN_TRANSPORT);
+  mutex_unlock(&e->authority);
+  kunit_kfree(test,uart); kunit_kfree(test,serdev); kunit_kfree(test,ctrl); kunit_kfree(test,e);
+ }
+}
+static struct kunit_case driver_cases[]={KUNIT_CASE(every_cancel_offset),KUNIT_CASE(concurrent_closure),KUNIT_CASE(late_receipts),KUNIT_CASE(every_fault_recovery_offset),KUNIT_CASE(stalled_parser_timeout),KUNIT_CASE(inhibited_revoke),KUNIT_CASE(retained_rx_recovery),KUNIT_CASE(stale_epoch_receipts),KUNIT_CASE(handshake_rx_sync),KUNIT_CASE(new_controller_epoch),KUNIT_CASE(bounded_queues_counters),KUNIT_CASE(pm_inhibition),KUNIT_CASE(grant_closure_idempotence),{}};
 static struct kunit_suite driver_suite={.name="actryn-serdev-recovery",.test_cases=driver_cases};
 kunit_test_suite(driver_suite);
