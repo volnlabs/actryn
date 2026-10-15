@@ -1,0 +1,18 @@
+# Actryn architecture workspace
+
+Actryn is the product under the **VolnLabs** organisation. The proposed product repository is `volnlabs/actryn`, with **Actryn Server** and **Actryn Robot** as its main components.
+
+The revised design includes a custom Linux kernel authority component in the first release, as requested. These are design artifacts, not implemented or qualified product capabilities.
+
+- [Complete offline architecture field guide](docs/actryn-architecture-guide.html) — beginner Linux/kernel explanations, decisions, failure walkthroughs, glossary and embedded specifications.
+- [System architecture, repositories, CLI, kernel/userspace boundary and distribution](docs/superpowers/specs/architecture.md)
+- [Pinned source review, extraction map and selective adoption decisions](docs/research/2026-10-13-source-review.md)
+- [Kernel/controller contract](docs/architecture/kernel-controller-contract.md) — cancellation/normal completion, fixture wire v2, native endpoint conformance and recovery.
+- [Platform/release contract](docs/architecture/platform-release-contract.md) — request-key cancellation, broker/preparation reservations, launch, evidence and independent release promotions.
+- [Review remediation and remaining validation gates](docs/reviews/2026-10-13-review-remediation.md).
+- [Independent cross-reference against the full product brief](docs/reviews/2026-10-13-post-patch-brief-review.md) — historical findings against preserved targets, all 40 problems, project dispositions and all 15 research references; subsequent corrections are in the remediation record.
+- [Historical independent review and coverage of all 40 problems](docs/reviews/2026-10-13-independent-architecture-review.md) — includes project and 15-paper inventories with explicit evidence limits; links preserve the pre-patch baseline.
+
+Selected source organization: one initial `actryn` monorepo with userspace/SDK/CLI, portable Rust core, `kernel/`, `firmware/` and `targets/` boundaries. Server, robot and target artifacts promote independently. An unprivileged network gateway relays end-to-end authenticated traffic to the trusted manager; it receives no actuator authority. Shared Rust kernel integration remains conditional on the exact target build/lifetime gate. Reference checkouts, when present under `ref/`, are local inspection inputs excluded from Git.
+
+Historical reviews and preserved baselines retain the previous product name, Voln.

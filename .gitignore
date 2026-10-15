@@ -1,0 +1,7 @@
+# Local credentials and agent state.
+/.aws/
+/.codex/
+/.agents/
+
+# Reference checkouts are inspection inputs, not product dependencies.
+/ref/
