@@ -49,6 +49,7 @@ def main():
     parser.add_argument('--key', required=True)
     parser.add_argument('--known-hosts', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--cli', type=Path, default=ROOT / 'target/debug/actryn')
     args = parser.parse_args()
     os.umask(0o077)
     args.output.mkdir(parents=True, exist_ok=False)
@@ -108,7 +109,8 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
     def recover_once(label):
         phase(label)
         write_json(label.replace(' ', '-') + '.json', local('recover'))
-        return poll(lambda: local('describe'), lambda d: not d['runtime']['recovery_pending']
+        return poll(lambda: local('describe'), lambda d: d['runtime']['recovery_ready']
+                    and not d['runtime']['recovery_pending']
                     and d['runtime']['kernel']['state'] == 0
                     and d['runtime']['kernel']['flags'] & 1, 14)
 
@@ -117,6 +119,18 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
 
     def path(name):
         return str(args.output / name)
+
+    def cli(*arguments):
+        timeout = 120 if arguments[0] == 'export' else 30
+        return json.loads(subprocess.check_output([str(args.cli), 'robot', *arguments], timeout=timeout))
+
+    def cli_pair(prefix, pin):
+        result = cli('pair', '--endpoint', f'127.0.0.1:{args.tcp_port}', '--dns', 'robot.test',
+                     '--pin', pin, '--ca', path(prefix + 'ca.pem'), '--cert', path(prefix + 'client.pem'),
+                     '--key', path(prefix + 'client.key'), '--out', path(prefix + 'pair.json'))
+        assert result['result'] == 'paired' and result['authority_issued'] is False
+        return ['--pair', path(prefix + 'pair.json'), '--cert', path(prefix + 'client.pem'),
+                '--key', path(prefix + 'client.key')]
 
     def issue_ca(prefix):
         openssl('req', '-x509', '-newkey', 'ec', '-pkeyopt', 'ec_paramgen_curve:P-256', '-nodes',
@@ -173,6 +187,8 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
         pass
     with connection('', server_pin) as authenticated:
         assert authenticated.describe()['live_actuation'] is False
+    phase('CLI pinned pairing')
+    cli_credentials = cli_pair('', server_pin)
     recover_once('prepared attempt recovery')
     phase('explicit rearm prepare grant activate')
     local('rearm')
@@ -180,7 +196,7 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
     attempt, namespace = secrets.token_bytes(16), secrets.token_bytes(16)
     prepared = local('prepare', wire.Prepare(attempt=attempt, namespace=namespace, principal=principal))
     assert bytes(prepared['binding']['attempt']) == attempt
-    poll(lambda: local('describe'), lambda d: d['runtime']['health']['pending_records'] == 0)
+    poll(lambda: local('describe'), lambda d: d['runtime']['preparation_ready'])
     local('grant', wire.Grant(duration_ms=30_000))
     local('activate')
     handles = []
@@ -203,6 +219,15 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
         cancelled = rpc.cancel(absent)
         assert cancelled['operation'] is None
         poll(lambda: rpc.query(absent), lambda r: r['snapshot']['cancellation_durable'])
+    phase('CLI cancellation from durable pre-send handle')
+    cli_handle = path('cli-cancelled-handle.json')
+    saved = cli('handle', '--pair', path('pair.json'), '--attempt', attempt.hex(),
+                '--namespace', namespace.hex(), '--out', cli_handle)
+    assert saved['authority_issued'] is False
+    cancelled = cli('cancel', *cli_credentials, '--handle', cli_handle)
+    assert cancelled['handle_state'] == 'cancel_requested' and cancelled['report']['operation'] is None
+    poll(lambda: cli('query', *cli_credentials, '--handle', cli_handle),
+         lambda r: r['report']['snapshot']['cancellation_durable'])
 
     phase('gateway death while kernel operation RUNNING')
     old_pid = int(run('systemctl show --property=MainPID --value actryn-gatewayd.service').strip())
@@ -258,6 +283,78 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
         pass
     phase('explicit local revoke remains available')
     local('revoke', closure=True)
+
+    recover_once('manager crash preparation recovery')
+    phase('fresh local authority for manager crash test')
+    local('rearm')
+    poll(lambda: local('describe'), lambda d: d['runtime']['kernel']['state'] == 1)
+    crash_attempt, crash_namespace = secrets.token_bytes(16), secrets.token_bytes(16)
+    local('prepare', wire.Prepare(attempt=crash_attempt, namespace=crash_namespace, principal=principal))
+    poll(lambda: local('describe'), lambda d: d['runtime']['preparation_ready'])
+    local('grant', wire.Grant(duration_ms=30_000))
+    local('activate')
+    crashed = RequestHandle.create(crash_attempt, crash_namespace)
+    write_json('manager-interrupted-handle.json', crashed.json())
+    manager_pid = int(run('systemctl show --property=MainPID --value actryn-robotd.service').strip())
+    previous_epoch = epoch
+    phase('manager death while kernel operation RUNNING')
+    with connection('', server_pin) as rpc:
+        observation = rpc.observe(crash_attempt, crash_namespace)
+        rpc.propose(crashed, observation_id=observation['id'], left_delta_ticks=100,
+                    right_delta_ticks=-100, duration_ms=10000, parent_digest=b'\x09' * 32)
+        durable = poll(lambda: rpc.query(crashed), lambda r: r['snapshot'] is not None
+                       and r['snapshot']['operation'] is not None, 3)
+        running = poll(lambda: rpc.describe(), lambda d: d['runtime']['kernel']['state'] == 2
+                       and d['runtime']['kernel']['operation_state'] == 2
+                       and d['runtime']['kernel']['flags'] & 8
+                       and d['runtime']['operation']['key'] == list(crashed.key), 3)
+        write_json('manager-before-kill.json', {'description': running, 'durable': durable})
+        run('systemctl kill --kill-whom=main --signal=SIGKILL actryn-robotd.service')
+    poll(lambda: int(run('systemctl show --property=MainPID --value actryn-robotd.service').strip()),
+         lambda pid: pid > 0 and pid != manager_pid, 8)
+    epoch = b''  # Describe discovers the replacement before inspecting retained identities.
+
+    def manager_ready():
+        try:
+            return {'ready': True, 'description': local('describe')}
+        except (subprocess.SubprocessError, OSError, RuntimeError) as error:
+            return {'ready': False, 'error': repr(error)}
+
+    recovered = poll(manager_ready, lambda value: value['ready'], 8)['description']
+    assert epoch != previous_epoch
+    assert recovered['runtime']['health']['inhibited']
+    assert recovered['runtime']['prepared'] is None
+    assert not recovered['runtime']['kernel']['flags'] & 8
+    write_json('manager-restarted.json', recovered)
+    # Restart the relay explicitly if systemd stopped the dependent unit.
+    run('systemctl start actryn-gatewayd.service')
+    poll(gateway_ready, lambda value: value['ready'], 5)
+    with connection('', server_pin) as rpc:
+        retained = rpc.query(crashed)
+        snapshot = retained['snapshot']
+        assert not retained['live_authority'] and snapshot['terminal']
+        assert snapshot['phase'] == 'OutcomeUnknown' and snapshot['verdict'] == 'OutcomeUnknown'
+        assert not snapshot['reconciled'] and not snapshot['cancellation_durable']
+        assert snapshot['operation'] == durable['snapshot']['operation']
+        write_json('manager-retained-unknown.json', retained)
+        for _ in range(3):
+            state = rpc.describe()['runtime']
+            assert state['prepared'] is None and state['health']['inhibited']
+            assert not state['kernel']['flags'] & 8
+            time.sleep(.1)
+        try:
+            rpc.propose(crashed, observation_id=observation['id'], left_delta_ticks=100,
+                        right_delta_ticks=-100, duration_ms=10000, parent_digest=b'\x09' * 32)
+            raise AssertionError('old prepared namespace regained authority after manager restart')
+        except RpcError:
+            pass
+        assert rpc.query(crashed) == retained
+    phase('CLI retained query through original pairing after manager restart')
+    historical = cli('query', *cli_credentials, '--handle', cli_handle)
+    assert not historical['report']['live_authority']
+    assert historical['report']['snapshot']['cancellation_durable']
+    assert json.loads(Path(path('pair.json')).read_text())['robot_epoch'] == previous_epoch.hex()
+    write_json('cli-retained-after-manager-restart.json', historical)
 
     recover_once('identity rotation inhibited recovery')
     phase('prepare replacement identity material')
@@ -382,6 +479,17 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
         write_json('retired-capture-verification.json', {'files': count, 'bytes': total,
                    'all_sha256_verified': True, 'retained_principal_after_rotation': principal,
                    'execution_replay_eligible': False, 'physical_acceptance': False})
+    phase('CLI retired capture export under explicitly replaced pairing')
+    rotated_credentials = cli_pair('rotated-', new_pin)
+    cli_export = cli('export', *rotated_credentials, '--handle', cli_handle, '--out', path('cli-capture'))
+    assert cli_export['result'] == 'exported' and cli_export['execution_replay_eligible'] is False
+    assert not (args.output / 'cli-capture/INCOMPLETE.json').exists()
+    exported = json.loads((args.output / 'cli-capture/manifest.json').read_text())
+    assert len(exported['files']) == count and exported['total_bytes'] == total
+    for entry in exported['files']:
+        raw = (args.output / 'cli-capture/capture' / entry['file']).read_bytes()
+        assert len(raw) == entry['size'] and hashlib.sha256(raw).hexdigest() == entry['sha256']
+    write_json('cli-export-verification.json', cli_export)
     phase('principal revocation under replacement identity')
     local('revoke_principal', wire.PrincipalRevoke(principal=principal), closure=True)
     try:
@@ -394,6 +502,8 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
     print(json.dumps({'test': 'robotd-real-module-mtls-sdk', 'status': 'PASS',
                       'physical_acceptance': False, 'operations': [h.json() for h in handles],
                       'gateway_interrupted_operation': interrupted.json(),
+                      'manager_interrupted_operation': crashed.json(),
+                      'manager_restart_retained_unknown_without_resend': True,
                       'rotation_established_session_retired': True, 'retired_capture_hashes_verified': True}), flush=True)
 
 

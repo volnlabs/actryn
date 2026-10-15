@@ -9,6 +9,11 @@ pub(crate) struct Capture {
     sequences: Mutex<[u64; 2]>,
 }
 impl Capture {
+    pub fn preparation_ready(&self) -> bool {
+        let health = self.recorder.health();
+        // The three preparation records precede activation and streamed observations.
+        !health.revoke_required && health.frontiers[0].durable >= 3
+    }
     pub fn create(
         path: &Path,
         binding: &Binding,
@@ -88,5 +93,32 @@ impl Capture {
         sequences[producer] = next;
         self.recorder.queue_read();
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn durable_preparation_can_be_ready_while_new_observations_are_queued() {
+        let root = tempfile::tempdir().unwrap();
+        let binding = Binding {
+            principal: [1; 32],
+            attempt: [2; 16],
+            namespace: [3; 16],
+            session_deadline_ns: 1000,
+        };
+        let (capture, mut writer) =
+            Capture::create(&root.path().join("capture"), &binding, [4; 16]).unwrap();
+        for n in 0..3 {
+            capture.record(0, n, EventKind::Configuration, &n).unwrap();
+        }
+        assert!(!capture.preparation_ready());
+        writer.flush().unwrap();
+        capture
+            .record(1, 4, EventKind::Observation, &"fresh observation")
+            .unwrap();
+        assert_eq!(capture.recorder.health().pending_records, 1);
+        assert!(capture.preparation_ready());
     }
 }

@@ -1,8 +1,10 @@
-# Actryn architecture workspace
+# Actryn developer preview in progress
 
 Actryn is the product under the **VolnLabs** organisation. The proposed product repository is `volnlabs/actryn`, with **Actryn Server** and **Actryn Robot** as its main components.
 
-The revised design includes a custom Linux kernel authority component in the first release, as requested. These are design artifacts, not implemented or qualified product capabilities.
+The first release includes a narrow custom Linux authority component. Its actual
+QEMU UART tests and the server, runtime and developer tools are under integration;
+the combined release acceptance gates are not yet complete.
 
 The approved [v0.0.1 developer-preview specification](docs/superpowers/specs/actryn-v0.0.1.md)
 and [execution plan](docs/superpowers/plans/2026-10-16-actryn-v0.0.1.md) define the

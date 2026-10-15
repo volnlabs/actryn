@@ -118,6 +118,39 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   rejects wrong image pins and post-preparation rootfs tampering, and checks
   cancellation/cleanup. Lane integration and explicit per-artifact tool-policy
   checks are still pending; this is not the combined server-to-robot demo.
+- Kernel revision 13 is integrated as `18a9a62`. Four separate diagnostic kernels
+  pass 14 cases each; the exact ARM64 module passes all 12 transport scenarios
+  and six additional reload checks. The latter capture the same truncated old
+  observation that caused revision 12's handshake failure, now followed by a
+  successful fresh acknowledgement. Malformed active traffic still faults.
+  [Campaign evidence and preserved failures](../../kernel/tests/ADVERSARIAL.md)
+  record the exact module, fixture, source and archive hashes. This closes those
+  component regressions, not all integrated acceptance or physical gates.
+- Live artifact policy `5e96ebf` pins the provider, model, prompt/schema and
+  transport limits separately from the offline profile. Its host checks pass
+  34 server tests, three agent tests and two packaging tests. Actual server guest
+  offline regression 02 and missing-credential live run 01 pass. No provider
+  request succeeded or was attempted with a real credential. Trusted Robot
+  delegation is being integrated and will require a new final policy digest.
+- RPC publication `d17c470` prepares bounded ciphertext before the final
+  synchronous publication fence. Eleven RPC tests and strict Clippy pass,
+  including real mTLS, no application send before publication, pin/DNS rejection,
+  lost/mismatched responses and non-retrying short/error writes.
+- Manager guest run 04 failed before authorization on clock continuity/durability.
+  Its journal also exposed a separate runtime recovery failure: historical
+  cumulative kernel event loss prevented the new acknowledgement from establishing
+  a mapping. The old harness mistook a kernel handshake flag for runtime recovery;
+  its earlier recovery phases are not accepted as passes. `8b9e438` serializes
+  clock sampling with validation, adds specific clock diagnostics, and establishes
+  an explicit epoch-scoped event-loss baseline without erasing old loss/captures.
+  The concurrent clock and event-loss regressions pass RED/GREEN host tests.
+  The exact cause of run 04's clock fault was not captured by its generic error.
+- Manager guest run 05 establishes healthy clock and matched runtime recovery
+  while retaining cumulative loss 3862. It then times out before authorization
+  because the harness awaited a globally empty recorder despite healthy ongoing
+  observations and advancing durable frontiers. Preparation readiness now requires
+  the durable initial records and namespace; queued new observations need not be
+  empty. Full lifecycle, manager crash, rotation and CLI export remain pending.
 - No host kernel module was loaded and no physical interface was attached.
 
 ## Decisions

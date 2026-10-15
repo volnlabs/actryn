@@ -446,6 +446,7 @@ impl Engine {
                 .context
                 .registry
                 .namespace_ready(&slot.context.namespace)
+            || !slot.context.capture.preparation_ready()
             || deadline_ns <= now
             || deadline_ns - now > 60_000 * MS
             || deadline_ns > slot.context.prepared.binding.session_deadline_ns
@@ -830,6 +831,15 @@ impl Engine {
             prepared,
             retiring: core.slot.as_ref().is_some_and(|s| s.retiring),
             recovery_pending: core.recovery.is_some(),
+            preparation_ready: core.slot.as_ref().is_some_and(|slot| {
+                !slot.retiring
+                    && !slot.context.closed.load(Ordering::Acquire)
+                    && slot
+                        .context
+                        .registry
+                        .namespace_ready(&slot.context.namespace)
+                    && slot.context.capture.preparation_ready()
+            }),
             recovery_ready: core.recovery.is_none()
                 && core.event_stream_ready(&kernel)
                 && recovered_mapping_ready(core.mapping, &kernel, boottime_ns()?),
