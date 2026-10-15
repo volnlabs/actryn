@@ -210,7 +210,9 @@ impl Engine {
             *self.context.write().unwrap() = None;
             self.reserved.store(false, Ordering::Release);
         }
-        if core.mapping.is_some() && self.bridge.admin.status()?.state == 0 && !core.recover_reset {
+        if !core.recover_reset
+            && recovered_mapping_ready(core.mapping, &self.bridge.admin.status()?, boottime_ns()?)
+        {
             return Ok(Progress::Ready);
         }
         // Dropping the runtime role faults the old owner even after an idle revoke.
@@ -238,11 +240,15 @@ impl Engine {
     }
     fn recovery_progress(&self) -> Result<Progress> {
         let c = self.core.lock().unwrap();
-        Ok(if c.recovery.is_none() && c.mapping.is_some() {
-            Progress::Ready
-        } else {
-            Progress::Pending
-        })
+        Ok(
+            if c.recovery.is_none()
+                && recovered_mapping_ready(c.mapping, &self.bridge.admin.status()?, boottime_ns()?)
+            {
+                Progress::Ready
+            } else {
+                Progress::Pending
+            },
+        )
     }
     pub fn rearm(&self) -> Result<Progress> {
         let mut core = self.core.lock().unwrap();
@@ -250,6 +256,10 @@ impl Engine {
             return Err(Error::Denied("matched recovery required"));
         }
         let status = self.bridge.admin.status()?;
+        core.mapping.unwrap().controller_lower(boottime_ns()?)?;
+        if status.flags & 1 == 0 {
+            return Err(Error::Denied("matched recovery required"));
+        }
         if status.state == 1 {
             return Ok(Progress::Ready);
         }
@@ -1085,6 +1095,11 @@ fn register_observation(bridge: &Bridge, core: &mut Core, observation: &Observat
     core.registered_observation = observation.id;
     Ok(())
 }
+fn recovered_mapping_ready(mapping: Option<Mapping>, status: &Status, now: u64) -> bool {
+    status.state == 0
+        && status.flags & 1 != 0
+        && mapping.is_some_and(|m| m.controller_lower(now).is_ok())
+}
 fn advance_generation(value: &AtomicU64) -> std::result::Result<u64, u64> {
     value.fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
 }
@@ -1157,6 +1172,26 @@ mod tests {
         assert_ne!(digest, proposal_digest(&changed, 1, [4; 32], target, 7));
         assert_ne!(digest, proposal_digest(&binding, 1, [4; 32], target, 8));
         assert_eq!(digest, proposal_digest(&binding, 1, [4; 32], target, 7));
+    }
+    #[test]
+    fn expired_or_unacknowledged_mapping_cannot_complete_recovery() {
+        let mapping = Mapping::new(990 * MS, 1000 * MS, 2000 * MS).unwrap();
+        let mut status = Status {
+            state: 0,
+            flags: 1,
+            ..Status::default()
+        };
+        assert!(recovered_mapping_ready(Some(mapping), &status, 1001 * MS));
+        assert!(!recovered_mapping_ready(
+            Some(mapping),
+            &status,
+            60_990 * MS
+        ));
+        status.flags = 0;
+        assert!(!recovered_mapping_ready(Some(mapping), &status, 1001 * MS));
+        status.flags = 1;
+        status.state = 4;
+        assert!(!recovered_mapping_ready(Some(mapping), &status, 1001 * MS));
     }
     #[test]
     fn generation_exhaustion_never_wraps() {

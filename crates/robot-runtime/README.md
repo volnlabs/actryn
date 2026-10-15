@@ -18,7 +18,9 @@ controller command expiry remain independent when that thread stops.
 
 An explicit local sequence is `recover` (poll pending, at most 12 seconds),
 `rearm` (poll until matched baseline), `prepare(binding, instance, digest)`,
-`grant(deadline)`, `activate`. Preparation publishes its namespace asynchronously;
+`grant(deadline)`, `activate`. An expired or unacknowledged clock mapping never returns recovery-ready; explicit
+recovery refreshes it even after a long inhibited enrollment/setup interval.
+Preparation publishes its namespace asynchronously;
 `grant` rejects until namespace durability. Use `configuration_digest()` and
 `profile_digest()` for the compiled reviewed inputs. Configuration cannot change
 on a live instance. Binding principal, attempt, namespace and session deadline
