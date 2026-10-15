@@ -109,6 +109,7 @@ fn help() -> Value {
  "robot observe --pair FILE --cert FILE --key FILE --handle FILE",
  "robot propose --pair FILE --cert FILE --key FILE --handle FILE --observation ID --parent-digest HEX --left TICKS --right TICKS --duration-ms MS",
  "robot query|cancel --pair FILE --cert FILE --key FILE --handle FILE","robot query|cancel --local --handle FILE [--epoch EPOCH]"
+ ,"robot export --local --handle FILE --out DIRECTORY","robot export --pair FILE --cert FILE --key FILE --handle FILE --out DIRECTORY"
  ],"rules":["All output is JSON; errors exit nonzero.","Local epoch-based commands also accept --pair FILE instead of --epoch.","A handle is durable before proposal transmission. A proposal is never retried.","After uncertainty, query or cancel the same handle. Pairing never grants or rearms.","Installation and execution replay are separate release tooling; this CLI does not infer replay eligibility."]})
 }
 pub async fn run(args: Vec<String>) -> Result<Value> {
@@ -198,6 +199,7 @@ async fn server(verb: &str, flags: &Flags) -> Result<Value> {
 async fn robot(verb: &str, flags: &Flags) -> Result<Value> {
     match verb {
         "pair" => pair(flags).await,
+        "export" => export_robot(flags).await,
         "handle" => {
             flags.allow(&["pair", "attempt", "namespace", "out"])?;
             let pair = state::load_pair(Path::new(flags.get("pair")?))?;
@@ -314,6 +316,147 @@ async fn robot(verb: &str, flags: &Flags) -> Result<Value> {
         }
         _ => bail!("unknown robot command"),
     }
+}
+async fn export_robot(flags: &Flags) -> Result<Value> {
+    use std::{
+        fs::{self, DirBuilder, File},
+        os::unix::fs::DirBuilderExt,
+    };
+    flags.allow(&["local", "handle", "out", "pair", "cert", "key"])?;
+    ensure!(
+        flags.yes("local") != flags.yes("pair"),
+        "choose local export or paired endpoint"
+    );
+    let handle = state::load_handle(Path::new(flags.get("handle")?))?;
+    let connection = if flags.yes("local") {
+        ensure!(
+            !flags.yes("cert") && !flags.yes("key"),
+            "local export does not take network credentials"
+        );
+        None
+    } else {
+        let pair = state::load_pair(Path::new(flags.get("pair")?))?;
+        let (certificate, key) = flags.credentials()?;
+        Some((pair, certificate, key))
+    };
+    let epoch = if let Some((pair, _, _)) = &connection {
+        unhex(&pair.robot_epoch, 16)?
+    } else {
+        let description = local(Command::Describe(wire::Empty {}), vec![]).await?;
+        ensure!(
+            description["result"] == "report",
+            "manager description unavailable"
+        );
+        unhex(
+            description["robot_epoch"]
+                .as_str()
+                .context("manager epoch missing")?,
+            16,
+        )?
+    };
+    let read = async |name: &str, offset: u64| -> Result<Value> {
+        let req = request(
+            Command::EvidenceRead(wire::EvidenceRead {
+                handle: Some(handle.wire()?),
+                file: name.into(),
+                offset,
+            }),
+            epoch.clone(),
+        )?;
+        let response = match &connection {
+            Some((pair, certificate, key)) => rpc::remote(pair, certificate, key, &req).await,
+            None => rpc::local(&req).await,
+        }
+        .map_err(|e| anyhow::anyhow!(e.message))?;
+        let response = rpc::robot_json(response)?;
+        ensure!(
+            response["result"] == "report",
+            "evidence unavailable: {}",
+            response
+        );
+        Ok(response["report"].clone())
+    };
+    let mut manifest = read("", 0).await?;
+    let inspection = &manifest["inspection"];
+    ensure!(
+        inspection["live_authority"] == false
+            && serde_json::from_value::<Vec<u8>>(
+                inspection["prepared"]["binding"]["attempt"].clone()
+            )? == unhex(&handle.attempt, 16)?
+            && serde_json::from_value::<Vec<u8>>(
+                inspection["prepared"]["binding"]["namespace"].clone()
+            )? == unhex(&handle.namespace, 16)?,
+        "export binding mismatch"
+    );
+    let count = manifest["file_count"]
+        .as_u64()
+        .filter(|n| *n <= 8192)
+        .context("capture file capacity")?;
+    let total = manifest["total_bytes"]
+        .as_u64()
+        .filter(|n| *n <= crate::export::MAX_BYTES)
+        .context("capture byte capacity")?;
+    let mut entries = manifest["files"]
+        .as_array()
+        .context("capture entries")?
+        .clone();
+    let mut next = manifest["next_offset"].clone();
+    while !next.is_null() {
+        let offset = next
+            .as_u64()
+            .filter(|n| *n == entries.len() as u64 && *n < count)
+            .context("capture pagination")?;
+        let page = read("", offset).await?;
+        ensure!(
+            page["file_count"] == count && page["total_bytes"] == total,
+            "capture listing changed"
+        );
+        let files = page["files"].as_array().context("capture page")?;
+        ensure!(
+            !files.is_empty() && files.len() <= 32 && entries.len() + files.len() <= 8192,
+            "capture page bound"
+        );
+        entries.extend(files.iter().cloned());
+        next = page["next_offset"].clone();
+    }
+    ensure!(entries.len() as u64 == count, "incomplete capture listing");
+    let mut seen = std::collections::BTreeSet::new();
+    let mut bytes = 0u64;
+    for entry in &entries {
+        let name = entry["file"].as_str().context("capture filename")?;
+        ensure!(
+            robot_rpc::valid_capture_file(name) && seen.insert(name),
+            "invalid/duplicate capture filename"
+        );
+        bytes = bytes
+            .checked_add(entry["size"].as_u64().context("capture size")?)
+            .context("capture size overflow")?;
+    }
+    ensure!(bytes == total, "capture total mismatch");
+    let out = Path::new(flags.get("out")?);
+    DirBuilder::new().mode(0o700).create(out)?;
+    state::save_new(
+        &out.join("INCOMPLETE.json"),
+        &json!({"attempt":handle.attempt,"namespace":handle.namespace}),
+    )?;
+    DirBuilder::new().mode(0o700).create(out.join("capture"))?;
+    for entry in &entries {
+        let mut file = crate::export::CaptureFile::create(&out.join("capture"), entry)?;
+        while file.offset < file.size {
+            file.append(&read(entry["file"].as_str().unwrap(), file.offset).await?)?;
+        }
+        file.finish()?;
+    }
+    File::open(out.join("capture"))?.sync_all()?;
+    manifest["files"] = json!(entries);
+    manifest["next_offset"] = Value::Null;
+    manifest["format"] = json!("actryn-robot-evidence-1");
+    crate::export::save_manifest(&out.join("manifest.json"), &manifest)?;
+    fs::remove_file(out.join("INCOMPLETE.json"))?;
+    File::open(out)?.sync_all()?;
+    Ok(
+        json!({"result":"exported","path":out,"attempt":handle.attempt,"namespace":handle.namespace,"files":count,"bytes":total,"execution_replay_eligible":false,"volatile_tail_unknown":true}),
+    )
 }
 async fn pair(flags: &Flags) -> Result<Value> {
     flags.allow(&["endpoint", "dns", "pin", "ca", "cert", "key", "out"])?;

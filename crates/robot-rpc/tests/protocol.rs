@@ -42,6 +42,11 @@ async fn canonical_typed_frames_reject_unknown_duplicate_and_oversize() {
     sender.write_u32(65537).await.unwrap();
     assert!(read_message::<wire::Request>(&mut receiver).await.is_err());
     let (mut sender, mut receiver) = tokio::io::duplex(1024);
+    sender.write_u32(4097).await.unwrap();
+    assert!(read_message_limit::<wire::Request>(&mut receiver, 4096)
+        .await
+        .is_err());
+    let (mut sender, mut receiver) = tokio::io::duplex(1024);
     write_message(&mut sender, &request).await.unwrap();
     assert_eq!(
         read_message::<wire::Request>(&mut receiver).await.unwrap(),
@@ -85,4 +90,31 @@ fn clock_discontinuity_is_sticky_and_restart_floor_is_enforced() {
     guard.check(10_500_000_000, 1_500_000_000).unwrap();
     assert!(guard.check(10_500_000_000, 1_400_000_000).is_err());
     assert!(guard.check(10_600_000_000, 1_600_000_000).is_err());
+}
+
+#[test]
+fn evidence_reads_are_scoped_bounded_and_cannot_select_private_paths() {
+    let mut request = proposal();
+    request.command = Some(Command::EvidenceRead(wire::EvidenceRead {
+        handle: Some(wire::Handle {
+            attempt: vec![1; 16],
+            namespace: vec![2; 16],
+            key: vec![3; 32],
+        }),
+        file: "checkpoints.sqlite".into(),
+        offset: 0,
+    }));
+    request.validate().unwrap();
+    assert_eq!(request.remote_scope().unwrap(), Scope::Read);
+    assert!(valid_capture_file("batch-00000000000000000001.mcap"));
+    assert!(!valid_capture_file("../identity/key.pem"));
+    if let Some(Command::EvidenceRead(e)) = request.command.as_mut() {
+        e.offset = 67_108_865;
+    }
+    assert!(request.validate().is_err());
+    if let Some(Command::EvidenceRead(e)) = request.command.as_mut() {
+        e.offset = 0;
+        e.file = "../key.pem".into();
+    }
+    assert!(request.validate().is_err());
 }

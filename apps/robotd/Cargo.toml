@@ -1,0 +1,23 @@
+[package]
+name = "actryn-robotd"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+libc.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+robot-rpc = { path = "../../crates/robot-rpc" }
+robot-runtime = { path = "../../crates/robot-runtime" }
+authority-client = { path = "../../crates/authority-client" }
+rustls = { version = "=0.23.46", default-features = false, features = ["ring", "std"] }
+tokio-rustls = { version = "=0.26.6", default-features = false, features = ["ring"] }
+rcgen = "=0.14.10"
+
+[dev-dependencies]
+tempfile.workspace = true

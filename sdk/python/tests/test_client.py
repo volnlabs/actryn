@@ -52,6 +52,21 @@ class ClientTests(unittest.TestCase):
         peer.settimeout(.05)
         with self.assertRaises(TimeoutError):peer.recv(1)
 
+    def test_evidence_read_rejects_paths_before_transport_and_retains_identity(self):
+        client,peer=self.client();handle=RequestHandle.create(b'a'*16,b'n'*16)
+        with self.assertRaises(ValueError):client.evidence_read(handle,file='../key.pem')
+        with self.assertRaises(ValueError):client.evidence_read(handle,offset=67108865)
+        def reply():
+            size,=struct.unpack('!I',peer.recv(4));request=wire.Request.FromString(peer.recv(size))
+            assert request.evidence_read.handle.key==handle.key
+            assert request.evidence_read.file=='checkpoints.sqlite'
+            response=wire.Response(version=1,request_id=request.request_id,robot_epoch=b'e'*16,
+                report=wire.Report(json=b'{"data_hex":"61","next_offset":1}'))
+            data=response.SerializeToString(deterministic=True);peer.sendall(struct.pack('!I',len(data))+data)
+        worker=threading.Thread(target=reply);worker.start()
+        self.assertEqual(client.evidence_read(handle,file='checkpoints.sqlite')['data_hex'],'61')
+        worker.join(1);self.assertFalse(worker.is_alive())
+
     def test_forged_reply_correlation_is_unknown_for_cancel(self):
         client,peer=self.client();handle=RequestHandle.create(b'a'*16,b'n'*16)
         response=wire.Response(version=1,request_id=b'wrong'*3,robot_epoch=b'e'*16,report=wire.Report(json=b'{}'))

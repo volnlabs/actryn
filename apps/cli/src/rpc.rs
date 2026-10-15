@@ -32,6 +32,7 @@ pub fn mutation(request: &wire::Request) -> bool {
             wire::request::Command::Describe(_)
                 | wire::request::Command::Observe(_)
                 | wire::request::Command::Query(_)
+                | wire::request::Command::EvidenceRead(_)
         )
     )
 }
@@ -131,6 +132,7 @@ pub async fn local(request: &wire::Request) -> std::result::Result<wire::Respons
             wire::request::Command::Cancel(_)
                 | wire::request::Command::Revoke(_)
                 | wire::request::Command::Retire(_)
+                | wire::request::Command::RevokePrincipal(_)
         )
     ) {
         CLOSURE_SOCKET

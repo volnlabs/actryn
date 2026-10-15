@@ -3,6 +3,25 @@
 version = 4
 
 [[package]]
+name = "actryn-cli"
+version = "0.0.1"
+dependencies = [
+ "actryn-server",
+ "anyhow",
+ "authority-client",
+ "libc",
+ "rcgen",
+ "robot-rpc",
+ "rustls",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "tokio",
+ "tokio-rustls",
+]
+
+[[package]]
 name = "actryn-core"
 version = "0.0.1"
 dependencies = [
@@ -27,6 +46,25 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
+]
+
+[[package]]
+name = "actryn-robotd"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "authority-client",
+ "libc",
+ "rcgen",
+ "robot-rpc",
+ "robot-runtime",
+ "rustls",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "tokio",
+ "tokio-rustls",
 ]
 
 [[package]]
@@ -1695,6 +1733,20 @@ dependencies = [
  "tokio",
  "tokio-rustls",
  "x509-parser",
+]
+
+[[package]]
+name = "robot-runtime"
+version = "0.0.1"
+dependencies = [
+ "authority-client",
+ "evidence",
+ "libc",
+ "robot-intent",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
 ]
 
 [[package]]

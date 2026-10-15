@@ -43,6 +43,14 @@ One Client supports sequential calls on one connection; do not share it across
 threads. It retains no background renewal or retries. Close/reconnect explicitly
 when the session expires. A credential renewal does not extend an existing grant.
 
+After local retirement/recovery releases the capture writer,
+`robot.evidence_read(handle)` lists a page of retained capture filenames, sizes
+and SHA-256 hashes; `file="...", offset=N` reads a bounded hexadecimal chunk.
+Listing pages use the returned `next_offset`. Reads preserve the original
+principal/attempt/namespace and never resume work. For a complete verified local
+directory export use `actryn robot export`; an unknown volatile tail and
+metadata-only replay restrictions remain explicit in its manifest.
+
 Run `PYTHONPATH=sdk/python python3 -m unittest discover -s sdk/python/tests -v`
 from the repository root. These codec/timeout tests use local socket pairs;
 end-to-end mTLS and Robot acceptance require the running manager and fixture.

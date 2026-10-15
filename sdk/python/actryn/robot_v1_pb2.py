@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0erobot-v1.proto\x12\x0f\x61\x63tryn.robot.v1\"\xfa\x06\n\x07Request\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x12\n\nrequest_id\x18\x02 \x01(\x0c\x12\x13\n\x0brobot_epoch\x18\x03 \x01(\x0c\x12*\n\x08\x64\x65scribe\x18\n \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12*\n\x07observe\x18\x0b \x01(\x0b\x32\x17.actryn.robot.v1.HandleH\x00\x12,\n\x07propose\x18\x0c \x01(\x0b\x32\x19.actryn.robot.v1.ProposalH\x00\x12(\n\x05query\x18\r \x01(\x0b\x32\x17.actryn.robot.v1.HandleH\x00\x12)\n\x06\x63\x61ncel\x18\x0e \x01(\x0b\x32\x17.actryn.robot.v1.HandleH\x00\x12+\n\x07prepare\x18\x14 \x01(\x0b\x32\x18.actryn.robot.v1.PrepareH\x00\x12\'\n\x05rearm\x18\x15 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12\'\n\x05grant\x18\x16 \x01(\x0b\x32\x16.actryn.robot.v1.GrantH\x00\x12*\n\x08\x61\x63tivate\x18\x17 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12+\n\treconcile\x18\x18 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12)\n\x07recover\x18\x19 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12(\n\x06revoke\x18\x1a \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12(\n\x06retire\x18\x1b \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12<\n\x0e\x65nroll_request\x18\x1e \x01(\x0b\x32\".actryn.robot.v1.EnrollmentRequestH\x00\x12<\n\x0e\x65nroll_install\x18\x1f \x01(\x0b\x32\".actryn.robot.v1.EnrollmentInstallH\x00\x12<\n\x10revoke_principal\x18  \x01(\x0b\x32 .actryn.robot.v1.PrincipalRevokeH\x00\x12>\n\x11install_principal\x18! \x01(\x0b\x32!.actryn.robot.v1.PrincipalInstallH\x00\x42\t\n\x07\x63ommand\"\x07\n\x05\x45mpty\"9\n\x06Handle\x12\x11\n\tnamespace\x18\x01 \x01(\x0c\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\x0f\n\x07\x61ttempt\x18\x03 \x01(\x0c\"R\n\x06Target\x12\x18\n\x10left_delta_ticks\x18\x01 \x01(\x12\x12\x19\n\x11right_delta_ticks\x18\x02 \x01(\x12\x12\x13\n\x0b\x64uration_ms\x18\x03 \x01(\x04\"\x8b\x01\n\x08Proposal\x12\'\n\x06handle\x18\x01 \x01(\x0b\x32\x17.actryn.robot.v1.Handle\x12\x16\n\x0eobservation_id\x18\x02 \x01(\x04\x12\'\n\x06target\x18\x03 \x01(\x0b\x32\x17.actryn.robot.v1.Target\x12\x15\n\rparent_digest\x18\x04 \x01(\x0c\"@\n\x07Prepare\x12\x0f\n\x07\x61ttempt\x18\x01 \x01(\x0c\x12\x11\n\tnamespace\x18\x02 \x01(\x0c\x12\x11\n\tprincipal\x18\x03 \x01(\t\"\x1c\n\x05Grant\x12\x13\n\x0b\x64uration_ms\x18\x01 \x01(\x04\"%\n\x11\x45nrollmentRequest\x12\x10\n\x08\x64ns_name\x18\x01 \x01(\t\"<\n\x11\x45nrollmentInstall\x12\x17\n\x0f\x63\x65rtificate_pem\x18\x01 \x01(\x0c\x12\x0e\n\x06\x63\x61_pem\x18\x02 \x01(\x0c\"$\n\x0fPrincipalRevoke\x12\x11\n\tprincipal\x18\x01 \x01(\t\"V\n\x10PrincipalInstall\x12\x11\n\tprincipal\x18\x01 \x01(\t\x12\x1a\n\x12\x63\x65rtificate_sha256\x18\x02 \x01(\t\x12\x13\n\x0b\x63\x61n_propose\x18\x03 \x01(\x08\"\xdb\x01\n\x08Response\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x12\n\nrequest_id\x18\x02 \x01(\x0c\x12\x13\n\x0brobot_epoch\x18\x03 \x01(\x0c\x12)\n\x06report\x18\n \x01(\x0b\x32\x17.actryn.robot.v1.ReportH\x00\x12\x33\n\x0bobservation\x18\x0b \x01(\x0b\x32\x1c.actryn.robot.v1.ObservationH\x00\x12+\n\x07\x66\x61ilure\x18\x0c \x01(\x0b\x32\x18.actryn.robot.v1.FailureH\x00\x42\x08\n\x06result\"\x16\n\x06Report\x12\x0c\n\x04json\x18\x01 \x01(\x0c\"\xd8\x01\n\x0bObservation\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x1c\n\x14\x61\x63quired_earliest_ns\x18\x02 \x01(\x04\x12\x1a\n\x12\x61\x63quired_latest_ns\x18\x03 \x01(\x04\x12\x16\n\x0evalid_until_ns\x18\x04 \x01(\x04\x12\x15\n\rcontroller_ns\x18\x05 \x01(\x04\x12\x12\n\nleft_ticks\x18\x06 \x01(\x12\x12\x13\n\x0bright_ticks\x18\x07 \x01(\x12\x12\x11\n\tsimulated\x18\x08 \x01(\x08\x12\x18\n\x10\x63ontext_revision\x18\t \x01(\x04\"\xa2\x01\n\x07\x46\x61ilure\x12+\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x1d.actryn.robot.v1.Failure.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\"Y\n\x04\x43ode\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0c\n\x08REJECTED\x10\x01\x12\x0c\n\x08\x43\x41PACITY\x10\x02\x12\x0f\n\x0bUNAVAILABLE\x10\x03\x12\x13\n\x0fOUTCOME_UNKNOWN\x10\x04\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0erobot-v1.proto\x12\x0f\x61\x63tryn.robot.v1\"\xb2\x07\n\x07Request\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x12\n\nrequest_id\x18\x02 \x01(\x0c\x12\x13\n\x0brobot_epoch\x18\x03 \x01(\x0c\x12*\n\x08\x64\x65scribe\x18\n \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12*\n\x07observe\x18\x0b \x01(\x0b\x32\x17.actryn.robot.v1.HandleH\x00\x12,\n\x07propose\x18\x0c \x01(\x0b\x32\x19.actryn.robot.v1.ProposalH\x00\x12(\n\x05query\x18\r \x01(\x0b\x32\x17.actryn.robot.v1.HandleH\x00\x12)\n\x06\x63\x61ncel\x18\x0e \x01(\x0b\x32\x17.actryn.robot.v1.HandleH\x00\x12\x36\n\revidence_read\x18\x0f \x01(\x0b\x32\x1d.actryn.robot.v1.EvidenceReadH\x00\x12+\n\x07prepare\x18\x14 \x01(\x0b\x32\x18.actryn.robot.v1.PrepareH\x00\x12\'\n\x05rearm\x18\x15 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12\'\n\x05grant\x18\x16 \x01(\x0b\x32\x16.actryn.robot.v1.GrantH\x00\x12*\n\x08\x61\x63tivate\x18\x17 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12+\n\treconcile\x18\x18 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12)\n\x07recover\x18\x19 \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12(\n\x06revoke\x18\x1a \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12(\n\x06retire\x18\x1b \x01(\x0b\x32\x16.actryn.robot.v1.EmptyH\x00\x12<\n\x0e\x65nroll_request\x18\x1e \x01(\x0b\x32\".actryn.robot.v1.EnrollmentRequestH\x00\x12<\n\x0e\x65nroll_install\x18\x1f \x01(\x0b\x32\".actryn.robot.v1.EnrollmentInstallH\x00\x12<\n\x10revoke_principal\x18  \x01(\x0b\x32 .actryn.robot.v1.PrincipalRevokeH\x00\x12>\n\x11install_principal\x18! \x01(\x0b\x32!.actryn.robot.v1.PrincipalInstallH\x00\x42\t\n\x07\x63ommand\"\x07\n\x05\x45mpty\"9\n\x06Handle\x12\x11\n\tnamespace\x18\x01 \x01(\x0c\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\x0f\n\x07\x61ttempt\x18\x03 \x01(\x0c\"R\n\x06Target\x12\x18\n\x10left_delta_ticks\x18\x01 \x01(\x12\x12\x19\n\x11right_delta_ticks\x18\x02 \x01(\x12\x12\x13\n\x0b\x64uration_ms\x18\x03 \x01(\x04\"\x8b\x01\n\x08Proposal\x12\'\n\x06handle\x18\x01 \x01(\x0b\x32\x17.actryn.robot.v1.Handle\x12\x16\n\x0eobservation_id\x18\x02 \x01(\x04\x12\'\n\x06target\x18\x03 \x01(\x0b\x32\x17.actryn.robot.v1.Target\x12\x15\n\rparent_digest\x18\x04 \x01(\x0c\"@\n\x07Prepare\x12\x0f\n\x07\x61ttempt\x18\x01 \x01(\x0c\x12\x11\n\tnamespace\x18\x02 \x01(\x0c\x12\x11\n\tprincipal\x18\x03 \x01(\t\"\x1c\n\x05Grant\x12\x13\n\x0b\x64uration_ms\x18\x01 \x01(\x04\"U\n\x0c\x45videnceRead\x12\'\n\x06handle\x18\x01 \x01(\x0b\x32\x17.actryn.robot.v1.Handle\x12\x0c\n\x04\x66ile\x18\x02 \x01(\t\x12\x0e\n\x06offset\x18\x03 \x01(\x04\"%\n\x11\x45nrollmentRequest\x12\x10\n\x08\x64ns_name\x18\x01 \x01(\t\"<\n\x11\x45nrollmentInstall\x12\x17\n\x0f\x63\x65rtificate_pem\x18\x01 \x01(\x0c\x12\x0e\n\x06\x63\x61_pem\x18\x02 \x01(\x0c\"$\n\x0fPrincipalRevoke\x12\x11\n\tprincipal\x18\x01 \x01(\t\"V\n\x10PrincipalInstall\x12\x11\n\tprincipal\x18\x01 \x01(\t\x12\x1a\n\x12\x63\x65rtificate_sha256\x18\x02 \x01(\t\x12\x13\n\x0b\x63\x61n_propose\x18\x03 \x01(\x08\"\xdb\x01\n\x08Response\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x12\n\nrequest_id\x18\x02 \x01(\x0c\x12\x13\n\x0brobot_epoch\x18\x03 \x01(\x0c\x12)\n\x06report\x18\n \x01(\x0b\x32\x17.actryn.robot.v1.ReportH\x00\x12\x33\n\x0bobservation\x18\x0b \x01(\x0b\x32\x1c.actryn.robot.v1.ObservationH\x00\x12+\n\x07\x66\x61ilure\x18\x0c \x01(\x0b\x32\x18.actryn.robot.v1.FailureH\x00\x42\x08\n\x06result\"\x16\n\x06Report\x12\x0c\n\x04json\x18\x01 \x01(\x0c\"\xd8\x01\n\x0bObservation\x12\n\n\x02id\x18\x01 \x01(\x04\x12\x1c\n\x14\x61\x63quired_earliest_ns\x18\x02 \x01(\x04\x12\x1a\n\x12\x61\x63quired_latest_ns\x18\x03 \x01(\x04\x12\x16\n\x0evalid_until_ns\x18\x04 \x01(\x04\x12\x15\n\rcontroller_ns\x18\x05 \x01(\x04\x12\x12\n\nleft_ticks\x18\x06 \x01(\x12\x12\x13\n\x0bright_ticks\x18\x07 \x01(\x12\x12\x11\n\tsimulated\x18\x08 \x01(\x08\x12\x18\n\x10\x63ontext_revision\x18\t \x01(\x04\"\xa2\x01\n\x07\x46\x61ilure\x12+\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x1d.actryn.robot.v1.Failure.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\"Y\n\x04\x43ode\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0c\n\x08REJECTED\x10\x01\x12\x0c\n\x08\x43\x41PACITY\x10\x02\x12\x0f\n\x0bUNAVAILABLE\x10\x03\x12\x13\n\x0fOUTCOME_UNKNOWN\x10\x04\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,35 +32,37 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'robot_v1_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_REQUEST']._serialized_start=36
-  _globals['_REQUEST']._serialized_end=926
-  _globals['_EMPTY']._serialized_start=928
-  _globals['_EMPTY']._serialized_end=935
-  _globals['_HANDLE']._serialized_start=937
-  _globals['_HANDLE']._serialized_end=994
-  _globals['_TARGET']._serialized_start=996
-  _globals['_TARGET']._serialized_end=1078
-  _globals['_PROPOSAL']._serialized_start=1081
-  _globals['_PROPOSAL']._serialized_end=1220
-  _globals['_PREPARE']._serialized_start=1222
-  _globals['_PREPARE']._serialized_end=1286
-  _globals['_GRANT']._serialized_start=1288
-  _globals['_GRANT']._serialized_end=1316
-  _globals['_ENROLLMENTREQUEST']._serialized_start=1318
-  _globals['_ENROLLMENTREQUEST']._serialized_end=1355
-  _globals['_ENROLLMENTINSTALL']._serialized_start=1357
-  _globals['_ENROLLMENTINSTALL']._serialized_end=1417
-  _globals['_PRINCIPALREVOKE']._serialized_start=1419
-  _globals['_PRINCIPALREVOKE']._serialized_end=1455
-  _globals['_PRINCIPALINSTALL']._serialized_start=1457
-  _globals['_PRINCIPALINSTALL']._serialized_end=1543
-  _globals['_RESPONSE']._serialized_start=1546
-  _globals['_RESPONSE']._serialized_end=1765
-  _globals['_REPORT']._serialized_start=1767
-  _globals['_REPORT']._serialized_end=1789
-  _globals['_OBSERVATION']._serialized_start=1792
-  _globals['_OBSERVATION']._serialized_end=2008
-  _globals['_FAILURE']._serialized_start=2011
-  _globals['_FAILURE']._serialized_end=2173
-  _globals['_FAILURE_CODE']._serialized_start=2084
-  _globals['_FAILURE_CODE']._serialized_end=2173
+  _globals['_REQUEST']._serialized_end=982
+  _globals['_EMPTY']._serialized_start=984
+  _globals['_EMPTY']._serialized_end=991
+  _globals['_HANDLE']._serialized_start=993
+  _globals['_HANDLE']._serialized_end=1050
+  _globals['_TARGET']._serialized_start=1052
+  _globals['_TARGET']._serialized_end=1134
+  _globals['_PROPOSAL']._serialized_start=1137
+  _globals['_PROPOSAL']._serialized_end=1276
+  _globals['_PREPARE']._serialized_start=1278
+  _globals['_PREPARE']._serialized_end=1342
+  _globals['_GRANT']._serialized_start=1344
+  _globals['_GRANT']._serialized_end=1372
+  _globals['_EVIDENCEREAD']._serialized_start=1374
+  _globals['_EVIDENCEREAD']._serialized_end=1459
+  _globals['_ENROLLMENTREQUEST']._serialized_start=1461
+  _globals['_ENROLLMENTREQUEST']._serialized_end=1498
+  _globals['_ENROLLMENTINSTALL']._serialized_start=1500
+  _globals['_ENROLLMENTINSTALL']._serialized_end=1560
+  _globals['_PRINCIPALREVOKE']._serialized_start=1562
+  _globals['_PRINCIPALREVOKE']._serialized_end=1598
+  _globals['_PRINCIPALINSTALL']._serialized_start=1600
+  _globals['_PRINCIPALINSTALL']._serialized_end=1686
+  _globals['_RESPONSE']._serialized_start=1689
+  _globals['_RESPONSE']._serialized_end=1908
+  _globals['_REPORT']._serialized_start=1910
+  _globals['_REPORT']._serialized_end=1932
+  _globals['_OBSERVATION']._serialized_start=1935
+  _globals['_OBSERVATION']._serialized_end=2151
+  _globals['_FAILURE']._serialized_start=2154
+  _globals['_FAILURE']._serialized_end=2316
+  _globals['_FAILURE_CODE']._serialized_start=2227
+  _globals['_FAILURE_CODE']._serialized_end=2316
 # @@protoc_insertion_point(module_scope)

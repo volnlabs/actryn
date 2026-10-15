@@ -83,10 +83,41 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Retained exports explicitly preserve unknown broker work after server death
   and unknown attempt outcome after launcher death. Service setup failures
   (account allocation and required NET_ADMIN for BPF_PROG_QUERY) remain retained.
-- Robot RPC and Python SDK foundations are committed. TLS 1.3, certificate
-  policy, canonical framing, gateway peer pidfd and deadline/unknown-outcome
-  tests pass. The manager, gateway integration, enrollment, CLI, immutable
-  packaging and end-to-end workflow are being implemented and are not accepted.
+- CLI `462f4f8` exposes the server and robot workflows, immutable pre-send handles,
+  pairing pins and explicit unknown outcomes. Nine initial CLI tests and strict
+  Clippy pass. Actual server CLI guest run 03 launches the isolated attempt,
+  inspects its offline result, cancels/reaps it and verifies export hashes and
+  no-overwrite behavior. Earlier harness/state and preparation-timeout runs remain
+  retained. ARM64 CLI doctor reports the real manager state; full robot CLI
+  mutation/export acceptance remains open.
+- Robot RPC and Python SDK use TLS 1.3, local certificate policy, canonical
+  framing, gateway peer pidfd and immutable deadlines. The new manager/gateway
+  implementation is under integration review. Host checks currently pass seven
+  manager tests, eight RPC tests and ten CLI tests; the Python SDK has eight
+  passing tests. These include retired-capture export bounds, path isolation,
+  active-writer exclusion, output hashes and no-overwrite behavior. Actual export
+  and full lifecycle acceptance are not yet established.
+- Manager guest run 02 completed local enrollment, device pin verification and
+  authenticated preparation, then inhibited before GRANT when recorder progress
+  exceeded its two-second ceiling. Later diagnostic fsync calls measured 3.64 s
+  and 2.24 s under shared host storage contention; exact failing-write latency
+  was not traced. The ceiling remains unchanged and no operation was dispatched.
+- Manager guest run 03 failed during recovery before enrollment or authorization.
+  A separately traced regression established that the fixture rejected a fresh
+  HELLO while disabled in READY, causing the kernel receipt timeout. Fixture fix
+  `e28524f` reconfirms disabled-zero sink state before accepting that fresh session;
+  ACTIVE remains non-replaceable. Eleven core tests pass, including the prior
+  failure and sink uncertainty. Actual updated-fixture campaigns are in progress.
+- Kernel snapshot 12 adds five diagnostic cases and closes authority upon valid
+  evidence of a newer paired controller epoch. All 13 cases pass separately in
+  plain KUnit, lockdep, KASAN and KCSAN; the prior failing newer-epoch case is
+  retained. Snapshot 12 builds on the exact ARM kernel. Its actual transport
+  campaign is pending integration; diagnostic passes do not substitute for it.
+- The server lane's OCI artifact guest run 01 imports a SHA-256-pinned image,
+  launches its static offline proposal agent, verifies a broker-attested result,
+  rejects wrong image pins and post-preparation rootfs tampering, and checks
+  cancellation/cleanup. Lane integration and explicit per-artifact tool-policy
+  checks are still pending; this is not the combined server-to-robot demo.
 - No host kernel module was loaded and no physical interface was attached.
 
 ## Decisions

@@ -173,5 +173,13 @@ class Client:
     def query(self, handle: RequestHandle):
         return self._call('query', handle._wire())
 
+    def evidence_read(self, handle: RequestHandle, *, file='', offset=0):
+        """Read a retired capture page or bounded file chunk; never starts work."""
+        if (not isinstance(file, str) or len(file) > 64 or
+            any(not (c.isascii() and (c.isalnum() or c in '-.')) for c in file) or
+            type(offset) is not int or not 0 <= offset <= 67108864):
+            raise ValueError('invalid evidence read bounds')
+        return self._call('evidence_read', wire.EvidenceRead(handle=handle._wire(), file=file, offset=offset))
+
     def cancel(self, handle: RequestHandle):
         return self._call('cancel', handle._wire(), mutation=True)

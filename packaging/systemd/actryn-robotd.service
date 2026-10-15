@@ -1,0 +1,40 @@
+[Unit]
+Description=Actryn fixed-skill Robot manager
+After=systemd-tmpfiles-setup.service
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/actryn-robotd
+Restart=on-failure
+RestartSec=1
+RuntimeDirectory=actryn-robot
+RuntimeDirectoryMode=0755
+StateDirectory=actryn-robot
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_CHOWN CAP_DAC_OVERRIDE
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX
+DevicePolicy=closed
+DeviceAllow=/dev/actryn-authority rw
+MemoryMax=256M
+TasksMax=32
+CPUQuota=100%
+LimitNOFILE=256
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target

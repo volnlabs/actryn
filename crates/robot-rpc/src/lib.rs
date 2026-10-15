@@ -12,12 +12,26 @@ use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 pub const VERSION: u32 = 1;
 pub const MAX_MESSAGE: usize = 65_536;
 pub const ALPN: &[u8] = b"actryn-rpc/1";
+pub fn valid_capture_file(name: &str) -> bool {
+    matches!(name, "checkpoints.sqlite" | "checkpoints.sqlite-journal")
+        || (name.len() == 31
+            && name.starts_with("batch-")
+            && name.ends_with(".mcap")
+            && name.as_bytes()[6..26].iter().all(u8::is_ascii_digit))
+}
 
 pub async fn read_message<M: Message + Default>(
     stream: &mut (impl AsyncRead + Unpin),
 ) -> Result<M> {
+    read_message_limit(stream, MAX_MESSAGE).await
+}
+pub async fn read_message_limit<M: Message + Default>(
+    stream: &mut (impl AsyncRead + Unpin),
+    limit: usize,
+) -> Result<M> {
+    ensure!((1..=MAX_MESSAGE).contains(&limit), "RPC decoder limit");
     let size = stream.read_u32().await? as usize;
-    ensure!((1..=MAX_MESSAGE).contains(&size), "RPC frame size");
+    ensure!((1..=limit).contains(&size), "RPC frame size");
     let mut bytes = vec![0; size];
     stream.read_exact(&mut bytes).await?;
     let message = M::decode(bytes.as_slice())?;
@@ -67,6 +81,22 @@ impl wire::Request {
         match command {
             Observe(h) => handle(h, false)?,
             Query(h) | Cancel(h) => handle(h, true)?,
+            EvidenceRead(e) => {
+                handle(
+                    e.handle
+                        .as_ref()
+                        .ok_or_else(|| anyhow::anyhow!("missing handle"))?,
+                    true,
+                )?;
+                ensure!(
+                    e.file.len() <= 64
+                        && e.file
+                            .bytes()
+                            .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'-' | b'.'))
+                        && e.offset <= 67_108_864,
+                    "evidence read bounds"
+                );
+            }
             Propose(p) => {
                 handle(
                     p.handle
@@ -125,7 +155,7 @@ impl wire::Request {
     pub fn remote_scope(&self) -> Result<Scope> {
         use wire::request::Command::*;
         match self.command.as_ref() {
-            Some(Describe(_) | Observe(_) | Query(_)) => Ok(Scope::Read),
+            Some(Describe(_) | Observe(_) | Query(_) | EvidenceRead(_)) => Ok(Scope::Read),
             Some(Propose(_) | Cancel(_)) => Ok(Scope::Propose),
             _ => bail!("local operator method"),
         }
