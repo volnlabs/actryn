@@ -1,0 +1,130 @@
+{
+  "role": "server",
+  "version": "0.0.1",
+  "compatibility": {
+    "rpc": 1,
+    "uapi": 1,
+    "wire": 2,
+    "state_schema": 1,
+    "server_rpc_min": 1,
+    "server_rpc_max": 1,
+    "live_actuation": false,
+    "physical_acceptance": false
+  },
+  "target": {
+    "distribution": "debian",
+    "version": "13.7",
+    "architecture": "amd64",
+    "kernel_release": "6.12.111+deb13-amd64",
+    "kernel_image_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "kernel_config_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "image_sha512": "d4721b56d60472370f3ff088a85ca36f298b360d3131af421a009bb8ea03c4d80eb67915bb57a69f6057e56c5bd48e69d3a47fbc5b8efacc5434a9c756b345d3",
+    "packages": {
+      "linux-image-6.12.111+deb13-amd64": "6.12.111-1",
+      "systemd": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "openssl": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "python3": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "python3-venv": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "containerd": "1.7.24~ds1-6+deb13u1",
+      "runc": "1.1.15+ds1-2+b4"
+    }
+  },
+  "provenance": {
+    "source_revision": "0000000000000000000000000000000000000000",
+    "rust": "1.92.0",
+    "build_inputs_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "qualification": "incomplete",
+    "evidence": {},
+    "custodian_attestation": null
+  },
+  "files": {
+    "bin/actryn": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/actryn",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "bin/actryn-launcher": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/actryn-launcher",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "bin/actryn-observer": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/actryn-observer",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "bin/actryn-serverd": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/actryn-serverd",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "bin/controller-fixture": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/controller-fixture",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/agent/offline-oci.tar": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/agent/offline-oci.tar",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/licenses/Apache-2.0.txt": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/licenses/Apache-2.0.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/licenses/THIRD-PARTY.txt": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/licenses/THIRD-PARTY.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/sdk/actryn/__init__.py": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/sdk/actryn/__init__.py",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/sdk/actryn/client.py": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/sdk/actryn/client.py",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/sdk/actryn/robot_v1_pb2.py": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/sdk/actryn/robot_v1_pb2.py",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/sdk/pyproject.toml": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/sdk/pyproject.toml",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/target/build-inputs.toml": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/target/build-inputs.toml",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/target/profile.toml": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/target/profile.toml",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/wheels/protobuf-7.36.1-py3-none-any.whl": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/wheels/protobuf-7.36.1-py3-none-any.whl",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "sysusers/server.conf": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/sysusers/server.conf",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "tmpfiles/server.conf": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/tmpfiles/server.conf",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "tools/install.py": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/tools/install.py",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "tools/release.py": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/tools/release.py",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "units/actryn-launcher.service": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/units/actryn-launcher.service",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "units/actryn-observer.service": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/units/actryn-observer.service",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "units/actryn-serverd.service": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/units/actryn-serverd.service",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}

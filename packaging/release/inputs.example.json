@@ -1,0 +1,103 @@
+{
+  "role": "robot",
+  "version": "0.0.1",
+  "compatibility": {
+    "rpc": 1,
+    "uapi": 1,
+    "wire": 2,
+    "state_schema": 1,
+    "server_rpc_min": 1,
+    "server_rpc_max": 1,
+    "live_actuation": false,
+    "physical_acceptance": false
+  },
+  "target": {
+    "distribution": "debian",
+    "version": "13.7",
+    "architecture": "arm64",
+    "kernel_release": "6.12.111+deb13-arm64",
+    "kernel_image_sha256": "5028c424ee9fd0f4d18c38269122e30e3d084deb1b13404ab070a3f478ddd30a",
+    "kernel_config_sha256": "0f442d89365ea22dc5169463634ee62903925200844558479666cbe3eeb7e555",
+    "image_sha512": "a34e1c1eea1fbb9ad31ebdfc6c776d1d579ce9e3d740ab10549ebcdca6fe1a46c28e0a42cbcdf1eb561795776733c178f6e816fe1a2cb60d26ffc56c07f915c4",
+    "packages": {
+      "linux-image-6.12.111+deb13-arm64": "6.12.111-1",
+      "systemd": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "openssl": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "python3": "REPLACE_WITH_EXACT_DPKG_VERSION"
+    }
+  },
+  "provenance": {
+    "source_revision": "0000000000000000000000000000000000000000",
+    "rust": "1.92.0",
+    "build_inputs_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "qualification": "incomplete",
+    "evidence": {},
+    "custodian_attestation": null
+  },
+  "files": {
+    "bin/actryn": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/actryn",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "bin/actryn-gatewayd": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/actryn-gatewayd",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "bin/actryn-robotd": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/bin/actryn-robotd",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "module/actryn_authority.ko": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/module/actryn_authority.ko",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/licenses/Apache-2.0.txt": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/licenses/Apache-2.0.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/licenses/GPL-2.0-only.txt": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/licenses/GPL-2.0-only.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/licenses/THIRD-PARTY.txt": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/licenses/THIRD-PARTY.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/source/kernel.tar": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/source/kernel.tar",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/target/build-inputs.toml": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/target/build-inputs.toml",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/target/profile.toml": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/target/profile.toml",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/target/virt-actryn.dtb": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/target/virt-actryn.dtb",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "sysusers/robot.conf": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/sysusers/robot.conf",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "tools/install.py": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/tools/install.py",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "tools/release.py": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/tools/release.py",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "units/actryn-gatewayd.service": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/units/actryn-gatewayd.service",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "units/actryn-robotd.service": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/units/actryn-robotd.service",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}
