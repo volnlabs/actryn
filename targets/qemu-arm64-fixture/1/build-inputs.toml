@@ -1,0 +1,21 @@
+# Selected immutable inputs; this is not a signed promotion/qualification manifest.
+[robot]
+image_url = "https://cloud.debian.org/images/cloud/trixie/20261015-2632/debian-13-generic-arm64-20261015-2632.qcow2"
+image_sha512 = "a34e1c1eea1fbb9ad31ebdfc6c776d1d579ce9e3d740ab10549ebcdca6fe1a46c28e0a42cbcdf1eb561795776733c178f6e816fe1a2cb60d26ffc56c07f915c4"
+kernel_release = "6.12.111+deb13-arm64"
+kernel_package_version = "6.12.111-1"
+kernel_image_sha256 = "5028c424ee9fd0f4d18c38269122e30e3d084deb1b13404ab070a3f478ddd30a"
+kernel_config_sha256 = "0f442d89365ea22dc5169463634ee62903925200844558479666cbe3eeb7e555"
+
+[server]
+image_url = "https://cloud.debian.org/images/cloud/trixie/20261015-2632/debian-13-generic-amd64-20261015-2632.qcow2"
+image_sha512 = "d4721b56d60472370f3ff088a85ca36f298b360d3131af421a009bb8ea03c4d80eb67915bb57a69f6057e56c5bd48e69d3a47fbc5b8efacc5434a9c756b345d3"
+kernel_release = "6.12.111+deb13-amd64"
+kernel_package_version = "6.12.111-1"
+containerd_package_version = "1.7.24~ds1-6+deb13u1"
+runc_package_version = "1.1.15+ds1-2+b4"
+
+[build]
+rust = "1.92.0"
+qemu_test_host = "11.1.1"
+qualification = "incomplete"

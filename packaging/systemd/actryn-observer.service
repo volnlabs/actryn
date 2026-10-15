@@ -1,0 +1,37 @@
+[Unit]
+Description=Actryn fixed diagnostic probes
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/rm -f /run/actryn/observer.sock
+ExecStart=/usr/bin/actryn-observer
+Restart=on-failure
+RestartSec=1
+RuntimeDirectory=actryn
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+StateDirectory=actryn-observer
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_BPF CAP_PERFMON CAP_SYS_RESOURCE
+ProtectSystem=strict
+ProtectHome=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectKernelLogs=yes
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+TasksMax=16
+MemoryMax=128M
+LimitNOFILE=64
+
+[Install]
+WantedBy=multi-user.target

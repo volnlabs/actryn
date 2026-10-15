@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "kernel_release": "6.12.111+deb13-amd64",
+  "architecture": "x86_64",
+  "source": "observer.bpf.c",
+  "record_bytes": 72,
+  "ring_bytes": 1048576,
+  "max_registrations": 8,
+  "coverage": ["process.lifecycle", "syscall.openat", "syscall.connect", "syscall.bpf", "syscall.perf_event_open", "syscall.mount", "syscall.unshare", "syscall.setns"],
+  "enforcement": false,
+  "failure_label": "access_failed",
+  "payload_policy": "metadata only; no paths, argv, file contents or network payloads",
+  "source_sequence": "per registered cgroup, includes ring allocation losses; cross-CPU delivery may reorder",
+  "clock": "CLOCK_MONOTONIC"
+}
