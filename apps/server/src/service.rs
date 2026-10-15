@@ -132,6 +132,15 @@ impl Server {
             self.queue_robot_closure(captured);
         }
     }
+    fn publication_key(&self, context: &ContextState, key: &str) -> Result<Arc<PublicationGate>> {
+        let result = context.key(key);
+        if result.is_err() && context.gate.publish(|| ()).is_err() {
+            // Exhausting key retention closes the whole namespace. Queue all
+            // captured handles before returning, without touching SQLite.
+            self.close_robot_memory(&context.attempt_id, None);
+        }
+        result
+    }
     fn queue_robot_closure(&self, captured: Arc<robot::Captured>) {
         let peer_capture = captured.clone();
         self.queue_robot_closure_with(captured, async move {
@@ -168,7 +177,7 @@ impl Server {
                 Ok(Ok(_)) => (),
                 _ => eprintln!("Robot closure persistence unavailable; retained handle {id}/{key} remains unresolved"),
             }
-            captured.finish();
+            inventory.finished(&captured);
         });
     }
     async fn record_robot_reply(
@@ -210,7 +219,7 @@ impl Server {
             .database(move |s| s.robot_reserve(&id, &saved_key, &hash, launcher::now_ms()?))
             .await?;
         let captured = self.robot_closures.capture(&binding, &intent)?;
-        let key_gate = context.key(key)?;
+        let key_gate = self.publication_key(context, key)?;
         let observation = async {
             open_gates(context, &key_gate)?;
             let observation = peer.observe(&binding).await?;
@@ -492,7 +501,7 @@ impl Server {
                     .map_err(|_| anyhow::anyhow!("context lock poisoned"))?
                     .get(attempt_id)
                 {
-                    context.key(request_key)?.close();
+                    self.publication_key(context, request_key)?.close();
                 }
                 self.close_robot_memory(attempt_id, Some(request_key));
                 let id = attempt_id.clone();
@@ -711,7 +720,7 @@ impl Server {
                             let call_gate = match &request {
                                 BrokerRequest::Call { request_key, .. }
                                 | BrokerRequest::Result { request_key } => {
-                                    Some(context.key(request_key)?)
+                                    Some(server.publication_key(&context, request_key)?)
                                 }
                                 _ => None,
                             };
@@ -791,7 +800,7 @@ impl Server {
                 Ok(json!({"call":call,"value":value}))
             }
             BrokerRequest::Cancel { request_key } => {
-                context.key(&request_key)?.close();
+                self.publication_key(context, &request_key)?.close();
                 self.close_robot_memory(&context.attempt_id, Some(&request_key));
                 let id = context.attempt_id.clone();
                 self.database(move |s| {
@@ -807,7 +816,7 @@ impl Server {
                 method,
                 input,
             } => {
-                let key_gate = context.key(&request_key)?;
+                let key_gate = self.publication_key(context, &request_key)?;
                 key_gate.publish(|| ())?;
                 ensure!(method.len() <= 128, "method name too large");
                 if !context.methods.contains(&method.as_str()) {
@@ -972,6 +981,136 @@ fn verify_agent_peer(stream: &UnixStream, attempt: &str) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    fn closure_fixture() -> (
+        tempfile::TempDir,
+        Store,
+        Arc<Server>,
+        Arc<ContextState>,
+        RobotBinding,
+        RobotIntent,
+    ) {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("db");
+        let mut store = Store::open(&path, Limits::default()).unwrap();
+        let a = store
+            .prepare(&format!("sha256:{}", "a".repeat(64)), 100)
+            .unwrap();
+        store.mark_prepared(&a.id, "runtime").unwrap();
+        let binding = RobotBinding {
+            attempt_id: a.id.clone(),
+            namespace: a.id.clone(),
+            principal: "server".into(),
+            peer_digest: format!("sha256:{}", "c".repeat(64)),
+            client_certificate_sha256: "d".repeat(64),
+            robot_epoch: "e".repeat(32),
+            robot_configuration_digest: "f".repeat(64),
+            robot_profile_digest: "a".repeat(64),
+            created_ms: 100,
+            deadline_ms: 60_000,
+        };
+        store.robot_bind(&binding, 100).unwrap();
+        store.start(&a.id, 100).unwrap();
+        let intent = store.robot_reserve(&a.id, "key", "digest", 101).unwrap();
+        let context = Arc::new(ContextState {
+            attempt_id: a.id.clone(),
+            methods: &["model.offline"],
+            gate: PublicationGate::default(),
+            keys: Mutex::new(BTreeMap::new()),
+            robot_binding: Mutex::new(Some(binding.clone())),
+            preparation: tokio::sync::Mutex::new(()),
+        });
+        let server = Arc::new(Server {
+            db: path,
+            contexts: Mutex::new(BTreeMap::from([(a.id, context.clone())])),
+            listeners: Mutex::new(BTreeMap::new()),
+            robot_closures: Arc::new(robot::Closures::default()),
+        });
+        (dir, store, server, context, binding, intent)
+    }
+    #[tokio::test]
+    async fn query_settlement_retains_capacity_until_pending_network_worker_exits() {
+        let (_dir, _store, server, _context, binding, intent) = closure_fixture();
+        let captured = server.robot_closures.capture(&binding, &intent).unwrap();
+        let (release, held) = tokio::sync::oneshot::channel::<()>();
+        server.queue_robot_closure_with(captured, async move {
+            held.await?;
+            Ok(RemoteReply::Absent)
+        });
+        for n in 1..robot::CLOSURE_CAPACITY {
+            let mut next = intent.clone();
+            next.request_key = format!("fill-{n}");
+            next.handle.key = format!("{n:064x}");
+            assert!(server
+                .robot_closures
+                .capture(&binding, &next)
+                .unwrap()
+                .begin());
+        }
+        let snapshot = robot::RemoteSnapshot {
+            namespace: robot::unhex(&intent.handle.namespace).unwrap(),
+            key: robot::unhex(&intent.handle.key).unwrap(),
+            digest: None,
+            operation: None,
+            revision: 1,
+            durable_revision: 1,
+            phase: "CancelledDurable".into(),
+            terminal: true,
+            closure: "NotAllocated".into(),
+            cancellation_durable: true,
+            persistence_failed: false,
+            verdict: robot::Verdict::Pending,
+            reconciled: false,
+        };
+        assert!(
+            !server
+                .record_robot_reply(&intent, Ok(RemoteReply::Snapshot(snapshot)))
+                .await
+                .unwrap()
+                .outstanding_debit
+        );
+        let mut extra = intent.clone();
+        extra.request_key = "overflow".into();
+        extra.handle.key = "f".repeat(64);
+        assert!(server.robot_closures.capture(&binding, &extra).is_err());
+        release.send(()).unwrap();
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while server
+                .robot_closures
+                .for_attempt(&binding.attempt_id, None)
+                .len()
+                == robot::CLOSURE_CAPACITY
+            {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        assert!(server.robot_closures.capture(&binding, &extra).is_ok());
+    }
+    #[tokio::test]
+    async fn reserved_cancel_key_exhaustion_queues_all_captured_closures_before_error() {
+        let (_dir, _store, server, context, binding, intent) = closure_fixture();
+        for n in 0..16 {
+            context.key(&format!("key-{n}")).unwrap();
+        }
+        let captured = server.robot_closures.capture(&binding, &intent).unwrap();
+        let result = server
+            .handle_inner(Request::RobotCancel {
+                attempt_id: binding.attempt_id,
+                request_key: "seventeenth".into(),
+            })
+            .await;
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("key capacity exhausted"));
+        assert!(context.gate.publish(|| ()).is_err());
+        // No await follows: the production network future is queued but never polled in this test.
+        assert!(
+            !captured.begin(),
+            "capacity closure did not queue the existing remote handle"
+        );
+    }
     #[tokio::test]
     async fn concurrent_preparation_transitions_reject_without_blocking_closure() {
         let directory = tempfile::tempdir().unwrap();

@@ -236,6 +236,62 @@ impl RemoteSnapshot {
                 && serde_json::to_vec(self)?.len() <= REMOTE_REPORT_BYTES,
             "remote report exceeds fixed bounds"
         );
+        let terminal_phase = match self.phase.as_str() {
+            "PendingIntent" | "IntentDurable" | "Submitted" => false,
+            "CancelPending" | "CancelledDurable" | "Completed" | "Rejected" | "OutcomeUnknown" => {
+                true
+            }
+            _ => anyhow::bail!("unknown remote phase"),
+        };
+        ensure!(
+            self.terminal == terminal_phase,
+            "remote phase/terminal mismatch"
+        );
+        let closure_known = matches!(
+            self.closure.as_str(),
+            "NotRequested"
+                | "NotAllocated"
+                | "Requested"
+                | "Failed(Denied)"
+                | "Failed(Unavailable)"
+                | "Failed(OutcomeUnknown)"
+        ) || self
+            .closure
+            .strip_prefix("LocallyClosed { transition: ")
+            .and_then(|value| value.strip_suffix(" }"))
+            .and_then(|value| value.parse::<u64>().ok())
+            .is_some_and(|transition| transition > 0);
+        ensure!(closure_known, "unknown remote closure");
+        if self.cancellation_durable {
+            ensure!(
+                self.phase == "CancelledDurable"
+                    && self.revision > 0
+                    && self.durable_revision == self.revision
+                    && !self.persistence_failed,
+                "remote cancellation is not durably terminal"
+            );
+            ensure!(
+                self.operation.is_some() || self.closure == "NotAllocated",
+                "absent operation cancellation has inconsistent closure"
+            );
+        }
+        if let Some(operation) = &self.operation {
+            ensure!(
+                self.closure != "NotAllocated",
+                "allocated operation has absent closure"
+            );
+            ensure!(
+                operation.device != [0; 16]
+                    && operation.runtime_nonce != [0; 16]
+                    && operation.boot > 0
+                    && operation.session > 0
+                    && operation.grant > 0
+                    && operation.instance > 0
+                    && operation.operation > 0
+                    && operation.stream > 0,
+                "invalid remote operation identity"
+            );
+        }
         if let Some(old) = &intent.last_remote {
             ensure!(
                 self.revision >= old.revision && self.durable_revision >= old.durable_revision,
@@ -255,10 +311,15 @@ impl RemoteSnapshot {
     }
     pub fn settled(&self) -> bool {
         !self.persistence_failed
-            && self.durable_revision > 0
+            && self.revision > 0
+            && self.durable_revision == self.revision
+            && self.terminal
             && self.verdict != Verdict::OutcomeUnknown
-            && ((self.cancellation_durable && self.operation.is_none())
-                || (self.terminal
+            && ((self.cancellation_durable
+                && self.phase == "CancelledDurable"
+                && self.closure == "NotAllocated"
+                && self.operation.is_none())
+                || (matches!(self.phase.as_str(), "Completed" | "CancelledDurable")
                     && self.reconciled
                     && self.operation.is_some()
                     && matches!(
@@ -583,22 +644,24 @@ impl Handle {
 pub struct Captured {
     pub binding: Binding,
     pub intent: Intent,
-    running: std::sync::atomic::AtomicBool,
+    // One atomic state prevents a stale captured Arc from starting after settlement/removal.
+    state: std::sync::atomic::AtomicU8,
 }
+const CLOSURE_RUNNING: u8 = 1;
+const CLOSURE_SETTLED: u8 = 2;
 impl Captured {
     pub fn begin(&self) -> bool {
-        self.running
+        self.state
             .compare_exchange(
-                false,
-                true,
+                0,
+                CLOSURE_RUNNING,
                 std::sync::atomic::Ordering::AcqRel,
                 std::sync::atomic::Ordering::Acquire,
             )
             .is_ok()
     }
-    pub fn finish(&self) {
-        self.running
-            .store(false, std::sync::atomic::Ordering::Release);
+    fn running(&self) -> bool {
+        self.state.load(std::sync::atomic::Ordering::Acquire) & CLOSURE_RUNNING != 0
     }
 }
 #[derive(Default)]
@@ -611,7 +674,7 @@ impl Closures {
             .lock()
             .unwrap_or_else(|p| p.into_inner())
             .values()
-            .any(|v| v.running.load(std::sync::atomic::Ordering::Acquire))
+            .any(|v| v.running())
     }
     pub fn capture(&self, binding: &Binding, intent: &Intent) -> Result<Arc<Captured>> {
         let mut entries = self
@@ -633,7 +696,7 @@ impl Closures {
         let value = Arc::new(Captured {
             binding: binding.clone(),
             intent: intent.clone(),
-            running: std::sync::atomic::AtomicBool::new(false),
+            state: std::sync::atomic::AtomicU8::new(0),
         });
         entries.insert(key, value.clone());
         Ok(value)
@@ -648,9 +711,32 @@ impl Closures {
             .collect()
     }
     pub fn settled(&self, attempt: &str, key: &str) {
-        self.entries
-            .lock()
-            .unwrap_or_else(|p| p.into_inner())
-            .remove(&(attempt.into(), key.into()));
+        let mut entries = self.entries.lock().unwrap_or_else(|p| p.into_inner());
+        let key = (attempt.into(), key.into());
+        if let Some(captured) = entries.get(&key) {
+            let old = captured
+                .state
+                .fetch_or(CLOSURE_SETTLED, std::sync::atomic::Ordering::AcqRel);
+            if old & CLOSURE_RUNNING == 0 {
+                entries.remove(&key);
+            }
+        }
+    }
+    pub fn finished(&self, captured: &Arc<Captured>) {
+        let mut entries = self.entries.lock().unwrap_or_else(|p| p.into_inner());
+        let state = captured
+            .state
+            .fetch_and(!CLOSURE_RUNNING, std::sync::atomic::Ordering::AcqRel);
+        let key = (
+            captured.intent.handle.attempt.clone(),
+            captured.intent.request_key.clone(),
+        );
+        if state & CLOSURE_SETTLED != 0
+            && entries
+                .get(&key)
+                .is_some_and(|entry| Arc::ptr_eq(entry, captured))
+        {
+            entries.remove(&key);
+        }
     }
 }

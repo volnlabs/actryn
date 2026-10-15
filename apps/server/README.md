@@ -187,7 +187,13 @@ There is at most one outstanding Robot job per attempt and four globally, with
 16 retained keys per attempt and 16 captured closure entries. Container cleanup,
 provider settlement and Robot settlement are separate. A matching durable
 cancel-before-operation receipt or a known terminal **and reconciled** operation
-can release a Robot debit. `OutcomeUnknown`, absent results and unavailable peers
+can release a Robot debit only when that terminal revision itself is durable.
+Canonical phase/closure fields and nonzero operation identities are checked;
+an absent-operation cancellation can carry the live query's `Pending` verdict
+only with its durable `CancelledDurable`/`NotAllocated` receipt. A closure slot
+remains charged until both settlement and any running network worker have
+finished. Exhausting request-key retention closes every captured remote handle
+before reporting the capacity error. `OutcomeUnknown`, absent results and unavailable peers
 remain charged across restart. Historical lookup cannot erase already retained
 durable reconciliation proof. Status reports compact metadata and explicit
 omission counts; per-key query returns the finite retained record. These reports

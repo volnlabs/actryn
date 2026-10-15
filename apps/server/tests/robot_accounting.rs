@@ -43,7 +43,7 @@ fn snapshot(intent: &actryn_server::robot::Intent, unknown: bool) -> RemoteSnaps
     serde_json::from_value(json!({"namespace":actryn_server::robot::unhex::<16>(&intent.handle.namespace).unwrap(),
         "key":actryn_server::robot::unhex::<32>(&intent.handle.key).unwrap(), "digest":null,
         "operation":{"device":vec![1;16],"boot":1,"session":1,"runtime_nonce":vec![2;16],"grant":1,"instance":1,"operation":1,"stream":1},
-        "revision":1,"durable_revision":1,"phase":"Completed","terminal":true,"closure":"Open",
+        "revision":1,"durable_revision":1,"phase":"Completed","terminal":true,"closure":"NotRequested",
         "cancellation_durable":false,"persistence_failed":false,"verdict":if unknown {"OutcomeUnknown"} else {"TargetReached"},"reconciled":true})).unwrap()
 }
 #[test]
@@ -107,8 +107,13 @@ fn terminal_unknown_stays_charged_and_only_matching_reconciled_result_settles() 
     pending.reconciled = false;
     s.robot_snapshot(&a, "first", &pending).unwrap();
     assert!(s.robot_intent(&a, "first").unwrap().outstanding_debit);
-    s.robot_snapshot(&a, "first", &snapshot(&intent, false))
-        .unwrap();
+    let mut terminal = snapshot(&intent, false);
+    terminal.revision = 2;
+    s.robot_snapshot(&a, "first", &terminal).unwrap();
+    assert!(s.robot_intent(&a, "first").unwrap().outstanding_debit);
+    assert!(s.robot_reserve(&a, "second", "input-2", 105).is_err());
+    terminal.durable_revision = 2;
+    s.robot_snapshot(&a, "first", &terminal).unwrap();
     assert!(!s.robot_intent(&a, "first").unwrap().outstanding_debit);
     assert!(s.robot_reserve(&a, "second", "input-2", 105).is_ok());
 }
@@ -169,9 +174,10 @@ fn durable_absent_key_cancellation_settles_but_retained_keys_cannot_replay() {
         let mut closed = snapshot(&intent, false);
         closed.operation = None;
         closed.reconciled = false;
-        closed.phase = "Cancelled".into();
-        closed.closure = "KeyCancelled".into();
-        closed.verdict = actryn_server::robot::Verdict::Cancelled;
+        closed.phase = "CancelledDurable".into();
+        closed.closure = "NotAllocated".into();
+        // Current live no-operation query uses Pending even after the tombstone is durable.
+        closed.verdict = actryn_server::robot::Verdict::Pending;
         closed.cancellation_durable = true;
         s.robot_cancel_key(&a, &key).unwrap();
         s.robot_snapshot(&a, &key, &closed).unwrap();
@@ -194,6 +200,67 @@ fn durable_absent_key_cancellation_settles_but_retained_keys_cannot_replay() {
         .omissions
         .iter()
         .any(|o| o.artifact == actryn_server::evidence::ArtifactName::Robot));
+}
+
+#[test]
+fn malformed_terminal_and_cancellation_reports_cannot_release_remote_debits() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut store = Store::open(dir.path().join("db"), Limits::default()).unwrap();
+    let a = prepared(&mut store);
+    store.robot_bind(&binding(&a), 100).unwrap();
+    store.start(&a, 100).unwrap();
+    let intent = store.robot_reserve(&a, "key", "digest", 101).unwrap();
+    let mut cancelled = snapshot(&intent, false);
+    cancelled.operation = None;
+    cancelled.reconciled = false;
+    cancelled.cancellation_durable = true;
+    cancelled.phase = "CancelledDurable".into();
+    cancelled.closure = "NotAllocated".into();
+    cancelled.verdict = actryn_server::robot::Verdict::Pending;
+    let mut invalid = cancelled.clone();
+    invalid.phase = "Submitted".into();
+    invalid.terminal = false;
+    assert!(store.robot_snapshot(&a, "key", &invalid).is_err());
+    invalid = cancelled.clone();
+    invalid.revision = 2;
+    assert!(store.robot_snapshot(&a, "key", &invalid).is_err());
+    invalid = cancelled.clone();
+    invalid.durable_revision = 2;
+    assert!(store.robot_snapshot(&a, "key", &invalid).is_err());
+    invalid = cancelled.clone();
+    invalid.closure = "NotRequested".into();
+    assert!(store.robot_snapshot(&a, "key", &invalid).is_err());
+    invalid = snapshot(&intent, false);
+    invalid.phase = "InventedTerminal".into();
+    assert!(store.robot_snapshot(&a, "key", &invalid).is_err());
+    invalid = snapshot(&intent, false);
+    invalid.closure = "InventedClosure".into();
+    assert!(store.robot_snapshot(&a, "key", &invalid).is_err());
+    for field in [
+        "device",
+        "boot",
+        "session",
+        "runtime_nonce",
+        "grant",
+        "instance",
+        "operation",
+        "stream",
+    ] {
+        let mut value = serde_json::to_value(snapshot(&intent, false)).unwrap();
+        value["operation"][field] = if matches!(field, "device" | "runtime_nonce") {
+            json!(vec![0; 16])
+        } else {
+            json!(0)
+        };
+        let invalid: RemoteSnapshot = serde_json::from_value(value).unwrap();
+        assert!(
+            store.robot_snapshot(&a, "key", &invalid).is_err(),
+            "{field}"
+        );
+    }
+    assert!(store.robot_intent(&a, "key").unwrap().outstanding_debit);
+    store.robot_snapshot(&a, "key", &cancelled).unwrap();
+    assert!(!store.robot_intent(&a, "key").unwrap().outstanding_debit);
 }
 
 #[test]
