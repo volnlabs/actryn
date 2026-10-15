@@ -14,9 +14,11 @@ use std::{
 use tokio::{net::UnixListener, sync::Semaphore};
 #[tokio::main]
 async fn main() -> Result<()> {
+    let args: Vec<_> = std::env::args_os().skip(1).collect();
+    let recovery_only = args.len() == 1 && args[0] == "--recover-only";
     ensure!(
-        std::env::args_os().len() == 1,
-        "server accepts no caller configuration arguments"
+        args.is_empty() || recovery_only,
+        "server accepts only the fixed recovery mode"
     );
     let config = LauncherConfig::read(Path::new("/etc/actryn/server.json"))?;
     let operator = config.operator_uid;
@@ -24,6 +26,9 @@ async fn main() -> Result<()> {
         "/var/lib/actryn-server/broker/server.lock",
     ))?;
     let server = Server::new(&config).await?;
+    if recovery_only {
+        return Ok(());
+    }
     let monitor = server.clone();
     tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_millis(500));
@@ -40,6 +45,7 @@ async fn main() -> Result<()> {
     }
     let listener = UnixListener::bind(SERVER_SOCKET)?;
     fs::set_permissions(SERVER_SOCKET, fs::Permissions::from_mode(0o666))?;
+    actryn_server::notify_ready()?;
     let slots = Arc::new(Semaphore::new(4));
     loop {
         let (mut stream, _) = listener.accept().await?;

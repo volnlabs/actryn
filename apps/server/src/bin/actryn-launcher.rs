@@ -16,9 +16,11 @@ use tokio::{
 };
 #[tokio::main]
 async fn main() -> Result<()> {
+    let args: Vec<_> = std::env::args_os().skip(1).collect();
+    let recovery_only = args.len() == 1 && args[0] == "--recover-only";
     ensure!(
-        std::env::args_os().len() == 1,
-        "launcher accepts no caller configuration arguments"
+        args.is_empty() || recovery_only,
+        "launcher accepts only the fixed recovery mode"
     );
     fs::create_dir_all(actryn_server::launcher::STATE_ROOT)?;
     let _lifetime =
@@ -27,6 +29,9 @@ async fn main() -> Result<()> {
     let allowed = config.server_uid;
     let mut launcher = Launcher::new(config).await?;
     launcher.recover().await?;
+    if recovery_only {
+        return Ok(());
+    }
     let launcher = Arc::new(Mutex::new(launcher));
     let ticker = launcher.clone();
     tokio::spawn(async move {
@@ -44,6 +49,7 @@ async fn main() -> Result<()> {
     }
     let listener = UnixListener::bind(LAUNCHER_SOCKET)?;
     fs::set_permissions(LAUNCHER_SOCKET, fs::Permissions::from_mode(0o666))?;
+    actryn_server::notify_ready()?;
     let slots = Arc::new(Semaphore::new(4));
     loop {
         let (mut stream, _) = listener.accept().await?;

@@ -1,0 +1,42 @@
+[Unit]
+Description=Actryn restricted container launcher
+Requires=containerd.service
+Wants=actryn-observer.service
+After=containerd.service actryn-observer.service systemd-tmpfiles-setup.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=notify
+NotifyAccess=main
+TimeoutStartSec=30
+ExecStart=/usr/bin/actryn-launcher
+# Executes after both normal stops and crashes; startup also repeats conservative recovery.
+ExecStopPost=/usr/bin/actryn-launcher --recover-only
+Restart=on-failure
+RestartSec=1
+TimeoutStopSec=30
+UMask=0077
+NoNewPrivileges=yes
+# Linux 6.12 BPF_PROG_QUERY checks bpf_net_capable(), even for cgroup devices.
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_SYS_PTRACE CAP_NET_ADMIN
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectKernelLogs=yes
+ReadWritePaths=/var/lib/actryn-server /run/actryn /run/actryn-server /sys/fs/cgroup
+InaccessiblePaths=-/etc/actryn/credentials /run/credentials
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+TasksMax=32
+MemoryMax=128M
+LimitNOFILE=256
+
+[Install]
+WantedBy=multi-user.target
