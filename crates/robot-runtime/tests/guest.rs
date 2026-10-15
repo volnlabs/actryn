@@ -1,6 +1,7 @@
 //! Opt-in integration: no mock device or userspace authority substitute.
 use robot_runtime::*;
 use std::{
+    os::unix::fs::PermissionsExt,
     thread,
     time::{Duration, Instant},
 };
@@ -16,6 +17,7 @@ fn poll(engine: &Engine, timeout: Duration, mut ready: impl FnMut() -> bool) {
 #[ignore = "requires isolated ARM64 guest, loaded actual module, connected fixture and administrative credentials"]
 fn actual_module_two_steps_and_pre_id_tombstone() {
     let dir = tempfile::tempdir().unwrap();
+    std::fs::set_permissions(dir.path(), std::fs::Permissions::from_mode(0o700)).unwrap();
     let engine = Engine::open(dir.path()).unwrap();
     engine.recover().unwrap();
     poll(&engine, Duration::from_secs(13), || {
