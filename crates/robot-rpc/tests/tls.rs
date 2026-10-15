@@ -153,3 +153,197 @@ async fn no_client_certificate_cannot_reach_rpc() {
     );
     assert!(s.is_err());
 }
+
+fn proposal_request() -> wire::Request {
+    wire::Request {
+        version: VERSION,
+        request_id: vec![1; 16],
+        robot_epoch: vec![2; 16],
+        command: Some(wire::request::Command::Propose(wire::Proposal {
+            handle: Some(wire::Handle {
+                attempt: vec![3; 16],
+                namespace: vec![4; 16],
+                key: vec![5; 32],
+            }),
+            observation_id: 1,
+            parent_digest: vec![6; 32],
+            target: Some(wire::Target {
+                left_delta_ticks: 1,
+                right_delta_ticks: -1,
+                duration_ms: 1000,
+            }),
+        })),
+    }
+}
+
+#[tokio::test]
+async fn prepared_rpc_sends_no_application_bytes_until_consuming_publication() {
+    use sha2::{Digest, Sha256};
+    use std::time::Duration;
+    for publish in [false, true] {
+        let p = pki();
+        let server = server_tls(
+            p.ca.as_bytes(),
+            p.server.as_bytes(),
+            p.server_key.as_bytes(),
+        )
+        .unwrap();
+        let client = client_tls(
+            p.ca.as_bytes(),
+            p.client.as_bytes(),
+            p.client_key.as_bytes(),
+        )
+        .unwrap();
+        let pin: [u8; 32] =
+            Sha256::digest(certificates(p.server.as_bytes()).unwrap()[0].as_ref()).into();
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let endpoint = listener.local_addr().unwrap();
+        let (ready, observed) = tokio::sync::oneshot::channel();
+        let server = tokio::spawn(async move {
+            let (socket, _) = listener.accept().await.unwrap();
+            let mut tls = TlsAcceptor::from(server).accept(socket).await.unwrap();
+            let mut first = [0];
+            assert!(
+                tokio::time::timeout(Duration::from_millis(50), tls.read(&mut first))
+                    .await
+                    .is_err()
+            );
+            ready.send(()).unwrap();
+            if publish {
+                let request: wire::Request = read_message(&mut tls).await.unwrap();
+                assert_eq!(request, proposal_request());
+                write_message(
+                    &mut tls,
+                    &wire::Response {
+                        version: VERSION,
+                        request_id: request.request_id,
+                        robot_epoch: request.robot_epoch,
+                        result: Some(wire::response::Result::Report(wire::Report {
+                            json: b"{}".to_vec(),
+                        })),
+                    },
+                )
+                .await
+                .unwrap();
+            } else {
+                // Dropping a prepared request after closure never flushes its ciphertext.
+                let result = tls.read(&mut first).await;
+                assert!(matches!(result, Ok(0) | Err(_)));
+            }
+        });
+        let prepared = PreparedRpc::connect(
+            endpoint,
+            "robot.test".into(),
+            client,
+            pin,
+            &proposal_request(),
+        )
+        .await
+        .unwrap();
+        observed.await.unwrap();
+        if publish {
+            let sent = prepared.try_send_once().unwrap();
+            let reply = sent.read_response().await.unwrap();
+            assert_eq!(reply.request_id, vec![1; 16]);
+        } else {
+            drop(prepared);
+        }
+        tokio::time::timeout(Duration::from_secs(2), server)
+            .await
+            .unwrap()
+            .unwrap();
+    }
+}
+
+#[tokio::test]
+async fn prepared_rpc_checks_peer_before_publication_and_rejects_lost_or_stale_reply() {
+    use sha2::{Digest, Sha256};
+    use std::time::Duration;
+    for case in ["pin", "dns", "lost", "epoch", "correlation"] {
+        let p = pki();
+        let server = server_tls(
+            p.ca.as_bytes(),
+            p.server.as_bytes(),
+            p.server_key.as_bytes(),
+        )
+        .unwrap();
+        let client = client_tls(
+            p.ca.as_bytes(),
+            p.client.as_bytes(),
+            p.client_key.as_bytes(),
+        )
+        .unwrap();
+        let pin: [u8; 32] =
+            Sha256::digest(certificates(p.server.as_bytes()).unwrap()[0].as_ref()).into();
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let endpoint = listener.local_addr().unwrap();
+        let server = tokio::spawn(async move {
+            let (socket, _) = listener.accept().await.unwrap();
+            let tls = TlsAcceptor::from(server).accept(socket).await;
+            if case == "dns" {
+                assert!(tls.is_err());
+                return;
+            }
+            let mut tls = tls.unwrap();
+            if case == "pin" {
+                let mut first = [0];
+                assert!(matches!(tls.read(&mut first).await, Ok(0) | Err(_)));
+                return;
+            }
+            let request: wire::Request = read_message(&mut tls).await.unwrap();
+            assert_eq!(request, proposal_request());
+            if case != "lost" {
+                write_message(
+                    &mut tls,
+                    &wire::Response {
+                        version: VERSION,
+                        request_id: if case == "correlation" {
+                            vec![8; 16]
+                        } else {
+                            request.request_id
+                        },
+                        robot_epoch: if case == "epoch" {
+                            vec![9; 16]
+                        } else {
+                            request.robot_epoch
+                        },
+                        result: Some(wire::response::Result::Report(wire::Report {
+                            json: b"{}".to_vec(),
+                        })),
+                    },
+                )
+                .await
+                .unwrap();
+            }
+            // A failed response closes this connection; no second mutation is sent.
+        });
+        let prepared = PreparedRpc::connect(
+            endpoint,
+            if case == "dns" {
+                "wrong.test"
+            } else {
+                "robot.test"
+            }
+            .into(),
+            client,
+            if case == "pin" { [0; 32] } else { pin },
+            &proposal_request(),
+        )
+        .await;
+        if matches!(case, "pin" | "dns") {
+            assert!(prepared.is_err());
+        } else {
+            assert!(prepared
+                .unwrap()
+                .try_send_once()
+                .unwrap()
+                .read_response()
+                .await
+                .is_err());
+        }
+        tokio::time::timeout(Duration::from_secs(2), server)
+            .await
+            .unwrap()
+            .unwrap();
+    }
+}

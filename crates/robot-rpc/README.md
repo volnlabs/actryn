@@ -37,3 +37,14 @@ flooding/replay and robot execution acceptance are separate.
 API references: [Rustls server authentication](https://docs.rs/rustls/0.23.46/rustls/server/struct.WebPkiClientVerifier.html),
 [Tokio TLS](https://docs.rs/tokio-rustls/0.26.6/tokio_rustls/),
 [Prost messages](https://docs.rs/prost/0.14.4/prost/trait.Message.html).
+# Fenced publication
+
+`PreparedRpc::connect` authenticates TLS, verifies the operator's device pin and
+encrypts a bounded request without sending its application bytes. Call the
+consuming, synchronous `try_send_once` inside the caller's publication locks.
+It makes one nonblocking socket write; a short write, timeout or error closes the
+connection and leaves delivery unknown. There is no retry or automatic flush on
+drop. The returned `SentRpc` reads one canonical, identity-checked response under
+the original five-second deadline. The ciphertext buffer is capped at 73,728
+bytes. This transport does not create grants, durable request handles or fences;
+the broker must establish those before publication.

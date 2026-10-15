@@ -1,7 +1,9 @@
 //! Bounded wire format and TLS identity; no method here issues an authority grant.
 mod identity;
+mod prepared;
 mod transport;
 pub use identity::*;
+pub use prepared::*;
 pub use transport::*;
 pub mod wire {
     include!(concat!(env!("OUT_DIR"), "/actryn.robot.v1.rs"));
