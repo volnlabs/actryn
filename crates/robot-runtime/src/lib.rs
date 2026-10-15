@@ -792,7 +792,6 @@ impl Engine {
         // Health closes authority first; continue draining actual events while
         // inhibited so normal retirement cannot overflow the kernel evidence FIFO.
         self.health()?;
-        let now = boottime_ns()?;
         let mut core = self.core.lock().unwrap();
         for _ in 0..64 {
             match self.events.read_event() {
@@ -801,6 +800,9 @@ impl Engine {
                 Err(e) => return Err(e.into()),
             }
         }
+        // Records may be acquired while the drain runs; compare them against a
+        // current host clock, never a snapshot predating their actual capture.
+        let now = boottime_ns()?;
         if core.recovery.is_some_and(|(_, deadline)| now >= deadline) {
             core.recovery = None;
             return Err(Error::Denied("recovery exchange timed out"));
