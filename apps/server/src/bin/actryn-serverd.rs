@@ -27,6 +27,7 @@ async fn main() -> Result<()> {
     ))?;
     let server = Server::new(&config).await?;
     if recovery_only {
+        server.finish_recovery_closures().await;
         return Ok(());
     }
     let monitor = server.clone();
@@ -39,14 +40,31 @@ async fn main() -> Result<()> {
             }
         }
     });
-    if let Ok(m) = fs::symlink_metadata(SERVER_SOCKET) {
-        ensure!(m.file_type().is_socket(), "server socket path occupied");
-        fs::remove_file(SERVER_SOCKET)?;
-    }
-    let listener = UnixListener::bind(SERVER_SOCKET)?;
-    fs::set_permissions(SERVER_SOCKET, fs::Permissions::from_mode(0o666))?;
+    let regular = bind(SERVER_SOCKET)?;
+    let closure = bind(protocol::CLOSURE_SOCKET)?;
     actryn_server::notify_ready()?;
-    let slots = Arc::new(Semaphore::new(4));
+    tokio::try_join!(
+        serve(regular, server.clone(), operator, false),
+        serve(closure, server, operator, true)
+    )?;
+    Ok(())
+}
+fn bind(path: &str) -> Result<UnixListener> {
+    if let Ok(m) = fs::symlink_metadata(path) {
+        ensure!(m.file_type().is_socket(), "server socket path occupied");
+        fs::remove_file(path)?;
+    }
+    let listener = UnixListener::bind(path)?;
+    fs::set_permissions(path, fs::Permissions::from_mode(0o666))?;
+    Ok(listener)
+}
+async fn serve(
+    listener: UnixListener,
+    server: Arc<Server>,
+    operator: u32,
+    closure_only: bool,
+) -> Result<()> {
+    let slots = Arc::new(Semaphore::new(if closure_only { 2 } else { 4 }));
     loop {
         let (mut stream, _) = listener.accept().await?;
         let uid = stream.peer_cred()?.uid();
@@ -64,6 +82,14 @@ async fn main() -> Result<()> {
                     tokio::time::timeout(Duration::from_secs(1), protocol::read_frame(&mut stream))
                         .await??;
                 let request = protocol::decode_request(&bytes)?;
+                ensure!(
+                    !closure_only
+                        || matches!(
+                            request,
+                            protocol::Request::Stop { .. } | protocol::Request::RobotCancel { .. }
+                        ),
+                    "reserved closure endpoint"
+                );
                 let response = server.handle(request.clone()).await;
                 server
                     .send_response(&mut stream, &request, &response)

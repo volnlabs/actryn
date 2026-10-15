@@ -33,6 +33,12 @@ impl Proposal {
     }
 }
 pub fn request_body(input: &ModelInput) -> Result<Value> {
+    request_body_with_observation(input, None)
+}
+pub fn request_body_with_observation(
+    input: &ModelInput,
+    observation: Option<&crate::robot::Observation>,
+) -> Result<Value> {
     ensure!(
         !input.goal.is_empty() && input.goal.len() <= 4096,
         "invalid goal length"
@@ -41,10 +47,14 @@ pub fn request_body(input: &ModelInput) -> Result<Value> {
         !input.observation_id.is_empty() && input.observation_id.len() <= 128,
         "invalid observation identity"
     );
+    if let Some(observation) = observation {
+        observation.validate()?;
+    }
+    let context = json!({"goal":input.goal,"trusted_robot_observation":observation});
     Ok(
         json!({"model":MODEL,"store":false,"background":false,"max_output_tokens":1024,"tools":[],"reasoning":{"effort":"none"},
         "instructions":"Propose one restrained simulated wheel index step. Return signed left_delta_ticks and right_delta_ticks in [-100,100] and duration_ms in [1,10000]. This proposal grants no authority. No tools are available.",
-        "input":input.goal,"text":{"format":{"type":"json_schema","name":"wheel_index_step","strict":true,
+        "input":serde_json::to_string(&context)?,"text":{"format":{"type":"json_schema","name":"wheel_index_step","strict":true,
             "schema":{"type":"object","additionalProperties":false,"required":["left_delta_ticks","right_delta_ticks","duration_ms"],
                 "properties":{"left_delta_ticks":{"type":"integer","minimum":-100,"maximum":100},"right_delta_ticks":{"type":"integer","minimum":-100,"maximum":100},"duration_ms":{"type":"integer","minimum":1,"maximum":10000}}}}}}),
     )
@@ -62,10 +72,12 @@ pub fn policy_digest() -> Result<String> {
         .remove("input");
     Ok(format!(
         "sha256:{:x}",
-        Sha256::digest(serde_json::to_vec(&json!({"request":policy,"transport":{
+        Sha256::digest(serde_json::to_vec(
+            &json!({"request":policy,"input_contract":"goal_and_broker_acquired_robot_observation_v1","transport":{
             "endpoint":ENDPOINT,"connect_timeout_seconds":CONNECT_TIMEOUT_SECONDS,
             "request_timeout_seconds":REQUEST_TIMEOUT_SECONDS,"response_byte_limit":RESPONSE_BYTE_LIMIT,
-            "proxies":false,"redirects":false,"retries":0}}))?)
+            "proxies":false,"redirects":false,"retries":0}})
+        )?)
     ))
 }
 pub fn decode_completed(response: &Value) -> Result<(Proposal, i64)> {
@@ -106,7 +118,14 @@ pub fn decode_completed(response: &Value) -> Result<(Proposal, i64)> {
 }
 /// A transport failure keeps the previously committed reservation unresolved.
 pub async fn live(input: &ModelInput, key: &str) -> Result<(Proposal, i64)> {
-    let body = request_body(input)?;
+    live_with_observation(input, key, None).await
+}
+pub async fn live_with_observation(
+    input: &ModelInput,
+    key: &str,
+    observation: Option<&crate::robot::Observation>,
+) -> Result<(Proposal, i64)> {
+    let body = request_body_with_observation(input, observation)?;
     let client = reqwest::Client::builder()
         .https_only(true)
         .no_proxy()

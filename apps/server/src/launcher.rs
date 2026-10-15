@@ -245,6 +245,11 @@ impl Launcher {
                 }
                 Request::Inspect { attempt_id } => self.store.inspect(&attempt_id),
                 Request::Result { .. } => bail!("result lookup belongs to the broker service"),
+                Request::BindRobot { .. }
+                | Request::RobotQuery { .. }
+                | Request::RobotCancel { .. } => {
+                    bail!("Robot delegation belongs to the broker service")
+                }
                 Request::Export { .. } => unreachable!(),
             }
         }

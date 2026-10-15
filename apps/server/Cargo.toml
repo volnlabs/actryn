@@ -18,6 +18,9 @@ prost-types = "=0.14.4"
 reqwest = { version = "=0.13.5", default-features = false, features = ["rustls", "json", "stream"] }
 
 tar = "=0.4.46"
+robot-rpc = { path = "../../crates/robot-rpc" }
+rustls = { version = "=0.23.46", default-features = false, features = ["ring", "std"] }
+prost = "=0.14.4"
 
 [dev-dependencies]
 tempfile.workspace = true

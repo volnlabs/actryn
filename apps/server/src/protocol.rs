@@ -9,6 +9,7 @@ use tokio::{
     net::UnixStream,
 };
 pub const MAX_MESSAGE: usize = 65536;
+pub const CLOSURE_SOCKET: &str = "/run/actryn-server/closure.sock";
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Request {
@@ -31,6 +32,18 @@ pub enum Request {
     Export {
         attempt_id: String,
     },
+    BindRobot {
+        attempt_id: String,
+        namespace: String,
+    },
+    RobotQuery {
+        attempt_id: String,
+        request_key: String,
+    },
+    RobotCancel {
+        attempt_id: String,
+        request_key: String,
+    },
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case")]
@@ -44,6 +57,12 @@ pub enum Response {
     },
     Evidence {
         bundle: crate::evidence::Bundle,
+    },
+    RobotBinding {
+        binding: crate::robot::Binding,
+    },
+    RobotResult {
+        request: crate::robot::Intent,
     },
     Error {
         message: String,
@@ -63,11 +82,28 @@ pub fn decode_request(bytes: &[u8]) -> Result<Request> {
         Request::Result {
             attempt_id,
             request_key,
+        }
+        | Request::RobotQuery {
+            attempt_id,
+            request_key,
+        }
+        | Request::RobotCancel {
+            attempt_id,
+            request_key,
         } => {
             ensure!(valid_id(attempt_id), "invalid attempt id");
             ensure!(
                 !request_key.is_empty() && request_key.len() <= 128,
                 "invalid request key"
+            );
+        }
+        Request::BindRobot {
+            attempt_id,
+            namespace,
+        } => {
+            ensure!(
+                valid_id(attempt_id) && valid_id(namespace),
+                "invalid delegation identity"
             );
         }
     };

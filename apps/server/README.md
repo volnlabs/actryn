@@ -18,7 +18,7 @@ non-group/world-writable `/etc/actryn/server.json`:
   "io_device": "254:0",
   "artifacts": {
     "sha256:<64 lowercase hex digits>": {
-      "rootfs": "/var/lib/actryn/artifacts/<digest>/rootfs",
+      "rootfs": "/var/lib/actryn-artifacts/<64 lowercase hex digits>/rootfs",
       "argv": ["/bin/agent"]
     }
   }
@@ -35,9 +35,13 @@ Fixed sockets:
 
 - `/run/actryn/launcher.sock`: root or configured server UID only.
 - `/run/actryn-server/server.sock`: root or configured operator UID only.
+- `/run/actryn-server/closure.sock`: the same operator authentication, with two
+  reserved connections accepting only `stop` and `robot_cancel`.
 - `/run/actryn/observer.sock`: real privileged observer, verified root peer.
 - `/run/actryn/brokers/<generated-attempt>/broker.sock`: bind-mounted into only that
   attempt; host parent is service-private. Peer UID and actual peer cgroup are checked.
+- `/run/actryn/brokers/<generated-attempt>/closure.sock`: two reserved agent
+  cancellation connections, mounted at `/run/actryn-broker/closure.sock`.
 
 Messages use a four-byte big-endian length followed by UTF-8 JSON, at most 65,536
 bytes, one request per connection. Operator and launcher requests are:
@@ -90,9 +94,11 @@ The offline fixture returns a bounded 10/10 tick, 1,000 ms proposal. Its label i
 `offline-fixture`; it is not a model-quality result. The live method uses only
 OpenAI Responses, `gpt-5.4-mini-2026-03-17`, fixed structured output, no hosted tools,
 no redirects/proxies/retries, 4,096 input text bytes, 1,024 output tokens and a
-65,536-byte response cap. The broker binds observation/request identity itself.
-Neither method dispatches a robot command. The integration layer must route that
-proposal through authenticated Robot admission and the kernel gate.
+65,536-byte response cap. An unbound attempt produces an attested diagnostic
+proposal only. An explicitly bound attempt acquires a trusted Robot observation
+before inference and sends the resulting bounded proposal through authenticated
+Robot admission. `observation_id` in agent input is an untrusted diagnostic
+reference; it never selects or replaces the trusted observation.
 
 For live calls, systemd must deliver `openai-api-key` to the **server service only**
 at `/run/credentials/actryn-serverd.service/openai-api-key`. Missing credentials
@@ -120,6 +126,68 @@ histories (including capped stdout/stderr), 16 stable request keys per attempt a
 has no acknowledgement or deletion command that could forgive unresolved work.
 These values must remain pinned with the installed release profile.
 
+## Trusted Robot delegation
+
+The operator prepares a server attempt, binds it to a fresh namespace, completes
+local Robot preparation/rearm/grant/activation for that exact attempt, namespace
+and workload principal, then starts the agent. Binding establishes a recent
+authenticated workload session; it grants no Robot authority. The binding and
+namespace cannot be replaced or reused, and expire no later than the original
+prepared attempt or 120 seconds after binding. Operator protocol requests are:
+
+```json
+{"op":"bind_robot","attempt_id":"<32 hex digits>","namespace":"<32 hex digits>"}
+{"op":"robot_query","attempt_id":"<32 hex digits>","request_key":"index-1"}
+{"op":"robot_cancel","attempt_id":"<32 hex digits>","request_key":"index-1"}
+```
+
+Binding returns `{"result":"robot_binding","binding":...}`. Query and cancellation
+return `{"result":"robot_result","request":...}` with the retained remote handle,
+original manager epoch, observation lineage, closure state and outstanding debit.
+The operator uses the reserved closure socket for cancellation. Cancelling an
+unknown broker key closes it locally and reports that no remote handle exists;
+it does not invent a remote cancellation receipt.
+
+Only root-installed `/etc/actryn/robot-peer.json` selects the peer. It contains
+`endpoint` (numeric IP and port), `dns_name`, `robot_leaf_sha256` (bare lowercase
+DER-leaf SHA-256), `principal`, `robot_configuration_digest`,
+`robot_profile_digest` (both bare SHA-256), `ca_pem`, and
+`client_certificate_pem`. The public configuration is at most 64 KiB, root-owned
+and not group/world writable. The broker reads the private workload key only from
+`/run/credentials/actryn-serverd.service/robot-client-key`; packaging supplies it
+with `LoadCredential`. Neither agent nor privileged launcher receives that key.
+TLS 1.3 validates the CA, DNS name, exact leaf pin and workload identity. Describe
+must match the installed Robot identity/configuration/profile before binding.
+
+The broker commits a random 32-byte remote key and immutable attempt/namespace
+before observing or sending. It stores the actual Robot observation and context
+revision, then includes that observation in the live model input and attested
+result. It commits the proposal intent before preparing its encrypted request.
+At the final publication point, both attempt and request cancellation fences must
+remain open; one consuming, nonblocking ciphertext write publishes the request.
+Partial writes, lost replies and expired observations are never retried. The
+original observation retains Robot's one-second freshness bound; the server also
+rejects a final write one second after local receipt. It never refreshes or
+substitutes observations after inference.
+
+Cancellation closes those in-memory fences and queues the captured remote handle
+before waiting for SQLite. Reserved network closure therefore remains usable
+while the ordinary database is stalled. Every pending pre-send transaction checks
+the same closed fences again after commit. Recovery sends only cancellation or
+query for retained handles, never a new proposal. An authenticated Describe may
+discover a replacement manager epoch only for these retained-handle operations;
+the stored original epoch and binding remain unchanged.
+
+There is at most one outstanding Robot job per attempt and four globally, with
+16 retained keys per attempt and 16 captured closure entries. Container cleanup,
+provider settlement and Robot settlement are separate. A matching durable
+cancel-before-operation receipt or a known terminal **and reconciled** operation
+can release a Robot debit. `OutcomeUnknown`, absent results and unavailable peers
+remain charged across restart. Historical lookup cannot erase already retained
+durable reconciliation proof. Status reports compact metadata and explicit
+omission counts; per-key query returns the finite retained record. These reports
+do not reopen publication of historical model replies.
+
 `Inspection` reports attempt state/outcome, calls and evidence gaps. Normal process
 exit, cancellation, unknown outcomes and incomplete diagnostics remain distinct.
 Raw capped stdout/stderr and truncation markers stay in the launcher-owned
@@ -132,7 +200,9 @@ is capped at 60 KiB including hexadecimal log-tail expansion and the manifest.
 Each artifact records the SHA-256 and byte length of its compact UTF-8 JSON
 content with sorted object keys. Fixed artifacts separate attempt identity,
 verified runtime binding, observed cgroup counters/observer status, untrusted
-stdout/stderr, and broker policy denials. No arbitrary OS error is attributed to
+stdout/stderr, broker policy denials, and Robot delegation metadata. The Robot
+artifact prioritizes outstanding jobs and reports any omitted records; it does
+not include historical model output. No arbitrary OS error is attributed to
 a policy rule. Counter snapshots commit before runtime deletion removes the
 cgroup; unavailable counters and missing evidence remain explicit.
 
@@ -159,13 +229,14 @@ listed capabilities, and cannot open network address families. Linux 6.12's
 [device-program query](https://github.com/torvalds/linux/blob/v6.12/kernel/bpf/syscall.c#L3943)
 requires `CAP_NET_ADMIN` through `bpf_net_capable()`; the helper retains that
 capability to verify installed enforcement before start. `actryn-serverd`
-has no capabilities, cannot access the engine socket, and can use HTTPS only via
-its named fixed-destination broker implementation. Both use `Restart=on-failure`.
+has no capabilities, cannot access the engine socket, and its broker selects only
+the installed Robot peer and named HTTPS model provider. Both use `Restart=on-failure`.
 Their fixed `--recover-only` stop hooks also retire work after normal stops and
 crashes; startup repeats recovery. `Type=notify` reports readiness only after
 recovery and listener creation. The file lock excludes duplicate processes.
 
-The offline package loads no credential. Live inference requires an operator
+Offline inference needs no provider credential. Robot delegation separately
+requires the server-only workload key. Live inference requires an operator
 drop-in containing `LoadCredential=openai-api-key:/etc/actryn/credentials/openai-api-key`.
 The source file remains root-only, and only the server service receives it.
 These directives follow the [systemd 257 execution contract](https://github.com/systemd/systemd/blob/v257/man/systemd.exec.xml)
@@ -197,6 +268,15 @@ After that fixture, `tests/guest_services.py <launcher> <serverd> <packaging-dir
 installs the units and checks both daemon crashes, normal service stop, automatic
 recovery without repeated agent execution, retired descendants, historical export,
 resource counters, log hashes and explicit crash-induced log incompleteness.
+
+`tests/robot_accounting.rs` checks immutable bindings/observations, cancel before
+dispatch, retained handles across restart, terminal unknowns, reconciliation,
+global outstanding capacity, retained key exhaustion, trusted model context and
+bounded status/export. The service test uses a real TCP connection while another
+connection holds SQLite's write lock to check that network closure proceeds
+before persistence. These tests do not establish a completed cross-guest Robot
+workflow or provider latency suitability; the combined acceptance campaign must
+exercise those separately with the final pinned artifact/profile.
 
 Not yet qualified by this crate's unit suite: full runtime negative-access and
 resource-pressure tests, storage-failure/crash campaigns, full trace/content

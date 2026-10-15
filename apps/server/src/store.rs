@@ -2,6 +2,7 @@ use anyhow::{bail, ensure, Context, Result};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use serde::{Deserialize, Serialize};
 use std::{path::Path, time::Duration};
+mod robot;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -65,6 +66,12 @@ pub struct Inspection {
     pub calls: Vec<Reservation>,
     pub evidence_gaps: Vec<String>,
     pub denials: Vec<Denial>,
+    #[serde(default)]
+    pub denials_omitted: usize,
+    #[serde(default)]
+    pub robot_binding: Option<crate::robot::Binding>,
+    #[serde(default)]
+    pub robot_requests: Vec<crate::robot::Summary>,
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Denial {
@@ -192,6 +199,8 @@ impl Store {
             CREATE TABLE IF NOT EXISTS gaps(attempt_id TEXT NOT NULL REFERENCES attempts(id),reason TEXT NOT NULL,UNIQUE(attempt_id,reason));
             CREATE TABLE IF NOT EXISTS runtime_evidence(attempt_id TEXT PRIMARY KEY REFERENCES attempts(id),data TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS denials(attempt_id TEXT NOT NULL REFERENCES attempts(id),request_key TEXT NOT NULL,method TEXT NOT NULL,UNIQUE(attempt_id,request_key,method));")?;
+        db.execute_batch("CREATE TABLE IF NOT EXISTS robot_bindings(attempt_id TEXT PRIMARY KEY REFERENCES attempts(id),namespace TEXT NOT NULL UNIQUE,data TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS robot_requests(attempt_id TEXT NOT NULL REFERENCES robot_bindings(attempt_id),request_key TEXT NOT NULL,data TEXT NOT NULL,outstanding INTEGER NOT NULL,cancelled INTEGER NOT NULL,PRIMARY KEY(attempt_id,request_key));")?;
         let integrity: String = db.query_row("PRAGMA quick_check", [], |r| r.get(0))?;
         ensure!(integrity == "ok", "ambiguous/corrupt accounting storage");
         Ok(Self { db, limits })
@@ -329,6 +338,7 @@ impl Store {
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
         ensure!(tx.execute("UPDATE attempts SET state=CASE WHEN state='reaped' THEN state ELSE 'retiring' END,outcome=CASE WHEN outcome='pending' THEN ?2 ELSE outcome END WHERE id=?1",params![id,outcome])?==1,"unknown attempt");
         tx.execute("UPDATE calls SET publication_closed=1,output=NULL,state=CASE WHEN state='reserved' THEN 'cancelled' ELSE state END WHERE attempt_id=?1",[id])?;
+        robot::close(&tx, Some(id))?;
         tx.commit()?;
         Ok(())
     }
@@ -356,6 +366,7 @@ impl Store {
             [],
         )?;
         tx.execute("UPDATE calls SET publication_closed=1,output=NULL,state=CASE WHEN state='reserved' THEN 'cancelled' WHEN state='dispatched' THEN 'unknown' ELSE state END",[])?;
+        robot::close(&tx, None)?;
         tx.commit()?;
         Ok(ids)
     }
@@ -513,10 +524,17 @@ impl Store {
             .prepare("SELECT reason FROM gaps WHERE attempt_id=?1 ORDER BY reason")?
             .query_map([id], |r| r.get(0))?
             .collect::<rusqlite::Result<_>>()?;
-        Ok(Inspection {
+        let mut inspection = Inspection {
             attempt,
             calls,
             evidence_gaps,
+            denials_omitted: 0,
+            robot_binding: self.robot_binding(id)?,
+            robot_requests: self
+                .robot_intents(id)?
+                .iter()
+                .map(crate::robot::Intent::summary)
+                .collect(),
             denials: self
                 .db
                 .prepare(
@@ -530,7 +548,17 @@ impl Store {
                     })
                 })?
                 .collect::<rusqlite::Result<_>>()?,
-        })
+        };
+        // Untrusted denied method strings may expand sixfold in JSON. Keep
+        // status usable while retaining every raw record in the durable store.
+        while serde_json::to_vec(&inspection)?.len() > crate::protocol::MAX_MESSAGE - 1024 {
+            ensure!(
+                inspection.denials.pop().is_some(),
+                "inspection metadata exceeds response cap"
+            );
+            inspection.denials_omitted += 1;
+        }
+        Ok(inspection)
     }
     /// Read an existing result only; this never allocates or dispatches work.
     pub fn result(

@@ -15,6 +15,7 @@ fn artifact_cap(name: ArtifactName) -> usize {
         ArtifactName::Attempt => 1024,
         ArtifactName::Stdout | ArtifactName::Stderr => 5 * 1024,
         ArtifactName::Broker => 10 * 1024,
+        ArtifactName::Robot => 4 * 1024,
         ArtifactName::RuntimeBinding | ArtifactName::RuntimeFacts => ARTIFACT_CAP,
     }
 }
@@ -28,6 +29,7 @@ pub enum ArtifactName {
     Stdout,
     Stderr,
     Broker,
+    Robot,
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Artifact {
@@ -113,7 +115,30 @@ impl Bundle {
             inspection.attempt.id == self.attempt_id,
             "broker evidence attempt mismatch"
         );
-        let total = inspection.denials.len();
+        if let Some(binding) = inspection.robot_binding {
+            let total = inspection.robot_requests.len();
+            let mut requests = inspection.robot_requests;
+            let outstanding = requests.iter().filter(|r| r.outstanding_debit).count();
+            // Preserve unresolved handles first. Full observations/replies stay in the durable store.
+            requests.sort_by_key(|r| !r.outstanding_debit);
+            let content = loop {
+                let value = json!({"classification":"trusted_peer_delegation_metadata","binding":binding,"requests":requests,"requests_retained":total,"outstanding_debits":outstanding,"detail_lookup":"robot_query_by_attempt_and_request_key"});
+                if serde_json::to_vec(&value)?.len() <= artifact_cap(ArtifactName::Robot) {
+                    break value;
+                }
+                ensure!(!requests.is_empty(), "Robot binding exceeds evidence cap");
+                requests.pop();
+            };
+            if requests.len() < total {
+                self.omit(
+                    ArtifactName::Robot,
+                    "robot_records_omitted_from_export",
+                    total - requests.len(),
+                )?;
+            }
+            self.add(ArtifactName::Robot, content)?;
+        }
+        let total = inspection.denials.len() + inspection.denials_omitted;
         let mut denials = inspection.denials;
         let content = loop {
             let value = json!({"classification":"broker_application_policy_and_delegated_accounting",

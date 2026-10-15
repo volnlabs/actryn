@@ -6,8 +6,11 @@ pub struct PublicationGate {
     closed: Mutex<bool>,
 }
 impl PublicationGate {
-    pub fn close(&self) {
-        *self.closed.lock().unwrap_or_else(|p| p.into_inner()) = true;
+    pub fn close(&self) -> bool {
+        let mut closed = self.closed.lock().unwrap_or_else(|p| p.into_inner());
+        let first = !*closed;
+        *closed = true;
+        first
     }
     pub fn publish<T>(&self, f: impl FnOnce() -> T) -> Result<T> {
         let closed = self

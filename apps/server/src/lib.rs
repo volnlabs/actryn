@@ -8,6 +8,7 @@ pub mod model;
 pub mod observer;
 pub mod policy;
 pub mod protocol;
+pub mod robot;
 pub mod service;
 
 /// systemd readiness notification, after recovery and the authenticated listener are ready.
