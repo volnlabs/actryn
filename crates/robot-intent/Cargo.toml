@@ -1,0 +1,9 @@
+[package]
+name = "robot-intent"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rusqlite = { version = "=0.40.2", default-features = false, features = ["libsqlite3-sys", "bundled"] }
