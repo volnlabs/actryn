@@ -1,0 +1,13 @@
+config ACTRYN_AUTHORITY
+	tristate "Actryn software fixture serdev authority"
+	depends on SERIAL_DEV_BUS && OF
+	help
+	  Typed software-fixture authority. Physical targets are not supported.
+
+config ACTRYN_AUTHORITY_KUNIT_TEST
+	tristate "Actryn authority codec and urgent control KUnit tests"
+	depends on KUNIT && ACTRYN_AUTHORITY
+	default KUNIT_ALL_TESTS
+	help
+	  Tests production codec, deadline and urgent closure primitives.
+	  The separate guest selftest exercises actual serdev dispatch.
