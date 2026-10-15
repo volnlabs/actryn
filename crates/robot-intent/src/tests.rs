@@ -461,3 +461,40 @@ fn epoch_reuse_lock_payload_and_namespace_capacity_reject_before_allocation() {
     drop(writer);
     assert!(Registry::open(&temp.0, [1; 16], limits, Kernel::new(1)).is_err());
 }
+
+#[test]
+fn sqlite_exclusive_writer_lock_cannot_block_urgent_allocated_cancel() {
+    let temp = Temp::new();
+    let (registry, mut writer, ns, kernel) = ready(&temp.0, Limits::default());
+    registry.propose(&ns, [1; 32], intent()).unwrap();
+    let blocker = rusqlite::Connection::open(&temp.0).unwrap();
+    blocker.execute_batch("BEGIN EXCLUSIVE").unwrap();
+    let barrier = Arc::new(std::sync::Barrier::new(2));
+    writer.block_storage(barrier.clone());
+    let storage = thread::spawn(move || writer.flush());
+    barrier.wait();
+    barrier.wait();
+    thread::sleep(Duration::from_millis(20));
+    assert!(!registry.health().persistence_failed);
+    let (tx, rx) = std::sync::mpsc::channel();
+    let urgent = registry.clone();
+    let urgent_ns = ns.clone();
+    let cancel = thread::spawn(move || {
+        tx.send(urgent.cancel(&urgent_ns, [1; 32]).unwrap())
+            .unwrap()
+    });
+    let pending = rx
+        .recv_timeout(Duration::from_secs(1))
+        .expect("cancel waited for SQLite lock");
+    cancel.join().unwrap();
+    assert_eq!(pending.phase, Phase::CancelPending);
+    assert_eq!(kernel.count("close"), 1);
+    assert_eq!(kernel.count("submit"), 0);
+    blocker.execute_batch("COMMIT").unwrap();
+    storage.join().unwrap().unwrap();
+    assert!(registry
+        .query(ns.id(), [1; 32])
+        .unwrap()
+        .key_cancelled_durable());
+    assert_eq!(kernel.count("submit"), 0);
+}
