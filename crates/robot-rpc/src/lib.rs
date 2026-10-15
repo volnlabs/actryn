@@ -110,6 +110,14 @@ impl wire::Request {
                 "enrollment material size"
             ),
             RevokePrincipal(p) => ensure!(valid_principal(&p.principal), "invalid principal"),
+            InstallPrincipal(p) => ensure!(
+                valid_principal(&p.principal)
+                    && p.certificate_sha256.len() == 64
+                    && p.certificate_sha256
+                        .bytes()
+                        .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)),
+                "invalid principal installation"
+            ),
             _ => (),
         }
         Ok(())

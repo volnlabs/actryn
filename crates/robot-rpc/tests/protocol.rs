@@ -61,6 +61,18 @@ fn scope_and_envelope_do_not_accept_authority_in_caller_fields() {
     assert!(r.remote_scope().is_err());
     r.robot_epoch.clear();
     assert!(r.validate().is_err());
+    r.robot_epoch = vec![2; 16];
+    r.command = Some(Command::InstallPrincipal(wire::PrincipalInstall {
+        principal: "workload".into(),
+        certificate_sha256: "ab".repeat(32),
+        can_propose: true,
+    }));
+    r.validate().unwrap();
+    assert!(r.remote_scope().is_err());
+    if let Some(Command::InstallPrincipal(p)) = &mut r.command {
+        p.certificate_sha256 = "../../policy".into();
+    }
+    assert!(r.validate().is_err());
 }
 #[test]
 fn clock_discontinuity_is_sticky_and_restart_floor_is_enforced() {

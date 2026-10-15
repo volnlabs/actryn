@@ -41,7 +41,52 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   `6.12.111+deb13-amd64`. This image verification used HTTPS and published hashes;
   detached-signature verification is not yet recorded.
 - Server guest has containerd `1.7.24~ds1-6+deb13u1` and runc
-  `1.1.15+ds1-2+b4`. Runtime launch/isolation acceptance is still pending.
+  `1.1.15+ds1-2+b4`. Actual stopped-sandbox verification, OCI launch, broker identity/isolation and packaged-service crash recovery pass on this tuple. The guest device for io.max is the whole block device `254:0`; `254:1` was rejected by the kernel. These component runs do not close the integrated release gates.
+- Evidence recorder integrated through `1f511e6`; 12 real-file tests pass on
+  the integration branch. MCAP batches precede SQLite durable checkpoints;
+  read/queued/durable frontiers, stalled-writer health, reserved transition
+  capacity, finite disk/batch limits, source gaps and strict replay eligibility
+  are covered. Manager-triggered revocation and power-cut validation remain open.
+- Actual authority module revision 07 (`cc3aeb3`) builds/loads on ARM64
+  `6.12.111+deb13-arm64`, exclusively bound to the second PL011 serdev child;
+  `/dev/ttyAMA1` is absent. Its clean guest C selftest passes two completions
+  under one grant, allocated cancellation, stale START rejection, duplicate
+  checks, forked-FD rejection, exec denial, malformed requests, expiry and
+  non-resurrection. Plain, lockdep, KASAN and KCSAN campaigns each pass seven
+  cases. These diagnostic guests exercise production code with a mocked serdev;
+  the ARM guest selftest exercises actual UART/module/fixture transport.
+- Kernel archive 11 fixes a separately reproduced zero-grant REVOKE bypass of
+  inhibited baseline state. The direct ARM regression now passes. Its plain,
+  lockdep and KASAN campaigns pass eight cases. Initial incremental KCSAN reused
+  a stale object and the eight-case validator rejected it; preserved campaign
+  `11b` rebuilds the authority sources and passes all eight cases under KCSAN.
+  The earlier logs, configs and binaries remain separately hash-verified.
+  Adversarial dup/rights/owner-exit tests have component passes; remaining 11
+  runs and broader teardown/PM/capacity coverage are still open. One fresh
+  rights test failed during initial handshake with PROTOCOL, before exercising
+  rights; it is retained as a setup failure, not a pass or established cause.
+- Robot intent registry has 17 passing host tests, including a real SQLite
+  exclusive-writer stall while cancellation remains nonblocking. Its read-only
+  historical inspector cannot resume unfinished work. The authority client
+  passed real UAPI layout/role checks and process-wide exec denial tests.
+- Fixed native skill runtime (`5a60d9f`) has 12 passing host tests. Guest run 04
+  passes on actual kernel revision 07: two target-reaching operations under one
+  grant, key tombstones before proposal, duplicate/digest rejection, no
+  reactivation after revoke and principal-checked history. Earlier guest runs
+  are retained: the first exposed test-directory permissions; the next two
+  exposed premature slew credit relative to STARTED. Runtime now waits from
+  the actual STARTED receipt using a conservative controller-clock estimate.
+  This validates simulated encoder behavior, not physical position accuracy.
+- Server evidence/supervision (`5a99dd8`) has 29 passing host tests and strict
+  Clippy. Packaged guest run 05 passes real daemon SIGKILL recovery, resource
+  collection, bounded export with verified hashes, operator access and cleanup.
+  Retained exports explicitly preserve unknown broker work after server death
+  and unknown attempt outcome after launcher death. Service setup failures
+  (account allocation and required NET_ADMIN for BPF_PROG_QUERY) remain retained.
+- Robot RPC and Python SDK foundations are committed. TLS 1.3, certificate
+  policy, canonical framing, gateway peer pidfd and deadline/unknown-outcome
+  tests pass. The manager, gateway integration, enrollment, CLI, immutable
+  packaging and end-to-end workflow are being implemented and are not accepted.
 - No host kernel module was loaded and no physical interface was attached.
 
 ## Decisions

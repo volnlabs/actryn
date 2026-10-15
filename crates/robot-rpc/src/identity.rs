@@ -69,19 +69,7 @@ impl Policy {
             !self.revoked.contains(&policy.principal),
             "principal revoked"
         );
-        let (remaining, cert) = X509Certificate::from_der(leaf)
-            .map_err(|_| anyhow::anyhow!("certificate structure"))?;
-        ensure!(remaining.is_empty(), "trailing certificate data");
-        let before = u64::try_from(cert.validity().not_before.timestamp())?
-            .checked_mul(1_000_000_000)
-            .context("certificate time overflow")?;
-        let after = u64::try_from(cert.validity().not_after.timestamp())?
-            .checked_mul(1_000_000_000)
-            .context("certificate time overflow")?;
-        ensure!(
-            before <= wall_ns && wall_ns < after,
-            "certificate outside validity"
-        );
+        let after = certificate_valid_until(leaf, wall_ns)?;
         let remaining = (after - wall_ns).min(300_000_000_000);
         Ok(Session {
             principal: policy.principal.clone(),
@@ -118,6 +106,23 @@ impl Session {
         );
         Ok(())
     }
+}
+pub fn certificate_valid_until(leaf: &[u8], wall_ns: u64) -> Result<u64> {
+    ensure!(leaf.len() <= 24_576, "certificate size");
+    let (remaining, cert) =
+        X509Certificate::from_der(leaf).map_err(|_| anyhow::anyhow!("certificate structure"))?;
+    ensure!(remaining.is_empty(), "trailing certificate data");
+    let before = u64::try_from(cert.validity().not_before.timestamp())?
+        .checked_mul(1_000_000_000)
+        .context("certificate time overflow")?;
+    let after = u64::try_from(cert.validity().not_after.timestamp())?
+        .checked_mul(1_000_000_000)
+        .context("certificate time overflow")?;
+    ensure!(
+        before <= wall_ns && wall_ns < after,
+        "certificate outside validity"
+    );
+    Ok(after)
 }
 pub fn fingerprint(bytes: &[u8]) -> String {
     Sha256::digest(bytes)

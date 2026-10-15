@@ -25,6 +25,7 @@ message Request {
     EnrollmentRequest enroll_request = 30;
     EnrollmentInstall enroll_install = 31;
     PrincipalRevoke revoke_principal = 32;
+    PrincipalInstall install_principal = 33;
   }
 }
 message Empty {}
@@ -53,6 +54,11 @@ message Grant { uint64 duration_ms = 1; }
 message EnrollmentRequest { string dns_name = 1; }
 message EnrollmentInstall { bytes certificate_pem = 1; bytes ca_pem = 2; }
 message PrincipalRevoke { string principal = 1; }
+message PrincipalInstall {
+  string principal = 1;
+  string certificate_sha256 = 2; // Locally approved lowercase leaf fingerprint.
+  bool can_propose = 3; // Read access is always present.
+}
 message Response {
   uint32 version = 1;
   bytes request_id = 2;
