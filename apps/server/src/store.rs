@@ -138,6 +138,22 @@ fn key(s: &str) -> Result<()> {
 }
 
 impl Store {
+    pub fn record_runtime_evidence(&mut self, id: &str, data: &str) -> Result<()> {
+        ensure!(data.len() <= 16384, "runtime evidence exceeds fixed cap");
+        let _: serde_json::Value = serde_json::from_str(data)?;
+        self.db.execute("INSERT INTO runtime_evidence(attempt_id,data) VALUES(?1,?2) ON CONFLICT(attempt_id) DO UPDATE SET data=excluded.data",params![id,data])?;
+        Ok(())
+    }
+    pub fn runtime_evidence(&self, id: &str) -> Result<Option<String>> {
+        Ok(self
+            .db
+            .query_row(
+                "SELECT data FROM runtime_evidence WHERE attempt_id=?1",
+                [id],
+                |r| r.get(0),
+            )
+            .optional()?)
+    }
     pub fn open(path: impl AsRef<Path>, limits: Limits) -> Result<Self> {
         for n in [
             limits.prepared,
@@ -174,6 +190,7 @@ impl Store {
               consumed_tokens INTEGER NOT NULL DEFAULT 0,deadline_ms INTEGER NOT NULL DEFAULT 0,
               publication_closed INTEGER NOT NULL DEFAULT 0,output BLOB,UNIQUE(attempt_id,request_key));
             CREATE TABLE IF NOT EXISTS gaps(attempt_id TEXT NOT NULL REFERENCES attempts(id),reason TEXT NOT NULL,UNIQUE(attempt_id,reason));
+            CREATE TABLE IF NOT EXISTS runtime_evidence(attempt_id TEXT PRIMARY KEY REFERENCES attempts(id),data TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS denials(attempt_id TEXT NOT NULL REFERENCES attempts(id),request_key TEXT NOT NULL,method TEXT NOT NULL,UNIQUE(attempt_id,request_key,method));")?;
         let integrity: String = db.query_row("PRAGMA quick_check", [], |r| r.get(0))?;
         ensure!(integrity == "ok", "ambiguous/corrupt accounting storage");

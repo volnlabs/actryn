@@ -117,6 +117,14 @@ fn protocol_rejects_unknown_authority_fields_and_caller_paths() {
         decode_request(br#"{"op":"prepare","artifact_digest":"sha256:abc","rootfs":"/"}"#).is_err()
     );
     assert!(decode_request(br#"{"op":"start","attempt_id":"../../host"}"#).is_err());
+    assert!(decode_request(br#"{"op":"export","attempt_id":"../../etc/shadow"}"#).is_err());
+    let export = format!(r#"{{"op":"export","attempt_id":"{}"}}"#, "a".repeat(32));
+    assert!(matches!(
+        decode_request(export.as_bytes()).unwrap(),
+        Request::Export { .. }
+    ));
+    let path_override = export.replace('}', r#", "path":"/etc/shadow"}"#);
+    assert!(decode_request(path_override.as_bytes()).is_err());
     assert!(decode_request(&vec![b' '; 65537]).is_err());
     let bytes = format!(
         r#"{{"op":"prepare","artifact_digest":"sha256:{}"}}"#,

@@ -1,4 +1,5 @@
 use crate::{
+    evidence::{self, ArtifactName, Bundle, RuntimeFacts},
     observer::{self, ObserverRequest, ObserverStatus},
     policy::{self, Snapshot},
     protocol::{Request, Response},
@@ -207,6 +208,10 @@ impl Launcher {
     }
     pub async fn recover(&mut self) -> Result<()> {
         for id in self.store.recover()? {
+            if Path::new(STATE_ROOT).join(&id).exists() {
+                // A previous reader may have died with undrained FIFO bytes or unsynced data.
+                self.store.record_gap(&id, "log_incomplete")?;
+            }
             if let Err(error) = self.cleanup(&id).await {
                 eprintln!("unreconciled runtime {id}: {error:#}");
             }
@@ -214,6 +219,14 @@ impl Launcher {
         Ok(())
     }
     pub async fn handle(&mut self, request: Request) -> Response {
+        if let Request::Export { attempt_id } = &request {
+            return match self.export_evidence(attempt_id) {
+                Ok(bundle) => Response::Evidence { bundle },
+                Err(error) => Response::Error {
+                    message: format!("{error:#}"),
+                },
+            };
+        }
         let result: Result<_> = async {
             match request {
                 Request::Prepare { artifact_digest } => {
@@ -231,6 +244,7 @@ impl Launcher {
                 }
                 Request::Inspect { attempt_id } => self.store.inspect(&attempt_id),
                 Request::Result { .. } => bail!("result lookup belongs to the broker service"),
+                Request::Export { .. } => unreachable!(),
             }
         }
         .await;
@@ -240,6 +254,48 @@ impl Launcher {
                 message: format!("{error:#}"),
             },
         }
+    }
+    fn export_evidence(&self, id: &str) -> Result<Bundle> {
+        let inspection = self.store.inspect(id)?;
+        let mut attempt = inspection.attempt;
+        let binding = attempt.binding.take();
+        let complete = attempt.state == "reaped"
+            && !inspection
+                .evidence_gaps
+                .iter()
+                .any(|v| v == "log_incomplete");
+        let mut bundle = Bundle::new(id)?;
+        bundle.add(ArtifactName::Attempt, serde_json::to_value(&attempt)?)?;
+        if let Some(binding) = binding {
+            bundle.add(
+                ArtifactName::RuntimeBinding,
+                serde_json::from_str(&binding)?,
+            )?;
+        } else {
+            bundle.omit(ArtifactName::RuntimeBinding, "preparation_never_bound", 1)?;
+        }
+        if let Some(facts) = self.store.runtime_evidence(id)? {
+            bundle.add(ArtifactName::RuntimeFacts, serde_json::from_str(&facts)?)?;
+        } else {
+            bundle.omit(
+                ArtifactName::RuntimeFacts,
+                "final_resource_snapshot_unavailable",
+                1,
+            )?;
+        }
+        let directory = Path::new(STATE_ROOT).join(id);
+        for (name, stderr) in [(ArtifactName::Stdout, false), (ArtifactName::Stderr, true)] {
+            match evidence::log_evidence(&directory, stderr, complete) {
+                Ok(log) => {
+                    bundle.add(name, serde_json::to_value(log)?)?;
+                }
+                Err(_) => bundle.omit(name, "retained_log_unavailable", 1)?,
+            }
+        }
+        for gap in inspection.evidence_gaps {
+            bundle.omit(ArtifactName::RuntimeFacts, &gap, 1)?;
+        }
+        Ok(bundle)
     }
     async fn prepare(&mut self, digest: &str) -> Result<String> {
         let artifact = self
@@ -488,6 +544,23 @@ impl Launcher {
                 );
                 tokio::time::sleep(Duration::from_millis(10)).await;
             }
+            let observer = if let Some(binding) = &binding {
+                observer::exchange(
+                    Path::new(OBSERVER_SOCKET),
+                    &self.observer_request("health", id, binding.cgroup_id),
+                )
+                .await
+                .ok()
+            } else {
+                None
+            };
+            let facts = RuntimeFacts {
+                resources: evidence::capture_resources(&cg, now_ms()?),
+                observer_health_unavailable: observer.is_none(),
+                observer,
+            };
+            self.store
+                .record_runtime_evidence(id, &serde_json::to_string(&facts)?)?;
         }
         if task.is_some() {
             match self

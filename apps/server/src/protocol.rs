@@ -28,6 +28,9 @@ pub enum Request {
         attempt_id: String,
         request_key: String,
     },
+    Export {
+        attempt_id: String,
+    },
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case")]
@@ -38,6 +41,9 @@ pub enum Response {
     CallResult {
         call: Reservation,
         value: Option<serde_json::Value>,
+    },
+    Evidence {
+        bundle: crate::evidence::Bundle,
     },
     Error {
         message: String,
@@ -52,7 +58,8 @@ pub fn decode_request(bytes: &[u8]) -> Result<Request> {
         }
         Request::Start { attempt_id }
         | Request::Stop { attempt_id }
-        | Request::Inspect { attempt_id } => ensure!(valid_id(attempt_id), "invalid attempt id"),
+        | Request::Inspect { attempt_id }
+        | Request::Export { attempt_id } => ensure!(valid_id(attempt_id), "invalid attempt id"),
         Request::Result {
             attempt_id,
             request_key,

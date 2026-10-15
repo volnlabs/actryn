@@ -247,6 +247,24 @@ impl Server {
         Ok(())
     }
     async fn handle_inner(self: &Arc<Self>, request: Request) -> Result<Response> {
+        if let Request::Export { attempt_id } = &request {
+            let id = attempt_id.clone();
+            let inspection = self.database(move |s| s.inspect(&id)).await?;
+            let response =
+                protocol::request(Path::new(launcher::LAUNCHER_SOCKET), &request).await?;
+            return match response {
+                Response::Evidence { mut bundle } => {
+                    ensure!(
+                        bundle.attempt_id == *attempt_id,
+                        "evidence attempt mismatch"
+                    );
+                    bundle.add_broker(inspection)?;
+                    Ok(Response::Evidence { bundle })
+                }
+                Response::Error { .. } => Ok(response),
+                _ => anyhow::bail!("unexpected launcher evidence response"),
+            };
+        }
         match &request {
             Request::Stop { attempt_id } => {
                 if let Some(context) = self
@@ -334,7 +352,9 @@ impl Server {
                     self.close_attempt(&attempt_id, "start_rejected").await?;
                 }
             }
-            Response::CallResult { .. } => anyhow::bail!("unexpected launcher response"),
+            Response::CallResult { .. } | Response::Evidence { .. } => {
+                anyhow::bail!("unexpected launcher response")
+            }
         }
         Ok(response)
     }
