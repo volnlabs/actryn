@@ -83,13 +83,17 @@ to receive `OK`, `ERROR`, or status. Send plain UTF-8 commands:
 | `replay` | Enqueue the last command/fault receipt unchanged; telemetry is excluded. |
 | `pause-rx N` | Pause wire input for up to 2 seconds while controller expiry still polls. |
 | `sink-fail` | Fail the next synthetic sink update; emits no successful applied receipt. |
-| `restart` | Disable, durably increment boot and return inhibited; clear queued bytes/parser. |
+| `restart` | Disable, durably increment boot and return inhibited; retire queued bytes/parser and emit a synchronization delimiter. |
 | `shutdown` | Disable and exit cleanly. |
 
 Controls introduce no agent wire kinds or RPC authority. Delay zero affects new
 queue entries only. Replay adds no controller effect. Restart is an injected
 controller reset, so an already partially transmitted receipt can become a
-malformed frame; host framing/restart recovery must handle that uncertainty.
+malformed frame. Reset emits an immediate zero delimiter, and each fresh HELLO_ACK
+starts with another zero delimiter. Short writes preserve delimiter progress.
+Already transmitted bytes cannot be retracted; the host must discard malformed
+prefixes only during inhibited nonce-bound handshake recovery. Active parser
+errors still fail closed. This is stream synchronization, not an epoch bypass.
 
 ## Verification
 

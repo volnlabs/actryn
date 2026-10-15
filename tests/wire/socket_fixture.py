@@ -90,6 +90,8 @@ def main(binary):
             wire = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             wire.connect(str(d/'wire'));peer = Peer(wire)
             wire.sendall(encode(1,nonce=b'X'*16,transaction=1))
+            wire.settimeout(2)
+            assert wire.recv(1) == b'\0', 'fresh HELLO_ACK lacks explicit synchronization delimiter'
             epoch = peer.receipt(2,1);assert field(epoch,'boot') == 1
             wire.sendall(encode(3,epoch,transaction=2,context=1));peer.receipt(4,2)
             expiry = field(epoch,'time')+1_500_000_000

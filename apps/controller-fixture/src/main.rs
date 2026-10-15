@@ -22,6 +22,37 @@ struct Pending {
     bytes: [u8; ENCODED_LEN],
     offset: usize,
     at: u64,
+    sync: bool,
+}
+impl Pending {
+    fn write_to(&mut self, output: &mut impl Write) -> io::Result<bool> {
+        let bytes = if self.sync {
+            &[0][..]
+        } else {
+            &self.bytes[self.offset..]
+        };
+        let n = output.write(bytes)?;
+        if n == 0 {
+            return Err(io::ErrorKind::WriteZero.into());
+        }
+        if self.sync {
+            self.sync = false;
+        } else {
+            self.offset += n;
+        }
+        Ok(self.offset == ENCODED_LEN)
+    }
+}
+fn retire_output(queue: &mut VecDeque<Pending>, now: u64) {
+    queue.clear();
+    // A reset may abandon an already-written prefix. End it explicitly before
+    // any new receipt; this byte is framing, not a delayed/droppable receipt.
+    queue.push_back(Pending {
+        bytes: [0; ENCODED_LEN],
+        offset: ENCODED_LEN,
+        at: now,
+        sync: true,
+    });
 }
 #[derive(Default)]
 struct FaultControls {
@@ -51,6 +82,7 @@ fn enqueue(
         bytes,
         offset: 0,
         at: now.saturating_add(controls.delay),
+        sync: f.kind == Kind::HelloAck,
     });
     true
 }
@@ -171,7 +203,7 @@ fn run() -> io::Result<()> {
                     ["sink-fail"] => sink.fail_next = true,
                     ["restart"] => {
                         controller.transport_lost(now, &mut sink);
-                        queue.clear();
+                        retire_output(&mut queue, now);
                         parser = Parser::default();
                         partial_since = None;
                         let boot = persistent.advance()?;
@@ -181,7 +213,7 @@ fn run() -> io::Result<()> {
                     ["replay"] => {
                         if let Some(bytes) = controls.last {
                             if queue.len() < MAX_QUEUE {
-                                queue.push_back(Pending {bytes, offset: 0, at: now});
+                                queue.push_back(Pending {bytes, offset: 0, at: now, sync: false});
                             } else { accepted = false; }
                         } else { accepted = false; }
                     }
@@ -255,14 +287,11 @@ fn run() -> io::Result<()> {
             }
             if let Some(pending) = queue.front_mut() {
                 if now >= pending.at {
-                    match stream.write(&pending.bytes[pending.offset..]) {
-                        Ok(0) => disconnect = true,
-                        Ok(n) => {
-                            pending.offset += n;
-                            if pending.offset == ENCODED_LEN {
-                                queue.pop_front();
-                            }
+                    match pending.write_to(stream) {
+                        Ok(true) => {
+                            queue.pop_front();
                         }
+                        Ok(false) => {}
                         Err(e) if e.kind() == io::ErrorKind::WouldBlock => {}
                         Err(_) => disconnect = true,
                     }
@@ -277,5 +306,92 @@ fn run() -> io::Result<()> {
             queue.clear();
         }
         thread::sleep(Duration::from_millis(1));
+    }
+}
+
+#[cfg(test)]
+mod framing_tests {
+    use super::*;
+    struct ShortWriter {
+        bytes: Vec<u8>,
+        limit: usize,
+        block: bool,
+    }
+    impl Write for ShortWriter {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            if self.block {
+                self.block = false;
+                return Err(io::ErrorKind::WouldBlock.into());
+            }
+            let n = bytes.len().min(self.limit);
+            self.bytes.extend_from_slice(&bytes[..n]);
+            Ok(n)
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+    #[test]
+    fn restart_terminates_every_abandoned_prefix_before_fresh_ack() {
+        let mut hello = Frame::new(Kind::HelloAck);
+        hello.nonce = [8; 16];
+        for cut in 1..ENCODED_LEN {
+            let mut queue = VecDeque::new();
+            let mut controls = FaultControls::default();
+            let old = Frame::new(Kind::Observation).encode();
+            let mut output = ShortWriter {
+                bytes: vec![],
+                limit: cut,
+                block: false,
+            };
+            let mut pending = Pending {
+                bytes: old,
+                offset: 0,
+                at: 0,
+                sync: false,
+            };
+            assert!(!pending.write_to(&mut output).unwrap());
+            assert_eq!(output.bytes.len(), cut);
+            queue.push_back(pending);
+            retire_output(&mut queue, 4);
+            assert_eq!(queue.len(), 1);
+            assert!(enqueue(&mut queue, hello, 4, &mut controls));
+            output.limit = 3;
+            output.block = true;
+            assert_eq!(
+                queue
+                    .front_mut()
+                    .unwrap()
+                    .write_to(&mut output)
+                    .unwrap_err()
+                    .kind(),
+                io::ErrorKind::WouldBlock
+            );
+            assert!(queue.front().unwrap().sync);
+            while let Some(front) = queue.front_mut() {
+                if front.write_to(&mut output).unwrap() {
+                    queue.pop_front();
+                }
+            }
+            assert_eq!(
+                &output.bytes[cut..],
+                [&[0, 0][..], &hello.encode()].concat()
+            );
+            let mut parser = Parser::default();
+            let decoded: Vec<_> = output
+                .bytes
+                .into_iter()
+                .filter_map(|b| parser.push(b))
+                .filter_map(Result::ok)
+                .collect();
+            assert_eq!(decoded.last(), Some(&hello));
+            if cut == ENCODED_LEN - 1 {
+                // All old payload bytes were already sent: the reset delimiter
+                // can finish that old frame, whose identity stays old.
+                assert_eq!(decoded, vec![Frame::new(Kind::Observation), hello]);
+            } else {
+                assert_eq!(decoded, vec![hello]);
+            }
+        }
     }
 }
