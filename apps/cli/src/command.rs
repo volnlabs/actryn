@@ -101,6 +101,7 @@ async fn local(command: Command, epoch: Vec<u8>) -> Result<Value> {
 fn help() -> Value {
     json!({"result":"help","version":env!("CARGO_PKG_VERSION"),"commands":[
  "server status --attempt ID","server prepare --artifact sha256:DIGEST","server launch --attempt ID","server cancel --attempt ID","server result --attempt ID --key KEY","server export --attempt ID --out FILE",
+ "server import --layout DIRECTORY --digest sha256:DIGEST","server discard-incomplete --digest sha256:DIGEST",
  "robot describe|status|doctor","robot enroll-request --dns NAME","robot enroll-install --cert FILE --ca FILE",
  "robot install-principal --epoch EPOCH --principal NAME --pin LEAF_SHA256 [--can-propose]","robot revoke-principal --epoch EPOCH --principal NAME",
  "robot pair --endpoint IP:PORT --dns NAME --pin LEAF_SHA256 --ca FILE --cert FILE --key FILE --out FILE",
@@ -131,6 +132,25 @@ pub async fn run(args: Vec<String>) -> Result<Value> {
 async fn server(verb: &str, flags: &Flags) -> Result<Value> {
     use actryn_server::protocol::{Request, Response};
     let request = match verb {
+        "import" => {
+            flags.allow(&["layout", "digest"])?;
+            let layout = flags.get("layout")?;
+            let digest = flags.get("digest")?;
+            ensure!(
+                actryn_server::store::valid_digest(digest),
+                "invalid artifact digest"
+            );
+            return actryn_server::artifact::import(Path::new(layout), digest);
+        }
+        "discard-incomplete" => {
+            flags.allow(&["digest"])?;
+            let digest = flags.get("digest")?;
+            ensure!(
+                actryn_server::store::valid_digest(digest),
+                "invalid artifact digest"
+            );
+            return actryn_server::artifact::discard_incomplete(digest);
+        }
         "status" => {
             flags.allow(&["attempt"])?;
             Request::Inspect {

@@ -72,3 +72,47 @@ async fn export_rejects_untrusted_destination_ancestors_before_loading_a_handle(
         assert!(!out.exists());
     }
 }
+
+#[tokio::test]
+async fn offline_artifact_routes_reject_unknown_flags_and_invalid_digests_before_storage() {
+    for values in [
+        vec![
+            "server",
+            "import",
+            "--layout",
+            "/missing-layout",
+            "--digest",
+            "bad",
+            "--unexpected",
+            "value",
+        ],
+        vec![
+            "server",
+            "discard-incomplete",
+            "--digest",
+            "bad",
+            "--unexpected",
+            "value",
+        ],
+    ] {
+        let error = run(args(&values)).await.unwrap_err();
+        assert!(
+            error.to_string().contains("unsupported option"),
+            "{error:?}"
+        );
+    }
+    for values in [
+        vec![
+            "server",
+            "import",
+            "--layout",
+            "/missing-layout",
+            "--digest",
+            "bad",
+        ],
+        vec!["server", "discard-incomplete", "--digest", "bad"],
+    ] {
+        let error = run(args(&values)).await.unwrap_err();
+        assert!(error.to_string().contains("artifact digest"), "{error:?}");
+    }
+}
