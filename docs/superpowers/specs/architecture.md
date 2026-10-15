@@ -4,6 +4,10 @@ Date: 2026-10-13. Revision: **comparative architecture remediation**, not an imp
 
 Product naming confirmed 2026-10-16: **Actryn** is the product under the **VolnLabs** organisation, with proposed repository `volnlabs/actryn`.
 
+The approved [v0.0.1 developer preview](actryn-v0.0.1.md) scopes the first implementation
+to a non-actuating QEMU fixture and selects the C kernel fallback. Its software
+release gates do not establish the physical V1 qualification described below.
+
 This revision incorporates the [independent review](../../reviews/2026-10-13-independent-architecture-review.md) and the subsequent [cross-reference against the full brief](../../reviews/2026-10-13-post-patch-brief-review.md). The normative details are in the [kernel/controller contract](../../architecture/kernel-controller-contract.md) and [platform/release contract](../../architecture/platform-release-contract.md); this document defines their scope and composition. The [remediation record](../../reviews/2026-10-13-review-remediation.md) maps findings to their changes or remaining evidence gates. Byte-identical pre-patch snapshots preserve both reviews' line references. The subsequent comparison with the supplied `arch.md` changes source organization, gateway placement and the preferred implementation language; it preserves the execution, recovery and evidence contracts. The remediation record distinguishes adopted ideas from rejected source assumptions.
 
 ## 1. Recommendation and design brief

@@ -1,6 +1,6 @@
 # Platform, evidence and release contract
 
-Status: **selected V1 design; unimplemented and unqualified**. This contract addresses the [independent review](../reviews/2026-10-13-independent-architecture-review.md), especially platform S1–S6 and architecture findings 7/9/10/12/13, plus the subsequent [brief cross-reference](../reviews/2026-10-13-post-patch-brief-review.md). It supplements the [system architecture](../superpowers/specs/2026-10-13-volnlabs-system-architecture.md). Names and CLI examples are proposed interfaces. Target versions, hardware and numerical physical limits remain required release inputs; missing inputs fail preflight.
+Status: **selected V1 design; unimplemented and unqualified**. This contract addresses the [independent review](../reviews/2026-10-13-independent-architecture-review.md), especially platform S1–S6 and architecture findings 7/9/10/12/13, plus the subsequent [brief cross-reference](../reviews/2026-10-13-post-patch-brief-review.md). It supplements the [system architecture](../superpowers/specs/architecture.md). Names and CLI examples are proposed interfaces. Target versions, hardware and numerical physical limits remain required release inputs; missing inputs fail preflight.
 
 ## 1. Executable artifacts and identity
 

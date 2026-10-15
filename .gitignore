@@ -5,3 +5,19 @@
 
 # Reference checkouts are inspection inputs, not product dependencies.
 /ref/
+
+# Local builds, test evidence, isolated worktrees and runtime secrets.
+/.worktrees/
+/.cache/
+/target/
+**/__pycache__/
+*.pyc
+*.ko
+*.o
+*.mod
+*.mod.c
+*.cmd
+Module.symvers
+modules.order
+/artifacts/
+/runtime/

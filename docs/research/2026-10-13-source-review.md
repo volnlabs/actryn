@@ -1,6 +1,6 @@
 # Source review and selective adoption decisions
 
-Review date: 2026-10-13; adoption guidance updated after independent review. Companion to the [revised system architecture](../superpowers/specs/2026-10-13-volnlabs-system-architecture.md). These are source/documentation findings and design decisions. The [original snapshot](../reviews/2026-10-13-source-review-baseline.md) preserves historical line references; [remediation](../reviews/2026-10-13-review-remediation.md) records the changes. No integration, target kernel test or physical qualification was performed.
+Review date: 2026-10-13; adoption guidance updated after independent review. Companion to the [revised system architecture](../superpowers/specs/architecture.md). These are source/documentation findings and design decisions. The [original snapshot](../reviews/2026-10-13-source-review-baseline.md) preserves historical line references; [remediation](../reviews/2026-10-13-review-remediation.md) records the changes. No integration, target kernel test or physical qualification was performed.
 
 ## 1. Inspected evidence and boundaries
 

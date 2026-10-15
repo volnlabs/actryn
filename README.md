@@ -4,6 +4,11 @@ Actryn is the product under the **VolnLabs** organisation. The proposed product 
 
 The revised design includes a custom Linux kernel authority component in the first release, as requested. These are design artifacts, not implemented or qualified product capabilities.
 
+The approved [v0.0.1 developer-preview specification](docs/superpowers/specs/actryn-v0.0.1.md)
+and [execution plan](docs/superpowers/plans/2026-10-16-actryn-v0.0.1.md) define the
+current implementation scope. See the [progress ledger](docs/development/progress.md)
+for actual verification. The preview is software-only; physical activation is unavailable.
+
 - [Complete offline architecture field guide](docs/actryn-architecture-guide.html) — beginner Linux/kernel explanations, decisions, failure walkthroughs, glossary and embedded specifications.
 - [System architecture, repositories, CLI, kernel/userspace boundary and distribution](docs/superpowers/specs/architecture.md)
 - [Pinned source review, extraction map and selective adoption decisions](docs/research/2026-10-13-source-review.md)

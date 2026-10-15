@@ -1,0 +1,77 @@
+# Software policy values, not measured physical safety or timing limits.
+target_id = "qemu-arm64-fixture"
+revision = 1
+physical_acceptance = false
+live_actuation = false
+distribution = "debian-13"
+architecture = "arm64"
+kernel_series = "6.12"
+wire_version = 2
+uapi_version = 1
+skill_id = "wheel.index_step.v1"
+context_revision = 1
+
+[authority]
+max_duty_permille = 200
+max_slew_permille_per_second = 1000
+max_slew_credit_ms = 100
+max_grant_ms = 60000
+max_operation_ms = 10000
+max_sample_ms = 500
+max_observation_age_ms = 1000
+max_clock_uncertainty_ms = 10
+clock_drift_ppm = 100
+max_clock_mapping_age_ms = 60000
+partial_recovery_ms = 500
+reconciliation_ms = 1000
+owner_poll_ms = 100
+rx_frames = 32
+event_records = 256
+max_started_frames = 1
+max_unsent_samples = 1
+
+[skill]
+max_abs_delta_ticks = 100
+nominal_duty_permille = 100
+sample_interval_ms = 100
+
+[preparation]
+active_instances = 1
+staged_instances = 1
+retiring_instances = 1
+max_state_bytes = 65536
+deadline_ms = 5000
+
+[recorder]
+volatile_bytes = 1048576
+volatile_records = 4096
+max_pending_age_ms = 2000
+heartbeat_ms = 100
+
+[sandbox]
+active = 1
+prepared = 1
+memory_bytes = 268435456
+pids = 64
+cpu_quota_us = 50000
+cpu_period_us = 100000
+log_bytes = 1048576
+prepare_lifetime_ms = 60000
+attempt_lifetime_ms = 120000
+
+[broker]
+per_attempt_jobs = 2
+global_jobs = 4
+request_bytes = 65536
+response_bytes = 65536
+retained_output_bytes = 262144
+max_output_tokens = 1024
+max_calls_per_attempt = 4
+request_deadline_ms = 30000
+
+[gateway]
+connections = 8
+handshakes = 2
+inflight_per_principal = 4
+message_bytes = 65536
+queued_bytes = 262144
