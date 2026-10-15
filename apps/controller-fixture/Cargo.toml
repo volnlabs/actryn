@@ -1,0 +1,10 @@
+[package]
+name = "controller-fixture"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+fixture-wire = { path = "../../crates/fixture-wire" }
+actryn-core = { path = "../../crates/actryn-core" }
