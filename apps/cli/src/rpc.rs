@@ -108,6 +108,9 @@ pub async fn remote(
     key: &[u8],
     request: &wire::Request,
 ) -> std::result::Result<wire::Response, ExchangeError> {
+    request
+        .validate()
+        .map_err(|error| ExchangeError::new(error, false))?;
     let connect = async {
         pair.validate()?;
         let config = robot_rpc::client_tls(pair.ca_pem.as_bytes(), certificate, key)?;
@@ -123,7 +126,35 @@ pub async fn remote(
     let mut stream = connect
         .await
         .map_err(|error| ExchangeError::new(error, false))?;
-    exchange(&mut stream, request).await
+    let mut current = request.clone();
+    if matches!(
+        current.command,
+        Some(
+            wire::request::Command::Query(_)
+                | wire::request::Command::Cancel(_)
+                | wire::request::Command::EvidenceRead(_)
+        )
+    ) {
+        // Retained identities survive manager restart; an authority-bearing
+        // proposal or observation must keep its explicitly selected epoch.
+        let description = wire::Request {
+            version: robot_rpc::VERSION,
+            request_id: robot_rpc::random_id::<16>()
+                .map_err(|error| ExchangeError::new(error, false))?
+                .to_vec(),
+            robot_epoch: vec![],
+            command: Some(wire::request::Command::Describe(wire::Empty {})),
+        };
+        let response = exchange(&mut stream, &description).await?;
+        if !matches!(response.result, Some(wire::response::Result::Report(_))) {
+            return Err(ExchangeError::new(
+                "manager description unavailable; retained request was not sent",
+                false,
+            ));
+        }
+        current.robot_epoch = response.robot_epoch;
+    }
+    exchange(&mut stream, &current).await
 }
 pub async fn local(request: &wire::Request) -> std::result::Result<wire::Response, ExchangeError> {
     let path = if matches!(

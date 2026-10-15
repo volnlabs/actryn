@@ -327,6 +327,7 @@ async fn export_robot(flags: &Flags) -> Result<Value> {
         flags.yes("local") != flags.yes("pair"),
         "choose local export or paired endpoint"
     );
+    let out = state::export_destination(Path::new(flags.get("out")?))?;
     let handle = state::load_handle(Path::new(flags.get("handle")?))?;
     let connection = if flags.yes("local") {
         ensure!(
@@ -433,8 +434,7 @@ async fn export_robot(flags: &Flags) -> Result<Value> {
             .context("capture size overflow")?;
     }
     ensure!(bytes == total, "capture total mismatch");
-    let out = Path::new(flags.get("out")?);
-    DirBuilder::new().mode(0o700).create(out)?;
+    DirBuilder::new().mode(0o700).create(&out)?;
     state::save_new(
         &out.join("INCOMPLETE.json"),
         &json!({"attempt":handle.attempt,"namespace":handle.namespace}),
@@ -453,7 +453,7 @@ async fn export_robot(flags: &Flags) -> Result<Value> {
     manifest["format"] = json!("actryn-robot-evidence-1");
     crate::export::save_manifest(&out.join("manifest.json"), &manifest)?;
     fs::remove_file(out.join("INCOMPLETE.json"))?;
-    File::open(out)?.sync_all()?;
+    File::open(&out)?.sync_all()?;
     Ok(
         json!({"result":"exported","path":out,"attempt":handle.attempt,"namespace":handle.namespace,"files":count,"bytes":total,"execution_replay_eligible":false,"volatile_tail_unknown":true}),
     )

@@ -38,3 +38,37 @@ async fn invalid_mutations_fail_before_transport_or_state_change() {
     .await
     .is_err());
 }
+
+#[tokio::test]
+async fn export_rejects_untrusted_destination_ancestors_before_loading_a_handle() {
+    use std::{
+        fs,
+        os::unix::fs::{symlink, PermissionsExt},
+    };
+    let root = tempfile::tempdir().unwrap();
+    fs::set_permissions(root.path(), fs::Permissions::from_mode(0o700)).unwrap();
+    let unsafe_parent = root.path().join("unsafe");
+    fs::create_dir(&unsafe_parent).unwrap();
+    fs::set_permissions(&unsafe_parent, fs::Permissions::from_mode(0o777)).unwrap();
+    let private_child = unsafe_parent.join("private");
+    fs::create_dir(&private_child).unwrap();
+    fs::set_permissions(&private_child, fs::Permissions::from_mode(0o700)).unwrap();
+    let link = root.path().join("alias");
+    symlink(&private_child, &link).unwrap();
+    for parent in [&unsafe_parent, &private_child, &link] {
+        let out = parent.join("export");
+        let error = run(args(&[
+            "robot",
+            "export",
+            "--local",
+            "--handle",
+            "/missing-handle-must-not-open",
+            "--out",
+            out.to_str().unwrap(),
+        ]))
+        .await
+        .unwrap_err();
+        assert!(error.to_string().contains("protected"), "{error:?}");
+        assert!(!out.exists());
+    }
+}

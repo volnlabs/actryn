@@ -159,6 +159,23 @@ fn parent(path: &Path) -> Result<PathBuf> {
     );
     Ok(directory.to_owned())
 }
+pub(crate) fn export_destination(path: &Path) -> Result<PathBuf> {
+    let directory = fs::canonicalize(parent(path)?)?;
+    for ancestor in directory.ancestors() {
+        let metadata = fs::symlink_metadata(ancestor)?;
+        ensure!(
+            metadata.is_dir()
+                && (metadata.uid() == unsafe { libc::geteuid() } || metadata.uid() == 0)
+                && (metadata.mode() & 0o022 == 0
+                    || (metadata.uid() == 0 && metadata.mode() & 0o1000 != 0)),
+            "export ancestors must be protected directories"
+        );
+    }
+    // Use the canonical parent for all later opens, so a symlink alias cannot
+    // redirect the destination after this check. Root-owned sticky ancestors
+    // permit private temporary directories without allowing their replacement.
+    Ok(directory.join(path.file_name().context("export directory name required")?))
+}
 pub fn read_file(path: &Path, max: u64, secret: bool) -> Result<Vec<u8>> {
     let mut file = OpenOptions::new()
         .read(true)
