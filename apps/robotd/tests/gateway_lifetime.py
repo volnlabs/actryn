@@ -171,14 +171,17 @@ class LifetimeCampaign(GatewayCampaign):
             self.activate()
             phase('A10 one real running operation before gateway lifetime fault')
             with self.connection() as rpc:
-                observation = rpc.observe(self.handle.attempt, self.handle.namespace)
-                call = OneProposal(rpc, self.handle, observation)
-                write_json('proposal-intent.json', {'handle': self.handle.json(), 'observation': observation,
-                    'target': [100, -100, 10000], 'automatic_retry': False})
-                self.start_checked(rpc, self.handle, call)
-                result = call.finish()
-                operation = self.confirm_running(rpc, result)
+                # Establish the sole accepted TLS connection before capturing its
+                # FD, then acquire the one observation after helper startup.
+                write_json('retainer-connection-description.json', rpc.describe())
                 with RemoteRetainer(self) as retained:
+                    observation = rpc.observe(self.handle.attempt, self.handle.namespace)
+                    call = OneProposal(rpc, self.handle, observation)
+                    write_json('proposal-intent.json', {'handle': self.handle.json(), 'observation': observation,
+                        'target': [100, -100, 10000], 'automatic_retry': False})
+                    self.start_checked(rpc, self.handle, call)
+                    result = call.finish()
+                    operation = self.confirm_running(rpc, result)
                     killed = retained.kill_once()
                     closed = self.poll_read('gateway-closed', lambda: self.local('describe', label='closure-read'),
                         lambda d: same_operation(d['runtime']['kernel'], operation)

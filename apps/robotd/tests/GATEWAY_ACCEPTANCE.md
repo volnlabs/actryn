@@ -105,8 +105,13 @@ rejects ambiguity and closes every duplicate after this nonmutating preflight.
 Only diagnostic files are created. Permission denial stops the campaign; there
 is no ptrace setting, capability, service policy or production API workaround.
 
-After one acknowledged proposal reaches RUNNING, a fresh helper retains those
-three real sockets again. Its command lease accepts one `kill` line, then sends
+Before the proposal, the campaign establishes its sole TLS connection with one
+Describe and a fresh helper retains those three real sockets again. Only after
+the helper reports readiness does the campaign acquire its single observation,
+propose once and confirm RUNNING. Helper startup therefore consumes neither the
+observation freshness horizon nor the operation window. The existing three-second
+command lease and eight-second retention lease remain unchanged; failed readiness
+cannot send a proposal or signal. Its command lease accepts one `kill` line, then sends
 SIGKILL once through the pinned pidfd. It confirms process death while all three
 duplicate descriptors remain open and attempts one nonblocking `H` heartbeat on
 the retained control socket. That single write may already fail because the
