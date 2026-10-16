@@ -278,6 +278,9 @@ fn write_new(path: &Path, bytes: &[u8], mode: u32) -> Result<()> {
         .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC)
         .open(path)?;
     file.write_all(bytes)?;
+    // Creation mode is filtered by umask; publish the fixed profile mode on
+    // this exclusively created descriptor before making its metadata durable.
+    file.set_permissions(fs::Permissions::from_mode(mode))?;
     file.sync_all()?;
     Ok(())
 }
@@ -571,6 +574,91 @@ mod tests {
                 tar::EntryType::Regular,
             ),
         ])
+    }
+    fn under_restrictive_umasks(test: &str, check: fn()) {
+        const CHILD: &str = "ACTRYN_ARTIFACT_UMASK_TEST";
+        const MASK: &str = "ACTRYN_ARTIFACT_UMASK";
+        if std::env::var(CHILD).as_deref() == Ok(test) {
+            let mask = u32::from_str_radix(&std::env::var(MASK).unwrap(), 8).unwrap();
+            assert!([0o027, 0o077].contains(&mask));
+            // Only this exact test runs in the subprocess. Never change the
+            // process-wide umask of the parent parallel test runner.
+            unsafe { libc::umask(mask) };
+            check();
+            return;
+        }
+        for mask in ["027", "077"] {
+            let output = std::process::Command::new(std::env::current_exe().unwrap())
+                .args(["--exact", test, "--nocapture", "--test-threads=1"])
+                .env(CHILD, test)
+                .env(MASK, mask)
+                .output()
+                .unwrap();
+            assert!(
+                output.status.success(),
+                "{test} with umask {mask}:\n{}\n{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+    }
+    #[test]
+    fn imported_artifact_survives_restrictive_umasks() {
+        under_restrictive_umasks(
+            "artifact::tests::imported_artifact_survives_restrictive_umasks",
+            || {
+                let source = tempfile::tempdir().unwrap();
+                let hash = image(source.path(), &valid_layer());
+                let v = Verified::read(source.path(), &hash).unwrap();
+                let registry = tempfile::tempdir().unwrap();
+                let installed = v.install(registry.path()).unwrap();
+                verify_installed(&installed, &hash, false).unwrap();
+                for (name, bytes) in &v.files {
+                    let path = installed.join("rootfs").join(name);
+                    assert_eq!(fs::read(&path).unwrap(), *bytes);
+                    assert_eq!(
+                        fs::metadata(path).unwrap().mode() & 0o7777,
+                        if name == "bin/agent" { 0o555 } else { 0o444 }
+                    );
+                }
+                for (name, bytes) in &v.blobs {
+                    let path = installed.join("layout/blobs/sha256").join(&name[7..]);
+                    assert_eq!(fs::read(&path).unwrap(), *bytes);
+                    assert_eq!(fs::metadata(path).unwrap().mode() & 0o7777, 0o444);
+                }
+                for name in ["layout/oci-layout", "layout/index.json", "ready.json"] {
+                    assert_eq!(
+                        fs::metadata(installed.join(name)).unwrap().mode() & 0o7777,
+                        0o444
+                    );
+                }
+                // A second import verifies the sealed slot rather than rewriting it.
+                assert_eq!(v.install(registry.path()).unwrap(), installed);
+            },
+        );
+    }
+    #[test]
+    fn config_publication_survives_restrictive_umasks_without_replacement() {
+        under_restrictive_umasks(
+            "artifact::tests::config_publication_survives_restrictive_umasks_without_replacement",
+            || {
+                let dir = tempfile::tempdir().unwrap();
+                let path = dir.path().join("server.json.importing-test");
+                let bytes = br#"{"artifacts":{}}"#;
+                write_new(&path, bytes, 0o644).unwrap();
+                assert_eq!(fs::read(&path).unwrap(), bytes);
+                assert_eq!(fs::metadata(&path).unwrap().mode() & 0o7777, 0o644);
+                assert!(write_new(&path, b"replacement", 0o600).is_err());
+                assert_eq!(fs::read(&path).unwrap(), bytes);
+                assert_eq!(fs::metadata(&path).unwrap().mode() & 0o7777, 0o644);
+                let link = dir.path().join("symlink");
+                std::os::unix::fs::symlink(&path, &link).unwrap();
+                assert!(write_new(&link, b"replacement", 0o600).is_err());
+                assert!(fs::symlink_metadata(&link).unwrap().is_symlink());
+                assert_eq!(fs::read(&path).unwrap(), bytes);
+                assert_eq!(fs::metadata(&path).unwrap().mode() & 0o7777, 0o644);
+            },
+        );
     }
     #[test]
     fn live_content_cannot_change_model_policy_or_claim_offline_profile() {
