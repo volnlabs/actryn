@@ -682,6 +682,34 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   its exact first boot and guarded deployment pass, with instrumentation pilots
   and comparison still pending actual results.
 
+### Instrumentation pilot and observer measurement preparation
+
+- A16's first actual kernel instrumentation pilot, `tracekernel01trace`, fails:
+  all ten fixed trials begin and end, with nine passes and one first-SAMPLE
+  rejection. The retained result reports no new event loss or sequence gaps.
+  Separately, all ten HELLO writes exceed the tracer's 158-byte capture cap:
+  the production write includes a resynchronization byte plus the 158-byte
+  frame. This invalidates capture decoding. No userspace pilot or comparison
+  run follows the failure. The original 43 campaign files, launch/deployment
+  records and serial output remain under `artifacts/a16-execution01`.
+- The failed normal trial faults with EXPIRED during SAMPLE while its sample,
+  operation and grant deadlines remain live. Source/timing analysis is examining
+  the conservative controller-clock floor relative to the actual STARTED
+  receipt; private mapping and transmission timestamps were not captured, so
+  the exact rejecting branch is not established. A separately numbered
+  premeasurement correction is being prepared without changing frozen inputs,
+  production limits or the original failure classification.
+- The tracer unloads and the owned A16 guest shuts down explicitly; inactive
+  MainPID0 and process disappearance are verified. The retained readback has
+  no authority or output. Its disk and fixture state remain preserved.
+- `2657876` prepares eight fixed OFF/ON observer trials using the same trusted
+  30,000-open workload and resource limits. Root and independent review each
+  pass 17 host checks; the reused gap/capacity checks also pass. The campaign
+  records loss, wall/CPU cost and retirement persistence separately, retaining
+  every denominator. These checks are not measured overhead. Installed Server03
+  execution is now in progress, after exact boot/manifest/binary and quiescence
+  verification; the observer-gap campaign must pass before overhead runs.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
