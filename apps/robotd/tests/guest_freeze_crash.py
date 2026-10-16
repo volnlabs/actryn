@@ -230,7 +230,7 @@ GUEST_FACTS = '''import hashlib,json,os,pathlib,re,subprocess
 p=pathlib.Path('/opt/actryn/robot/current').resolve();raw=(p.parent/'manifest.json').read_bytes()
 units={};executables={}
 for u in ('actryn-robotd','actryn-gatewayd'):
- r=subprocess.run(['systemctl','show','--property=MainPID,ActiveState',u],capture_output=True,timeout=2);assert r.returncode==0
+ r=subprocess.run(['systemctl','show','--property=MainPID,ActiveState,UnitFileState,ExecMainStartTimestampMonotonic',u],capture_output=True,timeout=2);assert r.returncode==0
  units[u]=dict(v.split('=',1) for v in r.stdout.decode().splitlines())
  pid=int(units[u]['MainPID'])
  if pid>1:
@@ -239,6 +239,27 @@ n=pathlib.Path('/sys/module/actryn_authority/notes/.note.gnu.build-id')
 i=pathlib.Path('/var/lib/actryn-robot/identity');active=json.loads((i/'active.json').read_bytes());assert re.fullmatch('[a-f0-9]{32}',active['generation'])
 identity=dict(active=active,ca_sha256=hashlib.sha256((i/active['generation']/'ca.pem').read_bytes()).hexdigest(),certificate_sha256=hashlib.sha256((i/active['generation']/'certificate.pem').read_bytes()).hexdigest(),policy_sha256=hashlib.sha256(pathlib.Path('/var/lib/actryn-robot/policy.json').read_bytes()).hexdigest())
 print(json.dumps(dict(machine_id=pathlib.Path('/etc/machine-id').read_text().strip(),boot_id=pathlib.Path('/proc/sys/kernel/random/boot_id').read_text().strip(),arch=os.uname().machine,kernel=os.uname().release,compatible=pathlib.Path('/proc/device-tree/compatible').read_bytes().hex(),manifest_sha256=hashlib.sha256(raw).hexdigest(),slot=str(p),module_note_sha256=hashlib.sha256(n.read_bytes()).hexdigest() if n.exists() else None,units=units,executables=executables,public_identity=identity)))
+'''
+COLD_SERVICES = '''import json,pathlib,subprocess,uuid
+boot=pathlib.Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+queries={}
+def read(name,argv):
+ try:
+  p=subprocess.run(argv,capture_output=True,timeout=2)
+  code,out,err,timed=p.returncode,p.stdout,p.stderr,False
+ except subprocess.TimeoutExpired as e:
+  code,out,err,timed=None,e.stdout or b'',e.stderr or b'',True
+ queries[name]=dict(argv=argv,exit=code,stdout=out[:65536].decode(errors='replace'),
+  stderr=err[:8192].decode(errors='replace'),timeout=timed,overflow=len(out)>65536 or len(err)>8192)
+for unit in ('actryn-robotd','actryn-gatewayd'):
+ read(unit,['systemctl','show','--property=MainPID,ActiveState,UnitFileState,ExecMainStartTimestampMonotonic',unit])
+# A missing/empty journal is not evidence that these units never ran. Require a
+# current-boot anchor independently of the bounded unit-presence query.
+base=['journalctl','--no-pager','--quiet','--boot='+uuid.UUID(boot).hex,'--lines=1',
+ '--output=json','--output-fields=_BOOT_ID,__MONOTONIC_TIMESTAMP']
+read('boot-journal',base)
+read('unit-journal',base+['--unit=actryn-robotd.service','--unit=actryn-gatewayd.service'])
+print(json.dumps(dict(boot_id=boot,boot_id_after=pathlib.Path('/proc/sys/kernel/random/boot_id').read_text().strip(),queries=queries)))
 '''
 HISTORY = '''import contextlib,json,pathlib,sqlite3
 p=pathlib.Path('/var/lib/actryn-robot/runtime/intent.sqlite')
@@ -288,6 +309,46 @@ def validate_guest(actual, plan, boot):
     for unit,key in (('actryn-robotd','manager_sha256'),('actryn-gatewayd','gateway_sha256')):
         if unit in actual['executables']:
             require(actual['executables'][unit]==dict(path=actual['slot']+'/bin/'+unit,sha256=plan['rpc'][key]), 'loaded binary differs from installed tuple')
+
+
+def validate_cold_units(units):
+    require(set(units)=={'actryn-robotd','actryn-gatewayd'} and all(
+        value.get('ActiveState')=='inactive' and value.get('MainPID')=='0'
+        and value.get('UnitFileState')=='disabled'
+        and value.get('ExecMainStartTimestampMonotonic')=='0' for value in units.values()),
+        'cold service activation absent/disabled proof required')
+
+
+def validate_cold_services(value, boot):
+    require(value.get('boot_id')==value.get('boot_id_after')==boot,'cold service boot changed')
+    queries=value.get('queries',{})
+    require(set(queries)=={'actryn-robotd','actryn-gatewayd','boot-journal','unit-journal'},
+        'cold service/journal evidence missing')
+    require(all(q.get('exit')==0 and q.get('timeout') is False and q.get('overflow') is False
+                and q.get('stderr')=='' for q in queries.values()),
+        'cold service/journal availability uncertain')
+    units={}
+    for name in ('actryn-robotd','actryn-gatewayd'):
+        rows=[row.split('=',1) for row in queries[name]['stdout'].splitlines()]
+        require(all(len(row)==2 for row in rows),'cold service property format')
+        units[name]=dict(rows)
+        require(len(units[name])==len(rows)==4,'cold service properties missing/duplicated')
+    validate_cold_units(units)
+    lines=queries['boot-journal']['stdout'].splitlines()
+    require(len(lines)==1,'current-boot journal anchor missing/ambiguous')
+    anchor=json.loads(lines[0])
+    require(anchor.get('_BOOT_ID')==uuid.UUID(boot).hex
+        and isinstance(anchor.get('__CURSOR'),str) and 0<len(anchor['__CURSOR'])<=4096
+        and isinstance(anchor.get('__MONOTONIC_TIMESTAMP'),str)
+        and re.fullmatch('[0-9]+',anchor['__MONOTONIC_TIMESTAMP']) is not None,
+        'current-boot journal anchor invalid')
+    require(queries['unit-journal']['stdout']=='','prior current-boot service journal activity')
+
+
+def executed_source_pins():
+    paths=list(Path(__file__).parent.glob('*.py'))
+    paths.extend(ROOT/'sdk/python/actryn'/name for name in ('__init__.py','client.py','robot_v1_pb2.py'))
+    return {str(path.relative_to(ROOT)):sha(path) for path in sorted(paths)}
 
 
 def durable_record(name, value):
@@ -397,6 +458,11 @@ def verify_raw_archive(path):
 
 
 class CrashCampaign(GatewayCampaign):
+    def cold_services(self, boot, label):
+        value=remote_json(self,COLD_SERVICES)
+        write_json(label+'.json',value)
+        validate_cold_services(value,boot)
+
     def history(self):
         value=remote_json(self,HISTORY)
         write_json('history-'+str(self.local_calls)+'.json',value)
@@ -411,6 +477,8 @@ class CrashCampaign(GatewayCampaign):
             fixture=FixtureStatus(plan['fixture'])
             facts=remote_json(self,GUEST_FACTS);validate_guest(facts,plan,plan['boot_id'])
             write_json('original-guest.json',facts)
+            require(all(v.get('UnitFileState')=='disabled' for v in facts['units'].values()),
+                'installed services must be disabled before crash')
             setup_started=True;self.setup();self.activate()
             with self.connection() as rpc:
                 observation=rpc.observe(self.handle.attempt,self.handle.namespace)
@@ -469,15 +537,17 @@ class CrashCampaign(GatewayCampaign):
         same_disk_restart(plan['qemu'],restart['qemu'])
         qemu=PinnedQemu(restart['qemu'])
         try:
-            facts=remote_json(self,GUEST_FACTS);validate_guest(facts,plan,restart['boot_id'])
-            require(all(v['ActiveState']=='inactive' and v['MainPID']=='0' for v in facts['units'].values()),'normal services already opened retained state')
+            facts=remote_json(self,GUEST_FACTS)
             write_json('cold-boot.json',facts)
+            validate_guest(facts,plan,restart['boot_id']);validate_cold_units(facts['units'])
+            self.cold_services(restart['boot_id'],'cold-services-before-archive')
             path=self.args.output/'cold-runtime.tar.gz'
             with path.open('xb') as output:
                 p=subprocess.run(self.ssh+['python3 -B -E -s -c '+shlex.quote(RAW_CAPTURE)],stdout=output,stderr=subprocess.PIPE,timeout=45)
                 output.flush();os.fsync(output.fileno())
             write_json('cold-runtime-process.json',dict(exit=p.returncode,stderr=p.stderr[:8192].decode(errors='replace')))
             require(p.returncode==0,'raw DB/journal/capture preservation failed')
+            self.cold_services(restart['boot_id'],'cold-services-after-archive')
             inventory=verify_raw_archive(path);write_json('cold-runtime-inventory.json',inventory)
             handoff=before['handoff'];require(handoff['plan_sha256']==self.plan_sha256,'wrong original handoff plan')
             require(facts['public_identity']==handoff['guest']['public_identity'],'retained public identity/policy changed')
@@ -488,6 +558,7 @@ class CrashCampaign(GatewayCampaign):
                 and not external['enabled'],'external controller restarted or restored output')
             write_json('same-external-fixture-afterboot.json',external)
             history=self.history();validate_history(handoff['history'],history,self.handle,operation)
+            self.cold_services(restart['boot_id'],'cold-services-before-start')
             write_json('one-explicit-service-start-intent.json',dict(units=['actryn-robotd','actryn-gatewayd'],automatic_retry=False))
             raw=self.run('systemctl start actryn-robotd.service actryn-gatewayd.service',timeout=40)
             write_json('one-explicit-service-start-reply.json',dict(stdout=raw.decode(errors='replace')))
@@ -550,7 +621,7 @@ def main():
     require(plan['qemu']['argv'][plan['qemu']['argv'].index('-chardev')+1]
         =='socket,id=controller,path='+plan['fixture']['controller_path'],'QEMU does not use pinned native fixture socket')
     plan_sha256=hashlib.sha256(raw).hexdigest()
-    source_pins={str(p.relative_to(ROOT)):sha(p) for p in sorted(Path(__file__).parent.glob('*.py'))}
+    source_pins=executed_source_pins()
     before=restart=None
     if options.phase=='inspect':
         require(options.before is not None and options.restart is not None,'reviewed before/restart handoff required')

@@ -90,6 +90,13 @@ remain inactive; their disabled installation units do not become auto-started.
 Root explicitly loads only the installed signed-slot module using the existing
 bootstrap instructions, and records its note pin; this does not open the registry.
 
+Before the destructive phase the harness also requires both installed units to
+have `UnitFileState=disabled`. On the new boot, inactivity alone is insufficient:
+both units must report `ActiveState=inactive`, `MainPID=0`,
+`UnitFileState=disabled`, and `ExecMainStartTimestampMonotonic=0`. Retain these
+exact fields in the parent's reboot handoff; do not stop a previously started
+service or clear its state to manufacture this predicate.
+
 Create a separate protected restart JSON containing the freshly observed `boot_id`
 and `qemu` identity object with the same fields as above. Both PID and InvocationID
 must be new; machine, manifest, identity and retained disk must match.
@@ -107,6 +114,37 @@ It excludes the identity/key directory. Inventory is bounded to 2048 regular fil
 verified locally. A separate `mode=ro` SQLite query checks the exact unfinished
 operation and all original rows. A hot-journal read failure is recorded as a failure;
 the harness does **not** repair the source, delete its journal or silently retry.
+
+Three additional read-only records, `cold-services-before-archive.json`,
+`cold-services-after-archive.json`, and `cold-services-before-start.json`, repeat
+the service fields and current-boot journal checks. Each retains the actual boot
+before/after, exact argv, status, stdout/stderr and timeout/overflow flags for four
+queries. Each command has a two-second timeout; retained stdout/stderr are capped
+at 64 KiB/8 KiB, with overflow rejected. The journal commands use `--lines=1`,
+restricted JSON fields, `--no-pager`, and the exact boot UUID as a 32-digit ID:
+
+```sh
+journalctl --no-pager --quiet --boot=BOOT_ID_HEX --lines=1 --output=json \
+  --output-fields=_BOOT_ID,__MONOTONIC_TIMESTAMP
+journalctl --no-pager --quiet --boot=BOOT_ID_HEX --lines=1 --output=json \
+  --output-fields=_BOOT_ID,__MONOTONIC_TIMESTAMP \
+  --unit=actryn-robotd.service --unit=actryn-gatewayd.service
+```
+
+The first must return one valid current-boot anchor with its cursor and monotonic
+timestamp. The second must return no entry: even a prior unit start/stop record
+rejects inspection. Missing journals, warnings, nonzero exits, malformed anchors,
+timeouts and overflow remain uncertainty and fail closed. Plan02's parent handoff
+must collect the same successful anchor and empty unit query before inspection;
+the harness independently repeats them. No journal sync, vacuum, rotation, repair
+or service-state mutation is performed. This uses the trusted host/journal
+assumption; it does not establish absence after deliberate journal erasure.
+
+The selected properties and filtering behavior are documented in the primary
+[systemd v257 D-Bus interface](https://github.com/systemd/systemd/blob/v257/man/org.freedesktop.systemd1.xml)
+and [journalctl documentation](https://github.com/systemd/systemd/blob/v257/man/journalctl.xml).
+`--unit` includes both service messages and manager messages about that unit;
+`--boot` selects `_BOOT_ID`. Restricted JSON retains the cursor and timestamps.
 
 Only after preservation/inspection does one explicit service start occur. The
 loaded installed executables are reverified. Without Recover/Rearm/Prepare/Grant
@@ -144,6 +182,10 @@ inventory digest and bounded regular-file hashes for the original plan, source
 pins, handle, before-freeze handoff, crash record and fixture closure. The retained
 plan/source must match the selected current inputs; embedded handoffs and closure
 proofs must agree. Missing, substituted or mixed phase records reject inspection.
+The existing source-pin map includes all sibling test Python files and the three
+executed SDK files `sdk/python/actryn/__init__.py`, `client.py`, and
+`robot_v1_pb2.py`. Plan02 must pin those same files. An SDK change or missing file
+between freeze and inspect rejects before inspection output or SSH is opened.
 
 Host-only checks exercise signal order/no retry, a real owned temporary child with
 pidfd SIGSTOP/SIGKILL, real read-only SQLite bytes, immutable history, UNKNOWN

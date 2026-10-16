@@ -16,12 +16,190 @@ import time
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
+import guest_freeze_crash as crash
 
 from guest_freeze_crash import (CAMPAIGN, HISTORY, SignalSequence, expiry_inference, finalize_result, main, process_identity,
     json_file,parse_fixture,same_disk_restart,unit_state,validate_crash_capture,validate_history,validate_unknown,verify_phase_handoff,verify_raw_archive,wait_read)
 
 
 class FreezeTests(unittest.TestCase):
+    def cold_evidence(self):
+        boot='22222222-2222-4222-8222-222222222222'
+        fields='MainPID=0\nActiveState=inactive\nUnitFileState=disabled\nExecMainStartTimestampMonotonic=0\n'
+        def reply(out):return dict(exit=0,stdout=out,stderr='',timeout=False,overflow=False,argv=[])
+        queries={u:reply(fields) for u in ('actryn-robotd','actryn-gatewayd')}
+        queries['boot-journal']=reply(json.dumps({'_BOOT_ID':boot.replace('-',''),
+            '__CURSOR':'s=retained;i=1','__MONOTONIC_TIMESTAMP':'123'})+'\n')
+        queries['unit-journal']=reply('')
+        return dict(boot_id=boot,boot_id_after=boot,queries=queries)
+
+    def test_cold_service_evidence_rejects_started_enabled_missing_or_uncertain_journal(self):
+        good=self.cold_evidence();crash.validate_cold_services(good,good['boot_id'])
+        changes=[lambda v:v.update(boot_id_after='another-boot'),
+            lambda v:v['queries'].pop('boot-journal'),
+            lambda v:v['queries']['boot-journal'].update(stdout=''),
+            lambda v:v['queries']['boot-journal'].update(stdout='{}\n'),
+            lambda v:v['queries']['boot-journal'].update(stdout='{}\n{}\n'),
+            lambda v:v['queries']['boot-journal'].update(exit=1),
+            lambda v:v['queries']['unit-journal'].update(timeout=True),
+            lambda v:v['queries']['unit-journal'].update(overflow=True),
+            lambda v:v['queries']['unit-journal'].update(stderr='journal unavailable'),
+            lambda v:v['queries']['unit-journal'].update(stdout='{"UNIT":"actryn-robotd.service"}\n')]
+        for unit in ('actryn-robotd','actryn-gatewayd'):
+            for old,new in [('disabled','enabled'),('TimestampMonotonic=0','TimestampMonotonic=100'),
+                            ('MainPID=0','MainPID=42'),('ActiveState=inactive','ActiveState=active'),
+                            ('UnitFileState=disabled\n','')]:
+                changes.append(lambda v,u=unit,a=old,b=new:v['queries'][u].update(
+                    stdout=v['queries'][u]['stdout'].replace(a,b)))
+        for change in changes:
+            bad=copy.deepcopy(good);change(bad)
+            with self.subTest(bad=bad),self.assertRaises(AssertionError):
+                crash.validate_cold_services(bad,good['boot_id'])
+
+    def test_guest_cold_queries_use_exact_boot_and_bounded_read_only_presence_checks(self):
+        good=self.cold_evidence();responses=[good['queries'][name]
+            for name in ('actryn-robotd','actryn-gatewayd','boot-journal','unit-journal')]
+        seen=[]
+        def run(argv,**kwargs):
+            seen.append((argv,kwargs));r=responses[len(seen)-1]
+            return SimpleNamespace(returncode=r['exit'],stdout=r['stdout'].encode(),stderr=b'')
+        output=io.StringIO()
+        with (patch('pathlib.Path.read_text',return_value=good['boot_id']+'\n'),
+              patch('subprocess.run',side_effect=run),contextlib.redirect_stdout(output)):
+            exec(crash.COLD_SERVICES,{})
+        value=json.loads(output.getvalue());crash.validate_cold_services(value,good['boot_id'])
+        self.assertEqual(len(seen),4)
+        self.assertTrue(all(options=={'capture_output':True,'timeout':2} for _,options in seen))
+        for argv,_ in seen[2:]:
+            self.assertIn('--boot='+good['boot_id'].replace('-',''),argv)
+            self.assertIn('--lines=1',argv)
+            self.assertIn('--output-fields=_BOOT_ID,__MONOTONIC_TIMESTAMP',argv)
+        self.assertEqual(seen[3][0][-2:],['--unit=actryn-robotd.service','--unit=actryn-gatewayd.service'])
+
+    def test_cold_query_timeout_and_overflow_remain_evidence_not_empty_success(self):
+        good=self.cold_evidence()
+        for failure in ('timeout','overflow'):
+            output=io.StringIO()
+            if failure=='timeout':effect=subprocess.TimeoutExpired(['journalctl'],2,output=b'partial')
+            else:effect=None
+            with (patch('pathlib.Path.read_text',return_value=good['boot_id']+'\n'),
+                  patch('subprocess.run',side_effect=effect,
+                        return_value=SimpleNamespace(returncode=0,stdout=b'x'*65537,stderr=b'')),
+                  contextlib.redirect_stdout(output)):
+                exec(crash.COLD_SERVICES,{})
+            value=json.loads(output.getvalue())
+            self.assertTrue(all(q[failure] for q in value['queries'].values()))
+            with self.assertRaisesRegex(AssertionError,'availability uncertain'):
+                crash.validate_cold_services(value,good['boot_id'])
+
+    def test_cold_archive_and_service_start_are_surrounded_by_fresh_checks(self):
+        good=self.cold_evidence();boot=good['boot_id']
+        units={u:dict(row.split('=',1) for row in good['queries'][u]['stdout'].splitlines())
+               for u in ('actryn-robotd','actryn-gatewayd')}
+        for fail_check in (None,1,2,3):
+            with self.subTest(fail_check=fail_check),tempfile.TemporaryDirectory() as d:
+                campaign=crash.CrashCampaign(SimpleNamespace(output=Path(d),ssh_key='/key',
+                    ssh_port=26223,known_hosts='/known'));campaign.plan_sha256='frozen'
+                order=[];count=0
+                def remote(_campaign,program):
+                    nonlocal count
+                    if program==crash.GUEST_FACTS:
+                        return {'units':units,'public_identity':{}}
+                    self.assertEqual(program,crash.COLD_SERVICES);count+=1;order.append('cold')
+                    value=copy.deepcopy(good)
+                    if count==fail_check:value['queries']['unit-journal']['stdout']='prior activation\n'
+                    return value
+                def archive(_argv,**kwargs):
+                    order.append('archive');kwargs['stdout'].write(b'preserved cold bytes')
+                    return SimpleNamespace(returncode=0,stderr=b'')
+                def history():order.append('history');return {}
+                def start(*_args,**_kwargs):order.append('start');raise RuntimeError('stop after start boundary')
+                campaign.history=history;campaign.run=start
+                handoff={'plan_sha256':'frozen','guest':{'public_identity':{}},'prepared':{},
+                    'operation':{'boot':3},'history':{},
+                    'handle':{'attempt':'aa'*16,'namespace':'bb'*16,'key':'cc'*32}}
+                with (patch('guest_freeze_crash.same_disk_restart'),patch('guest_freeze_crash.PinnedQemu'),
+                      patch('guest_freeze_crash.remote_json',side_effect=remote),
+                      patch('guest_freeze_crash.validate_guest'),patch('guest_freeze_crash.write_json'),
+                      patch('guest_freeze_crash.subprocess.run',side_effect=archive),
+                      patch('guest_freeze_crash.verify_raw_archive',return_value={}),
+                      patch('guest_freeze_crash.validate_history'),patch('guest_freeze_crash.FixtureStatus') as fixture):
+                    fixture.return_value.read.return_value=dict(boot=3,left=0,right=0,enabled=False)
+                    with self.assertRaises((AssertionError,RuntimeError)):
+                        campaign.inspect({'boot_id':'11111111-1111-4111-8111-111111111111','qemu':{},'fixture':{}},
+                            {'boot_id':boot,'qemu':{}},{'handoff':handoff})
+                expected={None:['cold','archive','cold','history','cold','start'],1:['cold'],
+                    2:['cold','archive','cold'],3:['cold','archive','cold','history','cold']}[fail_check]
+                self.assertEqual(order,expected)
+                self.assertEqual((Path(d)/'cold-runtime.tar.gz').exists(),fail_check!=1)
+
+    def test_prior_service_start_rejects_before_cold_archive(self):
+        boot='22222222-2222-4222-8222-222222222222'
+        facts={'units':{u:{'ActiveState':'inactive','MainPID':'0','UnitFileState':'disabled',
+                          'ExecMainStartTimestampMonotonic':'100'}
+                         for u in ('actryn-robotd','actryn-gatewayd')}}
+        with tempfile.TemporaryDirectory() as d:
+            campaign=crash.CrashCampaign(SimpleNamespace(output=Path(d),ssh_key='/key',
+                ssh_port=26223,known_hosts='/known'))
+            with (patch('guest_freeze_crash.same_disk_restart'),patch('guest_freeze_crash.PinnedQemu'),
+                  patch('guest_freeze_crash.remote_json',return_value=facts),
+                  patch('guest_freeze_crash.validate_guest'),patch('guest_freeze_crash.write_json'),
+                  patch('guest_freeze_crash.subprocess.run',side_effect=AssertionError('archive reached')) as archive):
+                with self.assertRaisesRegex(AssertionError,'cold service activation'):
+                    campaign.inspect({'boot_id':'11111111-1111-4111-8111-111111111111','qemu':{}},
+                                     {'boot_id':boot,'qemu':{}},{})
+            archive.assert_not_called()
+            self.assertFalse((Path(d)/'cold-runtime.tar.gz').exists())
+
+    def test_enabled_service_rejects_before_preparation_or_signal(self):
+        campaign=crash.CrashCampaign(SimpleNamespace(output=Path('/unused'),ssh_key='/key',
+            ssh_port=26223,known_hosts='/known'))
+        facts={'units':{'actryn-robotd':{'UnitFileState':'enabled'},
+                        'actryn-gatewayd':{'UnitFileState':'disabled'}}}
+        with (patch('guest_freeze_crash.PinnedQemu') as qemu,patch('guest_freeze_crash.FixtureStatus'),
+              patch('guest_freeze_crash.remote_json',return_value=facts),
+              patch('guest_freeze_crash.validate_guest'),patch('guest_freeze_crash.write_json'),
+              patch.object(campaign,'setup') as setup):
+            with self.assertRaisesRegex(AssertionError,'disabled before crash'):
+                campaign.freeze({'qemu':{},'fixture':{},'boot_id':'original'})
+        setup.assert_not_called();qemu.return_value.send.assert_not_called()
+
+    def test_sdk_change_is_in_inspect_chain_before_output_or_ssh(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);tests=root/'apps/robotd/tests';tests.mkdir(parents=True)
+            selected=tests/'guest_freeze_crash.py';selected.write_text('# selected harness\n')
+            sdk=root/'sdk/python/actryn';sdk.mkdir(parents=True)
+            for name in ('__init__.py','client.py','robot_v1_pb2.py'):(sdk/name).write_text('# original\n')
+            original={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
+                      for p in [selected,*sdk.glob('*.py')]}
+            (sdk/'client.py').write_text('# changed executed RPC implementation\n')
+            binary=root/'binary';binary.write_bytes(b'pinned');digest=hashlib.sha256(binary.read_bytes()).hexdigest()
+            rpc={k:str(binary) for k in ('cli','reader','ssh_key','known_hosts','ca','cert','key')}
+            rpc.update(ssh_port=26223,tcp_port=27445,principal='existing',dns='robot.test',
+                       pin='a'*64,manager_sha256='a'*64,gateway_sha256='a'*64,module_note_sha256='a'*64)
+            plan={'allow_disposable_guest':True,'machine_id':'a'*32,
+                'boot_id':'11111111-1111-4111-8111-111111111111','manifest_sha256':'b'*64,
+                'rpc':rpc,'cli_sha256':digest,'reader_sha256':digest,
+                'qemu':{'argv':['qemu','-chardev','socket,id=controller,path=/controller']},
+                'fixture':{'controller_path':'/controller'}}
+            (root/'plan.json').write_text(json.dumps(plan));(root/'restart.json').write_text('{}')
+            def frozen_chain(_directory,_plan,_digest,current):
+                # Production chain compares the full pin map; changes must be
+                # visible before output creation and SharedSsh construction.
+                for name,expected in current.items():
+                    if name in original and expected!=original[name]:
+                        raise AssertionError('changed executed SDK in frozen handoff')
+                return {}
+            argv=['guest_freeze_crash.py','inspect','--plan',str(root/'plan.json'),
+                '--before',str(root/'before'),'--restart',str(root/'restart.json'),'--output',str(root/'output')]
+            with (patch.object(sys,'argv',argv),patch.object(crash,'ROOT',root),
+                  patch.object(crash,'__file__',str(selected)),
+                  patch('guest_freeze_crash.verify_phase_handoff',side_effect=frozen_chain),
+                  patch('guest_freeze_crash.SharedSsh',side_effect=AssertionError('SSH reached')) as ssh):
+                with self.assertRaisesRegex(AssertionError,'changed executed SDK'):
+                    main()
+            ssh.assert_not_called();self.assertFalse((root/'output').exists())
+
     def fixture(self):
         h = SimpleNamespace(attempt=b'a'*16, namespace=b'n'*16, key=b'k'*32)
         op = dict(device=[1]*16, runtime_nonce=[2]*16, boot=3, session=4,
