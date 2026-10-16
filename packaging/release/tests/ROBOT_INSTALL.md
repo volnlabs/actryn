@@ -22,11 +22,11 @@ candidate.
 | Manager | Reuse tested manager10, `.cache/robot-manager10/actryn-robotd`, SHA256 `c198a0f61a9c6c8709b013555cef522982a6f75b45d3efb44be6387dd31f9eb7`; recorded source `4fc5452d874a72ef1a27ebdce772cea49720b9cc`. No rebuild just for packaging. |
 | Authority module | Reuse exact tested module15, SHA256 `2405de617a09b4b3beec5eaec8f83ff6ee6c0cc0a1968d091b0c5634fcff8e1e`; retained input is `inputs/robot/module/actryn_authority.ko` below the original assembly. Original guest build path `/root/actryn-kernel-build15/kernel/actryn_authority.ko` is provenance, **not** the installed load path. |
 | Module source | Preserve corresponding retained `share/source/kernel.tar`, SHA256 `c8fed52dab214d59773d4209aa3086680dd49a969092494bede737cb30161c67`; source/build provenance and GPL text accompany it. No complete-corresponding-source legal assurance is inferred. |
-| ARM CLI | Parent requested a fresh locked/offline build from an explicitly selected root revision after the quiet window. Reuse the documented `aarch64-linux-gnu-gcc` linker/target recipe; retain source/lock/tool versions, original/strip hashes and build ID. Do not guess a sysroot or install a host toolchain. Source `a476239` already contains historical-epoch and install CLI fixes; its earlier binary is not declared obsolete merely from that revision name. |
+| ARM CLI | Fresh locked/offline single-job build from `2ec9da0` passed; original debug SHA256 `258925b0501cd8dd725413f127da67f479f939fe0af644085e9f07d991669687`, private strip-copy SHA256 `2e65aa208d1c70c812d9da8dfc9a6e0facfa1913c261383855918f80fe5616f1` (10,667,216B), GNU build ID `dfc175888336b355c6febb476c16415e9aec8320`. Recorded GCC16.1 linker/sysroot `/usr/aarch64-linux-gnu`, Rust/Cargo1.92 and raw source/build records live in `artifacts/install-robot-inputs-02`. Source `a476239` already contains historical-epoch and install CLI fixes; its earlier binary is not declared obsolete merely from that revision name. New binary guest execution remains NOT_RUN. |
 | Gateway | Retain original source/binary transform chain for the unchanged gateway: selected payload SHA256 `8705d2ca43ec18440a8328e1cb24b0de12ed7858c2960548809d516b0f12822f`; source-debug SHA256 `14ad345385ec1d919384138e0dd70950608ebb1d57e1fed129ec7ee398360554`. Reverify bytes before selection. |
 | Installer and guide | Select current checked-out `release.py`, `install.py`, and `README.md` as `share/docs/INSTALL.md`, with their actual SHA256. The original prepared installer predates absent-unit and umask fixes. Select current `tests/guest.py`; never relabel the original payload as updated. |
 | Profile | SHA256 `6b9f174af8b018e0cf95bfd282ed52b5385d364ebe7e372d54ce6a91d1d99be8`; RPC1/UAPI1/wire2/state-schema1; live actuation and physical acceptance false. |
-| External native fixture | Existing prepared executable SHA256 `3684e5f2a5b848ac779336fb4dc1c087413c92d5fb11e63f39e1c72c7007e398`; assembly private strip-copy SHA256 `8f7a24510d4da7fdde7d3c078978e5f08b68da1294fba73bb775c3cc30eeb7e6`. The preserved manager08 provenance does not bind this fixture executable to source. Exact reviewed build/source linkage remains missing; either find a retained authoritative build record or record a separately reviewed source build after scheduling. Never silently substitute it in the original guest preparation. |
+| External native fixture | Existing prepared executable SHA256 `3684e5f2a5b848ac779336fb4dc1c087413c92d5fb11e63f39e1c72c7007e398` remains untouched and source-unbound. A separately recorded coherent single-job build from `2ec9da0` passed: debug SHA256 `289f7b63fc50a98ff935059efbed8668876e28495290403515e2993411a41938`, private strip-copy SHA256 `d1176146f8b56f21d644bc75c2b9fe686d342b0d8f09ca61532e726276013842` (705,984B), GNU build ID `5974f84a016e6eab6e827660c51e66fc1c5e0bf3`. This does not match the original prepared debug bytes. Use only an explicit numbered preexecution command/hash amendment pointing to the new artifact, never a replacement of the original cache binary or a running fixture. New fixture execution remains NOT_RUN. |
 
 Before producing a new numbered `robot-inputs.json` and prepared directory,
 verify every selected file hash and all mandatory package/boot pins, use the
@@ -34,7 +34,15 @@ current tool hashes, and preserve the old/new input diff and provenance. Only
 then run existing `guest.py prepare`; it keeps one bounded payload plus small
 manifest variants. The fixture attestation remains visibly NOT-A-RELEASE. No
 private fixture key is uploaded. A missing CLI/fixture source binding must remain
-an explicit unresolved input, not a fabricated qualification record.
+an explicit unresolved input, not a fabricated qualification record. The new
+source-bound CLI and fixture do not prove the original cache binary's provenance.
+
+**Module decision pending:** a newly identified kernel shutdown-callback
+obligation is under parent review. The module15 input is an explicitly
+intermediate, unqualified test selection. Do not create the final payload, launch
+the new guest or run installation until the parent selects module15 or supplies
+the corrected module and matching source/provenance. Do not relabel module15
+evidence as testing a later module, including any frozen A16 comparison.
 
 ## Disposable guest identity
 
