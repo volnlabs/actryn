@@ -126,10 +126,13 @@ identity. Only a secondary recorder `WriterStopped` issue is allowed; clock,
 storage, pending-age and source faults fail the test. The helper keeps its
 duplicates across the installed systemd gateway's automatic replacement. A fresh
 pinned mTLS connection must inspect the old operation with `live_authority=false`.
-One separately saved negative key in the old namespace must be rejected for the
-gateway/binding generation mismatch (`principal mismatch`), not for stale
-observation data; it must have no registry entry or allocation. Only then does
-the host release the duplicates.
+One separately saved negative key in the old namespace receives the
+gateway/binding generation mismatch (`principal mismatch`), not a stale
+observation error. The protocol may conservatively report `OutcomeUnknown`;
+that uncertainty is retained. A read-only query must find no registry snapshot
+and no live authority under the exact prepared binding, and local status before
+and after must retain the original closed operation with zero output. Only then
+does the host release the duplicates.
 
 The campaign stops the fixed gateway service once, establishes MainPID zero,
 and performs explicit local retirement/recovery while the gateway is offline.
@@ -191,3 +194,30 @@ bound or production behavior changes in this amendment. The full lifecycle
 already has a separate forty-second authenticated readiness check and needs no
 additional change. Campaign 07 remains failed; the corrected test requires a new
 numbered namespace/key campaign.
+
+## Installed-startup amendment 03
+
+Campaign 08 authenticated the active replacement and read its retained operation
+while all three old FDs remained held. Its negative proposal then returned the
+manager's conservative `OutcomeUnknown("principal mismatch")`; the harness
+correctly stopped on an unknown reply, preserving the failed campaign. The saved
+negative handle had the correct attempt/namespace and a distinct key. In this
+manager, the same binding error also denotes a retired gateway generation, and
+the binding check precedes the call into the execution engine.
+
+The test now retains that exact server-reported uncertainty and continues only
+with read-only inspection of the same negative key. Other unknown messages,
+transport failures and errors with a transport cause still fail; no proposal is
+resent. The inspection must match the complete prepared binding, have no snapshot
+and report no live authority. Local Describe before and after must show the same
+retired operation/deadline, no active grant or output and no independent health
+fault. The export binds this negative key and its observations to the sole original
+accepted proposal, allocation and globally unique START in the retained prefix.
+
+The retired recorder may stop before the negative request. The report includes
+the final kernel capture timestamp and the local observation interval, explicitly
+marks a prefix ending before that interval, and never treats the capture alone
+as proof of rejection. Observed no-new-effect evidence comes from the same-key
+query and local status, supported by the binding-before-mutation source path;
+the original unknown reply remains unknown. No SDK, manager, resource limit,
+deadline or service behavior changes. A separately numbered run is required.

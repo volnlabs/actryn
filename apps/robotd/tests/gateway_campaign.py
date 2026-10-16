@@ -92,7 +92,41 @@ def execution_counts(records, handle, operation):
     return proposals, samples
 
 
-def validate_gateway_capture(decoded, handle, prepared, operation, mode, interval):
+def validate_negative_binding(proof, handle, prepared, operation):
+    negative = RequestHandle.from_json(proof['handle'])
+    require(negative.attempt == handle.attempt and negative.namespace == handle.namespace
+            and negative.key != handle.key, 'negative key must retain original binding')
+    response = proof['response']
+    require(response == {'kind': 'OutcomeUnknown', 'message': 'principal mismatch',
+                         'outcome_unknown': True, 'cause': None}
+            or response == {'kind': 'RpcError', 'message': 'REJECTED: principal mismatch',
+                            'outcome_unknown': False, 'cause': None},
+            'unrelated or transport failure cannot establish negative request effects')
+    query = proof['inspection']
+    require(query['snapshot'] is None and query['live_authority'] is False
+            and query['prepared'] == prepared, 'negative key query identity/effect mismatch')
+    before, after = (proof[name]['runtime']['kernel'] for name in ('before', 'after'))
+    identity = ('device_identity', 'controller_boot', 'controller_session', 'runtime_nonce',
+                'instance', 'grant', 'operation', 'stream', 'deadline_ns')
+    require(before['now_ns'] <= after['now_ns'] and all(before[k] == after[k] for k in identity),
+            'negative request changed retained authority/operation')
+    for name in ('before', 'after'):
+        description = proof[name]
+        runtime, kernel = description['runtime'], description['runtime']['kernel']
+        health = runtime['health']
+        require(description['clock_healthy'] and runtime['event_stream_healthy']
+                and runtime['retiring'] and runtime['retirement_ready']
+                and runtime['prepared'] == prepared and same_operation(kernel, operation)
+                and health['registry_fault'] in (None, 'WriterStopped')
+                and set(health['evidence_issues']).issubset({'WriterStopped'})
+                and kernel['reason'] == 3 and kernel['operation_state'] == 4
+                and kernel['state'] != 2 and not kernel['flags'] & 8
+                and kernel['left_permille'] == kernel['right_permille'] == 0,
+                'negative request lacks retired no-output before/after evidence')
+    return proof
+
+
+def validate_gateway_capture(decoded, handle, prepared, operation, mode, interval, negative=None):
     require(mode in ('traffic', 'lifetime') and interval['started_ns'] < interval['finished_ns'], 'fault interval')
     require(decoded['format'] == 'actryn-failure-capture-1' and decoded['attempt'] == list(handle.attempt)
             and decoded['configuration_digest'] == prepared['configuration_digest']
@@ -114,17 +148,28 @@ def validate_gateway_capture(decoded, handle, prepared, operation, mode, interva
             and operation_id(allocations[0]['status']) == operation, 'exactly one allocation in whole capture')
     proposals, samples = execution_counts(records, handle, operation)
     matching = [e for e in events if same_operation(e['status'], operation)]
-    starts = [e for e in matching if e['kind'] == 0x10007]
+    starts = [e for e in events if e['kind'] == 0x10007]
     reason = 2 if mode == 'traffic' else 3
     closures = [e for e in matching if e['kind'] == (0x30000 | reason) and e['status']['reason'] == reason]
-    require(len(starts) == 1 and closures and starts[0]['sequence'] < closures[0]['sequence']
+    require(len(starts) == 1 and same_operation(starts[0]['status'], operation)
+            and closures and starts[0]['sequence'] < closures[0]['sequence']
             and interval['started_ns'] <= closures[0]['captured_ns'] <= interval['finished_ns']
             and any(e['status']['operation_state'] == 4 for e in matching),
             'missing START, fault-specific closure inside interval, or reconciliation')
-    return {'allocation_sequence': allocations[0]['sequence'], 'start_sequence': starts[0]['sequence'],
+    proof = {'allocation_sequence': allocations[0]['sequence'], 'start_sequence': starts[0]['sequence'],
             'closure_sequence': closures[0]['sequence'], 'reason': reason, 'operation': operation,
+            'allocation_count': len(allocations), 'start_count': len(starts),
             'accepted_proposal_count': proposals, 'sample_request_count': samples,
             'kernel_clock': 'CLOCK_BOOTTIME', 'volatile_tail_unknown': True, 'full_execution_replay': False}
+    if negative is not None:
+        proof['negative_binding'] = validate_negative_binding(negative, handle, prepared, operation)
+        before, after = (negative[name]['runtime']['kernel']['now_ns'] for name in ('before', 'after'))
+        proof['negative_capture_boundary'] = {'kernel_last_captured_ns': events[-1]['captured_ns'],
+            'negative_before_ns': before, 'negative_after_ns': after,
+            'kernel_prefix_ends_before_negative': events[-1]['captured_ns'] < before,
+            'capture_alone_establishes_rejection': False,
+            'observed_no_new_effect_basis': 'same-key absent query and unchanged closed local status; binding check precedes mutation'}
+    return proof
 
 
 class GatewayCampaign(FailureCampaign):
@@ -231,7 +276,8 @@ print(json.dumps({'machine':os.uname().machine,'kernel':os.uname().release,'mana
             'stdout': reader.stdout[:65536].decode(errors='replace'), 'stderr': reader.stderr[:65536].decode(errors='replace')})
         reader.check_returncode()
         proof = validate_gateway_capture(json.loads((a.output / 'decoded.json').read_text()), self.handle,
-                                         self.prepared, operation, a.mode, interval)
+                                         self.prepared, operation, a.mode, interval,
+                                         self.negative_binding if a.mode == 'lifetime' else None)
         write_json('result.json', {'status': 'PASS', 'test': 'A10-' + a.mode, 'proof': proof,
             'physical_acceptance': False, 'automatic_mutation_retries': 0, 'full_execution_replay': False})
 

@@ -5,10 +5,77 @@ import unittest
 from unittest.mock import Mock, patch
 
 import test_failure_paths
+from test_gateway_capture import negative_fixture
 from gateway_lifetime import check_retirement, LifetimeCampaign, RemoteRetainer
+from actryn import OutcomeUnknown, RequestHandle, RpcError
 
 
 class LifetimeTests(unittest.TestCase):
+    def negative_probe(self):
+        campaign = LifetimeCampaign(SimpleNamespace(ssh_key='unused', ssh_port=1, known_hosts='unused'))
+        campaign.handle = RequestHandle(b'a' * 16, b'n' * 16, b'k' * 32)
+        denied = RequestHandle(b'a' * 16, b'n' * 16, b'd' * 32)
+        campaign.prepared = {'binding': {'attempt': list(denied.attempt),
+            'namespace': list(denied.namespace), 'principal': [7] * 32}, 'runtime_epoch': [8] * 16}
+        operation = test_failure_paths.CapturePredicateTests().fixture()[3]
+        proof = negative_fixture(campaign.handle, campaign.prepared, operation)
+        campaign.local = Mock(side_effect=[proof['before'], proof['after']])
+        rpc = Mock()
+        rpc.propose.side_effect = OutcomeUnknown('principal mismatch')
+        rpc.query.return_value = {'snapshot': None, 'live_authority': False,
+                                  'prepared': copy.deepcopy(campaign.prepared)}
+        return campaign, denied, rpc, operation
+
+    def test_server_unknown_is_preserved_then_original_negative_key_queried_once(self):
+        campaign, denied, rpc, operation = self.negative_probe()
+        with patch('gateway_lifetime.write_json') as save:
+            campaign.probe_old_binding(rpc, denied, {'id': 17}, operation)
+        rpc.propose.assert_called_once()
+        self.assertEqual(rpc.propose.call_args.args, (denied,))
+        rpc.query.assert_called_once_with(denied)
+        self.assertTrue(campaign.negative_binding['response']['outcome_unknown'])
+        self.assertEqual(campaign.negative_binding['handle'], denied.json())
+        self.assertEqual(save.call_args_list[1].args[0], 'old-binding-response.json')
+        with self.assertRaises(AssertionError):
+            campaign.probe_old_binding(rpc, denied, {'id': 17}, operation)
+        rpc.propose.assert_called_once()
+
+    def test_unrelated_unknown_transport_failure_or_success_never_proves_rejection(self):
+        transport = OutcomeUnknown('principal mismatch')
+        transport.__cause__ = EOFError('missing reply')
+        for error in (transport, OutcomeUnknown('storage deadline'),
+                      RpcError('REJECTED: stale observation'), OSError('closed'), None):
+            campaign, denied, rpc, operation = self.negative_probe()
+            rpc.propose.side_effect = error
+            with patch('gateway_lifetime.write_json'), self.assertRaises((AssertionError, OSError)):
+                campaign.probe_old_binding(rpc, denied, {'id': 17}, operation)
+            rpc.propose.assert_called_once()
+            rpc.query.assert_not_called()
+
+    def test_absent_negative_key_requires_exact_binding_and_no_live_authority(self):
+        for change in (lambda q: q.update(snapshot={}), lambda q: q.update(live_authority=True),
+                       lambda q: q['prepared']['binding'].update(principal=[9] * 32),
+                       lambda q: q['prepared']['binding'].update(namespace=[9] * 16),
+                       lambda q: q['prepared'].update(runtime_epoch=[9] * 16)):
+            campaign, denied, rpc, operation = self.negative_probe()
+            change(rpc.query.return_value)
+            with patch('gateway_lifetime.write_json'), self.assertRaises(AssertionError):
+                campaign.probe_old_binding(rpc, denied, {'id': 17}, operation)
+            rpc.propose.assert_called_once()
+            rpc.query.assert_called_once_with(denied)
+
+    def test_wrong_negative_handle_never_sends_and_explicit_rejection_still_needs_query(self):
+        campaign, denied, rpc, operation = self.negative_probe()
+        with self.assertRaises(AssertionError):
+            campaign.probe_old_binding(rpc, campaign.handle, {'id': 17}, operation)
+        rpc.propose.assert_not_called()
+        campaign.local.assert_not_called()
+        rpc.propose.side_effect = RpcError('REJECTED: principal mismatch')
+        with patch('gateway_lifetime.write_json'):
+            campaign.probe_old_binding(rpc, denied, {'id': 17}, operation)
+        rpc.query.assert_called_once_with(denied)
+        self.assertFalse(campaign.negative_binding['response']['outcome_unknown'])
+
     def preload_order(self, preload_fails=False):
         events = []
         class Stopped(RuntimeError):

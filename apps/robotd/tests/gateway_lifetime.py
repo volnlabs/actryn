@@ -10,7 +10,7 @@ import subprocess
 import time
 
 from failure_paths import OneProposal, same_operation
-from gateway_campaign import GatewayCampaign, main
+from gateway_campaign import GatewayCampaign, main, validate_negative_binding
 from gateway_fds import HOLD_NS, validate_roles
 from guest import SERVICE_START_TIMEOUT_S, phase, wire, write_json
 from actryn import OutcomeUnknown, RpcError
@@ -118,6 +118,37 @@ class RemoteRetainer:
 
 
 class LifetimeCampaign(GatewayCampaign):
+    def probe_old_binding(self, rpc, denied, observation, operation):
+        require(not getattr(self, 'negative_sent', False), 'negative proposal cannot be retried')
+        require(denied.attempt == self.handle.attempt and denied.namespace == self.handle.namespace
+                and denied.key != self.handle.key, 'negative proposal must use a distinct original-binding key')
+        before = self.local('describe', label='negative-before')
+        check_retirement(before, operation)
+        self.negative_sent = True
+        write_json('old-binding-intent.json', {'handle': denied.json(), 'automatic_retry': False})
+        try:
+            rpc.propose(denied, observation_id=observation['id'], left_delta_ticks=1,
+                right_delta_ticks=1, duration_ms=1000, parent_digest=b'\x31' * 32)
+        except RpcError as error:
+            response = {'kind': type(error).__name__, 'message': str(error),
+                'outcome_unknown': isinstance(error, OutcomeUnknown),
+                'cause': None if error.__cause__ is None else repr(error.__cause__)}
+            write_json('old-binding-response.json', response)
+            require(response == {'kind': 'OutcomeUnknown', 'message': 'principal mismatch',
+                                 'outcome_unknown': True, 'cause': None}
+                    or response == {'kind': 'RpcError', 'message': 'REJECTED: principal mismatch',
+                                    'outcome_unknown': False, 'cause': None},
+                    'unrelated or transport failure; no negative proposal retry')
+        else:
+            raise AssertionError('replacement gateway accepted old namespace')
+        query = rpc.query(denied)  # Read-only settlement; never resend the uncertain proposal.
+        write_json('old-binding-inspection.json', {'handle': denied.json(), 'inspection': query})
+        after = self.local('describe', label='negative-after')
+        proof = {'handle': denied.json(), 'response': response, 'inspection': query,
+                 'before': before, 'after': after}
+        self.negative_binding = validate_negative_binding(proof, self.handle, self.prepared, operation)
+        write_json('old-binding-observed-effects.json', self.negative_binding)
+
     def fd_preflight(self, _, initial):
         require(initial['runtime']['kernel']['state'] == 0, 'FD preflight must be inhibited')
         phase('A10 nonmutating pidfd_getfd preflight, before grant')
@@ -215,17 +246,7 @@ class LifetimeCampaign(GatewayCampaign):
                         inspection = fresh.query(self.handle)
                         write_json('replacement-retained-query.json', inspection)
                         require(not inspection['live_authority'], 'new gateway revived old namespace')
-                        try:
-                            fresh.propose(denied, observation_id=observation['id'], left_delta_ticks=1,
-                                right_delta_ticks=1, duration_ms=1000, parent_digest=b'\x31' * 32)
-                        except OutcomeUnknown:
-                            raise  # An unknown send cannot establish denial; never resend it.
-                        except RpcError as error:
-                            require('principal mismatch' in str(error), 'denial must identify binding generation mismatch')
-                            write_json('old-binding-denied.json', {'error': str(error), 'handle': denied.json(), 'automatic_retry': False})
-                        else:
-                            raise AssertionError('replacement gateway accepted old namespace')
-                        require(fresh.query(denied)['snapshot'] is None, 'old binding negative key was retained')
+                        self.probe_old_binding(fresh, denied, observation, operation)
                     write_json('replacement-while-fds-held.json', {'new_pid': replacement,
                         'old_pid': self.pins['gateway_pid'], 'helper_live': retained.process.poll() is None,
                         'old_pidfd_dead': killed['pidfd_dead'], 'held_count': killed['held_after_death']})

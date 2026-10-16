@@ -26,6 +26,25 @@ def execution(value):
     return {'producer': 0, 'record_ordinal': 5, 'origin': 'Runtime', 'kind': 'Execution', 'value': value}
 
 
+def negative_fixture(handle, prepared, operation):
+    prepared['binding'] = {'attempt': list(handle.attempt), 'namespace': list(handle.namespace),
+                           'principal': [7] * 32}
+    kernel = {'device_identity': operation['device'], 'controller_boot': operation['boot'],
+        'controller_session': operation['session'], **{k: operation[k] for k in
+        ('runtime_nonce', 'instance', 'grant', 'operation', 'stream')},
+        'deadline_ns': 500, 'now_ns': 300, 'state': 1, 'flags': 1, 'operation_state': 4,
+        'reason': 3, 'left_permille': 0, 'right_permille': 0}
+    before = {'clock_healthy': True, 'runtime': {'kernel': kernel, 'event_stream_healthy': True,
+        'retiring': True, 'retirement_ready': True, 'prepared': copy.deepcopy(prepared),
+        'health': {'registry_fault': 'WriterStopped', 'evidence_issues': ['WriterStopped']}}}
+    after = copy.deepcopy(before); after['runtime']['kernel']['now_ns'] += 1
+    return {'handle': dict(handle.json(), key=(b'd' * 32).hex()),
+        'response': {'kind': 'OutcomeUnknown', 'message': 'principal mismatch',
+                     'outcome_unknown': True, 'cause': None},
+        'inspection': {'prepared': copy.deepcopy(prepared), 'snapshot': None, 'live_authority': False},
+        'before': before, 'after': after}
+
+
 class GatewayCaptureTests(unittest.TestCase):
     def test_cancel_requires_closure_inside_reserved_endpoint_interval(self):
         decoded, handle, prepared, operation = fixture()
@@ -64,6 +83,41 @@ class GatewayCaptureTests(unittest.TestCase):
         decoded['frontiers'][1]['durable'] -= 1
         with self.assertRaises(AssertionError):
             validate_gateway_capture(decoded, handle, prepared, operation, 'traffic', interval)
+
+    def test_unrelated_start_cannot_hide_outside_original_operation_filter(self):
+        decoded, handle, prepared, operation = fixture()
+        extra = copy.deepcopy(decoded['records'][2])
+        extra['value']['sequence'] = 104
+        extra['value']['status']['operation'] += 1
+        decoded['records'].append(extra)
+        with self.assertRaises(AssertionError):
+            validate_gateway_capture(decoded, handle, prepared, operation, 'traffic',
+                                     {'started_ns': 120, 'finished_ns': 140})
+
+    def test_negative_key_proof_binds_absent_query_to_original_prepared_namespace(self):
+        decoded, handle, prepared, operation = fixture()
+        negative = negative_fixture(handle, prepared, operation)
+        interval = {'started_ns': 120, 'finished_ns': 140}
+        proof = validate_gateway_capture(decoded, handle, prepared, operation, 'traffic', interval, negative)
+        self.assertEqual(proof['negative_binding']['handle'], negative['handle'])
+        self.assertEqual(proof['start_count'], 1)
+        self.assertTrue(proof['negative_binding']['response']['outcome_unknown'])
+        self.assertTrue(proof['negative_capture_boundary']['kernel_prefix_ends_before_negative'])
+        self.assertFalse(proof['negative_capture_boundary']['capture_alone_establishes_rejection'])
+        for change in (lambda n: n['handle'].update(key=handle.key.hex()),
+                       lambda n: n['handle'].update(namespace=(b'x' * 16).hex()),
+                       lambda n: n['inspection'].update(snapshot={}),
+                       lambda n: n['inspection']['prepared']['binding'].update(principal=[9] * 32),
+                       lambda n: n['response'].update(cause='EOF'),
+                       lambda n: n['response'].update(message='deadline'),
+                       lambda n: n['after']['runtime']['kernel'].update(operation=999),
+                       lambda n: n['after']['runtime']['kernel'].update(deadline_ns=999),
+                       lambda n: n['after']['runtime']['kernel'].update(flags=9),
+                       lambda n: n['after']['runtime']['kernel'].update(left_permille=1),
+                       lambda n: n['after'].update(clock_healthy=False)):
+            bad = copy.deepcopy(negative); change(bad)
+            with self.subTest(value=bad), self.assertRaises(AssertionError):
+                validate_gateway_capture(decoded, handle, prepared, operation, 'traffic', interval, bad)
 
     def test_samples_are_counted_separately_from_one_accepted_proposal(self):
         decoded, handle, prepared, operation = fixture()
