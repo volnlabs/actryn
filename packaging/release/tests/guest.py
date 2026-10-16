@@ -150,7 +150,7 @@ paths+=['/usr/lib/systemd/system/'+u+'.service' for u in units]
 paths+=['/etc/systemd/system/'+u+'.service' for u in units]
 paths+=['/etc/systemd/system/'+u+'.service.d' for u in units]
 paths+=['/usr/lib/sysusers.d/actryn-'+r+'.conf' for r in ['server','robot']]
-paths+=['/usr/lib/tmpfiles.d/actryn-server.conf']
+paths+=['/usr/lib/tmpfiles.d/actryn-server.conf','/usr/lib/actryn/observer.bpf.o']
 print(json.dumps({'euid':os.geteuid(),'debian':p('/etc/debian_version').read_text().strip(),
 'machine':platform.machine(),'kernel':platform.release(),'virtualization':subprocess.check_output(['/usr/bin/systemd-detect-virt'],timeout=10).decode().strip(),
 'boot_id':p('/proc/sys/kernel/random/boot_id').read_text().strip().replace('-',''),'machine_id':p('/etc/machine-id').read_text().strip(),

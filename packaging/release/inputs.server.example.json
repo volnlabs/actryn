@@ -26,7 +26,12 @@
       "python3": "REPLACE_WITH_EXACT_DPKG_VERSION",
       "python3-venv": "REPLACE_WITH_EXACT_DPKG_VERSION",
       "containerd": "1.7.24~ds1-6+deb13u1",
-      "runc": "1.1.15+ds1-2+b4"
+      "runc": "1.1.15+ds1-2+b4",
+      "libc6": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libgcc-s1": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libelf1t64": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libzstd1": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "zlib1g": "REPLACE_WITH_EXACT_DPKG_VERSION"
     }
   },
   "provenance": {
@@ -124,6 +129,18 @@
     },
     "units/actryn-serverd.service": {
       "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/units/actryn-serverd.service",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "lib/observer.bpf.o": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/lib/observer.bpf.o",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/licenses/GPL-2.0-only.txt": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/licenses/GPL-2.0-only.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/source/observer.bpf.c": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/source/observer.bpf.c",
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   }

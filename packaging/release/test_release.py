@@ -126,7 +126,9 @@ class ReleaseTests(unittest.TestCase):
         source.mkdir(mode=0o700)
         files = {}
         for number, name in enumerate(sorted(release.FILES[role])):
-            if name.startswith('bin/') or name.startswith('module/'):
+            if name == release.BPF_OBJECT:
+                data = bytearray(elf(247, variant=variant)); struct.pack_into('<H', data, 16, 1); data = bytes(data)
+            elif name.startswith('bin/') or name.startswith('module/'):
                 data = elf(release.MACHINE[role], name.startswith('module/'), variant)
             elif name.endswith('.whl'):
                 data = wheel()
@@ -142,6 +144,7 @@ class ReleaseTests(unittest.TestCase):
             path.write_bytes(data)
             files[name] = {'source': str(path), 'sha256': release.digest(data)}
         packages = {'systemd': '257.9-1', 'openssl': '3.5.4-1', 'python3': '3.13.5-1', f'linux-image-{release.KERNEL[role]}': '6.12.111-1'}
+        packages.update({name: '1.0-test' for name in release.RUNTIME_PACKAGES[role]})
         if role == 'server': packages.update(containerd='1.7.24~ds1-6+deb13u1', runc='1.1.15+ds1-2+b4', **{'python3-venv':'3.13.5-1'})
         return {'role': role, 'version': '0.0.1', 'compatibility': dict(release.COMPATIBILITY),
                 'target': {'distribution': 'debian', 'version': '13.7', 'architecture': release.ARCH[role],
@@ -212,6 +215,65 @@ class ReleaseTests(unittest.TestCase):
             with self.assertRaises((release.ReleaseError, OSError)):
                 release.build(spec, output)
             self.assertFalse(output.exists())
+
+    def test_runtime_library_package_pins_are_mandatory_for_each_role(self):
+        for role in ('server', 'robot'):
+            spec = self.spec(role)
+            release.target_valid(role, spec['target'])
+            for package in release.RUNTIME_PACKAGES[role]:
+                changed = copy.deepcopy(spec['target'])
+                del changed['packages'][package]
+                with self.assertRaises(release.ReleaseError, msg=(role, package)):
+                    release.target_valid(role, changed)
+
+    def test_host_rejects_runtime_package_drift_before_install_mutation(self):
+        spec = self.spec('server')
+        target = spec['target']
+        binaries = {f'/boot/vmlinuz-{release.KERNEL["server"]}': b'image',
+                    f'/boot/config-{release.KERNEL["server"]}': b'config', '/etc/debian_version': b'13.7'}
+        target['kernel_image_sha256'] = release.digest(b'image')
+        target['kernel_config_sha256'] = release.digest(b'config')
+        adapter = SystemPlatform()
+        for drift in (None, *sorted(release.RUNTIME_PACKAGES['server'])):
+            def command(argv):
+                return (target['packages'][argv[-1]] + ('-changed' if argv[-1] == drift else '')).encode()
+            with mock.patch('install.os.geteuid', return_value=0), \
+                    mock.patch('install.platform.machine', return_value='x86_64'), \
+                    mock.patch('install.platform.release', return_value=release.KERNEL['server']), \
+                    mock.patch('install.read_file', side_effect=lambda path, *args: binaries[path]), \
+                    mock.patch('install.command', side_effect=command):
+                if drift is None: adapter.inspect_host(spec)
+                else:
+                    with self.assertRaisesRegex(release.ReleaseError, 'package mismatch: ' + drift):
+                        adapter.inspect_host(spec)
+
+    def test_server_bpf_is_required_pinned_relocatable_and_installed_immutably(self):
+        name = 'lib/observer.bpf.o'
+        self.assertIn(name, release.FILES['server'])
+        for problem in ('missing', 'architecture', 'kind', 'hash'):
+            spec = self.spec('server')
+            item = spec['files'][name]
+            if problem == 'missing': del spec['files'][name]
+            else:
+                data = bytearray(Path(item['source']).read_bytes())
+                if problem == 'architecture': struct.pack_into('<H', data, 18, 62)
+                elif problem == 'kind': struct.pack_into('<H', data, 16, 3)
+                else: data[-1] ^= 1
+                Path(item['source']).write_bytes(data)
+                if problem != 'hash': item['sha256'] = release.digest(data)
+            with self.assertRaises(release.ReleaseError): release.build(spec, self.root / ('bad-bpf-' + problem))
+        spec, bundle = self.bundle('server')
+        root = self.install_root('bpf-machine')
+        installer = self.installer(root, spec)
+        identity = self.run_install(installer, 'activate', bundle)['manifest_sha256']
+        path = root / 'usr/lib/actryn/observer.bpf.o'
+        self.assertEqual(os.readlink(path), '/opt/actryn/server/current/' + name)
+        slot = installer.slots / identity
+        retained = slot / 'payload' / name
+        self.assertEqual(release.digest(retained.read_bytes()), spec['files'][name]['sha256'])
+        verified = {'manifest_sha256': identity, 'key_fingerprint': self.fingerprint}
+        retained.write_bytes(retained.read_bytes() + b'tampered')
+        with self.assertRaises(release.ReleaseError): installer.verify_slot(slot, verified)
 
     def test_signature_target_role_and_maintenance_mismatch_change_nothing(self):
         spec, bundle = self.bundle()

@@ -23,7 +23,9 @@
       "linux-image-6.12.111+deb13-arm64": "6.12.111-1",
       "systemd": "REPLACE_WITH_EXACT_DPKG_VERSION",
       "openssl": "REPLACE_WITH_EXACT_DPKG_VERSION",
-      "python3": "REPLACE_WITH_EXACT_DPKG_VERSION"
+      "python3": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libc6": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libgcc-s1": "REPLACE_WITH_EXACT_DPKG_VERSION"
     }
   },
   "provenance": {

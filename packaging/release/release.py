@@ -30,6 +30,10 @@ ASSETS = {'share/wheels/protobuf-7.36.1-py3-none-any.whl', 'share/agent/offline-
 KERNEL = {'server': '6.12.111+deb13-amd64', 'robot': '6.12.111+deb13-arm64'}
 ARCH = {'server': 'amd64', 'robot': 'arm64'}
 MACHINE = {'server': 62, 'robot': 183}
+BPF_OBJECT = 'lib/observer.bpf.o'
+# Observed ldd dependency closure of the selected Debian production executables.
+RUNTIME_PACKAGES = {'server': {'libc6', 'libgcc-s1', 'libelf1t64', 'libzstd1', 'zlib1g'},
+                    'robot': {'libc6', 'libgcc-s1'}}
 UNITS = {'server': ('actryn-observer', 'actryn-launcher', 'actryn-serverd'),
          'robot': ('actryn-robotd', 'actryn-gatewayd')}
 BINARIES = {'server': ('actryn', 'actryn-observer', 'actryn-launcher', 'actryn-serverd', 'controller-fixture'),
@@ -39,7 +43,7 @@ COMMON = {'tools/release.py', 'tools/install.py', 'share/target/profile.toml', '
 FILES = {role: COMMON | {f'bin/{name}' for name in BINARIES[role]} |
          {f'units/{name}.service' for name in UNITS[role]} | {f'sysusers/{role}.conf'}
          for role in ARCH}
-FILES['server'] |= {'tmpfiles/server.conf', 'share/sdk/actryn/__init__.py',
+FILES['server'] |= {BPF_OBJECT, 'share/licenses/GPL-2.0-only.txt', 'share/source/observer.bpf.c', 'tmpfiles/server.conf', 'share/sdk/actryn/__init__.py',
                     'share/sdk/actryn/client.py', 'share/sdk/actryn/robot_v1_pb2.py', 'share/sdk/pyproject.toml',
                     'share/wheels/protobuf-7.36.1-py3-none-any.whl', 'share/agent/offline-oci.tar'}
 FILES['robot'] |= {'module/actryn_authority.ko', 'share/target/virt-actryn.dtb',
@@ -108,7 +112,7 @@ def target_valid(role, target):
     require(is_hash(target['kernel_image_sha256']) and is_hash(target['kernel_config_sha256']), 'kernel pins required')
     require(isinstance(target['image_sha512'], str) and re.fullmatch('[0-9a-f]{128}', target['image_sha512']), 'image pin required')
     packages = target['packages']
-    required = {'systemd', 'openssl', 'python3', f'linux-image-{KERNEL[role]}'}
+    required = {'systemd', 'openssl', 'python3', f'linux-image-{KERNEL[role]}'} | RUNTIME_PACKAGES[role]
     if role == 'server':
         required |= {'containerd', 'runc', 'python3-venv'}
     require(isinstance(packages, dict) and required <= set(packages) and len(packages) <= 32, 'required package pins')
@@ -173,10 +177,13 @@ def module_note(data):
 
 
 def validate_binary(role, name, data):
-    if not (name.startswith('bin/') or name.startswith('module/')):
+    if not (name.startswith('bin/') or name.startswith('module/') or name == BPF_OBJECT):
         return
     require(len(data) >= 64 and data[:6] == b'\x7fELF\x02\x01', 'ELF64 little-endian artifact required')
     kind, machine = struct.unpack_from('<HH', data, 16)
+    if name == BPF_OBJECT:
+        require(role == 'server' and machine == 247 and kind == 1, 'BPF ELF architecture/kind mismatch')
+        return
     require(machine == MACHINE[role], 'ELF architecture mismatch')
     if name.startswith('module/'):
         require(kind == 1, 'module ELF kind')
@@ -302,7 +309,7 @@ def mode_for(name):
 
 
 def license_for(name):
-    if name.startswith('module/') or name in ('share/source/kernel.tar', 'share/licenses/GPL-2.0-only.txt'):
+    if name.startswith('module/') or name in ('share/source/kernel.tar', 'share/source/observer.bpf.c', 'share/licenses/GPL-2.0-only.txt', BPF_OBJECT):
         return 'GPL-2.0-only'
     return 'SEE-NOTICES' if name.endswith('THIRD-PARTY.txt') or name.startswith('share/wheels/') else 'Apache-2.0'
 

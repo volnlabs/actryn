@@ -196,6 +196,7 @@ class Installer:
         result[f'usr/lib/sysusers.d/actryn-{self.role}.conf'] = prefix + f'/sysusers/{self.role}.conf'
         if self.role == 'server':
             result['usr/lib/tmpfiles.d/actryn-server.conf'] = prefix + '/tmpfiles/server.conf'
+            result['usr/lib/actryn/observer.bpf.o'] = prefix + '/lib/observer.bpf.o'
         else:
             result[f'usr/lib/modules/{KERNEL[self.role]}/extra/actryn_authority.ko'] = prefix + '/module/actryn_authority.ko'
         return result
