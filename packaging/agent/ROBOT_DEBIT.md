@@ -32,6 +32,12 @@ recording or grant ceiling is increased. The broker's reviewed limits remain
 Robot per-attempt1/global4/keys16, closure inventory16, sandbox active1/prepared1.
 The harness checks the source declarations and exact selected service hashes.
 
+Reserve six new Robot namespaces for `--pressure`: cancellation, crash, two
+additional retained debits, the fifth refusal and restored-capacity admission.
+The fifth attempt prepares a namespace even though its Robot proposal is refused;
+five actual proposals therefore consume six preparation slots. Preserve retained
+history when checking the fixed 16-namespace capacity; do not delete it to fit a run.
+
 The caller explicitly provisions the reviewed public Robot peer and systemd
 workload credential beforehand, following the existing combined recipe. Keep
 the separately retained original peer/drop-in/credential metadata for later
