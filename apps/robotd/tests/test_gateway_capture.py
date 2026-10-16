@@ -19,8 +19,13 @@ class GatewayCaptureTests(unittest.TestCase):
         decoded, handle, prepared, operation, _, _ = test_failure_paths.CapturePredicateTests().fixture('a02')
         for record in decoded['records'][3:]:
             record['value']['status']['reason'] = 3
+        decoded['records'][3]['value']['kind'] = 0x30003
         interval = {'started_ns': 120, 'finished_ns': 140}
         validate_gateway_capture(decoded, handle, prepared, operation, 'lifetime', interval)
+        decoded['records'][3]['value']['kind'] = 0x30002
+        with self.assertRaises(AssertionError):
+            validate_gateway_capture(decoded, handle, prepared, operation, 'lifetime', interval)
+        decoded['records'][3]['value']['kind'] = 0x30003
         decoded['records'][3]['value']['status']['reason'] = 4
         with self.assertRaises(AssertionError):
             validate_gateway_capture(decoded, handle, prepared, operation, 'lifetime', interval)

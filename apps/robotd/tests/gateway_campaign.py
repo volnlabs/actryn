@@ -40,7 +40,7 @@ def validate_gateway_capture(decoded, handle, prepared, operation, mode, interva
     matching = [e for e in events if same_operation(e['status'], operation)]
     starts = [e for e in matching if e['kind'] == 0x10007]
     reason = 2 if mode == 'traffic' else 3
-    closures = [e for e in matching if e['kind'] == 0x30002 and e['status']['reason'] == reason]
+    closures = [e for e in matching if e['kind'] == (0x30000 | reason) and e['status']['reason'] == reason]
     require(len(starts) == 1 and closures and starts[0]['sequence'] < closures[0]['sequence']
             and interval['started_ns'] <= closures[0]['captured_ns'] <= interval['finished_ns']
             and any(e['status']['operation_state'] == 4 for e in matching),
