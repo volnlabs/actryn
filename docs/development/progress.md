@@ -348,6 +348,51 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Its pointer/count trace has no immutable-frame correlation and remains target
   NOT_RUN. Full dispatch measurement and the frozen A16 comparison remain open.
 
+### Installed runtime and allocated-key campaign checks
+
+- Fresh server 03 now passes installed-slot offline execution, independent sandbox
+  inspection, cancellation and six-artifact export validation. Explicit service
+  stop/start preserves both reaped attempt histories and the original single
+  stdout record, with no observed reexecution. The earlier read-only restart
+  precheck failure remains retained. Evidence is in
+  `artifacts/install-server-positive03`; the fixture signing identity is not a
+  publication identity. `6860bd4` ships the corresponding fresh-server recipe;
+  its shell/Python syntax and resume-parser checks pass without executing host
+  commands. The earlier immutable installed slot contains its original guide.
+- A documentation-editing heredoc error sent trailing example commands to the
+  development host shell. The attempted Actryn service start failed polkit
+  authentication; inspected Actryn binary, service, configuration and state
+  paths are absent. Exact command/output, interval and read-only metadata checks
+  are retained under `artifacts/install-server-positive03/host-command-incident`
+  and `artifacts/host-doc-edit-audit01`. No full preincident filesystem snapshot
+  exists; the audit does not claim byte identity of the whole host. Subsequent
+  documentation edits use structured patches and nonexecuting syntax checks.
+- `aced594` adds separate bounded A02 reply-loss and A09 SQLite writer-contention
+  campaigns using the production CLI/SDK and a production capture-reader adapter.
+  Fourteen focused Python checks pass after integration. The agent also ran the
+  native reader test and strict Clippy. Actual A09 remains NOT_RUN.
+- Actual A02 reply-loss 01 fails before allocation: recorder PendingAge and
+  WriterStopped inhibit the runtime, the query has no request snapshot, and the
+  kernel has no operation. The relay withholds 133 ciphertext bytes and the sole
+  SDK proposal returns OutcomeUnknown without resend. A separate cleanup revoke
+  is recorded. Explicit postfailure retirement/recovery then exports 177 durable
+  records with no missing record ordinals or raw remnants; this does not turn the
+  original campaign into a pass. Raw evidence and hashes are in
+  `artifacts/robot-a02-replyloss-01` and its `-retirement`/`-diagnostic` directories.
+  A prior host-only launch assertion selected the wrong worktree CLI and stopped
+  before guest access; its separate prelaunch record is retained.
+- A bounded idle-guest durability diagnostic writes twelve new 4 KiB files and
+  measures file fsync at approximately 49–61 ms. These later samples and PSI
+  readbacks do not explain the earlier two-second pending-data breach. Recorder
+  and clock limits remain unchanged; no failed mutation is automatically retried.
+- `83128e1` freezes a test-only UART accepted-prefix capture module and strict
+  frame correlation for A16. All 42 host Python checks plus sanitizer/native
+  helper checks pass; the module builds against the exact ARM kernel headers.
+  Target loading remains NOT_RUN. A passive preflight rejects the kernel's
+  legitimate `7 (expanded: 1408)` trace-buffer format; a separately numbered
+  preexecution amendment is required before the instrumentation pilot. No
+  software latency, physical drain or timing-bound claim follows from the build.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
