@@ -22,6 +22,7 @@
 #define MS 1000000ULL
 struct handles { int admin, runtime, events, acquisition; };
 static unsigned long long observation;
+static struct actryn_request last_observation,last_health;
 static struct actryn_event recent_events[16];
 static unsigned int recent_event_count;
 static unsigned long long now(void)
@@ -85,6 +86,7 @@ static void health(struct handles *h)
 {
  struct actryn_request r=req(ACTRYN_HEALTH); struct actryn_status s=status(h->admin);
  memcpy(r.runtime_nonce,s.runtime_nonce,16); r.deadline_ns=now()+1500*MS; submit(h->runtime,&r);
+ last_health=r;
 }
 static struct actryn_status await_state(struct handles *h,unsigned int state,unsigned int op,bool refresh)
 {
@@ -118,7 +120,8 @@ static struct actryn_request allocate(struct handles *h,unsigned long long durat
  struct actryn_status s=status(h->admin); struct actryn_request r=req(ACTRYN_OBSERVE);
  memcpy(r.runtime_nonce,s.runtime_nonce,16); r.observation=++observation; r.context_revision=1;
  r.acquired_earliest_ns=now()-MS; r.acquired_latest_ns=now(); r.valid_until_ns=now()+900*MS;
- submit(h->acquisition,&r); r=req(ACTRYN_ALLOCATE); memcpy(r.runtime_nonce,s.runtime_nonce,16);
+ submit(h->acquisition,&r); last_observation=r;
+ r=req(ACTRYN_ALLOCATE); memcpy(r.runtime_nonce,s.runtime_nonce,16);
  r.grant=s.grant; r.instance=s.instance; r.observation=observation; r.context_revision=1;
  r.deadline_ns=now()+duration; submit(h->runtime,&r); return r;
 }
@@ -279,10 +282,29 @@ static void repeated_revoke(bool escalate)
 static void controller_restart(void)
 {
  struct handles h=start(); struct actryn_request r; struct actryn_status original,s;
- unsigned long long end;
- begin(&h,5000*MS); original=status(h.admin); fixture_control("restart");
+ unsigned long long end,before_restart,after_restart,submitted;
+ int error;
+ begin(&h,5000*MS); original=status(h.admin); before_restart=now();
+ fprintf(stderr,"restart before_ns=%llu observation=%llu acquired_earliest_ns=%llu acquired_latest_ns=%llu valid_until_ns=%llu health_deadline_ns=%llu\n",
+  before_restart,(unsigned long long)last_observation.observation,
+  (unsigned long long)last_observation.acquired_earliest_ns,
+  (unsigned long long)last_observation.acquired_latest_ns,
+  (unsigned long long)last_observation.valid_until_ns,(unsigned long long)last_health.deadline_ns);
+ diagnostic("before fixture restart",original,0);
+ fixture_control("restart"); after_restart=now();
  r=operation(&h,ACTRYN_SAMPLE); r.sequence=1; r.observation=observation;
- r.context_revision=1; r.deadline_ns=now()+300*MS; submit(h.runtime,&r);
+ r.context_revision=1; r.deadline_ns=now()+300*MS;
+ submitted=now();
+ fprintf(stderr,"restart after_ns=%llu elapsed_ns=%llu sample_submit_ns=%llu grant=%llu operation=%llu stream=%llu sequence=%llu observation=%llu context=%llu deadline_ns=%llu duties=%d,%d\n",
+  after_restart,after_restart-before_restart,submitted,(unsigned long long)r.grant,
+  (unsigned long long)r.operation,(unsigned long long)r.stream,(unsigned long long)r.sequence,
+  (unsigned long long)r.observation,(unsigned long long)r.context_revision,
+  (unsigned long long)r.deadline_ns,r.left_permille,r.right_permille);
+ if(ioctl(h.runtime,ACTRYN_IOCTL_REQUEST,&r)) {
+  error=errno; s=status(h.admin); drain(h.events);
+  fprintf(stderr,"restart sample rejected: errno=%d (%s) returned_ns=%llu\n",error,strerror(error),now());
+  diagnostic("after rejected restart sample",s,r.deadline_ns); abort();
+ }
  /* A newer controller epoch must close authority on receipt, rather than
   * waiting for the one-second missing-receipt timeout. This is a test timeout,
   * not a measured or guaranteed scheduling bound. */

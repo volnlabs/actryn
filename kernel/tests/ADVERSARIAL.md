@@ -82,6 +82,13 @@ operation, sends a zero-duty sample under the old epoch, and requires a
 transport fault with UNKNOWN before the generic missing-receipt timeout. It
 checks that the old operation identity remains preserved and replay cannot
 revive it. Its 500 ms observation window is a test timeout, not a latency bound.
+The restart case logs original observation/health cutoffs, timestamps around
+the acknowledged admin restart, every sample identity/deadline field and the
+immediate kernel status/events if admission fails. It keeps the original
+observation and acceptance conditions. A slow restart can consume that
+observation's usable horizon; such an admission failure remains a failed setup,
+not a controller-epoch pass. Snapshot 14's earlier EINVAL lacked these snapshots
+and remains unresolved rather than being assigned a guard retrospectively.
 `repeated-revoke` delays a closure receipt by 250 ms, revokes repeatedly while
 that receipt is pending, and requires one unchanged QUIESCE transaction to
 reconcile. `cancel-revoke` adds escalation from operation cancellation to grant
