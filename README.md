@@ -23,3 +23,8 @@ for actual verification. The preview is software-only; physical activation is un
 Selected source organization: one initial `actryn` monorepo with userspace/SDK/CLI, portable Rust core, `kernel/`, `firmware/` and `targets/` boundaries. Server, robot and target artifacts promote independently. An unprivileged network gateway relays end-to-end authenticated traffic to the trusted manager; it receives no actuator authority. Shared Rust kernel integration remains conditional on the exact target build/lifetime gate. Reference checkouts, when present under `ref/`, are local inspection inputs excluded from Git.
 
 Historical reviews and preserved baselines retain the previous product name, Voln.
+
+Original userspace code uses [Apache-2.0](LICENSE). The Linux authority module,
+kernel tests and observer BPF code use [GPL-2.0-only](LICENSES/GPL-2.0-only.txt),
+as identified by their source headers. Third-party dependencies retain their own
+licenses; release bundles include their notices and corresponding kernel source.
