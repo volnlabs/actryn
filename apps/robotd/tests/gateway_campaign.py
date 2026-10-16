@@ -41,6 +41,57 @@ def acknowledged_running(handle, result, query, description):
     return operation
 
 
+def execution_counts(records, handle, operation):
+    """Runtime Execution is either an accepted proposal tuple or a successful SAMPLE ioctl."""
+    def byte_array(value, length):
+        return (isinstance(value, list) and len(value) == length
+                and all(type(v) is int and 0 <= v <= 255 for v in value))
+
+    proposals, samples = 0, 0
+    zero_fields = ('flags', 'role', 'instance', 'transaction', 'acquired_earliest_ns',
+                   'acquired_latest_ns', 'valid_until_ns', 'reason', 'reserved0')
+    positive_fields = ('grant', 'operation', 'stream', 'sequence', 'deadline_ns', 'observation')
+    fields = set(zero_fields + positive_fields + ('version', 'opcode', 'runtime_nonce',
+                 'context_revision', 'left_permille', 'right_permille', 'digest', 'reserved'))
+    for record in records:
+        if record['origin'] != 'Runtime' or record['kind'] != 'Execution':
+            continue
+        value = record['value']
+        if isinstance(value, list):
+            require(len(value) == 4 and value[0] == list(handle.key)
+                    and byte_array(value[0], 32) and byte_array(value[1], 32)
+                    and isinstance(value[2], dict)
+                    and set(value[2]) == {'left_ticks', 'right_ticks', 'duration_ms'}
+                    and all(type(v) is int for v in value[2].values())
+                    and abs(value[2]['left_ticks']) <= 100 and abs(value[2]['right_ticks']) <= 100
+                    and 0 < value[2]['duration_ms'] <= 10000
+                    and type(value[3]) is int and 0 < value[3] < 2**64,
+                    'unrecognized accepted proposal execution')
+            proposals += 1
+            require(proposals == 1, 'exactly one accepted proposal in whole capture')
+        else:
+            # SAMPLE does not carry device/boot/session/instance: its canonical
+            # identity is nonce/grant/operation/stream; instance must remain zero.
+            require(isinstance(value, dict) and set(value) == fields,
+                    'unrecognized runtime execution record')
+            require(all(type(value[k]) is int and value[k] == 0 for k in zero_fields)
+                    and all(type(value[k]) is int and 0 < value[k] < 2**64 for k in positive_fields)
+                    and type(value['version']) is int and value['version'] == 1
+                    and type(value['opcode']) is int and value['opcode'] == 8
+                    and type(value['context_revision']) is int and value['context_revision'] == 1
+                    and all(type(value[k]) is int and -200 <= value[k] <= 200
+                            for k in ('left_permille', 'right_permille'))
+                    and byte_array(value['runtime_nonce'], 16) and byte_array(value['digest'], 32)
+                    and byte_array(value['reserved'], 16) and value['reserved'] == [0] * 16,
+                    'noncanonical SAMPLE execution')
+            require(proposals == 1 and all(value[k] == operation[k] for k in
+                    ('runtime_nonce', 'grant', 'operation', 'stream'))
+                    and value['sequence'] == samples + 1, 'SAMPLE execution identity/order changed')
+            samples += 1
+    require(proposals == 1, 'exactly one accepted proposal in whole capture')
+    return proposals, samples
+
+
 def validate_gateway_capture(decoded, handle, prepared, operation, mode, interval):
     require(mode in ('traffic', 'lifetime') and interval['started_ns'] < interval['finished_ns'], 'fault interval')
     require(decoded['format'] == 'actryn-failure-capture-1' and decoded['attempt'] == list(handle.attempt)
@@ -61,9 +112,7 @@ def validate_gateway_capture(decoded, handle, prepared, operation, mode, interva
     allocations = [e for e in events if e['kind'] == 0x1000e]
     require(len(allocations) == 1 and allocations[0]['status']['operation_state'] == 6
             and operation_id(allocations[0]['status']) == operation, 'exactly one allocation in whole capture')
-    executions = [r['value'] for r in records if r['origin'] == 'Runtime' and r['kind'] == 'Execution']
-    require(len(executions) == 1 and isinstance(executions[0], list) and len(executions[0]) == 4
-            and executions[0][0] == list(handle.key), 'exactly one accepted execution in whole capture')
+    proposals, samples = execution_counts(records, handle, operation)
     matching = [e for e in events if same_operation(e['status'], operation)]
     starts = [e for e in matching if e['kind'] == 0x10007]
     reason = 2 if mode == 'traffic' else 3
@@ -74,6 +123,7 @@ def validate_gateway_capture(decoded, handle, prepared, operation, mode, interva
             'missing START, fault-specific closure inside interval, or reconciliation')
     return {'allocation_sequence': allocations[0]['sequence'], 'start_sequence': starts[0]['sequence'],
             'closure_sequence': closures[0]['sequence'], 'reason': reason, 'operation': operation,
+            'accepted_proposal_count': proposals, 'sample_request_count': samples,
             'kernel_clock': 'CLOCK_BOOTTIME', 'volatile_tail_unknown': True, 'full_execution_replay': False}
 
 

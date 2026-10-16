@@ -67,6 +67,13 @@ fall inside the guest CLOCK_BOOTTIME interval recorded by the reserved-endpoint
 helper. Extra allocations, expiry instead of cancellation, source gaps, incomplete
 capture, or an ambiguous successful result cannot pass.
 
+Runtime `Execution` records have two existing schemas: the accepted proposal's
+four-element tuple and successful UAPI SAMPLE requests. The validator requires
+exactly one proposal globally and checks every SAMPLE's canonical request fields,
+nonce/grant/operation/stream identity and contiguous runtime sample sequence.
+Unknown shapes, duplicate proposals and unrelated samples fail. These metadata
+counts do not establish physical execution or complete execution replay.
+
 The opaque relay has one connection, a 20-second lifetime, one complete captured
 TLS record (at most 18,437 bytes), 262,144 total observed bytes, and one explicit
 forward/replay action charged before I/O. Held bytes are never flushed on abort.
