@@ -423,6 +423,42 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Both amendment hashes are retained before module loading; target pilots remain
   NOT_RUN.
 
+- `c04146e` gives failure campaigns one owned SSH transport and disables silent
+  network fallback if its control socket disappears. Three new host checks pass,
+  including a real OpenSSH no-master refusal. A09 failure 01's recorded interval
+  from the prior SDK reply to lock acquisition is 2.046980352 seconds, exceeding
+  the unchanged two-second next-frame deadline. The transport amendment changes
+  setup, not the lease, recorder, RPC or clock limits.
+- Separately numbered A09 runs 02 and 03 stop during their initial Recover with
+  `OutcomeUnknown: clock checkpoint pending`, before preparation or fault injection.
+  Run 03 follows an explicit read-only check of run 02's zero authority, absent
+  operation/preparation and absent pending recovery; neither run resends an
+  uncertain proposal. Both failures remain retained. Later thread/clock readbacks
+  show a healthy updating clock and sleeping background threads, without a panic;
+  they do not establish the exact lock holder at either failure. Further failure
+  campaigns are deferred until selection of the next kernel artifact.
+- `e7d322b` freezes the four-boot/eight-run A16 runner with separate instrumentation
+  pilots, full failed/unstarted denominators, exact helper/binary pins and fenced
+  cleanup. Nine integrated host tests pass. The complete lane check reports 56
+  Python tests plus sanitizer/native helper checks passing. A thirteen-file
+  instrumentation package is staged in `artifacts/a16-instrumentation-deploy05`;
+  nothing is loaded in a guest yet.
+- Fresh Robot preparation (`21c20ab`, `75dd98b`) records explicit installed-slot
+  startup/enrollment/evidence steps. A locked/offline ARM CLI build and a native
+  controller-fixture build pass from source `2ec9da0`; raw build and transform
+  hashes are retained in `artifacts/install-robot-inputs-02`. The rebuilt fixture
+  differs from the older prepared executable, so a separate command amendment
+  selects it only for the new guest. Original cache inputs and running fixtures
+  remain unchanged. The module15 input is explicitly intermediate; no new Robot
+  payload or guest installation has been performed.
+- An A06 source audit finds the native serdev shutdown callback absent. Linux
+  calls that callback separately from removal. A narrow shared shutdown/removal
+  closure fix is now test-first work in `feat/kernel-shutdown`; it must prevent
+  additional dispatch, preserve uncertain operation/last-applied state and avoid
+  duplicate transport closure/reference release. It cannot invent a zero-output
+  receipt. Final module selection, targeted diagnostics, fresh Robot packaging
+  and any necessary A16 source/artifact amendment remain pending this fix.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
