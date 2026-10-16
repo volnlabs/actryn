@@ -97,7 +97,7 @@ Keep compiler output, ELF/readelf details and SHA-256 provenance. Compile withou
 ```
 
 Stop the quiescent server/launcher normally, retain the old public config, and
-import this layout once with installed `/usr/bin/actryn-artifact import --layout
+import this layout once with installed `/usr/bin/actryn server import --layout
 ... --digest sha256:ACTUAL_BUILDER_DIGEST`. Preserve the new public config and
 restart the unchanged services. The importer, not an edited allowlist, approves
 the artifact. Its fixed offline profile permits echo but no live model, network
