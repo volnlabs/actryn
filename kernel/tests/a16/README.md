@@ -131,3 +131,73 @@ moving one identical instruction sequence across the syscall boundary.
 
 Source owner: kernel lane (`kernel/tests/a16/**`). Root owns test-only DT/VM
 configuration, quiet-window scheduling and the integrated acceptance report.
+
+## Dedicated pilot preparation (not yet executed)
+
+The [frozen manifest](manifest.toml) selects the separate `actryn-a16` guest,
+ports 26224/27446, one 16 GiB disk, a new key and the pinned cloud image, boot
+assets and fixture binary. Existing manager/server disks and fixture state are
+never inputs. `prepare.py ROOT_REPO_WITH_PINNED_CACHE` requires a clean committed
+kernel source tree, verifies hashes, and refuses an existing `.cache/qemu/a16`.
+When explicitly executed, it creates a fresh disk, seed, private key, frozen
+fixture copy, source archive and command JSON files. **It never starts a VM,
+fixture or systemd unit.** A failed preparation remains recorded and cannot be
+silently rerun over its directory. Command JSON uses a distinct serial log for
+each provision/pilot/ABBA boot, with the same disk and hardware configuration.
+Run preparation from the integrated source checkout: its frozen profile hash is
+`6b9f174af8b018e0cf95bfd282ed52b5385d364ebe7e372d54ce6a91d1d99be8`.
+An older development worktree profile fails preflight even when its authority
+constants agree. Baseline source and driver hashes are checked independently.
+
+Root starts only `actryn-a16-fixture` and `actryn-a16-robot` after checking ports
+and memory headroom. The initial protected boot uses `qemu-provision01.json`;
+the raw pilot uses `qemu-pilot01.json`. The fixture command uses only this new
+directory's socket/admin/state files. Preserve its state across boot blocks.
+Establish and retain this local guest's SSH host fingerprint in its own
+`known_hosts`; use only its new `id_ed25519` and port 26224 thereafter.
+
+Extract the prepared `source.tar.gz` into `/opt/actryn-a16/src` in the new
+guest, then run `sh /opt/actryn-a16/src/kernel/tests/a16/provision-guest.sh`.
+It checks the exact hostname, architecture, kernel and virtual-machine identity,
+uses authenticated apt with bounded network/command timeouts and exact direct
+package pins, records the full installed dependency inventory and apt lists,
+then builds the module and test executables once. A new build directory is
+required. It installs no module or daemon and makes no target-test claim.
+The pins were checked against the Debian ARM64 pages for
+[build-essential](https://packages.debian.org/trixie/arm64/build-essential),
+[GCC 14](https://packages.debian.org/trixie/gcc-14),
+[make](https://packages.debian.org/trixie/arm64/make),
+[Python 3](https://packages.debian.org/trixie/arm64/python3) and the
+[exact kernel headers](https://packages.debian.org/trixie/arm64/linux-headers-6.12.111%2Bdeb13-arm64/download).
+Transitive package versions are recorded rather than falsely claimed to be
+individually pinned; both comparison arms use that same provisioned disk.
+
+With the appropriate dedicated mode already booted, run on the host:
+
+```sh
+python3 kernel/tests/a16/pilot.py protected /absolute/root/.cache/qemu/a16
+# Root then stops only the dedicated VM and boots its same disk with raw DT.
+python3 kernel/tests/a16/pilot.py userspace /absolute/root/.cache/qemu/a16
+```
+
+The protected pilot runs one module selftest and the diagnostic controller-reset
+case. The userspace pilot starts only the new guest's test gateway, runs the
+independent [live client](live_qualify.py), then the ten fixed workload trials.
+The client defines its own binary UAPI layout and uses real Unix descriptors;
+it does not import the baseline engine. It requires raw-UART access denial for
+an unrelated unprivileged process, inherited/SCM_RIGHTS runtime-role denial,
+continued admission of the original owner, and owner-death closure while another
+process retains its runtime connection. It issues no grant or rearm. The ten
+operation trials separately test the active path. Host tests of this client
+check binary offsets, actual seqpacket framing and malformed replies, **not**
+the live gateway or UART.
+
+`pilot.py` has a fixed port and hostname guard, new immutable result directories,
+bounded SSH/fixture/workload waits and no retry loop. A missing/failed trial,
+wrong scenario order, lost events or incomplete capture blocks qualification.
+It preserves failed output and partial captures and stops its test gateway;
+it never starts/stops a VM or contacts the existing guests. The 60-second bridge
+budget is a campaign timeout, not a latency bound. Target preparation, boot,
+provisioning and these live pilot commands remain **NOT_RUN** until their actual
+records exist. A passing pilot permits the already-authorized frozen ABBA
+experiment; pilot rows never enter its measurement denominator.

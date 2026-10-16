@@ -1,0 +1,58 @@
+# Test-only comparison inputs, revision 1. No physical or release qualification.
+revision = 1
+name = "actryn-a16"
+instance_id = "actryn-a16-20261016-01"
+kernel_release = "6.12.111+deb13-arm64"
+kernel_config_sha256 = "0f442d89365ea22dc5169463634ee62903925200844558479666cbe3eeb7e555"
+profile_sha256 = "6b9f174af8b018e0cf95bfd282ed52b5385d364ebe7e372d54ce6a91d1d99be8"
+authority_source_sha256 = "bf945ff25601c2681055de3bf2c9d9ed6bce04148396c5133dfc02926c26f289"
+baseline_source_commit = "71f71cd57d5d4b1951b1cb57539ab6a0a75c957d"
+physical_acceptance = false
+
+[baseline]
+"kernel/tests/a16/engine.c" = "15d3cdb3e420878fdaa2e51233b851327b79939196bf47718d3d46c6cd670bf5"
+"kernel/tests/a16/gateway.c" = "5ca065e12366c020987fb6670fed0dba7661b50f51f7198c29e5cbd0f066803c"
+"kernel/tests/a16/workload.c" = "07c801c2881aefdbd2319e264775190bfcd5d0caf5622be3db0f2796b4bca13c"
+
+[vm]
+qemu_version = "11.1.1"
+machine = "virt"
+accel = "tcg"
+cpu = "cortex-a72"
+vcpus = 2
+memory_mib = 2048
+disk_gib = 16
+ssh_port = 26224
+reserved_tls_port = 27446
+mac = "52:54:00:a1:60:24"
+
+[image]
+path = ".cache/qemu/images/debian-13-generic-arm64.qcow2"
+url = "https://cloud.debian.org/images/cloud/trixie/20261015-2632/debian-13-generic-arm64-20261015-2632.qcow2"
+sha512 = "a34e1c1eea1fbb9ad31ebdfc6c776d1d579ce9e3d740ab10549ebcdca6fe1a46c28e0a42cbcdf1eb561795776733c178f6e816fe1a2cb60d26ffc56c07f915c4"
+
+[assets.kernel]
+path = ".cache/qemu/robot/vmlinuz-6.12.111+deb13-arm64"
+sha256 = "5028c424ee9fd0f4d18c38269122e30e3d084deb1b13404ab070a3f478ddd30a"
+[assets.initrd]
+path = ".cache/qemu/robot/initrd.img-6.12.111+deb13-arm64"
+sha256 = "ee1f52b37a794606196f48012c634cffe77effdbefe380c86235048d2d76a3bc"
+[assets.raw_dtb]
+path = ".cache/qemu/robot/base.dtb"
+sha256 = "e39cb80b55a7391176ee478436abbea0ba44e83134f0cbffa1cb5596ebfd15a1"
+[assets.protected_dtb]
+path = ".cache/qemu/robot/authority.dtb"
+sha256 = "b7a13e2f87dccf996274d65e91603b988b4d170bfa3ca9f2610f173d0dcc2011"
+[assets.fixture]
+path = "target/debug/controller-fixture"
+sha256 = "3684e5f2a5b848ac779336fb4dc1c087413c92d5fb11e63f39e1c72c7007e398"
+
+# Verified 2026-10-16 using Debian trixie ARM64 package pages. Guest apt still
+# authenticates repository metadata; missing exact versions stop provisioning.
+# Full transitive package inventory and apt metadata are retained at provision.
+[packages]
+"linux-headers-6.12.111+deb13-arm64" = "6.12.111-1"
+"build-essential" = "12.12"
+"gcc-14" = "14.2.0-19"
+make = "4.4.1-2"
+python3 = "3.13.5-1"
