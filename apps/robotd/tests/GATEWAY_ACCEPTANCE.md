@@ -2,7 +2,10 @@
 
 `gateway_traffic.py` is an opt-in production manager, gateway, kernel and deterministic
 fixture campaign. Host tests validate the bounded test mechanisms; they do not
-close A10. No actual guest run is claimed by this source change.
+close A10. Installed lifetime09 passes the retained-descriptor and offline-recovery
+case; earlier failed campaigns remain preserved. See the
+[progress ledger](../../../docs/development/progress.md#installed-manager11-and-numbered-follow-up-campaigns)
+for actual numbered results and their evidence boundaries.
 
 The entry point accepts the same supplied SSH, mTLS, CLI, reader, principal and
 manager/module pins as `failure_paths.py`, plus `--gateway-sha256`. `--help` is

@@ -1,6 +1,10 @@
 # A04 frozen QEMU, crash and retained history
 
-**Source prepared; actual campaign NOT_RUN.** This opt-in test has two separate
+**Actual campaign01 passes on installed manager11/module16.** Its freeze, retained
+disk reboot and inspection evidence is recorded in the
+[progress ledger](../../../docs/development/progress.md#installed-manager11-and-numbered-follow-up-campaigns).
+The raw tail remains unknown; this does not close the whole A04 release row.
+This opt-in test has two separate
 invocations. It uses the existing installed Robot, software fixture, SDK proposal,
 canonical local RPC, SSH master, CLI pairing/export and production evidence reader.
 It launches no VM, installs nothing and creates no enrollment or replacement

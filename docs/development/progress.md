@@ -869,6 +869,34 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Actual A04 remains pending. `a17afd4` also supplies the complete source-backed
   installed offline broker recipe; syntax/source checks are not walkthrough
   execution or independent operator acceptance.
+- A04 freeze/crash01 and inspect01 pass on the same installed Robot disk. The
+  original operation is durably Submitted before the pinned QEMU is stopped.
+  All 14 threads are stopped with socket descriptors retained; the unchanged
+  native fixture reaches disabled zero output after 513.16 ms of fixture time.
+  This is an expiry inference without an observed fault reason, not instantaneous
+  power loss or physical stopping proof. The original QEMU is killed once, then
+  the same disk boots with a new boot ID. A prelaunch wrapper property error is
+  preserved separately and occurs before the sole launch.
+- Before normal services start, the exact module is loaded once and new-boot
+  inactive/disabled/zero-start service state plus anchored empty unit journals
+  are verified. Cold archival preserves 161 files and 1,116,003 raw bytes. All
+  seven namespace and ten intent rows match the pre-crash history; the interrupted
+  row stays revision 2, phase 3, nonterminal in storage. Three authenticated
+  original-handle queries project terminal `OutcomeUnknown`, with no authority,
+  preparation, cancellation claim or resend. This read-only projection does not
+  invent a persisted UNKNOWN transition; later explicit preparation can perform
+  the documented registry startup retirement separately.
+- The A04 export's 17 files/140,274 bytes match the original cold capture bytes,
+  including its checkpoint database, hot journal and partial batch. The reader
+  recovers only committed checkpoints in a private copy after SQLite error 776;
+  the raw source remains unchanged. Its supported prefix has 109 records, one
+  proposal/allocation/START and three SAMPLEs, with no terminal controller event.
+  The uncommitted/volatile tail stays unknown and execution replay ineligible.
+  Independent review verifies all 47 freeze and 51 inspect inventory entries,
+  all 29 executed source pins and the three unchanged postboot history snapshots.
+  Evidence remains in `artifacts/robot-a04-{freeze,inspect}-01` and
+  `artifacts/robot-a04-review01`. The full installed lifecycle and Server guest
+  crash/outstanding-debit case remain separate pending work.
 
 ## Decisions
 
