@@ -21,3 +21,4 @@ rcgen = "=0.14.10"
 
 [dev-dependencies]
 tempfile.workspace = true
+evidence = { path = "../../crates/evidence" }
