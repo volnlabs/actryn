@@ -518,6 +518,7 @@ static int do_request(struct actryn_file *file,struct actryn_request *r)
 {
  struct actryn_endpoint *e=file->ep; struct actryn_frame f;
  u64 now=now_ns(), expiry; int ret;
+ if(e->s.state==ACTRYN_DETACHED) return -ENODEV;
  if(r->opcode==ACTRYN_BIND) {
   if(file->role || !admin() || r->role<ACTRYN_ADMIN || r->role>ACTRYN_EVENTS) return -EPERM;
   if(r->role==ACTRYN_RUNTIME) {
@@ -662,7 +663,7 @@ static long authority_ioctl(struct file *file,unsigned int cmd,unsigned long arg
  ret=urgent_request(f,&r); if(ret) return ret;
  if(mutex_lock_interruptible(&e->authority)) return -ERESTARTSYS;
  apply_close(e); check_health(e);
- ret=e->s.state==ACTRYN_DETACHED?-ENODEV:do_request(f,&r);
+ ret=do_request(f,&r);
  mutex_unlock(&e->authority);
  if(!ret && copy_to_user((void __user *)arg,&r,sizeof(r))) ret=-EFAULT;
  return ret;
@@ -751,17 +752,29 @@ close:
 free:
  kref_put(&e->refs,endpoint_free); return ret;
 }
-static void authority_remove(struct serdev_device *serdev)
+/* The device core serializes shutdown and remove with the device lock. Keep
+ * the binding and open-file references until remove/release, even at shutdown. */
+static void authority_stop(struct serdev_device *serdev)
 {
  struct actryn_endpoint *e=serdev_device_get_drvdata(serdev); unsigned long flags;
- request_close(e,CTRL_DETACH,ACTRYN_DEVICE_REMOVED,0,0);
- mutex_lock(&e->authority); apply_close(e);
- spin_lock_irqsave(&e->control_lock,flags); e->stopping=true; spin_unlock_irqrestore(&e->control_lock,flags);
+ mutex_lock(&e->authority);
+ if(!e->stopping) {
+  request_close(e,CTRL_DETACH,ACTRYN_DEVICE_REMOVED,0,0); apply_close(e);
+  spin_lock_irqsave(&e->control_lock,flags); e->stopping=true; spin_unlock_irqrestore(&e->control_lock,flags);
+ }
  mutex_unlock(&e->authority);
- misc_deregister(&e->misc); cancel_delayed_work_sync(&e->work);
+ cancel_delayed_work_sync(&e->work);
  /* PL011 shutdown joins IRQs; tty close flush joins the receive consumer. */
- if(e->opened) serdev_device_close(serdev);
- wake_up_interruptible(&e->event_wait); kref_put(&e->refs,endpoint_free);
+ if(e->opened) { serdev_device_close(serdev); e->opened=false; }
+ wake_up_interruptible(&e->event_wait);
+}
+static void authority_shutdown(struct serdev_device *serdev)
+{ authority_stop(serdev); }
+static void authority_remove(struct serdev_device *serdev)
+{
+ struct actryn_endpoint *e=serdev_device_get_drvdata(serdev);
+ authority_stop(serdev); misc_deregister(&e->misc);
+ kref_put(&e->refs,endpoint_free);
 }
 static int authority_suspend(struct device *dev)
 {
@@ -782,6 +795,7 @@ static const struct dev_pm_ops authority_pm={ .suspend=authority_suspend,.resume
 static const struct of_device_id authority_of_match[]={ { .compatible="actryn,fixture-v2" },{} };
 MODULE_DEVICE_TABLE(of,authority_of_match);
 static struct serdev_device_driver authority_driver={ .probe=authority_probe,.remove=authority_remove,
+ .shutdown=authority_shutdown,
  .driver={ .name="actryn-authority",.of_match_table=authority_of_match,.pm=&authority_pm } };
 module_serdev_device_driver(authority_driver);
 MODULE_LICENSE("GPL");

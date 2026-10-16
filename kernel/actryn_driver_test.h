@@ -2,6 +2,7 @@
 #include <kunit/test.h>
 #include <linux/kthread.h>
 #include <linux/completion.h>
+#include <linux/pm_runtime.h>
 
 struct test_uart {
  u8 bytes[2*ACTRYN_ENCODED_MAX]; size_t count,limit; int error;
@@ -550,6 +551,116 @@ static void receive_wakeup_preserved(struct kunit *test)
  complete(&t->release); cancel_delayed_work_sync(&e->work);
  KUNIT_EXPECT_NE(test,finished,0UL);
 }
-static struct kunit_case driver_cases[]={KUNIT_CASE(every_cancel_offset),KUNIT_CASE(concurrent_closure),KUNIT_CASE(late_receipts),KUNIT_CASE(every_fault_recovery_offset),KUNIT_CASE(stalled_parser_timeout),KUNIT_CASE(inhibited_revoke),KUNIT_CASE(retained_rx_recovery),KUNIT_CASE(stale_epoch_receipts),KUNIT_CASE(handshake_rx_sync),KUNIT_CASE(new_controller_epoch),KUNIT_CASE(bounded_queues_counters),KUNIT_CASE(pm_inhibition),KUNIT_CASE(grant_closure_idempotence),KUNIT_CASE(receive_wakeup_preserved),{}};
+
+struct shutdown_uart {
+ struct test_uart uart;
+ struct actryn_endpoint *ep;
+ wait_queue_entry_t waiter;
+ unsigned int closes;
+ bool unlocked, woke_stopped;
+};
+static int shutdown_wake(wait_queue_entry_t *wait,unsigned int mode,int flags,void *key)
+{
+ struct shutdown_uart *uart=container_of(wait,struct shutdown_uart,waiter);
+ if(READ_ONCE(uart->ep->stopping)) uart->woke_stopped=true;
+ return 0;
+}
+static void shutdown_test_close(struct serdev_controller *ctrl)
+{
+ struct shutdown_uart *uart=container_of(serdev_controller_get_drvdata(ctrl),struct shutdown_uart,uart);
+ struct actryn_endpoint *e=uart->ep; u8 delimiter=0;
+ uart->closes++; uart->unlocked=mutex_trylock(&e->authority);
+ if(uart->unlocked) mutex_unlock(&e->authority);
+ /* A callback already entering transport close may still publish a wakeup. */
+ receive_buf(e->serdev,&delimiter,1); write_wakeup(e->serdev);
+}
+static const struct serdev_controller_ops shutdown_uart_ops={
+ .write_buf=test_write,.close=shutdown_test_close,
+};
+static void shutdown_test_device_release(struct device *dev) {}
+
+static void shutdown_lifetime(struct kunit *test)
+{
+ struct actryn_endpoint *e;
+ struct serdev_controller *ctrl;
+ struct serdev_device *serdev;
+ struct shutdown_uart *uart;
+ struct file runtime={},events={},fresh={};
+ struct actryn_file admin_file={.role=ACTRYN_ADMIN};
+ struct actryn_request request={.version=1,.opcode=ACTRYN_GRANT,.instance=1};
+ struct actryn_frame sample={.kind=AW_SAMPLE,.grant=7,.operation=8,.stream=9,
+  .sequence=1,.transaction=3,.left=100,.right=-100,.context=1};
+ unsigned int refs;
+ KUNIT_ASSERT_NOT_NULL(test,authority_driver.shutdown);
+ e=kzalloc(sizeof(*e),GFP_KERNEL);
+ ctrl=kunit_kzalloc(test,sizeof(*ctrl),GFP_KERNEL);
+ serdev=kunit_kzalloc(test,sizeof(*serdev),GFP_KERNEL);
+ uart=kunit_kzalloc(test,sizeof(*uart),GFP_KERNEL);
+ KUNIT_ASSERT_NOT_NULL(test,e); KUNIT_ASSERT_NOT_NULL(test,ctrl);
+ KUNIT_ASSERT_NOT_NULL(test,serdev); KUNIT_ASSERT_NOT_NULL(test,uart);
+ kref_init(&e->refs); mutex_init(&e->authority); spin_lock_init(&e->control_lock);
+ spin_lock_init(&e->rx_lock); spin_lock_init(&e->event_lock); init_waitqueue_head(&e->event_wait);
+ INIT_DELAYED_WORK(&e->work,endpoint_work);
+ device_initialize(&ctrl->dev); ctrl->dev.release=shutdown_test_device_release;
+ pm_runtime_get_noresume(&ctrl->dev); ctrl->ops=&shutdown_uart_ops;
+ serdev->ctrl=ctrl; e->serdev=serdev; e->opened=true;
+ serdev_controller_set_drvdata(ctrl,&uart->uart); serdev_device_set_drvdata(serdev,e);
+ uart->ep=e; uart->uart.limit=ACTRYN_ENCODED_MAX;
+ init_waitqueue_func_entry(&uart->waiter,shutdown_wake); add_wait_queue(&e->event_wait,&uart->waiter);
+ e->misc=(struct miscdevice){.minor=MISC_DYNAMIC_MINOR,.name="actryn-shutdown-test",.fops=&authority_fops};
+ KUNIT_ASSERT_EQ(test,misc_register(&e->misc),0);
+ runtime.private_data=&e->misc; events.private_data=&e->misc;
+ KUNIT_ASSERT_EQ(test,authority_open(NULL,&runtime),0);
+ KUNIT_ASSERT_EQ(test,authority_open(NULL,&events),0);
+ ((struct actryn_file *)runtime.private_data)->role=ACTRYN_RUNTIME;
+ ((struct actryn_file *)events.private_data)->role=ACTRYN_EVENTS;
+ e->s.state=ACTRYN_ACTIVE; e->s.operation_state=ACTRYN_OP_RUNNING;
+ e->s.grant=7; e->s.operation=8; e->s.stream=9; e->s.left_permille=100; e->s.right_permille=-100;
+ e->owner=current->group_leader; get_task_struct(e->owner); e->owner_cred=get_current_cred();
+ e->owner_exec_id=READ_ONCE(e->owner->self_exec_id);
+ e->grant_authorized=e->handshake=true; e->mailbox_valid=true;
+ sample.expiry=now_ns()+500*MS;
+ mutex_lock(&e->authority); KUNIT_EXPECT_EQ(test,queue_frame(e,&sample),0); mutex_unlock(&e->authority);
+ e->tx_off=3; refs=refcount_read(&e->refs.refcount);
+ KUNIT_EXPECT_TRUE(test,queue_delayed_work(system_wq,&e->work,60*HZ));
+ authority_driver.shutdown(serdev);
+ KUNIT_EXPECT_EQ(test,e->s.state,(u32)ACTRYN_DETACHED);
+ KUNIT_EXPECT_EQ(test,e->s.operation_state,(u32)ACTRYN_OP_UNKNOWN);
+ KUNIT_EXPECT_EQ(test,e->s.grant,7ULL); KUNIT_EXPECT_EQ(test,e->s.operation,8ULL);
+ KUNIT_EXPECT_EQ(test,e->s.stream,9ULL);
+ /* Last applied duties are evidence, not a fabricated disable receipt. */
+ KUNIT_EXPECT_EQ(test,e->s.left_permille,100); KUNIT_EXPECT_EQ(test,e->s.right_permille,-100);
+ KUNIT_EXPECT_FALSE(test,e->grant_authorized); KUNIT_EXPECT_FALSE(test,e->handshake);
+ KUNIT_EXPECT_TRUE(test,e->stopping); KUNIT_EXPECT_FALSE(test,e->opened);
+ KUNIT_EXPECT_FALSE(test,e->tx_busy); KUNIT_EXPECT_FALSE(test,e->mailbox_valid);
+ KUNIT_EXPECT_FALSE(test,delayed_work_pending(&e->work));
+ KUNIT_EXPECT_EQ(test,work_busy(&e->work.work),0U);
+ KUNIT_EXPECT_TRUE(test,uart->unlocked); KUNIT_EXPECT_TRUE(test,uart->woke_stopped);
+ KUNIT_EXPECT_EQ(test,uart->closes,1U);
+ KUNIT_EXPECT_EQ(test,refcount_read(&e->refs.refcount),refs);
+ KUNIT_EXPECT_PTR_EQ(test,e->owner,current->group_leader);
+ KUNIT_EXPECT_PTR_EQ(test,e->owner_cred,current_cred());
+ admin_file.ep=e; request.deadline_ns=now_ns()+MS;
+ mutex_lock(&e->authority);
+ KUNIT_EXPECT_EQ(test,do_request(&admin_file,&request),-ENODEV);
+ request.opcode=ACTRYN_SAMPLE;
+ KUNIT_EXPECT_EQ(test,do_request(runtime.private_data,&request),-ENODEV);
+ transmit(e); mutex_unlock(&e->authority);
+ KUNIT_EXPECT_EQ(test,uart->uart.count,(size_t)0);
+ fresh.private_data=&e->misc; KUNIT_EXPECT_EQ(test,authority_open(NULL,&fresh),-ENODEV);
+ authority_driver.shutdown(serdev);
+ KUNIT_EXPECT_EQ(test,uart->closes,1U);
+ remove_wait_queue(&e->event_wait,&uart->waiter);
+ authority_remove(serdev);
+ KUNIT_EXPECT_EQ(test,uart->closes,1U);
+ KUNIT_EXPECT_EQ(test,refcount_read(&e->refs.refcount),refs-1);
+ KUNIT_EXPECT_EQ(test,e->s.operation_state,(u32)ACTRYN_OP_UNKNOWN);
+ authority_release(NULL,&runtime);
+ KUNIT_EXPECT_EQ(test,refcount_read(&e->refs.refcount),1U);
+ authority_release(NULL,&events); /* Final open-file reference frees endpoint. */
+ KUNIT_EXPECT_EQ(test,atomic_read(&ctrl->dev.power.usage_count),0);
+ put_device(&ctrl->dev);
+}
+static struct kunit_case driver_cases[]={KUNIT_CASE(every_cancel_offset),KUNIT_CASE(concurrent_closure),KUNIT_CASE(late_receipts),KUNIT_CASE(every_fault_recovery_offset),KUNIT_CASE(stalled_parser_timeout),KUNIT_CASE(inhibited_revoke),KUNIT_CASE(retained_rx_recovery),KUNIT_CASE(stale_epoch_receipts),KUNIT_CASE(handshake_rx_sync),KUNIT_CASE(new_controller_epoch),KUNIT_CASE(bounded_queues_counters),KUNIT_CASE(pm_inhibition),KUNIT_CASE(grant_closure_idempotence),KUNIT_CASE(receive_wakeup_preserved),KUNIT_CASE(shutdown_lifetime),{}};
 static struct kunit_suite driver_suite={.name="actryn-serdev-recovery",.test_cases=driver_cases};
 kunit_test_suite(driver_suite);

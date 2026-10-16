@@ -81,9 +81,11 @@ for campaign in "$@"; do
   printf '%q ' "${command[@]}" > "$output/$campaign.command"
   printf '\n' >> "$output/$campaign.command"
   echo "Starting $campaign; maximum build-and-run time 30 minutes; one compiler job"
+  date -u +%FT%TZ > "$output/$campaign.started"
   run_status=0
   timeout --signal=TERM --kill-after=15s 1800s nice -n 10 "${command[@]}" > "$output/$campaign.log" 2>&1 || run_status=$?
   printf '%s\n' "$run_status" > "$output/$campaign.exit"
+  date -u +%FT%TZ > "$output/$campaign.finished"
   for file in .config test.log vmlinux System.map; do
     if [ -f "$build/$file" ]; then cp "$build/$file" "$output/$campaign.$file"; fi
   done
@@ -101,7 +103,7 @@ expected = {'wire_roundtrip', 'urgent_monotonic', 'every_cancel_offset',
             'stalled_parser_timeout', 'inhibited_revoke', 'retained_rx_recovery',
             'stale_epoch_receipts', 'new_controller_epoch', 'bounded_queues_counters',
             'pm_inhibition', 'handshake_rx_sync', 'grant_closure_idempotence',
-            'receive_wakeup_preserved'}
+            'receive_wakeup_preserved', 'shutdown_lifetime'}
 suites = {'actryn-authority', 'actryn-serdev-recovery'}
 found, found_suites = set(), set()
 def visit(node):
@@ -121,7 +123,7 @@ visit(data)
 assert found == expected, (found, expected)
 assert found_suites == suites, (found_suites, suites)
 assert not re.search(r'BUG:|WARNING:|KASAN:|KCSAN:|possible circular locking|Kernel panic|not ok|# SKIP', text), text
-print('All sixteen cases and both suites passed; no skip or kernel diagnostic pattern')
+print('All seventeen cases and both suites passed; no skip or kernel diagnostic pattern')
 PY
   test "$run_status" = 0
   sha256sum -c "$output/before.sha256"

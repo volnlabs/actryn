@@ -67,9 +67,15 @@ foreign nonces cannot refresh, acknowledge or reconcile current work.
 
 The owner is the referenced original leader, credential object and exec ID.
 Inherited/transferred descriptors do not gain authority. Binding and open-file
-references retain endpoint state. Remove marks it detached, prevents new worker
-scheduling, joins work, closes the UART and drops the binding reference; old
-FDs remain queryable and cannot adopt a replacement device. Active suspend is
+references retain endpoint state. Native serdev shutdown and removal share an
+idempotent stop path: mark detached, invalidate authority, prevent new worker
+scheduling, join work and close the UART once. Shutdown retains the binding and
+open-file references; removal deregisters the device and drops the binding
+reference. Existing event readers wake, and old FDs remain queryable but cannot
+dispatch or adopt a replacement device. Interrupted operations remain UNKNOWN,
+with their identity and last applied duties preserved. No further frame suffix
+is dispatched and no successful physical disable is inferred from local close.
+Active suspend is
 refused; resume faults and requires recovery/rearm. Module force-unload is not
 supported.
 
@@ -80,6 +86,12 @@ The Linux 6.12 source path inspected for this design is
 and the TTY buffer consumer lock. Serdev open retains its runtime-PM reference;
 PL011 close shuts down/free-joins IRQs and TTY flush joins the receive consumer.
 This source review is not a sanitizer, race or latency qualification.
+For shutdown, the authenticated Debian `linux-source-6.12=6.12.111-1` sources
+also confirm that `device_shutdown()` holds the device/parent locks and calls
+the serdev bus shutdown callback, which invokes only the native driver's
+`shutdown` callback, not `remove`. The corresponding upstream paths are
+[device core](https://raw.githubusercontent.com/gregkh/linux/v6.12.111/drivers/base/core.c)
+and [serdev core](https://raw.githubusercontent.com/gregkh/linux/v6.12.111/drivers/tty/serdev/core.c).
 
 ## Verification and remaining gates
 

@@ -17,6 +17,9 @@ evidence; diagnostic KUnit does not exercise the physical PL011 lifetime path.
 | 14 | Plain, lockdep, KASAN and KCSAN passed fifteen cases each, retaining the original barrier across grant closure. |
 | 15-red | Sixteen cases ran; only `receive_wakeup_preserved` failed because the worker tail armed a ten-ms timer over an already queued immediate receive wakeup. |
 | 15 | Plain, lockdep, KASAN and KCSAN passed sixteen cases each with the non-postponing worker tail. |
+| 16-red | The first test build failed on a designated-initializer error before execution. Preserved as a setup failure. |
+| 16-red2 | Seventeen cases ran; only `shutdown_lifetime` failed because the native serdev shutdown callback was absent. |
+| 16 | Plain, lockdep, KASAN and KCSAN passed seventeen cases each with shared, idempotent shutdown/removal closure. |
 
 Snapshot 12 records are retained in the disposable server guest under
 `/var/tmp/actryn-diag-12`; its RED evidence is under `actryn-diag-12-red`.
@@ -69,6 +72,29 @@ checks timer state rather than wall-clock completion. Both suites, all sixteen
 cases, zero skips and absence of diagnostic patterns were checked independently
 for each GREEN build. This establishes the scheduling defect, not its frequency
 or a causal explanation for an earlier untraced manager handshake failure.
+
+Snapshot 16 records remain in `/var/tmp/actryn-diag-16-plain` and
+`/var/tmp/actryn-diag-16-diagnostics`; the setup failure and behavioral RED are
+separately retained in `actryn-diag-16-red` and `actryn-diag-16-red2`.
+Exported evidence archive SHA-256:
+`9033d02f9e8c60f937e1cec6bbbca1e189cf72148d2a6684a4513a923831cb0b`.
+Its production driver SHA-256 is
+`0b63292e70ed1874cfd6cd178bea4178fca33e82970cc20550cf72e535550e28`;
+its driver-test header SHA-256 is
+`da06ae3299c295c135a4b67f8976fdaec27be6f2f983aa01b133f448bd01f055`.
+The new test invokes the registered native shutdown callback with an active
+operation, a partially written frame, pending work and actual open-file
+references. It checks DETACHED/UNKNOWN, invalidated authority, preserved
+identity/last-applied duties, rejected new requests, event-waiter wakeup, joined
+work, no further writer calls and exactly one transport close. Repeated shutdown
+then removal retains existing file references until their final release.
+Lockdep, KASAN and KCSAN separately exercise this callback sequence; all four
+configurations require both suites, all seventeen cases, zero skips and no
+kernel diagnostic patterns. Each has recorded start/end times and exit status.
+The guest retains diagnostic binaries and before/after hashes; the exported
+archive contains logs, JSON, configuration, sources, hashes and exact Debian
+shutdown-source excerpts. No ARM PL011 reboot/poweroff sequence or physical
+disable is established by this fake-controller callback test.
 
 Use the authenticated Debian `linux-source-6.12=6.12.111-1` package, whose
 source tarball includes the Debian patches, not a mutable checkout or the host
