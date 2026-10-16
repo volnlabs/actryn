@@ -1,0 +1,55 @@
+# Amendment 6: selected production module16; all workload/environment limits retained.
+revision = 1
+arms = ["kernel", "userspace", "userspace", "kernel"]
+runs_per_boot = 2
+order_per_boot = ["evidence", "trace"]
+trials_per_run = 10
+instrumentation_pilots = ["kernel", "userspace"]
+automatic_retries = false
+target_pilots = "NOT_RUN"
+comparison = "NOT_RUN"
+physical_acceptance = false
+
+[guest_binaries]
+"kernel/actryn_authority.ko" = "a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112"
+"a16-gateway" = "305f5e1d15df9d2037b7ecc8246825a791a18d92c5f1408fed8de5b1062c9720"
+"a16-workload" = "b68f61c4bcb183aad68ca712f726011645896587ddf2d23d1d660f938754811c"
+
+[sources]
+"dispatch.py" = "6ef48963be6734ff6bbe479a9ced71ec6424a5410bdc6be071de7eda1b88d61b"
+"capture_guest.py" = "e9a77544688ecb0fabf180a71e21403a4ee6789bd901505ff2bc48719dbc733a"
+"capture_guest5.py" = "652133811d5855a4be761ed235cf2022e52c0f88f1dfbada1acf974a0086fc45"
+"uart_trace.py" = "1b35bc8a536ade0beb4b5a6580e5f15a10b34650e4fa6ce709f6257fe3f642ca"
+"manifest.toml" = "cc6a4c2421b09dcacbf812220ed8af52e09973d1613fcf16eab234fb38a5b49a"
+"campaign.py" = "f7c06b383b3309830c786cb09b80229f691e933bb5d85cc4442f9f606febb973"
+"campaign_test.py" = "fc4b545828c2770e9d554b3e742a80e352e1ccca74dd5e1b64d985f95b36b113"
+"analyze.py" = "a33214234796555ece0942cf36090800357d1a8c02951148abcbae5265008b36"
+"prepare.py" = "dc75f8d68871cc62ad103bc5955f9064605a3efe166812313c9f0a25585dd7a1"
+"environment3.py" = "a283b8bef3a59987514e5ec7ec900e6beaa8b0fd3d440222f44e02814bf2e4f0"
+"amendment2.toml" = "6389f04e3e1c6cbb4fc82ac5d176ba1c2fd44fc6606f18781c6cae52edcef182"
+"amendment3.toml" = "8b3cd6d2b539d666a9a57cc8105086d5ad305b1ed3b2d6baa3e569c3e028a854"
+"instrumentation4.toml" = "4bd1c67206145c64f7ee1eacd54a0f49eab0ac41386295709d5026aeb83803ae"
+"instrumentation5.toml" = "a72c7601d18e635fd8374f8642ad12c421f5f1eb4fc89764c61dd66916d01dcc"
+"../fixture_bridge.py" = "13f0fa687981c66d180860af7a303d36a0369d27ca7459595421b97560b60452"
+"campaign6.py" = "7c064d3470ebe9a233f6dc528f4afa2f8aba23a6ceb0408d8a9267b77d10ed24"
+"campaign6_test.py" = "3b303c548104a6befa9e1fa40287ebdd495d82fec1bc49e4a5b1ad0cbea45bd3"
+
+[amendment]
+revision = 6
+base_campaign_sha256 = "d384f9a6401db5fd142edddd354bd1bf4275dfd6fa16b58af369a779fd2e01d5"
+source_revision = "d3f48e8694faac2ae4f360e8d4d010824d50ec0a"
+integrated_revision = "8802e97"
+guest_build = "/opt/actryn-a16/build-amendment6"
+module_sha256 = "a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112"
+source_archive_sha256 = "e72828159366b079dc481b4e3c4de672ad3248c695098f4fd6cd4d108ac0acde"
+driver_sha256 = "0b63292e70ed1874cfd6cd178bea4178fca33e82970cc20550cf72e535550e28"
+driver_test_sha256 = "da06ae3299c295c135a4b67f8976fdaec27be6f2f983aa01b133f448bd01f055"
+config_sha256 = "0f442d89365ea22dc5169463634ee62903925200844558479666cbe3eeb7e555"
+symvers_sha256 = "42fe7f2b8e33b9f95bf259092f437bf2a5927e231c07ea6e90869a7d2ac0b35d"
+packages_sha256 = "7e0e2adce6ec495a7b13a78a7659a2320d2fed1e61cfb0e7277e750c43bd4c1b"
+compiler_sha256 = "c499f40aab2cdb76f9fcf584a1ffdcf7a9c9a239656e83935c648f6b46095063"
+module_note_hex = "040000001400000003000000474e550093bacf6de73c5fdb387b9e995d3dca7b353e0fce"
+actual_acceptance_sha256 = "00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298"
+target_pilots = "NOT_RUN"
+comparison = "NOT_RUN"
+physical_acceptance = false
