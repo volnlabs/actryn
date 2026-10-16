@@ -393,6 +393,36 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   preexecution amendment is required before the instrumentation pilot. No
   software latency, physical drain or timing-bound claim follows from the build.
 
+- Installed-server capacity 01 passes on fresh server 03. With one agent running,
+  rejected preparations and a rejected second launch preserve its PID/start time
+  and original attested stdout. Cancelling the staged attempt frees preparation
+  capacity. All three accepted attempts finish cancelled/reaped in both stores,
+  with no cgroup or extra denied-request accounting. Root independently verifies
+  three complete exports and all eighteen artifact hashes. `a34dc2d` adds the
+  harness and nine passing host checks, including hash-valid semantic corruption
+  counterexamples. Evidence: `artifacts/server-installed-capacity01`. This does
+  not cover delayed retirement or broker-call pressure. The guest is then
+  gracefully powered off with its disk preserved and every attempt reaped.
+- Closer inspection of A02 failure 01 finds PendingAge before the proposal: the
+  writer's durable frontier stalls while batch 23 contains records more than
+  2.6 seconds old. WriterStopped follows final draining and retirement. The
+  capture does not distinguish fsync delay from writer descheduling. `2ec9da0`
+  adds pre-send clock/runtime/source-health and binding checks; sixteen focused
+  Python checks pass. No production timeout or limit changes.
+- Actual A09 writer-contention 01 acquires and releases the production SQLite
+  exclusive lock in 37,901,744 ns without modifying rows. Its existing SDK
+  observation connection closes during SSH helper setup, before any proposal is
+  sent. The campaign remains FAIL, with a separate revoke, retirement/recovery
+  and production-reader export in `artifacts/robot-a09-contention-01-retirement`.
+  This is a harness transport failure, not evidence of successful allocated-key
+  cancellation under storage contention. Reuse of a separately owned SSH
+  connection is being reviewed before a separately numbered campaign.
+- Instrumentation amendment 5 (`506720b`) preserves all frozen A16 module and
+  decoder inputs, replacing only the passive tracefs guard. Five host regression
+  tests pass, including the exact lazy-buffer display and foreign-trace rejection.
+  Both amendment hashes are retained before module loading; target pilots remain
+  NOT_RUN.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
