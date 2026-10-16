@@ -1,7 +1,9 @@
 # Paused implementation checkpoint — 2026-10-16
 
-The user explicitly requested a pause. The persistent goal is **paused**, not
-complete. Resume only when requested. The approved scope remains the full
+The user explicitly requested this pause and later resumed the persistent goal
+on 2026-10-16. The goal is now **active**, not complete. The sections below retain
+the historical pause state; current work is recorded in the progress ledger.
+The approved scope remains the full
 [v0.0.1 plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md); the
 [progress ledger](progress.md) and [acceptance inventory](acceptance-gaps.md)
 retain actual results and qualification boundaries.

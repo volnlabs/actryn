@@ -996,6 +996,40 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   hermetic-build claim. Original installed bytes and their acceptance evidence
   remain unchanged; final source/license assembly is still required.
 
+- The user resumed the paused goal on 2026-10-16. Root revalidated clean branch
+  `cc530d2`, linked worktrees and available memory. Current host boot differs;
+  prior fixture services and process identities no longer exist. Disk filesystem
+  device numbering changed from 57 to 56 while inode, size and mtime remained
+  unchanged. The refused revalidation is retained; the next explicit plan pins
+  the observed host/mount identity without claiming an unavailable old disk hash.
+  Server plan04 then boots the retained disk and stages its source successfully.
+  Its preflight stops on an incorrect test-script assumption that the signed
+  payload includes `actryn-artifact`; the shipped interface is `actryn server
+  import`. No compiler package installation, agent import or pressure campaign
+  has run. Failed preflights remain under their separately numbered artifacts.
+- `e9b2bd8` integrates the distinct, admin-only cold HELLO diagnostic source.
+  All 24 focused host checks pass independently at integration. Lost events,
+  sequence gaps, malformed statuses and nonzero/unknown RECOVER results prevent
+  a successful diagnostic report. The original HELLO predicate/time sample and
+  fixed authority denial remain intact. `artifacts/a16-hello8-source02` retains
+  the derived diff and source pins. Native compilation and the single target
+  case remain NOT_RUN; pilot07 remains FAILED. Restoring a fixture after the
+  host reboot requires newly recorded process/controller identities.
+- `artifacts/glibc-source-complete01` supplies the exact complete depth-one glibc
+  source tree at `16be1518495f1fa05481b0182c4e4c24927c62df`; its raw Git archive
+  matches the package recipe's Blake2b. The deterministic gzip is 40,523,851 bytes,
+  SHA256 `bc23d9fd3fa73c3d51be5327243d2365b1dbc3e9a2fa8824f6cf8825c52de28c`.
+  Recipe and all 15 auxiliary inputs retain their verified hashes. Root verifies
+  all 74 inventory/reference entries, including the full source and gzip bytes.
+  This closes only the glibc complete-source/archive-checksum gap, without a
+  native rebuild or a claim about the complete GCC source tree.
+- Independent review of `artifacts/release-notices02` verifies all 16 selected
+  source-text slices, including Rust library attribution, SQLite's disclaimer
+  and the exact native-library notices. No selected text changes or omissions
+  were found. The common notice remains a source corpus, not an exact linked-code
+  inventory. Final role input reconciliation is underway; no release identity,
+  signature, installation or qualification is inferred from source/notice checks.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
