@@ -143,6 +143,34 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
                 and log['tail'] == raw[offset:].hex(), 'final log bytes/completeness: ' + name)
 
 
+def cleanup_ready(snapshot, inspection):
+    return (set(snapshot['stores']) == {'broker', 'launcher'}
+            and inspection['attempt']['state'] == 'reaped' and not snapshot['cgroup_exists']
+            and snapshot['observer_summary_ready']
+            and all(value['state'] == 'reaped' and value['robot_outstanding'] == 0
+                    for value in snapshot['stores'].values())
+            and all(not value['outstanding_debit'] for value in inspection['robot_requests']))
+
+
+def verify_cleanup(snapshot, inspection):
+    require(cleanup_ready(snapshot, inspection), 'cleanup not converged')
+    require(set(snapshot['stores']) == {'broker', 'launcher'} and inspection['evidence_gaps'] == []
+            and all(value['gaps'] == [] and value['open_calls'] == value['pending_calls'] == 0
+                    for value in snapshot['stores'].values()), 'cleanup accounting/evidence incomplete')
+    facts, summary = snapshot['facts'], snapshot['summary']
+    require(facts is not None and facts['resources']['unavailable'] == [], 'cleanup resource evidence unavailable')
+    health = facts['observer']
+    require(facts['observer_health_unavailable'] is False and health is not None
+            and health['ready'] is True and health['lost'] == 0
+            and health['collector_epoch'] == snapshot['observer_epoch'], 'cleanup observer evidence unavailable')
+    status = summary['status']
+    require(status['collector_epoch'] == snapshot['observer_epoch'] and status['ready'] is True
+            and status['lost'] == 0 and summary['local_lost'] == 0
+            and status['sequence'] >= health['sequence']
+            and summary['retained_bytes'] == snapshot['log_bytes'] <= 16 * 1024 * 1024,
+            'observer unregister durability not established')
+
+
 def peer_update_program(path, token, original, fault, restore=False, uid=0, lock_timeout=8):
     """One serialized guest operation; a timed-out holder cannot be overtaken by readback."""
     require(re.fullmatch('[0-9a-f]{16}', token) and 0 < lock_timeout <= 8, 'peer maintenance parameters')
@@ -227,13 +255,14 @@ class Campaign:
         self.save(label + '-reply.json', value)
         return value
 
-    def server(self, *arguments, expected=True):
+    def server(self, *arguments, expected=True, allow_unknown=False):
         program = f'''import json,pwd,subprocess
 uid={self.operator!r};entry=pwd.getpwuid(uid)
 p=subprocess.run({[self.args.guest_cli, 'server', *arguments]!r},capture_output=True,text=True,timeout=20,user=uid,group=entry.pw_gid,extra_groups=[])
 print(json.dumps({{'exit':p.returncode,'value':json.loads(p.stdout),'stderr':p.stderr[:4096]}}))'''
         result = json.loads(self.ssh(self.args.server_port, program))
-        require((result['exit'] == 0) == expected, result)
+        uncertain = result['value'].get('outcome_unknown') is True and result['value'].get('automatic_retry') is False
+        require((result['exit'] == 0) == expected or (allow_unknown and uncertain), result)
         return result['value']
 
     def server_mutation(self, label, *arguments, expected=True):
@@ -305,12 +334,56 @@ print(json.dumps({{n:b.decode() for n,b in v.items()}}))'''
         self.save(label + '-server-evidence.json', bundle)
         return bundle
 
+    def cleanup_snapshot(self, attempt):
+        require(re.fullmatch('[0-9a-f]{32}', attempt), 'cleanup attempt identity')
+        program = f'''import contextlib,json,pathlib,sqlite3,stat,uuid
+attempt={attempt!r};stores={{}};facts=None;binding=None
+for name,path in [('launcher','/var/lib/actryn-server/launcher.sqlite'),('broker','/var/lib/actryn-server/broker/state.sqlite')]:
+ with contextlib.closing(sqlite3.connect('file:'+path+'?mode=ro',uri=True,timeout=1)) as db:
+  row=db.execute('SELECT state,binding FROM attempts WHERE id=?',(attempt,)).fetchone();assert row is not None
+  gaps=db.execute('SELECT reason FROM gaps WHERE attempt_id=?',(attempt,)).fetchall()
+  opened=db.execute('SELECT count(*) FROM calls WHERE attempt_id=? AND publication_closed=0',(attempt,)).fetchone()[0]
+  pending=db.execute("SELECT count(*) FROM calls WHERE attempt_id=? AND state IN ('reserved','dispatched','unknown')",(attempt,)).fetchone()[0]
+  remote=db.execute('SELECT count(*) FROM robot_requests WHERE attempt_id=? AND outstanding=1',(attempt,)).fetchone()[0]
+  stores[name]={{'state':row[0],'gaps':gaps,'open_calls':opened,'pending_calls':pending,'robot_outstanding':remote}}
+  if name=='launcher':
+   binding=json.loads(row[1]);record=db.execute('SELECT data FROM runtime_evidence WHERE attempt_id=?',(attempt,)).fetchone()
+   if record is not None:facts=json.loads(record[0])
+epoch=binding['observer']['collector_epoch'];assert str(uuid.UUID(epoch))==epoch
+log=pathlib.Path('/var/lib/actryn-observer')/epoch/(attempt+'.jsonl');summary_path=log.with_suffix('.summary.json')
+ready=summary_path.exists() and log.exists();summary=None;size=None
+if ready:
+ m=summary_path.lstat();assert stat.S_ISREG(m.st_mode) and m.st_size<=4096
+ summary=json.loads(summary_path.read_bytes());m=log.lstat();assert stat.S_ISREG(m.st_mode);size=m.st_size
+print(json.dumps({{'stores':stores,'facts':facts,'observer_epoch':epoch,'summary':summary,'log_bytes':size,
+'observer_summary_ready':ready,'cgroup_exists':pathlib.Path('/sys/fs/cgroup/actryn',attempt).exists()}}))
+'''
+        return json.loads(self.ssh(self.args.server_port, program))
+
     def cancel_server(self, label, attempt):
-        self.server_mutation(label + '-cancel', 'cancel', '--attempt', attempt)
-        self.poll(lambda: self.server('status', '--attempt', attempt),
-                  lambda value: value['inspection']['attempt']['state'] == 'reaped')
-        require(self.server('result', '--attempt', attempt, '--key', 'preview-1')['value'] is None,
-                'cancelled result republished')
+        # One cancellation, including an uncertain reply, never becomes a resend.
+        try:
+            reply = self.mutation(label + '-cancel', {'server': ['cancel', '--attempt', attempt]},
+                lambda: self.server('cancel', '--attempt', attempt, allow_unknown=True))
+            unknown = reply.get('outcome_unknown') is True
+            original = {'reply': reply}
+        except (subprocess.SubprocessError, TimeoutError, RuntimeError, ValueError) as error:
+            unknown, original = True, {'transport_error': repr(error)}
+        self.save(label + '-cleanup-ack.json', {**original, 'cancel_reply_unknown': unknown, 'mutation_retried': False})
+        def inspect():
+            return {'inspection': self.server('status', '--attempt', attempt)['inspection'],
+                    'snapshot': self.cleanup_snapshot(attempt)}
+        observed = self.poll(inspect, lambda value: cleanup_ready(value['snapshot'], value['inspection']), 12)
+        self.save(label + '-cleanup-observed.json', observed)
+        verify_cleanup(observed['snapshot'], observed['inspection'])
+        calls = observed['inspection']['calls']
+        if any(call['request_key'] == 'preview-1' for call in calls):
+            require(self.server('result', '--attempt', attempt, '--key', 'preview-1')['value'] is None,
+                    'cancelled result republished')
+        else:
+            # Prepared negative cases never allocated this key; Result correctly
+            # rejects an absent row rather than returning a fabricated null call.
+            require(calls == [], 'unexpected request identity after pre-start cancellation')
 
     def preflight(self):
         require(re.fullmatch('sha256:[0-9a-f]{64}', self.args.artifact), 'artifact pin format')
@@ -650,6 +723,55 @@ class VerificationTests(unittest.TestCase):
         with self.assertRaises(AssertionError): check(bundle(changed))
         changed = copy.deepcopy(content); changed['stdout']['tail'] = '00'
         with self.assertRaises(AssertionError): check(bundle(changed))
+
+    def test_cancel_lost_reply_polls_read_only_convergence_without_resend(self):
+        for reply in ({'result': 'error', 'outcome_unknown': True, 'automatic_retry': False}, TimeoutError('lost SSH reply')):
+            campaign = object.__new__(Campaign)
+            campaign.phase, campaign.mutations = 'test', set()
+            events, records = [], []
+            campaign.save = lambda name, value: records.append((name, value))
+            inspection = {'attempt': {'state': 'reaped'}, 'evidence_gaps': [], 'robot_requests': [], 'calls': []}
+            snapshot = {'stores': {name: {'state': 'reaped', 'gaps': [], 'open_calls': 0, 'pending_calls': 0,
+                        'robot_outstanding': 0} for name in ('broker', 'launcher')}, 'cgroup_exists': False,
+                        'observer_summary_ready': True, 'facts': {'resources': {'unavailable': []}, 'observer_health_unavailable': False,
+                        'observer': {'ready': True, 'lost': 0, 'sequence': 3, 'collector_epoch': 'observer'}},
+                        'observer_epoch': 'observer', 'log_bytes': 10, 'summary': {'local_lost': 0,
+                        'retained_bytes': 10, 'status': {'ready': True, 'lost': 0, 'sequence': 4, 'collector_epoch': 'observer'}}}
+            def server(*args, **kwargs):
+                events.append(args[0])
+                if args[0] == 'cancel':
+                    if isinstance(reply, Exception): raise reply
+                    return reply
+                return {'inspection': inspection} if args[0] == 'status' else {'value': None}
+            campaign.server = server
+            campaign.cleanup_snapshot = lambda attempt: copy.deepcopy(snapshot)
+            campaign.poll = lambda function, ready, timeout=12: (lambda value: value if ready(value) else self.fail('not ready'))(function())
+            campaign.cancel_server('case', 'a' * 32)
+            self.assertEqual(events.count('cancel'), 1)
+            self.assertNotIn('result', events, 'absent pre-start request must not be queried as a retained call')
+            self.assertTrue(any(value.get('cancel_reply_unknown') is True for _, value in records))
+            broken = copy.deepcopy(snapshot); broken['summary']['local_lost'] = 1
+            with self.assertRaises(AssertionError): verify_cleanup(broken, inspection)
+            broken = copy.deepcopy(snapshot); broken['stores']['broker']['robot_outstanding'] = 1
+            self.assertFalse(cleanup_ready(broken, inspection))
+            broken = copy.deepcopy(snapshot); broken['cgroup_exists'] = True
+            self.assertFalse(cleanup_ready(broken, inspection))
+
+    def test_server_cancel_accepts_only_explicit_unknown_or_success(self):
+        campaign = object.__new__(Campaign)
+        campaign.operator = 1000
+        campaign.args = type('Args', (), {'server_port': 1, 'guest_cli': '/usr/local/bin/actryn'})()
+        for value, allowed in [({'outcome_unknown': True, 'automatic_retry': False}, True),
+                               ({'outcome_unknown': False, 'automatic_retry': False}, False)]:
+            campaign.ssh = lambda *a, value=value, **k: compact({'exit': 1, 'value': value, 'stderr': ''})
+            if allowed:
+                self.assertEqual(campaign.server('cancel', '--attempt', 'a' * 32, allow_unknown=True), value)
+            else:
+                with self.assertRaises(AssertionError): campaign.server('cancel', '--attempt', 'a' * 32, allow_unknown=True)
+        programs = []
+        campaign.ssh = lambda port, program: programs.append(program) or b'{}'
+        campaign.cleanup_snapshot('a' * 32)
+        compile(programs[0], '<read-only-guest-cleanup-inspection>', 'exec')
 
     def test_failed_mutation_is_not_repeated(self):
         campaign = object.__new__(Campaign)

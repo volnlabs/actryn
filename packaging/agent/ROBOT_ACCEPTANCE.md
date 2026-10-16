@@ -81,6 +81,17 @@ remain available for diagnosis and are not labelled acceptance. The final Robot
 capture is exported through the existing verified CLI exporter. Neither evidence
 export establishes physical actuation or execution replay eligibility.
 
+Server cancellation sends one saved mutation. A lost transport reply or an explicit
+`outcome_unknown` response is preserved as uncertainty, never treated as a retry
+instruction. Bounded read-only inspection then requires the CLI and both fixed
+SQLite stores to report reaped, no cgroup, no publication/provider/Robot debit
+left open, no evidence gaps, and a complete observer unregister summary matching
+the original collector epoch, monotone sequence, retained JSONL size and zero
+reported loss. Required resource snapshots must remain available. Only converged
+evidence permits the campaign to continue; the original cancellation
+acknowledgment remains labelled unknown. Prepared negative cases have no call row
+and do not issue a Result lookup that would fabricate an absent request.
+
 Only read-only readiness/status/query calls poll. Mutations have unique saved
 intent/reply records and never retry. Any failure preserves `failure.json`, attempt
 identities and earlier results, then stops; it does not silently cancel/recover or
