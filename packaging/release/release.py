@@ -43,7 +43,7 @@ COMMON = {'tools/release.py', 'tools/install.py', 'share/target/profile.toml', '
 FILES = {role: COMMON | {f'bin/{name}' for name in BINARIES[role]} |
          {f'units/{name}.service' for name in UNITS[role]} | {f'sysusers/{role}.conf'}
          for role in ARCH}
-FILES['server'] |= {BPF_OBJECT, 'share/licenses/GPL-2.0-only.txt', 'share/source/observer.bpf.c', 'tmpfiles/server.conf', 'share/sdk/actryn/__init__.py',
+FILES['server'] |= {BPF_OBJECT, 'share/licenses/GPL-2.0-only.txt', 'share/source/observer.bpf.c', 'share/source/observer.Makefile', 'tmpfiles/server.conf', 'share/sdk/actryn/__init__.py',
                     'share/sdk/actryn/client.py', 'share/sdk/actryn/robot_v1_pb2.py', 'share/sdk/pyproject.toml',
                     'share/wheels/protobuf-7.36.1-py3-none-any.whl', 'share/agent/offline-oci.tar'}
 FILES['robot'] |= {'module/actryn_authority.ko', 'share/target/virt-actryn.dtb',
@@ -309,7 +309,7 @@ def mode_for(name):
 
 
 def license_for(name):
-    if name.startswith('module/') or name in ('share/source/kernel.tar', 'share/source/observer.bpf.c', 'share/licenses/GPL-2.0-only.txt', BPF_OBJECT):
+    if name.startswith('module/') or name in ('share/source/kernel.tar', 'share/source/observer.bpf.c', 'share/source/observer.Makefile', 'share/licenses/GPL-2.0-only.txt', BPF_OBJECT):
         return 'GPL-2.0-only'
     return 'SEE-NOTICES' if name.endswith('THIRD-PARTY.txt') or name.startswith('share/wheels/') else 'Apache-2.0'
 
