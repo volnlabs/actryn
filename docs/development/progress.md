@@ -784,6 +784,33 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   integration and independent review; author C sanitizer checks also pass.
   Exact target build, binary freeze, both new pilots and comparison remain
   NOT_RUN. The synthetic conservative clock anchor is not a measured send time.
+- Lifetime05's separate recovery/export succeeds without resending: 152 total
+  records, 112 selected metadata records, durable frontiers 42/110 and no gaps
+  or raw remnants. Its retained prefix contains one allocation and no START;
+  it ends before the health fault. Original status and later durable cancellation
+  establish closure separately. The cause of late persistence remains unknown.
+- Lifetime06 reaches RUNNING, kills the pinned gateway once and confirms reason-3
+  revocation/reconciliation while all three descriptors remain open. Capture
+  independently validates one allocation, one START and one accepted sample;
+  the closure event follows the signal by 20.49 ms in this run. The whole campaign
+  still FAILS: installed gateway replacement takes 25.80 seconds, exceeding the
+  test's three-second startup wait and eight-second retention lease. Journal
+  evidence shows successful signed-tuple preflight taking 21.82 seconds under
+  the existing service CPU quota, then one successful restart. No exact CPU/I/O
+  attribution is claimed. Separate recovery/export retains 22 files, 156,817 bytes;
+  all 68 original hashes remain unchanged.
+- Lifetime06's bounded, separate tracefs instance records 182 matched sync
+  syscall pairs with no recorded loss/overrun; the longest observed call is
+  88.35 ms. Tracing stops and its instance is removed. These measurements apply
+  only to lifetime06 and do not explain lifetime05. Test-only installed-service
+  readiness bounds are being amended; authority, revocation, persistence and
+  production resource limits remain unchanged.
+- `533f3a8` adds the opt-in frozen-guest crash campaign. Independent review finds
+  an unchecked prior-phase handoff; `99e5d34` binds its inventory and six required
+  files before SSH or output creation. All 19 focused checks pass and independent
+  review closes the finding. Actual execution remains NOT_RUN. The campaign
+  distinguishes frozen-guest expiry inference from instantaneous power loss,
+  preserves raw unfinished rows and checks read-only historical UNKNOWN.
 
 ## Decisions
 
