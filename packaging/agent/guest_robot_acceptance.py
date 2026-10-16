@@ -20,6 +20,10 @@ PEER = '/etc/actryn/robot-peer.json'
 OBSERVATION_FIELDS = ('id', 'acquired_earliest_ns', 'acquired_latest_ns', 'valid_until_ns',
                       'controller_ns', 'left_ticks', 'right_ticks', 'simulated',
                       'context_revision', 'received_ms')
+REQUIRED_COVERAGE = ('process.lifecycle', 'syscall.openat', 'syscall.connect', 'syscall.bpf',
+                     'syscall.perf_event_open', 'syscall.mount', 'syscall.unshare', 'syscall.setns')
+RESOURCE_COUNTERS = ('memory.current', 'memory.peak', 'memory.events', 'cpu.stat', 'io.stat',
+                     'pids.current', 'pids.peak', 'pids.events')
 
 
 def compact(value, sort=True):
@@ -59,8 +63,19 @@ def verify_lineage(value, intent, attempt, namespace):
     require(value['agent_observation_reference'] == 'offline-preview-reference', 'diagnostic agent input')
 
 
+def verify_kernel_completion(kernel, operation):
+    for source, target in [('device_identity', 'device'), ('controller_boot', 'boot'),
+                           ('controller_session', 'session'), ('runtime_nonce', 'runtime_nonce'),
+                           ('grant', 'grant'), ('instance', 'instance'), ('operation', 'operation'), ('stream', 'stream')]:
+        require(kernel[source] == operation[target], 'actual kernel identity: ' + source)
+    # Natural completion keeps the grant reusable; bit 8 is grant authorization.
+    require(kernel['operation_state'] == 4 and kernel['left_permille'] == kernel['right_permille'] == 0,
+            'kernel operation is not reconciled at zero output')
+
+
 def verify_bundle(bundle, attempt):
-    require(bundle['attempt_id'] == attempt and bundle['execution_replay_eligible'] is False, 'bundle identity')
+    require(bundle.get('schema') == 'actryn.server.evidence.v1' and bundle['attempt_id'] == attempt
+            and bundle['execution_replay_eligible'] is False, 'bundle identity')
     require(len(compact(bundle)) <= 60 * 1024, 'bundle bound')
     names = set()
     for artifact in bundle['artifacts']:
@@ -69,6 +84,99 @@ def verify_bundle(bundle, attempt):
         require(artifact['bytes'] == len(compact(artifact['content']))
                 and artifact['sha256'] == digest(artifact['content']), 'artifact hash/length')
     return names
+
+
+def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifact_digest):
+    required = {'attempt', 'runtime_binding', 'runtime_facts', 'stdout', 'stderr', 'broker', 'robot'}
+    require(verify_bundle(bundle, attempt) == required and bundle['omissions'] == [], 'final artifacts incomplete')
+    artifacts = {value['name']: value['content'] for value in bundle['artifacts']}
+    recorded = artifacts['attempt']
+    require(recorded['id'] == attempt and recorded['state'] == 'reaped'
+            and recorded['artifact_digest'] == artifact_digest, 'final attempt attribution')
+    runtime = artifacts['runtime_binding']
+    require(runtime['boot_id'] == boot and runtime['cgroup_id'] > 0 and runtime['ambiguous_create'] is False
+            and runtime['snapshot']['cgroup'] == '/actryn/' + attempt
+            and runtime['snapshot']['pid'] > 0 and runtime['snapshot']['start_ticks'] > 0,
+            'runtime lifetime binding')
+    facts = artifacts['runtime_facts']
+    require(facts['observer_health_unavailable'] is False and facts['observer'] is not None, 'cleanup observer unavailable')
+    first, final = runtime['observer'], facts['observer']
+    for observer in (first, final):
+        require(observer is not None and observer['ready'] is True and observer['lost'] == 0
+                and isinstance(observer['collector_epoch'], str) and observer['collector_epoch']
+                and set(REQUIRED_COVERAGE) <= set(observer['coverage']), 'observer evidence incomplete')
+    require(final['collector_epoch'] == first['collector_epoch'] and final['sequence'] >= first['sequence'],
+            'cleanup observer lifetime/frontier changed')
+    resources = facts['resources']
+    require(resources['classification'] == 'observed_cgroup_v2_counters'
+            and resources['stage'] == 'after_descendants_empty_before_runtime_delete'
+            and resources['captured_boottime_ms'] >= 0 and resources['unavailable'] == []
+            and set(resources['counters']) == set(RESOURCE_COUNTERS)
+            and all(isinstance(value, str) for value in resources['counters'].values()), 'resource evidence incomplete')
+    require(resources['counters']['pids.current'].strip() == '0', 'cleanup retained descendants')
+    broker = artifacts['broker']
+    require(broker['attempt_state'] == 'reaped' and broker['evidence_gaps'] == []
+            and broker['policy_denials'] == [] and broker['policy_denials_retained'] == 0
+            and len(broker['calls']) == 1, 'final broker evidence/accounting incomplete')
+    call = broker['calls'][0]
+    require(call['request_key'] == completed['request_key'] and call['state'] == 'settled'
+            and call['consumed_tokens'] == 0 and call['publication_closed'] is True, 'final call attribution')
+    robot = artifacts['robot']
+    require(robot['classification'] == 'trusted_peer_delegation_metadata' and robot['binding'] == binding
+            and robot['requests_retained'] == len(robot['requests']) == 1 and robot['outstanding_debits'] == 0,
+            'final Robot delegation attribution')
+    request = robot['requests'][0]
+    for field in ('request_key', 'handle', 'robot_epoch', 'observation_digest', 'proposal_digest'):
+        require(request[field] == completed[field], 'final Robot request identity: ' + field)
+    require(request['observation_id'] == completed['observation']['id'] and request['phase'] == 'settled'
+            and request['outstanding_debit'] is False and request['remote_verdict'] == 'TargetReached'
+            and request['reconciled'] is True, 'final Robot debit/reconciliation')
+    for name in ('stdout', 'stderr'):
+        log = artifacts[name]
+        raw = logs[name + '.log'].encode()
+        offset = max(0, len(raw) - 2048)
+        require(log['classification'] == 'untrusted_agent_output_not_policy_attribution'
+                and log['file_complete'] is True and log['source_truncated'] is False
+                and log['retained_bytes'] == len(raw)
+                and log['retained_sha256'] == 'sha256:' + hashlib.sha256(raw).hexdigest()
+                and log['tail_encoding'] == 'hex' and log['tail_omitted_bytes'] == offset
+                and log['tail'] == raw[offset:].hex(), 'final log bytes/completeness: ' + name)
+
+
+def peer_update_program(path, token, original, fault, restore=False, uid=0, lock_timeout=8):
+    """One serialized guest operation; a timed-out holder cannot be overtaken by readback."""
+    require(re.fullmatch('[0-9a-f]{16}', token) and 0 < lock_timeout <= 8, 'peer maintenance parameters')
+    return f'''import fcntl,json,os,pathlib,stat,time
+p=pathlib.Path({str(path)!r});parent=p.parent.lstat()
+assert stat.S_ISDIR(parent.st_mode) and parent.st_uid=={uid} and not parent.st_mode&0o022
+lock=p.with_name('robot-peer.acceptance.lock')
+fd=os.open(lock,os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW|os.O_CLOEXEC,0o600)
+m=os.fstat(fd);assert stat.S_ISREG(m.st_mode) and m.st_uid=={uid} and m.st_nlink==1 and not m.st_mode&0o077
+until=time.monotonic()+{lock_timeout!r}
+while True:
+ try:fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB);break
+ except BlockingIOError:
+  if time.monotonic()>=until:raise TimeoutError('peer maintenance lock unavailable; restoration unknown')
+  time.sleep(.01)
+m=p.lstat();assert stat.S_ISREG(m.st_mode) and m.st_uid=={uid} and m.st_nlink==1 and not m.st_mode&0o022 and m.st_size<=65536
+current=json.loads(p.read_bytes());original={original!r};fault={fault!r}
+restore={restore!r}
+if restore:
+ assert current in (original,fault),'peer changed concurrently; restoration unknown'
+ replacement=original
+else:
+ assert current==original,'peer compare failed'
+ replacement=fault
+if current!=replacement:
+ t=p.with_name('robot-peer.acceptance-{token}-'+('restore' if restore else 'fault')+'.tmp')
+ with t.open('xb') as f:
+  f.write(json.dumps(replacement,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode())
+  os.fchown(f.fileno(),m.st_uid,m.st_gid);os.fchmod(f.fileno(),stat.S_IMODE(m.st_mode));f.flush();os.fsync(f.fileno())
+ os.replace(t,p)
+ directory=os.open(p.parent,os.O_DIRECTORY);os.fsync(directory);os.close(directory)
+assert json.loads(p.read_bytes())==replacement
+print(json.dumps({{'restoration_confirmed':restore,'public_peer_replaced':not restore}}))
+'''
 
 
 class Campaign:
@@ -213,6 +321,7 @@ print(json.dumps({{n:b.decode() for n,b in v.items()}}))'''
             identity = json.loads(self.ssh(port, program))
             require(identity['arch'] == arch and identity['kernel'] == kernel, 'guest target mismatch')
             self.save(arch + '-guest.json', identity)
+            if arch == 'x86_64': self.server_boot = identity['boot']
         require(b'linux,dummy-virt' in self.ssh(self.args.robot_port,
                 "import pathlib,sys;sys.stdout.buffer.write(pathlib.Path('/proc/device-tree/compatible').read_bytes())"), 'ARM target is not disposable virt')
         program = f'''import json,pathlib,stat,pwd,os,subprocess
@@ -254,16 +363,34 @@ print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i}}))'''
                   and d['runtime']['kernel']['flags'] & 1, 15)
 
     def replace_peer(self, expected, replacement):
-        # Only this fixed public configuration is fault-injected, with compare-before-replace.
-        program = f'''import json,os,pathlib,stat
-p=pathlib.Path({PEER!r});assert json.loads(p.read_bytes())=={expected!r}
-m=p.stat();assert m.st_uid==0 and not m.st_mode&0o022
-t=p.with_name('robot-peer.acceptance-{self.token}.tmp')
-with t.open('xb') as f:f.write({compact(replacement)!r});f.flush();os.fsync(f.fileno())
-os.chown(t,m.st_uid,m.st_gid);os.chmod(t,stat.S_IMODE(m.st_mode));os.replace(t,p)
-fd=os.open(p.parent,os.O_DIRECTORY);os.fsync(fd);os.close(fd)
-print('{{"public_peer_replaced":true}}')'''
-        self.ssh(self.args.server_port, program)
+        program = peer_update_program(PEER, self.token, expected, replacement)
+        report = json.loads(self.ssh(self.args.server_port, program))
+        require(report.get('public_peer_replaced') is True, 'peer fault publication not confirmed')
+        return report
+
+    def restore_peer(self, label, changed):
+        # Readback and restoration hold the same lock as the original publication.
+        # SSH timeout is not proof that the remote root process was terminated.
+        try:
+            report = self.mutation(label + '-peer-restore', {'restoration': True}, lambda: json.loads(
+                self.ssh(self.args.server_port, peer_update_program(PEER, self.token, self.peer, changed, restore=True))))
+            require(report.get('restoration_confirmed') is True, 'restoration reply missing')
+            return report
+        except Exception as error:
+            self.save(label + '-restoration-unknown.json', {'restoration_unknown': True,
+                      'error': repr(error), 'automatic_retry': False,
+                      'next_action': 'inspect/reap outstanding remote maintenance holder before explicit restoration'})
+            raise RuntimeError('public peer restoration unknown; campaign stopped') from error
+
+    def retire_and_recover(self):
+        self.local_mutation('combined-retire', 'retire', closure=True)
+        self.poll(lambda: self.local('describe'), lambda d: d['runtime']['retirement_ready'], 15)
+        # All writers are finished; this one call can release the slot and begin recovery.
+        self.local_mutation('final-recover', 'recover')
+        self.poll(lambda: self.local('describe'), lambda d: d['runtime']['prepared'] is None
+                  and d['runtime']['recovery_ready'] and not d['runtime']['recovery_pending']
+                  and d['runtime']['kernel']['state'] == 0 and d['runtime']['kernel']['flags'] & 1
+                  and not d['runtime']['kernel']['flags'] & 8, 15)
 
     def negative_bindings(self):
         for name, field, value in [('peer', 'endpoint', '127.0.0.1:1'),
@@ -275,7 +402,7 @@ print('{{"public_peer_replaced":true}}')'''
             self.save(name + '-public-peer-fault.json', {'field': field,
                       'original_digest': digest(self.peer), 'temporary_digest': digest(changed)})
             try:
-                self.replace_peer(self.peer, changed)
+                self.mutation(name + '-peer-fault', {'field': field}, lambda: self.replace_peer(self.peer, changed))
                 self.server_mutation(name + '-bind', 'bind-robot', '--attempt', attempt,
                                      '--namespace', secrets.token_hex(16), expected=False)
                 state = self.server('status', '--attempt', attempt)['inspection']
@@ -283,13 +410,7 @@ print('{{"public_peer_replaced":true}}')'''
                         and state['robot_requests'] == [], 'rejected binding persisted or launched')
                 require(self.logs(attempt) == {'stdout.log': '', 'stderr.log': ''}, 'agent ran before start')
             finally:
-                # Restoration also covers a lost acknowledgment of the replacement.
-                # It never overwrites an unrelated concurrent administrator change.
-                current = json.loads(self.ssh(self.args.server_port,
-                    f"import pathlib,sys;sys.stdout.buffer.write(pathlib.Path({PEER!r}).read_bytes())"))
-                if current != self.peer:
-                    require(current == changed, 'public peer changed concurrently; explicit restoration required')
-                    self.replace_peer(changed, self.peer)
+                self.restore_peer(name, changed)
             self.cancel_server(name, attempt)
             self.export_server(name, attempt)
 
@@ -352,24 +473,17 @@ print('{{"public_peer_replaced":true}}')'''
         description = self.local('describe')
         require(description['runtime']['operation']['operation'] == snapshot['operation'], 'Robot runtime operation differs')
         kernel, operation = description['runtime']['kernel'], snapshot['operation']
-        for source, target in [('device_identity', 'device'), ('controller_boot', 'boot'),
-                               ('controller_session', 'session'), ('runtime_nonce', 'runtime_nonce'),
-                               ('grant', 'grant'), ('instance', 'instance'), ('operation', 'operation'), ('stream', 'stream')]:
-            require(kernel[source] == operation[target], 'actual kernel identity: ' + source)
-        require(not kernel['flags'] & 8 and kernel['left_permille'] == kernel['right_permille'] == 0, 'kernel output remains open')
+        verify_kernel_completion(kernel, operation)
         self.save('combined-completed.json', completed)
         self.save('combined-kernel-description.json', description)
         self.mark('close publication retire recover and export')
         self.cancel_server('combined', attempt)
-        self.local_mutation('combined-retire', 'retire', closure=True)
-        self.poll(lambda: self.local('describe'), lambda d: d['runtime']['prepared'] is None, 15)
-        self.local_mutation('final-recover', 'recover')
-        self.poll(lambda: self.local('describe'), lambda d: d['runtime']['recovery_ready']
-                  and not d['runtime']['recovery_pending'] and d['runtime']['kernel']['state'] == 0
-                  and not d['runtime']['kernel']['flags'] & 8, 15)
+        self.retire_and_recover()
+        final_logs = self.logs(attempt)
+        require(final_logs == logs, 'agent logs changed during final cleanup')
+        self.save('combined-final-agent-logs.json', final_logs)
         bundle = self.export_server('combined', attempt)
-        require({'robot', 'broker', 'runtime_binding', 'runtime_facts', 'stdout', 'stderr'}
-                <= verify_bundle(bundle, attempt), 'delegation/runtime evidence absent')
+        verify_final_bundle(bundle, attempt, binding, completed, final_logs, self.server_boot, self.args.artifact)
         handle = dict(completed['handle'], robot_epoch=completed['robot_epoch'], state='cancel_requested', proposal=None)
         self.save('retained-handle.json', handle)
         report = self.host_cli('export', '--pair', str(self.output / 'pair.json'),
@@ -419,6 +533,124 @@ def main():
 
 
 class VerificationTests(unittest.TestCase):
+    def test_natural_reconciliation_preserves_grant_but_requires_zero_output(self):
+        operation = {'device': [1]*16, 'boot': 1, 'session': 2, 'runtime_nonce': [3]*16,
+                     'grant': 4, 'instance': 5, 'operation': 6, 'stream': 7}
+        kernel = {'device_identity': [1]*16, 'controller_boot': 1, 'controller_session': 2,
+                  'runtime_nonce': [3]*16, 'grant': 4, 'instance': 5, 'operation': 6,
+                  'stream': 7, 'flags': 9, 'operation_state': 4, 'left_permille': 0, 'right_permille': 0}
+        verify_kernel_completion(kernel, operation)
+        for field, value in [('operation_state', 2), ('left_permille', 10), ('operation', 8)]:
+            with self.assertRaises(AssertionError):
+                verify_kernel_completion(dict(kernel, **{field: value}), operation)
+
+    def test_retirement_waits_for_workers_then_recovers_once(self):
+        campaign = object.__new__(Campaign)
+        events = []
+        campaign.local_mutation = lambda label, method, *a, **k: events.append(method)
+        campaign.local = lambda method: None
+        def poll(function, ready, timeout=12):
+            if events == ['retire']:
+                self.assertFalse(ready({'runtime': {'prepared': {'instance': 1}, 'retirement_ready': False}}))
+                self.assertTrue(ready({'runtime': {'prepared': {'instance': 1}, 'retirement_ready': True}}))
+            else:
+                self.assertEqual(events, ['retire', 'recover'])
+                self.assertFalse(ready({'runtime': {'prepared': {'instance': 1}, 'recovery_ready': False, 'recovery_pending': False,
+                                                  'kernel': {'state': 0, 'flags': 1}}}))
+                self.assertTrue(ready({'runtime': {'prepared': None, 'recovery_ready': True, 'recovery_pending': False,
+                                                 'kernel': {'state': 0, 'flags': 1}}}))
+        campaign.poll = poll
+        campaign.retire_and_recover()
+        self.assertEqual(events, ['retire', 'recover'])
+
+    def test_restore_timeout_is_explicitly_unknown_and_never_reported_confirmed(self):
+        campaign = object.__new__(Campaign)
+        campaign.peer, campaign.token, campaign.mutations = {'endpoint': 'original'}, 'a' * 16, set()
+        campaign.phase = 'test'
+        campaign.args = type('Args', (), {'server_port': 1})()
+        campaign.ssh = lambda *a, **k: (_ for _ in ()).throw(TimeoutError('remote process not reaped'))
+        records = []
+        campaign.save = lambda name, value: records.append((name, value))
+        with self.assertRaises(RuntimeError): campaign.restore_peer('case', {'endpoint': 'fault'})
+        self.assertTrue(any(value.get('restoration_unknown') is True for _, value in records))
+        self.assertFalse(any(value.get('restoration_confirmed') is True for _, value in records))
+
+    def test_restore_cannot_observe_original_while_fault_writer_holds_lock(self):
+        import fcntl
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'robot-peer.json'
+            path.write_bytes(compact({'endpoint': 'original'})); path.chmod(0o600)
+            lock = path.with_name('robot-peer.acceptance.lock')
+            with lock.open('w') as held:
+                os.chmod(lock, 0o600); fcntl.flock(held, fcntl.LOCK_EX)
+                script = peer_update_program(path, 'a' * 16, {'endpoint': 'original'}, {'endpoint': 'fault'},
+                                             restore=True, uid=os.geteuid(), lock_timeout=.05)
+                result = subprocess.run([sys.executable, '-c', script], capture_output=True, timeout=3)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertNotIn(b'restoration_confirmed', result.stdout)
+                path.write_bytes(compact({'endpoint': 'fault'}))
+            result = subprocess.run([sys.executable, '-c', script], capture_output=True, timeout=3)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(json.loads(result.stdout)['restoration_confirmed'])
+            self.assertEqual(json.loads(path.read_bytes()), {'endpoint': 'original'})
+
+    def test_final_evidence_rejects_cleanup_loss_and_wrong_attribution_even_with_valid_hashes(self):
+        attempt, binding = 'a' * 32, {'attempt_id': 'a' * 32, 'namespace': 'b' * 32}
+        handle = {'attempt': attempt, 'namespace': 'b' * 32, 'key': 'c' * 64}
+        completed = {'request_key': 'preview-1', 'handle': handle, 'robot_epoch': 'd' * 32,
+                     'observation': {'id': 1}, 'observation_digest': 'sha256:' + 'e' * 64,
+                     'proposal_digest': 'sha256:' + 'f' * 64}
+        observer = {'ready': True, 'collector_epoch': 'observer-1', 'coverage': list(REQUIRED_COVERAGE), 'sequence': 10, 'lost': 0}
+        logs = {'stdout.log': 'actual agent reply\n', 'stderr.log': ''}
+        content = {
+            'attempt': {'id': attempt, 'state': 'reaped', 'artifact_digest': 'sha256:' + '1' * 64},
+            'runtime_binding': {'boot_id': 'boot-1', 'cgroup_id': 42, 'ambiguous_create': False,
+                                'observer': observer, 'snapshot': {'cgroup': '/actryn/' + attempt, 'pid': 2, 'start_ticks': 3}},
+            'runtime_facts': {'observer_health_unavailable': False, 'observer': dict(observer, sequence=12),
+                              'resources': {'classification': 'observed_cgroup_v2_counters', 'captured_boottime_ms': 123,
+                                            'stage': 'after_descendants_empty_before_runtime_delete',
+                                            'counters': {name: '0\n' for name in RESOURCE_COUNTERS}, 'unavailable': []}},
+            'broker': {'attempt_state': 'reaped', 'calls': [{'request_key': 'preview-1', 'state': 'settled',
+                       'consumed_tokens': 0, 'publication_closed': True}], 'evidence_gaps': [],
+                       'policy_denials': [], 'policy_denials_retained': 0},
+            'robot': {'classification': 'trusted_peer_delegation_metadata', 'binding': binding, 'requests_retained': 1,
+                      'outstanding_debits': 0, 'requests': [{'request_key': 'preview-1', 'handle': handle, 'robot_epoch': 'd' * 32,
+                      'phase': 'settled', 'outstanding_debit': False, 'remote_verdict': 'TargetReached', 'reconciled': True,
+                      'observation_id': 1, 'observation_digest': completed['observation_digest'], 'proposal_digest': completed['proposal_digest']}]}}
+        for name in ('stdout', 'stderr'):
+            raw = logs[name + '.log'].encode()
+            content[name] = {'classification': 'untrusted_agent_output_not_policy_attribution', 'retained_bytes': len(raw),
+                             'retained_sha256': 'sha256:' + hashlib.sha256(raw).hexdigest(), 'source_truncated': False,
+                             'file_complete': True, 'tail_omitted_bytes': 0, 'tail_encoding': 'hex', 'tail': raw.hex()}
+        def bundle(values, omissions=None):
+            return {'schema': 'actryn.server.evidence.v1', 'attempt_id': attempt, 'execution_replay_eligible': False,
+                    'omissions': omissions or [], 'artifacts': [{'name': name, 'content': value,
+                    'bytes': len(compact(value)), 'sha256': digest(value)} for name, value in values.items()]}
+        check = lambda value: verify_final_bundle(value, attempt, binding, completed, logs, 'boot-1', 'sha256:' + '1' * 64)
+        check(bundle(content))
+        with self.assertRaises(AssertionError): check(bundle(content, [{'artifact': 'runtime_facts', 'reason': 'observer_unavailable'}]))
+        faults = [('runtime_facts', 'observer_health_unavailable', True), ('runtime_facts', 'observer', None),
+                  ('broker', 'evidence_gaps', ['log_incomplete']), ('runtime_binding', 'boot_id', 'wrong-boot'),
+                  ('robot', 'binding', dict(binding, namespace='wrong')), ('robot', 'outstanding_debits', 1),
+                  ('stdout', 'file_complete', False), ('stdout', 'source_truncated', True),
+                  ('stdout', 'retained_sha256', 'sha256:' + '0' * 64)]
+        for name, field, value in faults:
+            changed = copy.deepcopy(content); changed[name][field] = value
+            with self.assertRaises(AssertionError, msg=(name, field)): check(bundle(changed))
+        for field, value in [('lost', 1), ('ready', False), ('collector_epoch', 'other'), ('coverage', [])]:
+            changed = copy.deepcopy(content); changed['runtime_facts']['observer'][field] = value
+            with self.assertRaises(AssertionError, msg=field): check(bundle(changed))
+        for field, value in [('unavailable', ['cpu.stat']), ('counters', {})]:
+            changed = copy.deepcopy(content); changed['runtime_facts']['resources'][field] = value
+            with self.assertRaises(AssertionError, msg=field): check(bundle(changed))
+        changed = copy.deepcopy(content); changed['runtime_facts']['observer']['sequence'] = 9
+        with self.assertRaises(AssertionError): check(bundle(changed))
+        changed = copy.deepcopy(content); changed['robot']['requests'][0]['handle']['key'] = '0' * 64
+        with self.assertRaises(AssertionError): check(bundle(changed))
+        changed = copy.deepcopy(content); changed['stdout']['tail'] = '00'
+        with self.assertRaises(AssertionError): check(bundle(changed))
+
     def test_failed_mutation_is_not_repeated(self):
         campaign = object.__new__(Campaign)
         campaign.phase, campaign.mutations = 'test', set()
@@ -434,7 +666,7 @@ class VerificationTests(unittest.TestCase):
 
     def test_bundle_hashes_and_identity_are_checked(self):
         content = {'counter': 1}
-        bundle = {'attempt_id': 'a' * 32, 'execution_replay_eligible': False,
+        bundle = {'schema': 'actryn.server.evidence.v1', 'attempt_id': 'a' * 32, 'execution_replay_eligible': False,
                   'artifacts': [{'name': 'robot', 'content': content, 'bytes': len(compact(content)), 'sha256': digest(content)}]}
         self.assertEqual(verify_bundle(bundle, 'a' * 32), {'robot'})
         broken = copy.deepcopy(bundle); broken['artifacts'][0]['content']['counter'] = 2

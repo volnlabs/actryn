@@ -42,15 +42,44 @@ for endpoint, leaf-pin and configuration-digest mismatches; one independent unbo
 agent run with a rejected late binding; and one complete delegated operation. The
 negative cases temporarily replace only the fixed **public** peer configuration,
 compare the expected current value before replacement, and restore it in `finally`.
-Do not run a concurrent installer or another server operator during these cases.
+Both complete read/compare/replace operations and restoration read/restore hold the
+same guest `flock` on root-owned `robot-peer.acceptance.lock` beside that file.
+A timed-out publication cannot be overtaken by a readback that falsely reports
+the original configuration restored. Lock acquisition is bounded; a missing or
+lost restoration acknowledgment writes `*-restoration-unknown.json`, aborts the
+campaign and requires explicit inspection/reaping of any surviving remote holder
+before manual restoration. It never reports successful restoration from an
+unserialized read. Fault publication and restoration each have one retained
+intent/reply identity and are never retried. Temporary raw remnants remain for
+inspection. Do not run a concurrent installer or another server operator during
+these cases; this fixture lock does not exclude an unrelated privileged operator.
 
 After explicit recovery readiness, the complete path is server prepare/bind, local
 Robot rearm/prepare/readiness/grant/activate, then isolated agent launch. The harness
 checks the original trusted observation and lineage digests, stable request/remote
 handle, fixed 10/10-tick 1,000 ms target, actual kernel identity, and a terminal,
-reconciled `TargetReached` whose terminal revision is durable. It then closes server
-publication, retires the Robot namespace, recovers, and exports both finite server
-JSON evidence and the Robot capture through the verified CLI exporter.
+reconciled `TargetReached` whose terminal revision is durable. Natural completion
+requires operation state 4 and zero duties; grant-authorized bit 8 may remain set
+for normal reuse and is not an output-open flag. It then closes server publication
+and retires the Robot namespace. Read-only `retirement_ready` must become true
+before exactly one final Recover request; only recovery releases the prepared
+slot. That readiness proves writer termination, not downstream reconciliation or
+a known task outcome, and does not require operation state 4 globally. Subsequent
+Describe polling requires no prepared slot and matched recovery readiness. The
+installed manager must expose this current Report field.
+
+Final server JSON evidence must have the exact schema and all seven artifacts
+with valid hashes, no omissions, no final broker gaps/denials, and matching attempt,
+artifact, guest boot, cgroup lifetime, Robot binding, original handle/observation
+lineage and settled debit. Cleanup must retain a ready observer with zero loss,
+required probe coverage, the same collector epoch and monotone sequence, plus all
+selected resource counters captured after descendants are empty. Complete,
+untruncated stdout/stderr must match the separately retained actual log bytes,
+including full hashes and bounded tails. Evidence unavailable during cleanup
+fails this campaign even if earlier inspection was healthy; saved raw exports
+remain available for diagnosis and are not labelled acceptance. The final Robot
+capture is exported through the existing verified CLI exporter. Neither evidence
+export establishes physical actuation or execution replay eligibility.
 
 Only read-only readiness/status/query calls poll. Mutations have unique saved
 intent/reply records and never retry. Any failure preserves `failure.json`, attempt
@@ -59,8 +88,10 @@ rerun the failed campaign. Inspect the retained state and explicitly close/recov
 it before a separately numbered run. A lost reply may leave an unknown outcome or
 held debit. No observation is refreshed to rescue a stale model/dispatch result.
 
-The local self-tests check evidence hashes and trusted lineage validation; they do
-not constitute a guest run. This campaign covers one delegated offline operation.
+The local self-tests check evidence hashes and trusted lineage, grant-preserving
+natural completion, retirement/recovery ordering, strict final evidence semantics,
+restoration-unknown reporting and a real temporary-file/subprocess flock
+interleaving. They do not constitute a guest run. This campaign covers one delegated offline operation.
 The separate manager/kernel campaigns establish two operations under one grant,
 interruption, restart and malformed/race cases. Live-provider suitability, physical
 motion qualification and installation by an independent operator remain separate.
