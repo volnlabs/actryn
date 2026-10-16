@@ -477,6 +477,35 @@ class ReleaseTests(unittest.TestCase):
         self.assertFalse((slot / 'payload/tools/__pycache__').exists())
         installer.verify_slot(slot, {'manifest_sha256': identity, 'key_fingerprint': self.fingerprint})
 
+    def test_fresh_absent_units_need_no_stop_but_loaded_failures_still_inhibit(self):
+        adapter = SystemPlatform()
+        calls = []
+        def absent(argv):
+            calls.append(argv)
+            if argv[:2] == ['/usr/bin/systemctl', 'stop']:
+                raise release.ReleaseError('unit not loaded')
+            return b'not-found\n' if 'LoadState' in argv else b'inactive\n'
+        with mock.patch('install.command', side_effect=absent): adapter.stop('server')
+        self.assertFalse(any(argv[1] == 'stop' for argv in calls))
+        def loaded(argv):
+            if argv[1] == 'stop': raise release.ReleaseError('loaded unit stop failed')
+            return b'loaded\n' if 'LoadState' in argv else b'active\n'
+        with mock.patch('install.command', side_effect=loaded):
+            with self.assertRaisesRegex(release.ReleaseError, 'stop failed'): adapter.stop('server')
+        def stopped_but_active(argv):
+            if argv[1] == 'stop': return b''
+            return b'loaded\n' if 'LoadState' in argv else b'active\n'
+        with mock.patch('install.command', side_effect=stopped_but_active):
+            with self.assertRaisesRegex(release.ReleaseError, 'services did not stop'): adapter.stop('server')
+        def absent_but_active(argv):
+            return b'not-found\n' if 'LoadState' in argv else b'active\n'
+        with mock.patch('install.command', side_effect=absent_but_active):
+            with self.assertRaisesRegex(release.ReleaseError, 'absent unit unexpectedly active'): adapter.stop('server')
+        def ambiguous(argv):
+            return b'stub\n' if 'LoadState' in argv else b'inactive\n'
+        with mock.patch('install.command', side_effect=ambiguous):
+            with self.assertRaises(release.ReleaseError): adapter.stop('server')
+
     def test_server_config_check_uses_installed_daemon_before_accepting_readiness(self):
         adapter = SystemPlatform()
         account = mock.Mock(pw_uid=987, pw_gid=987, pw_shell='/usr/sbin/nologin')

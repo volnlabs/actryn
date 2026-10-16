@@ -75,7 +75,16 @@ class SystemPlatform:
 
     def stop(self, role):
         command(['/usr/bin/systemctl', 'daemon-reload'])
-        command(['/usr/bin/systemctl', 'stop', *[u + '.service' for u in reversed(UNITS[role])]])
+        loaded = []
+        for unit in reversed(UNITS[role]):
+            state = command(['/usr/bin/systemctl', 'show', '--value', '-p', 'LoadState', unit + '.service']).strip()
+            if state == b'not-found':
+                require(self.inactive(unit), 'absent unit unexpectedly active')
+            else:
+                require(state in (b'loaded', b'masked'), 'ambiguous service load state')
+                loaded.append(unit + '.service')
+        if loaded:
+            command(['/usr/bin/systemctl', 'stop', *loaded])
         require(all(self.inactive(u) for u in UNITS[role]), 'services did not stop')
 
     def check_config(self, role, config):
