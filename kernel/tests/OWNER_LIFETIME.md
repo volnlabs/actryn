@@ -1,7 +1,13 @@
 # Additional owner lifetime cases
 
 This test-only client supplements `owner-exit`, which covers a single-threaded
-process. The actual target cases are **NOT_RUN**. It reuses the existing
+process. Both target cases passed in `artifacts/kernel-module16-owner01` on
+the exact ARM kernel with module SHA-256
+`a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112`.
+Leader 3342 exited while thread 3343 survived; a separate case reused the reaped
+owner's numeric PID 3388 through one `clone3(set_tid)` call. The old descriptor's
+HEALTH and ACTIVATE requests returned EPERM, with UNKNOWN and identity retained.
+These are software fixture results, not physical qualification. It reuses the existing
 adversarial suite's fixed authority setup and target guard by including that C
 source with its entry point renamed. It does not load/unload the module, reset
 the fixture, or change production limits.

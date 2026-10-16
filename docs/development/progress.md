@@ -459,6 +459,47 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   receipt. Final module selection, targeted diagnostics, fresh Robot packaging
   and any necessary A16 source/artifact amendment remain pending this fix.
 
+### Selected module 16 and next installation candidate
+
+- `8802e97` integrates native serdev shutdown closure. Independent review of the
+  exported JSON confirms the missing callback is the only behavioral RED failure;
+  plain, lockdep, KASAN and KCSAN each then pass all seventeen cases. The earlier
+  designated-initializer setup failure remains separate. No shutdown test claims
+  a physical disable receipt or a real ARM reboot/poweroff sequence.
+- Exact ARM build 02 passes with module SHA-256
+  `a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112`.
+  Fourteen actual fixture regressions pass in
+  `artifacts/kernel-module16-lifecycle01` and `artifacts/kernel-module16-closure01`,
+  covering ownership, transferred descriptors, removal/rebinding, capacity,
+  delayed/replayed receipts, partial-write closure, controller restart and
+  recovery. Original source, compiler/header/configuration pins, build logs and
+  binary hashes are retained in `artifacts/kernel-module16-build02`. Build 01
+  stopped at a host archive-path guard before SSH because the root directory
+  entry lacked a trailing slash; that setup failure is preserved separately.
+- `7e01aa4` adds two bounded owner-lifetime cases. Both pass on the selected ARM
+  module in `artifacts/kernel-module16-owner01`: a surviving sibling loses
+  authority after its leader exits, and genuine numeric PID reuse cannot regain
+  authority through the old runtime descriptor. The original operation remains
+  UNKNOWN. Host predicate checks include fourteen counterexamples.
+- Gateway campaign sources `0d7fb40`, `29c84d9` and `496bf60` cover bounded hostile
+  traffic, encrypted delay/replay, reserved cancellation under decoder pressure,
+  and retention of the installed gateway's descriptors across replacement.
+  Review corrected a lifetime predicate that confused cancellation and revocation
+  event kinds. Target campaigns remain NOT_RUN; host mechanism checks are not
+  acceptance evidence for the actual manager/gateway lifetime path.
+- Fresh Robot candidate 03 selects module16, manager10 and the separately built
+  ARM CLI/fixture. Its new payload is 34,263,040 bytes, SHA-256
+  `e3df7b2eeb8f638cb43300095c03a3c8e6e48ac68bbbdc6bd175dec8e3932a88`;
+  base manifest SHA-256 is
+  `dec2aa32b660c3abef80688a903551022e8d811862f04fb236e6f24ce1a5365c`.
+  An actual payload installation into a disposable filesystem with the test
+  platform adapter and umask0077 passes all file hashes/modes and preserves a
+  private sentinel. This does not execute guest binaries or touch host services.
+  The new source archive retains the compiled kernel source bytes and adds GPL
+  text/build provenance. Evidence lives in `artifacts/install-robot-inputs-03`;
+  original prepared inputs remain unchanged. Fresh guest installation is NOT_RUN,
+  and the disposable signing key is not a release identity.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
