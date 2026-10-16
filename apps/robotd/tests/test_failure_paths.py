@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 
 from reply_gate import ReplyGate
 from sqlite_contention import writer_lease, wait_release, clock_ns
-from failure_paths import Campaign, OneProposal, durable_cancel, operation_id, validate_capture
+from failure_paths import Campaign, OneProposal, durable_cancel, operation_id, pre_send_ready, validate_capture
 from guest import RequestHandle
 from actryn import OutcomeUnknown
 from actryn import RpcError
@@ -149,6 +149,48 @@ class SQLiteLeaseTests(unittest.TestCase):
 
 
 class NoRetryTests(unittest.TestCase):
+    def healthy(self, handle):
+        return {'clock_healthy': True, 'runtime': {'health': {'healthy': True, 'inhibited': False,
+                'evidence_issues': []}, 'event_stream_healthy': True, 'preparation_ready': True, 'retiring': False,
+                'prepared': {'binding': {'attempt': list(handle.attempt), 'namespace': list(handle.namespace)}},
+                'operation': None, 'kernel': {'state': 2, 'flags': 8, 'grant': 1, 'operation_state': 0,
+                    'operation': 0, 'stream': 0, 'left_permille': 0, 'right_permille': 0}}}
+
+    def test_preexisting_health_fault_is_saved_without_arming_or_sending(self):
+        handle = RequestHandle.create(bytes([1]*16), bytes([2]*16))
+        changes = [lambda d: d['runtime']['health'].update(healthy=False, evidence_issues=['PendingAge']),
+                   lambda d: d.update(clock_healthy=False),
+                   lambda d: d['runtime'].update(event_stream_healthy=False),
+                   lambda d: d['runtime']['kernel'].update(operation=1, operation_state=6),
+                   lambda d: d['runtime']['prepared']['binding'].update(namespace=[0]*16),
+                   lambda d: d['runtime']['kernel'].update(left_permille=1)]
+        for change in changes:
+            description = self.healthy(handle)
+            change(description)
+            campaign = Campaign(SimpleNamespace(ssh_key='unused', ssh_port=26221, known_hosts='unused'))
+            sender, call, arm = Mock(), Mock(), Mock()
+            sender.describe.return_value = description
+            with patch('failure_paths.write_json') as save, self.assertRaises(AssertionError):
+                campaign.start_checked(sender, handle, call, arm)
+            sender.describe.assert_called_once()
+            call.start.assert_not_called()
+            arm.assert_not_called()
+            self.assertEqual(save.call_args.args[1]['description'], description)
+            self.assertFalse(save.call_args.args[1]['proposal_sent'])
+
+    def test_healthy_pre_send_guard_precedes_gate_and_single_send(self):
+        handle = RequestHandle.create(bytes([1]*16), bytes([2]*16))
+        description = self.healthy(handle)
+        pre_send_ready(description, handle)
+        campaign = Campaign(SimpleNamespace(ssh_key='unused', ssh_port=26221, known_hosts='unused'))
+        calls = []
+        sender = Mock()
+        sender.describe.side_effect = lambda: calls.append('describe') or description
+        call = Mock()
+        call.start.side_effect = lambda: calls.append('send')
+        campaign.start_checked(sender, handle, call, lambda: calls.append('arm'))
+        self.assertEqual(calls, ['describe', 'arm', 'send'])
+
     def test_explicit_rejection_is_retained_without_claiming_unknown_outcome(self):
         campaign = Campaign(SimpleNamespace(ssh_key='unused', ssh_port=26221, known_hosts='unused'))
         request_id = bytes([1]*16)

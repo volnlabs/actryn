@@ -20,6 +20,12 @@ operation bound and one actual observation. Observation freshness is unchanged.
 The target keeps a running fixture operation available for interruption; no
 physical output claim is made.
 
+Each mode retains an authenticated pre-fault Describe and another immediately
+before its one proposal. Both must show healthy clock/runtime/event evidence,
+the exact prepared binding, an active grant and no existing operation or output.
+A pre-existing fault prevents gate arming/proposal submission and remains a
+failed campaign. These snapshots do not guarantee that later health stays good.
+
 ## A02: first proposal reply withheld
 
 `--mode a02` connects through `reply_gate.py`, a one-connection loopback TCP relay

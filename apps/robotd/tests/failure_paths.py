@@ -51,6 +51,20 @@ def durable_cancel(snapshot, handle, operation):
             and snapshot['verdict'] == 'Cancelled' and snapshot['reconciled'])
 
 
+def pre_send_ready(description, handle):
+    runtime = description['runtime']
+    kernel, health, prepared = runtime['kernel'], runtime['health'], runtime['prepared']
+    require(description['clock_healthy'] and health['healthy'] and not health['inhibited']
+            and not health['evidence_issues'] and runtime['event_stream_healthy']
+            and runtime['preparation_ready'] and not runtime['retiring']
+            and prepared is not None and prepared['binding']['attempt'] == list(handle.attempt)
+            and prepared['binding']['namespace'] == list(handle.namespace)
+            and kernel['state'] == 2 and kernel['flags'] & 8 and kernel['grant'] > 0
+            and kernel['operation_state'] == 0 and kernel['operation'] == kernel['stream'] == 0
+            and kernel['left_permille'] == kernel['right_permille'] == 0
+            and runtime['operation'] is None, 'pre-existing fault or operation before proposal')
+
+
 def validate_capture(decoded, handle, prepared, operation, mode, lease=None):
     require(decoded['format'] == 'actryn-failure-capture-1'
             and decoded['attempt'] == list(handle.attempt)
@@ -273,6 +287,17 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
             write_json('cancel-reply-unknown.json', {'error': repr(error), 'automatic_retry': False})
             return None
 
+    def read_pre_send(self, sender, handle, label):
+        description = sender.describe()
+        write_json(label + '.json', {'host_monotonic_ns': time.monotonic_ns(), 'description': description,
+                                    'proposal_sent': False})
+        pre_send_ready(description, handle)
+
+    def start_checked(self, sender, handle, call, arm=lambda: None):
+        self.read_pre_send(sender, handle, 'immediate-pre-send')
+        arm()
+        call.start()
+
     def run_campaign(self):
         a = self.args
         self.cancel_attempted = False
@@ -363,14 +388,13 @@ print(json.dumps({'machine':os.uname().machine,'kernel':os.uname().release,'pid'
 
     def lost_reply(self, handle):
         with ReplyGate(self.args.tcp_port) as gate, self.connection(gate.port) as sender, self.connection() as observer:
-            write_json('gate-authenticated.json', sender.describe())
+            self.read_pre_send(sender, handle, 'gate-authenticated')
             observation = sender.observe(handle.attempt, handle.namespace)
             write_json('observation.json', observation)
             call = OneProposal(sender, handle, observation)
             write_json('proposal-intent.json', {'handle': handle.json(), 'observation': observation,
                        'target': [100, -100, 10000], 'parent_digest': '29' * 32, 'automatic_retry': False})
-            gate.arm()
-            call.start()
+            self.start_checked(sender, handle, call, gate.arm)
             try:
                 accepted = self.poll_read('independent-accepted', lambda: {'query': observer.query(handle),
                     'description': observer.describe(), 'gate': gate.report()}, lambda v:
@@ -400,6 +424,7 @@ print(json.dumps({'machine':os.uname().machine,'kernel':os.uname().release,'pid'
 
     def contended_writer(self, handle, manager_pid):
         with self.connection() as sender, self.connection() as observer:
+            self.read_pre_send(sender, handle, 'before-writer-contention')
             # Observe after lock acquisition to avoid spending freshness on SSH setup.
             with RemoteLease(self, manager_pid) as lease:
                 observation = sender.observe(handle.attempt, handle.namespace)
@@ -407,7 +432,7 @@ print(json.dumps({'machine':os.uname().machine,'kernel':os.uname().release,'pid'
                 call = OneProposal(sender, handle, observation)
                 write_json('proposal-intent.json', {'handle': handle.json(), 'observation': observation,
                            'target': [100, -100, 10000], 'parent_digest': '29' * 32, 'automatic_retry': False})
-                call.start()
+                self.start_checked(sender, handle, call)
                 try:
                     allocated = self.poll_read('allocated-under-lock', lambda: {'query': observer.query(handle),
                         'description': observer.describe()}, lambda v: v['query']['snapshot'] is not None
