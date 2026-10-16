@@ -838,6 +838,37 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Syntax/link checks pass; these instructions have not been independently
   executed. The delegated broker walkthrough remains separate work, and the
   manual handoff is not combined-path acceptance evidence.
+- `9433b53` corrects only the A10 test expectation. It retains the uncertain
+  stale-binding reply, then requires the same negative key absent under the exact
+  binding and unchanged closed local status. Capture proof separately requires
+  one original proposal/allocation/START and records whether its prefix ends
+  before that negative request. All 50 gateway host tests pass in integration.
+  Lifetime08's separate recovery/export retains 20 files, 140,358 bytes and 145
+  records; its original failed outcome is unchanged.
+- Lifetime09 passes in 66.36 seconds on installed manager11/module16. The helper
+  holds three descriptors for 27.99 seconds across gateway death and authenticated
+  replacement. Reason-3 closure follows the signal by 14.55 ms and reconciled zero
+  output by 18.52 ms. Its 127-record prefix contains one original allocation/START
+  and zero SAMPLE records; this run does not establish applied motion. The later
+  negative request remains uncertain, with an absent key and unchanged closed
+  status; the earlier capture is explicitly not proof of that request's rejection.
+  Explicit gateway-offline retirement/recovery, restart and 19-file/128,054-byte
+  export succeed. Independent artifact review verifies all 207 original hashes
+  and reproduces the decoded report with the pinned reader. Final state is healthy,
+  inhibited and unprepared. Evidence: `artifacts/robot-a10-lifetime-09` and
+  `artifacts/robot-a10-lifetime-09-review01`.
+- Lifetime09 launch01 fails before trace setup or any campaign mutation because
+  its wrapper incorrectly requires an old clock mapping still ready. The separate
+  launch02 keeps healthy/inhibited/no-pending-work guards and permits the existing
+  campaign's fresh explicit Recover. No original request is retried. Its bounded
+  sync trace has no recorded loss/overrun; tracing stops and the instance is removed.
+- `7f52d00` closes two additional A04 review gaps: source pins include all three
+  executed SDK files, and current-boot service activation/journal checks surround
+  cold archival and precede the only explicit start. Two meaningful failing host
+  tests reproduce the original gaps; all 104 Robot host tests pass after integration.
+  Actual A04 remains pending. `a17afd4` also supplies the complete source-backed
+  installed offline broker recipe; syntax/source checks are not walkthrough
+  execution or independent operator acceptance.
 
 ## Decisions
 
