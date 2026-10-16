@@ -500,6 +500,30 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   original prepared inputs remain unchanged. Fresh guest installation is NOT_RUN,
   and the disposable signing key is not a release identity.
 
+- Manager10 starts healthy/inhibited with the selected module16; loaded build-id
+  note SHA-256 is
+  `25ff476c455cbf45558abec5e2e3d1ecd95d599a5befa532f16b2e578901ab48`.
+  Actual A02 reply-loss02 passes: the relay withholds 625 bytes, forwards no
+  response after arming, and the sole SDK proposal returns OutcomeUnknown without
+  a retry. Independent observation establishes RUNNING; cancellation by the
+  stable saved key produces a durable, reconciled terminal result. The production
+  reader accepts the retired capture with no source gaps or recovery issues.
+  Root independently verifies all 89 retained artifact hashes. This does not
+  erase reply-loss01's earlier recorder failure.
+- Actual A09 contention04 also passes. The production SQLite exclusive lock is
+  held for 611,123,327 ns within its unchanged three-second lease; no rows are
+  modified by the helper. Allocation and urgent cancellation both occur inside
+  that interval, before any START or nonzero output. After release, the durable
+  cancellation and reconciliation are verified, then explicit retirement/recovery
+  and production-reader export complete. All 89 artifact hashes verify. This
+  establishes SQLite writer contention, not fsync stalls, EIO or media failure.
+  Earlier A09 setup failures remain distinct; no uncertain mutation is resent.
+- The selected module's aggregate record is
+  `artifacts/kernel-module16-acceptance01/manifest.json`, SHA-256
+  `00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298`.
+  It binds the sixteen actual cases and four seventeen-case diagnostic runs,
+  with physical qualification and the A16 comparison explicitly unverified.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
