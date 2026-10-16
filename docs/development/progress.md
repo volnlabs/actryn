@@ -534,12 +534,12 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 - Separately numbered traffic02 reaches protocol rejection, delayed-key terminal
   handling and encrypted replay rejection. Its reserved Cancel arrives after
   the operation reaches its target, so the combined campaign remains FAIL.
-  Recorded guest-helper startup costs about0.67s while holders remain open for
+  Recorded guest-helper startup costs about 0.67 s while holders remain open for
   0.73–0.77s. Preparation of that helper before the operation is being reviewed;
   target, operation and ordinary-request deadlines remain unchanged.
 - Before traffic02 retirement can contact the guest, the host QEMU process
   aborts. Host kernel and QEMU records identify a rejected thread creation at
-  the launcher cgroup's TasksMax64; the core metadata reports64threads and
+  the launcher cgroup's TasksMax64; the core metadata reports 64 threads and
   SIGABRT. The cause of thread growth remains unverified. This is not a guest
   shutdown receipt. Private local metadata and the original disk are retained in
   `artifacts/robot-qemu-crash01`; no core memory is exported. A separately recorded
@@ -550,6 +550,38 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   verification pass. The new wrapper requires the sixteen-case aggregate and
   compares the loaded GNU build-id note with the selected module before testing.
   Target instrumentation pilots, staging and comparison remain NOT_RUN.
+
+- Recovery boot `f8c8c92b-f208-4132-a1de-296f9e2ac51e` initially has both Robot
+  services stopped and no authority module. Read-only SQLite integrity is OK;
+  traffic02's exact key remains terminal Completed in its retired namespace.
+  After explicit module16/manager10 startup and one recovery, a fresh pairing
+  exports the original handle without any proposal resend. The production reader
+  accepts 735 retained records, with no issues, raw remnants or source gaps and
+  equal read/durable frontiers (runtime 200, kernel 724). Evidence remains
+  metadata-only and the original traffic02 failure is unchanged. Records live in
+  `artifacts/robot-a10-traffic-02-recovery-export01`.
+- `f7a8d34` preloads the existing cancellation helper before Propose, with a
+  bounded READY/one-trigger exchange; 32 focused gateway host tests pass.
+  Fresh traffic03 reaches durable cancellation and reconciliation under decoder
+  pressure, then retires, recovers and exports. Its final validator fails because
+  Runtime Execution contains one accepted proposal tuple plus four ordinary
+  SAMPLE request objects. This classification correction is pending separate
+  analysis of the unchanged export; the campaign is not relabeled as PASS.
+  All 136 original artifact hashes verify. No target or runtime deadline changed.
+- `e73a82e` and `8b30678` prepare an opt-in actual Server/Robot retained-debit
+  campaign: cancellation, explicit guest crash, four outstanding debits and
+  matching historical settlement. Independent review caught an unbounded stdin
+  read and premature success before gate cleanup; both are fixed before any
+  target execution. All 24 focused host tests pass. Actual execution is NOT_RUN.
+- Fresh Robot execution preparation in `artifacts/install-robot-execution-plan01`
+  has eight passing host checks. Its seven stages separately cover first boot,
+  identity, pinned prerequisites, installer transitions, installed bootstrap,
+  manager lifecycle and final quiescence. Fresh QEMU explicitly uses TasksMax256
+  and MemoryMax3G with the unchanged 2 GiB guest RAM; these test-host settings
+  do not change preview limits or establish the cause of the older QEMU crash.
+  No fresh guest stage has run. A16 amendment6 host inputs are now staged and
+  byte-verified; guest deployment, instrumentation pilots and comparison remain
+  NOT_RUN.
 
 ## Decisions
 
