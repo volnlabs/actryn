@@ -1,0 +1,31 @@
+revision = 7
+freeze_status = "FROZEN_EXACT_ARM_BUILD; TARGET_PILOTS_NOT_RUN"
+instrumentation7_sha256 = "a83702add38c5609ca8b0425b5a8fe239f14cec966e7a306a1808dc57499d84a"
+workload_sha256 = "40f75fe9d898bcd2320f97e70257426f3ca71cdddffe562a25f7581ccba42398"
+workload_build_id = "a868382dc485265d69f67061157383fbca387578"
+source_archive_sha256 = "2f8d1f5c3c8e4dfb14c70d73caec245ecfda2fa8524916a32b6d48f693a401ce"
+source_derivation_sha256 = "880f7acf8b2e9205e3ed1bf474c965562fdb0f3285cb667e6f740d875297983c"
+guest_build = "/opt/actryn-a16/build-amendment7"
+guest_instrumentation = "/opt/actryn-a16/instrumentation7"
+comparison = "NOT_RUN"
+physical_acceptance = false
+
+[sources]
+"capture/Makefile" = "c47d5e6b76a54c8d823a180f0e87d949a75e15e79cf0c08c3cb647a58db2c332"
+"capture/actryn_a16_capture.c" = "aaaa851212d77466eb2593662b85e73a60bcfb162e04e52e2af7751743728e6c"
+"capture/prefix.h" = "a569b35cba32de8bbb7626ea26fe53090cca4f76946278bf48f5618810276f27"
+"capture_guest.py" = "da44e74fda0a13061a9c577592a8efd419b3e514370a12aa61492e8b4d6e8e54"
+"capture_guest5.py" = "652133811d5855a4be761ed235cf2022e52c0f88f1dfbada1acf974a0086fc45"
+"capture_guest7.py" = "b0ee60731791a029bcb785f07e6196fb612e3446e6584abdb4ccc3ca64343673"
+"dispatch.py" = "95c881fb9fff19763f8ff7db2b17fc802fe20f2ac6cfc31ca92ba5a8a61733f8"
+"uart_trace.py" = "1b35bc8a536ade0beb4b5a6580e5f15a10b34650e4fa6ce709f6257fe3f642ca"
+
+[workload_sources]
+"../../actryn_control.h" = "813b753af6f5dd2f23e9f255cce6b34bfd71b548a000ceb52db8d4b17b062133"
+"../../actryn_wire.h" = "74956048d120c7b45726202a58701f8507c17f220a87cf6c958fd4c0421aa018"
+"../../include/uapi/linux/actryn_authority.h" = "bab4e0b968193bef83b6e082c656cb8c2b101ccd04239729c48c731394d81261"
+"common.h" = "bbafd17bb1e119eaee20035c4fb7788ed37df5d38272cee708409e1439c77acf"
+"engine.h" = "de1e33e1b57b38647bd9b55febcf4f28e8f941d868fc4f068e4d2adc18799ac7"
+"first_sample7.h" = "8b5555dab127c765d5435028fe584cc191b3ef82817ba913951a85647ddc78a0"
+"protocol.h" = "49a88ce9ecbcfce638fdddb033b780d2f0b60fd27d7c7595f576749db44e62f0"
+"workload.c" = "c94c29729272ef19ed94d7777ea0fd3ddea5b162b44344eefa1e53c550ef6b32"

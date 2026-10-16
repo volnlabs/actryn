@@ -1,0 +1,36 @@
+revision = 7
+freeze_status = "FROZEN_EXACT_ARM_BUILD; TARGET_PILOTS_NOT_RUN"
+source_commit = "a748e67f281fc308377bd593fcfdbd5e14e577be"
+integrated_commit = "1a2e9c5607e1a805e87b7de41ee3cbe06a87bce2"
+kernel_release = "6.12.111+deb13-arm64"
+kernel_package = "6.12.111-1"
+compiler_package = "14.2.0-19"
+kernel_config_sha256 = "0f442d89365ea22dc5169463634ee62903925200844558479666cbe3eeb7e555"
+exact_module_symvers_sha256 = "42fe7f2b8e33b9f95bf259092f437bf2a5927e231c07ea6e90869a7d2ac0b35d"
+module_source_archive_sha256 = "2f8d1f5c3c8e4dfb14c70d73caec245ecfda2fa8524916a32b6d48f693a401ce"
+source_derivation_sha256 = "880f7acf8b2e9205e3ed1bf474c965562fdb0f3285cb667e6f740d875297983c"
+module_sha256 = "fae8eccb64cbe586f55a5c92c4b0521173dc2c4308fd5fa60f0c6cb3f646b403"
+module_build_id = "e8c3965072ce9c9a3f1c04681598a5576b302aa5"
+module_build_evidence_sha256 = "887124e9c3fab35bde1d3bf422fff87c389b1d27e28aa2d71f7142aeb1fa91c8"
+record_capacity = 4096
+record_bytes = 256
+header_bytes = 128
+max_prefix_bytes = 159
+kretprobe_maxactive = 64
+target = "ttyAMA1"
+clock = "CLOCK_BOOTTIME"
+paired_count_only_trace = false
+target_kernel_pilot = "NOT_RUN"
+target_userspace_pilot = "NOT_RUN"
+comparison = "NOT_RUN"
+physical_acceptance = false
+
+[sources]
+"capture/Makefile" = "c47d5e6b76a54c8d823a180f0e87d949a75e15e79cf0c08c3cb647a58db2c332"
+"capture/actryn_a16_capture.c" = "aaaa851212d77466eb2593662b85e73a60bcfb162e04e52e2af7751743728e6c"
+"capture/prefix.h" = "a569b35cba32de8bbb7626ea26fe53090cca4f76946278bf48f5618810276f27"
+"capture_guest.py" = "da44e74fda0a13061a9c577592a8efd419b3e514370a12aa61492e8b4d6e8e54"
+"capture_guest5.py" = "652133811d5855a4be761ed235cf2022e52c0f88f1dfbada1acf974a0086fc45"
+"capture_guest7.py" = "b0ee60731791a029bcb785f07e6196fb612e3446e6584abdb4ccc3ca64343673"
+"dispatch.py" = "95c881fb9fff19763f8ff7db2b17fc802fe20f2ac6cfc31ca92ba5a8a61733f8"
+"uart_trace.py" = "1b35bc8a536ade0beb4b5a6580e5f15a10b34650e4fa6ce709f6257fe3f642ca"
