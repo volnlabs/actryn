@@ -26,6 +26,16 @@ the exact prepared binding, an active grant and no existing operation or output.
 A pre-existing fault prevents gate arming/proposal submission and remains a
 failed campaign. These snapshots do not guarantee that later health stays good.
 
+Before campaign setup, `ssh_campaign.py` establishes one foreground SSH master
+under a unique mode-0700 temporary directory. Readiness is bounded to eight
+seconds and checks its socket and owned child PID. Local RPCs and the contention
+helper reuse this connection; a fixed failing ProxyCommand prevents a lost
+master from falling back to another transport. Cleanup signals only that owned
+child and removes only its temporary directory. This removes repeated SSH
+authentication from the timing window; it changes neither the manager's
+two-second idle-request limit nor the contention lease. Unknown remote outcomes
+still never cause command re-execution. Master/lease host timestamps are retained.
+
 ## A02: first proposal reply withheld
 
 `--mode a02` connects through `reply_gate.py`, a one-connection loopback TCP relay

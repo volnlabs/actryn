@@ -22,6 +22,7 @@ from actryn import OutcomeUnknown, RpcError
 from source_gap import Campaign as BaseCampaign, no_effect, require, sha
 from reply_gate import ReplyGate
 from sqlite_contention import LEASE_NS
+from ssh_campaign import SharedSsh
 
 
 def operation_id(status):
@@ -158,7 +159,8 @@ class RemoteLease:
         command = 'python3 -c ' + shlex.quote(helper) + ' ' + ' '.join(map(shlex.quote,
             [str(self.manager_pid), self.campaign.args.manager_sha256, self.remote]))
         write_json('lease-intent.json', {'path': self.remote, 'lease_ns': LEASE_NS,
-                   'manager_pid': self.manager_pid, 'mechanism': 'SQLite BEGIN EXCLUSIVE', 'retry': False})
+                   'manager_pid': self.manager_pid, 'mechanism': 'SQLite BEGIN EXCLUSIVE', 'retry': False,
+                   'host_monotonic_ns': time.monotonic_ns()})
         self.process = subprocess.Popen(self.campaign.ssh + [command], stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
@@ -172,6 +174,7 @@ class RemoteLease:
                 data.extend(chunk)
             require(data.count(b'\n') == 1 and data.endswith(b'\n'), 'lease already ended or malformed')
             ready = json.loads(data)
+            ready['received_at_host_ns'] = time.monotonic_ns()
             write_json('lease-ready.json', ready)
             require(ready['phase'] == 'locked' and ready['helper_pidfd_pinned']
                     and ready['manager_pid'] == self.manager_pid
@@ -482,13 +485,17 @@ def main():
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'source_pins': {str(p.relative_to(ROOT)): sha(p) for p in (
             Path(__file__), Path(__file__).with_name('reply_gate.py'), Path(__file__).with_name('sqlite_contention.py'),
+            Path(__file__).with_name('ssh_campaign.py'),
             Path(__file__).with_name('failure_capture.rs'), ROOT / 'kernel/include/uapi/linux/actryn_authority.h',
             ROOT / 'kernel/actryn_driver.c', ROOT / 'crates/robot-runtime/src/lib.rs')},
         'cli_sha256': sha(args.cli), 'reader_sha256': sha(args.reader), 'principal': args.principal,
         'manager_sha256': args.manager_sha256, 'module_note_sha256': args.module_note_sha256,
         'physical_acceptance': False, 'automatic_mutation_retries': 0})
     try:
-        Campaign(args).run_campaign()
+        campaign = Campaign(args)
+        with SharedSsh(campaign.ssh, args.output) as ssh:
+            campaign.ssh = ssh.command
+            campaign.run_campaign()
     except BaseException as error:
         write_json('failure.json', {'phase': CAMPAIGN['phase'], 'error': repr(error), 'automatic_retry': False})
         raise
