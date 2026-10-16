@@ -36,6 +36,23 @@ impl Mapping {
             .and_then(|v| v.checked_sub(age.div_ceil(10_000)))
             .ok_or(Error::Denied("controller clock overflow"))
     }
+    /// Grants must fit in this exchange's conservative host validity interval.
+    pub fn validate_grant_deadline(&self, now: u64, deadline: u64) -> Result<()> {
+        self.controller_lower(now)
+            .map_err(|_| Error::Denied("clock mapping invalid; explicit recovery required"))?;
+        if deadline <= now {
+            return Err(Error::Denied("grant deadline is not in the future"));
+        }
+        let cutoff = self.sent.checked_add(60_000 * MS).ok_or(Error::Denied(
+            "clock mapping cutoff overflow; explicit recovery required",
+        ))?;
+        if deadline >= cutoff {
+            return Err(Error::Denied(
+                "grant exceeds clock mapping lifetime; recover, rearm and prepare again",
+            ));
+        }
+        Ok(())
+    }
     pub fn acquisition(&self, controller: u64, received: u64) -> Result<(u64, u64)> {
         let age = received
             .checked_sub(self.sent)
@@ -75,6 +92,50 @@ mod tests {
         assert!(m.acquisition(1000 * MS, 61_000 * MS).is_err());
         assert!(m.acquisition(899 * MS, 204 * MS).is_err());
         assert!(Mapping::new(0, 11 * MS, 0).is_err());
+    }
+    #[test]
+    fn grant_must_end_before_conservative_mapping_cutoff() {
+        let mapping = Mapping::new(1000 * MS, 1002 * MS, 2000 * MS).unwrap();
+        let now = 57_000 * MS;
+        let cutoff = 61_000 * MS;
+        assert!(mapping.controller_lower(now).is_ok());
+        // A currently valid old mapping cannot cover a fresh thirty-second grant.
+        assert!(mapping
+            .validate_grant_deadline(now, now + 30_000 * MS)
+            .is_err());
+        assert!(mapping.validate_grant_deadline(now, cutoff).is_err());
+        assert!(mapping.validate_grant_deadline(now, cutoff - 1).is_ok());
+    }
+    #[test]
+    fn grant_requires_current_mapping_and_future_deadline() {
+        let mapping = Mapping::new(1000 * MS, 1002 * MS, 2000 * MS).unwrap();
+        assert!(mapping
+            .validate_grant_deadline(2000 * MS, 2000 * MS)
+            .is_err());
+        assert!(mapping
+            .validate_grant_deadline(2000 * MS, 1999 * MS)
+            .is_err());
+        assert!(mapping
+            .validate_grant_deadline(999 * MS, 2000 * MS)
+            .is_err());
+        assert!(mapping
+            .validate_grant_deadline(1001 * MS, 2000 * MS)
+            .is_err());
+        assert!(mapping
+            .validate_grant_deadline(61_000 * MS, 61_001 * MS)
+            .is_err());
+        assert!(Mapping::new(0, 0, u64::MAX)
+            .unwrap()
+            .validate_grant_deadline(1, 2)
+            .is_err());
+    }
+    #[test]
+    fn grant_mapping_cutoff_overflow_is_rejected() {
+        let sent = u64::MAX - 1000 * MS;
+        let mapping = Mapping::new(sent, sent + MS, 2000 * MS).unwrap();
+        let now = sent + 2 * MS;
+        assert!(mapping.controller_lower(now).is_ok());
+        assert!(mapping.validate_grant_deadline(now, now + MS).is_err());
     }
 }
 

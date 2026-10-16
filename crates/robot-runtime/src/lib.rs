@@ -183,8 +183,9 @@ impl Engine {
         }
         Ok(())
     }
-    /// Explicit local recovery. Existing writer resources remain charged until
-    /// finished; repeated calls poll, never resend a pending RECOVER.
+    /// Explicit local recovery starts a fresh inhibited clock exchange. Existing
+    /// writer resources remain charged until finished; calls while the exchange
+    /// is pending only poll and never resend RECOVER.
     pub fn recover(&self) -> Result<Progress> {
         self.inhibited.store(true, Ordering::Release);
         self.bridge.enabled.store(false, Ordering::Release);
@@ -219,13 +220,6 @@ impl Engine {
             core.slot = None;
             *self.context.write().unwrap() = None;
             self.reserved.store(false, Ordering::Release);
-        }
-        let status = self.bridge.admin.status()?;
-        if !core.recover_reset
-            && core.event_stream_ready(&status)
-            && recovered_mapping_ready(core.mapping, &status, boottime_ns()?)
-        {
-            return Ok(Progress::Ready);
         }
         // Dropping the runtime role faults the old owner even after an idle revoke.
         if !core.recover_reset {
@@ -435,6 +429,7 @@ impl Engine {
     pub fn grant(&self, deadline_ns: u64) -> Result<Status> {
         let now = boottime_ns()?;
         let mut core = self.core.lock().unwrap();
+        let mapping = core.mapping;
         let slot = core
             .slot
             .as_mut()
@@ -457,6 +452,11 @@ impl Engine {
         if !health.healthy {
             return Err(Error::Denied("unhealthy preparation"));
         }
+        mapping
+            .ok_or(Error::Denied(
+                "no clock mapping; explicit recovery required",
+            ))?
+            .validate_grant_deadline(now, deadline_ns)?;
         let generation = self.generation.load(Ordering::Acquire);
         let mut r = Request::new(Opcode::Grant);
         r.instance = slot.context.prepared.instance;

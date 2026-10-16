@@ -18,8 +18,11 @@ controller command expiry remain independent when that thread stops.
 
 An explicit local sequence is `recover` (poll pending, at most 12 seconds),
 `rearm` (poll until matched baseline), `prepare(binding, instance, digest)`,
-`grant(deadline)`, `activate`. An expired or unacknowledged clock mapping never returns recovery-ready; explicit
-recovery refreshes it even after a long inhibited enrollment/setup interval.
+`grant(deadline)`, `activate`. Every new explicit `recover` after a completed
+exchange starts a fresh inhibited exchange, even if the old mapping is still
+valid. Calls while that exchange is pending only poll; they never resend it.
+An expired or unacknowledged mapping never returns recovery-ready. After a long
+inhibited enrollment/setup interval, explicitly recover before rearm/preparation.
 Preparation publishes its namespace asynchronously;
 `grant` rejects until namespace durability. Use `configuration_digest()` and
 `profile_digest()` for the compiled reviewed inputs. Configuration cannot change
@@ -31,7 +34,11 @@ Only one instance is charged, including staged, active and retiring states. A
 rejected second preparation preserves the current one. Construction has a
 5-second publication deadline; blocked work stays charged until it returns.
 A staged instance expires after 60 seconds, session ceilings are at most 120
-seconds, and grants at most 60 seconds. `retire`/`recover` cannot release writer
+seconds, and grants at most 60 seconds. A grant must also end strictly before
+the existing clock mapping's conservative 60-second cutoff. An overlong grant
+is rejected before issuing kernel authority; it is not shortened or refreshed
+automatically. Explicit recovery followed by rearm and a fresh preparation is
+required for a fresh mapping. `retire`/`recover` cannot release writer
 resources while a writer is blocked; callers see pending. A fresh preparation
 after retirement requires explicit recovery/rearm. After `retire`, poll
 `status.retirement_ready` before calling `recover` once. This flag reports only
@@ -136,15 +143,18 @@ cargo test -p robot-runtime
 cargo clippy -p robot-runtime --all-targets -- -D warnings
 cargo fmt -p robot-runtime -- --check
 # Only inside an isolated ARM64 guest with the actual module and fixture:
-cargo test -p robot-runtime --test guest -- --ignored --nocapture
+cargo test -p robot-runtime --test guest -- --ignored --nocapture --test-threads=1
 ```
 
 Host tests exercise pure limits/overflow, monotone wheel stopping, deadline
 precedence, clock intervals, immutable digests/bindings, private durable history
-and thread-safe API shape. Registry and evidence tests separately exercise actual
-SQLite stalls and crash-prefix recovery. The ignored guest test uses the actual
+and thread-safe API shape, including grant/mapping cutoff boundaries and checked
+arithmetic. Registry and evidence tests separately exercise actual
+SQLite stalls and crash-prefix recovery. The ignored guest tests use the actual
 module for two natural completions under one grant, duplicate/change semantics,
-pre-ID cancellation and principal-bound historical lookup. Its presence is not a
-claim that it ran. No production service integration, race qualification, hard
+pre-ID cancellation and principal-bound historical lookup, plus fresh explicit
+recovery and no repeated exchange while pending. Run them serially because they
+own the same real endpoint. Their presence is not a claim that they ran.
+No production service integration, race qualification, hard
 scheduler/WCET bound, hardware interface, physical result or release acceptance
 is established by these host checks.

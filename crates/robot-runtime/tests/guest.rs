@@ -46,6 +46,74 @@ fn poll(engine: &Engine, stage: &str, timeout: Duration, mut ready: impl FnMut()
 }
 #[test]
 #[ignore = "requires isolated ARM64 guest, loaded actual module, connected fixture and administrative credentials"]
+fn actual_module_explicit_recovery_refreshes_valid_mapping_once() {
+    let dir = StateDirectory(Some(tempfile::tempdir().unwrap()));
+    std::fs::set_permissions(dir.path(), std::fs::Permissions::from_mode(0o700)).unwrap();
+    let engine = Engine::open(dir.path()).unwrap();
+    assert!(matches!(engine.recover().unwrap(), Progress::Pending));
+    poll(&engine, "initial HELLO", Duration::from_secs(13), || {
+        engine.status().unwrap().recovery_ready
+    });
+    let original = engine.status().unwrap();
+    assert!(!original.recovery_pending);
+    assert!(original.prepared.is_none());
+    assert_eq!(original.kernel.state, 0);
+    assert_eq!(original.kernel.grant, 0);
+    assert_eq!(original.kernel.operation, 0);
+
+    // The mapping is still valid. A NEW explicit recovery must not return Ready
+    // by reusing it, including after inhibited enrollment or other setup work.
+    assert!(matches!(engine.recover().unwrap(), Progress::Pending));
+    let nonce = engine.status().unwrap().kernel.runtime_nonce;
+    assert_ne!(nonce, original.kernel.runtime_nonce);
+    let end = Instant::now() + Duration::from_secs(13);
+    loop {
+        assert!(Instant::now() < end, "{}", diagnostic(&engine));
+        // There is no background ticker in this test: only this pending call can
+        // consume HELLO_ACK. Its Ready result must not initiate another exchange.
+        assert!(engine.status().unwrap().recovery_pending);
+        let progress = engine.recover().unwrap();
+        let current = engine.status().unwrap();
+        assert_eq!(current.kernel.runtime_nonce, nonce);
+        assert_eq!(current.kernel.state, 0);
+        assert_eq!(current.kernel.grant, 0);
+        assert_eq!(current.kernel.operation, 0);
+        assert_eq!(current.kernel.left_permille, 0);
+        assert_eq!(current.kernel.right_permille, 0);
+        if matches!(progress, Progress::Ready) {
+            assert!(current.recovery_ready && !current.recovery_pending);
+            assert!(current.prepared.is_none());
+            assert_eq!(
+                current.kernel.device_identity,
+                original.kernel.device_identity
+            );
+            assert_eq!(
+                current.kernel.controller_boot,
+                original.kernel.controller_boot
+            );
+            assert_eq!(
+                current.kernel.controller_session,
+                original.kernel.controller_session.checked_add(1).unwrap()
+            );
+            break;
+        }
+        thread::sleep(Duration::from_millis(25));
+    }
+    // Read-only status and ordinary ticks cannot refresh the completed mapping.
+    for _ in 0..4 {
+        engine.tick().unwrap();
+        let current = engine.status().unwrap();
+        assert!(current.recovery_ready);
+        assert_eq!(current.kernel.runtime_nonce, nonce);
+        assert_eq!(
+            current.kernel.controller_session,
+            original.kernel.controller_session + 1
+        );
+    }
+    eprintln!("fresh explicit recovery complete: {}", diagnostic(&engine));
+}
+#[test]
+#[ignore = "requires isolated ARM64 guest, loaded actual module, connected fixture and administrative credentials"]
 fn actual_module_two_steps_and_pre_id_tombstone() {
     let dir = StateDirectory(Some(tempfile::tempdir().unwrap()));
     std::fs::set_permissions(dir.path(), std::fs::Permissions::from_mode(0o700)).unwrap();

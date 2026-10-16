@@ -125,7 +125,10 @@ Use the server's generated attempt ID. Save a fresh handle **before** proposing:
 ```sh
 actryn robot handle --pair session/pair.json --attempt ATTEMPT_ID \
   --out session/operation.json
-# On the robot, with that handle file and a recent authenticated client session:
+# On the robot after enrollment/setup, with that handle file and a recent
+# authenticated client session:
+actryn robot recover --epoch ROBOT_EPOCH
+# Poll robot status until recovery_ready; do not resend a pending recovery.
 actryn robot rearm --epoch ROBOT_EPOCH
 actryn robot prepare --handle session/operation.json --principal developer
 actryn robot grant --epoch ROBOT_EPOCH --duration-ms 30000
@@ -145,8 +148,12 @@ actryn robot reconcile --epoch ROBOT_EPOCH
 Supply the SHA-256 parent digest of the proposal input you are recording as
 provenance, and use a fresh authenticated observation. Neither value issues authority. The fixed skill is bounded by
 the reviewed profile; the CLI accepts only typed integer deltas and duration.
-Grant duration is bounded at 60 seconds and the daemon enforces the remaining
-session/preparation/authority lifetime. Local epoch-based commands accept
+Grant duration is bounded at 60 seconds and must end before the current clock
+mapping expires; the daemon also enforces the remaining session/preparation/
+authority lifetime. A new explicit Recover starts a fresh inhibited exchange,
+including when the previous mapping remains valid. If a grant exceeds the mapping
+lifetime, recover, rearm and prepare again; no deadline is extended automatically.
+Local epoch-based commands accept
 `--pair FILE` instead of `--epoch HEX` when the pairing file is present locally.
 
 A second operation under the same still-valid grant needs a fresh handle key,
