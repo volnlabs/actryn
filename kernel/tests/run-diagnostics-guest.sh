@@ -77,14 +77,17 @@ import re
 import sys
 data = json.loads(pathlib.Path(sys.argv[1]).read_text())
 text = pathlib.Path(sys.argv[2]).read_text()
-expected = {"wire_roundtrip", "urgent_monotonic", "every_cancel_offset", "concurrent_closure", "late_receipts", "every_fault_recovery_offset", "stalled_parser_timeout", "inhibited_revoke", "retained_rx_recovery", "stale_epoch_receipts", "new_controller_epoch", "bounded_queues_counters", "pm_inhibition", "handshake_rx_sync"}
-found = set()
+expected = {"wire_roundtrip", "urgent_monotonic", "every_cancel_offset", "concurrent_closure", "late_receipts", "every_fault_recovery_offset", "stalled_parser_timeout", "inhibited_revoke", "retained_rx_recovery", "stale_epoch_receipts", "new_controller_epoch", "bounded_queues_counters", "pm_inhibition", "handshake_rx_sync", "grant_closure_idempotence", "receive_wakeup_preserved"}
+suites = {"actryn-authority", "actryn-serdev-recovery"}
+found, found_suites = set(), set()
 def visit(node):
     if isinstance(node, dict):
         name = node.get("name", "")
         if name in expected:
             assert node.get("status") == "PASS", node
             found.add(name)
+        if name in suites:
+            found_suites.add(name)
         for value in node.values():
             visit(value)
     elif isinstance(node, list):
@@ -92,6 +95,7 @@ def visit(node):
             visit(value)
 visit(data)
 assert found == expected, (found, expected)
+assert found_suites == suites, (found_suites, suites)
 assert not re.search(r"BUG:|WARNING:|KASAN:|KCSAN:|possible circular locking|Kernel panic|not ok|# SKIP", text), text
 print("Expected cases passed; no skip or kernel diagnostic pattern found")
 PY

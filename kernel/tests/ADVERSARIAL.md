@@ -1,5 +1,25 @@
 # Actual guest regressions
 
+Snapshot 15's single labeled ARM64 verification ran `selftest` and
+`ready-recovery`; both passed without a retry. The latter retained controller
+boot 77 and advanced session 1 to 2. Its exact module SHA-256 is
+`2405de617a09b4b3beec5eaec8f83ff6ee6c0cc0a1968d091b0c5634fcff8e1e`.
+The evidence archive SHA-256 is
+`78f651edfac6b1bb8c64853542ddd315644cae7ce32dee5a2d665d7fd0ec7741`.
+It includes the build log, per-case output and kernel logs, fixture state,
+guest boot identity and a clean handoff (no diagnostic probes, local trace
+clock, daemon services stopped, no second raw TTY). This bounded verification
+does not turn the incomplete snapshot 14 wider campaign into a pass.
+
+Before this fix, a separate module-14 admin-only exchange was instrumented:
+the valid HELLO_ACK reached decoding about 3.47 ms after HELLO send, the worker
+receipt snapshot was 3.591615 ms after send, and mapping succeeded. That trace
+is retained in the same archive and is explicitly a **non-reproduction** of
+the earlier manager handshake failure. The deterministic worker-wakeup RED/GREEN
+test described in [diagnostics](../DIAGNOSTICS.md) proves a source race; the
+unchanged ten-ms clock-exchange guard still applies. No measured timing bound
+or universal explanation for handshake failures follows from these tests.
+
 These tests require the exact Debian `6.12.111+deb13-arm64` QEMU guest and
 external non-actuating fixture. The harness checks kernel, architecture, root
 and device-tree machine identity before opening authority. It never loads a

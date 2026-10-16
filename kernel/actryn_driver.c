@@ -439,7 +439,9 @@ static void endpoint_work(struct work_struct *work)
  apply_close(e); check_health(e); transmit(e);
  mutex_unlock(&e->authority);
  spin_lock_irqsave(&e->control_lock,flags);
- if(!e->stopping) mod_delayed_work(system_wq,&e->work,msecs_to_jiffies(have?0:10));
+ /* Preserve any immediate RX/control wakeup queued during this iteration.
+  * Modifying it here could postpone an already captured HELLO_ACK by 10 ms. */
+ if(!e->stopping) queue_delayed_work(system_wq,&e->work,msecs_to_jiffies(have?0:10));
  spin_unlock_irqrestore(&e->control_lock,flags);
 }
 static size_t receive_buf(struct serdev_device *serdev,const u8 *data,size_t n)

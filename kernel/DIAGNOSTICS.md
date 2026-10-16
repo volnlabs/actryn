@@ -15,6 +15,8 @@ evidence; diagnostic KUnit does not exercise the physical PL011 lifetime path.
 | 13 | Plain, lockdep, KASAN and KCSAN passed fourteen cases each with bounded handshake synchronization. |
 | 14-red | Fifteen cases ran; only `grant_closure_idempotence` failed, with replaced barrier bytes/transaction and lost receipt wait. |
 | 14 | Plain, lockdep, KASAN and KCSAN passed fifteen cases each, retaining the original barrier across grant closure. |
+| 15-red | Sixteen cases ran; only `receive_wakeup_preserved` failed because the worker tail armed a ten-ms timer over an already queued immediate receive wakeup. |
+| 15 | Plain, lockdep, KASAN and KCSAN passed sixteen cases each with the non-postponing worker tail. |
 
 Snapshot 12 records are retained in the disposable server guest under
 `/var/tmp/actryn-diag-12`; its RED evidence is under `actryn-diag-12-red`.
@@ -51,6 +53,22 @@ its driver-test header SHA-256 is
 The fifteen-case validator rejected the RED failure and checked both suites,
 zero skips and absence of kernel diagnostic patterns separately for each GREEN
 configuration. Source and binary artifacts from earlier campaigns remain intact.
+
+Snapshot 15 records remain under `/var/tmp/actryn-diag-15`, with the original
+driver's RED run in `actryn-diag-15-red`. Exported evidence archive SHA-256:
+`df35bbcabcb8041aab0f154018268109edba53cc30082eee89db600ad9d295f1`.
+Its production driver SHA-256 is
+`bf945ff25601c2681055de3bf2c9d9ed6bce04148396c5133dfc02926c26f289`;
+its driver-test header SHA-256 is
+`2bf3fa3d911800b99512c8216148ec62d19f777091f259e1a08ec257a0ff2a1b`.
+The new test executes the actual worker on `system_wq`. Its injected UART writer
+calls the production receive callback after the worker has observed an empty RX
+queue. That callback publishes an immediate wakeup. The original worker tail
+overwrote it with a ten-ms timer; the fixed tail preserves it. The assertion
+checks timer state rather than wall-clock completion. Both suites, all sixteen
+cases, zero skips and absence of diagnostic patterns were checked independently
+for each GREEN build. This establishes the scheduling defect, not its frequency
+or a causal explanation for an earlier untraced manager handshake failure.
 
 Use the authenticated Debian `linux-source-6.12=6.12.111-1` package, whose
 source tarball includes the Debian patches, not a mutable checkout or the host

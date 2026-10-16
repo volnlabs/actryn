@@ -3,7 +3,10 @@
 #include <linux/kthread.h>
 #include <linux/completion.h>
 
-struct test_uart { u8 bytes[2*ACTRYN_ENCODED_MAX]; size_t count,limit; int error; };
+struct test_uart {
+ u8 bytes[2*ACTRYN_ENCODED_MAX]; size_t count,limit; int error;
+ struct serdev_device *inject_rx;
+};
 static ssize_t test_write(struct serdev_controller *ctrl,const u8 *data,size_t n)
 {
  struct test_uart *uart=serdev_controller_get_drvdata(ctrl);
@@ -11,6 +14,14 @@ static ssize_t test_write(struct serdev_controller *ctrl,const u8 *data,size_t n
  n=min(n,uart->limit);
  if(n>sizeof(uart->bytes)-uart->count) return -ENOSPC;
  memcpy(uart->bytes+uart->count,data,n); uart->count+=n;
+ if(uart->inject_rx) {
+  struct actryn_frame f={.kind=AW_OBSERVATION,.sequence=1,.context=1};
+  u8 encoded[ACTRYN_ENCODED_MAX]; size_t length=actryn_encode(&f,encoded);
+  struct serdev_device *serdev=uart->inject_rx; uart->inject_rx=NULL;
+  /* The first worker already found RX empty. Arrival publishes an immediate
+   * wakeup while its transmit call is still in progress. */
+  receive_buf(serdev,encoded,length);
+ }
  return n;
 }
 static const struct serdev_controller_ops test_uart_ops={.write_buf=test_write};
@@ -490,6 +501,55 @@ static void grant_closure_idempotence(struct kunit *test)
   kunit_kfree(test,uart); kunit_kfree(test,serdev); kunit_kfree(test,ctrl); kunit_kfree(test,e);
  }
 }
-static struct kunit_case driver_cases[]={KUNIT_CASE(every_cancel_offset),KUNIT_CASE(concurrent_closure),KUNIT_CASE(late_receipts),KUNIT_CASE(every_fault_recovery_offset),KUNIT_CASE(stalled_parser_timeout),KUNIT_CASE(inhibited_revoke),KUNIT_CASE(retained_rx_recovery),KUNIT_CASE(stale_epoch_receipts),KUNIT_CASE(handshake_rx_sync),KUNIT_CASE(new_controller_epoch),KUNIT_CASE(bounded_queues_counters),KUNIT_CASE(pm_inhibition),KUNIT_CASE(grant_closure_idempotence),{}};
+struct wakeup_test {
+ struct actryn_endpoint endpoint;
+ struct completion tail_done,release;
+ bool first,queued;
+ unsigned long tail_timer_expires;
+};
+static void wakeup_test_worker(struct work_struct *work)
+{
+ struct actryn_endpoint *e=container_of(to_delayed_work(work),struct actryn_endpoint,work);
+ struct wakeup_test *t=container_of(e,struct wakeup_test,endpoint);
+ if(!t->first) return;
+ t->first=false;
+ endpoint_work(work);
+ /* A zero-delay kick does not arm the timer. Its expires field stays zero,
+  * even if the incorrectly added ten-ms timer has fired before inspection. */
+ t->tail_timer_expires=e->work.timer.expires;
+ t->queued=delayed_work_pending(&e->work);
+ complete(&t->tail_done); wait_for_completion(&t->release);
+}
+static void receive_wakeup_preserved(struct kunit *test)
+{
+ struct wakeup_test *t=kunit_kzalloc(test,sizeof(*t),GFP_KERNEL);
+ struct serdev_controller *ctrl=kunit_kzalloc(test,sizeof(*ctrl),GFP_KERNEL);
+ struct serdev_device *serdev=kunit_kzalloc(test,sizeof(*serdev),GFP_KERNEL);
+ struct test_uart *uart=kunit_kzalloc(test,sizeof(*uart),GFP_KERNEL);
+ struct actryn_endpoint *e; struct actryn_frame hello={.kind=AW_HELLO,.transaction=1};
+ unsigned long flags,finished;
+ KUNIT_ASSERT_NOT_NULL(test,t); KUNIT_ASSERT_NOT_NULL(test,ctrl);
+ KUNIT_ASSERT_NOT_NULL(test,serdev); KUNIT_ASSERT_NOT_NULL(test,uart);
+ e=&t->endpoint; mutex_init(&e->authority); spin_lock_init(&e->control_lock);
+ spin_lock_init(&e->rx_lock); spin_lock_init(&e->event_lock); init_waitqueue_head(&e->event_wait);
+ init_completion(&t->tail_done); init_completion(&t->release); t->first=true;
+ INIT_DELAYED_WORK(&e->work,wakeup_test_worker);
+ ctrl->ops=&test_uart_ops; serdev->ctrl=ctrl; e->serdev=serdev;
+ serdev_controller_set_drvdata(ctrl,uart); serdev_device_set_drvdata(serdev,e);
+ uart->limit=ACTRYN_ENCODED_MAX+1; uart->inject_rx=serdev;
+ mutex_lock(&e->authority); KUNIT_EXPECT_EQ(test,queue_frame(e,&hello),0); mutex_unlock(&e->authority);
+ KUNIT_EXPECT_TRUE(test,queue_delayed_work(system_wq,&e->work,0));
+ finished=wait_for_completion_timeout(&t->tail_done,msecs_to_jiffies(3000));
+ if(finished) {
+  KUNIT_EXPECT_EQ(test,e->rx_count,1U);
+  KUNIT_EXPECT_TRUE(test,t->queued);
+  KUNIT_EXPECT_EQ(test,t->tail_timer_expires,0UL);
+ }
+ spin_lock_irqsave(&e->control_lock,flags); e->stopping=true;
+ spin_unlock_irqrestore(&e->control_lock,flags);
+ complete(&t->release); cancel_delayed_work_sync(&e->work);
+ KUNIT_EXPECT_NE(test,finished,0UL);
+}
+static struct kunit_case driver_cases[]={KUNIT_CASE(every_cancel_offset),KUNIT_CASE(concurrent_closure),KUNIT_CASE(late_receipts),KUNIT_CASE(every_fault_recovery_offset),KUNIT_CASE(stalled_parser_timeout),KUNIT_CASE(inhibited_revoke),KUNIT_CASE(retained_rx_recovery),KUNIT_CASE(stale_epoch_receipts),KUNIT_CASE(handshake_rx_sync),KUNIT_CASE(new_controller_epoch),KUNIT_CASE(bounded_queues_counters),KUNIT_CASE(pm_inhibition),KUNIT_CASE(grant_closure_idempotence),KUNIT_CASE(receive_wakeup_preserved),{}};
 static struct kunit_suite driver_suite={.name="actryn-serdev-recovery",.test_cases=driver_cases};
 kunit_test_suite(driver_suite);

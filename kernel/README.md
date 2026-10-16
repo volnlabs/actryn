@@ -40,6 +40,9 @@ Repeated grant revocation, including the urgent and mutex sides of one ioctl,
 preserves an existing close barrier and its receipt wait. Escalating operation
 closure to grant revocation invalidates authorization without replacing that
 immutable barrier or renewing its absolute deadline.
+The worker's periodic tail queues its next poll without postponing an immediate
+RX or control wakeup already published during that iteration. This preserves
+prompt scheduling intent; Linux scheduling still has no qualified latency bound.
 
 One immutable started frame and one replaceable unsent sample are retained.
 Cancellation drops unsent work, finishes only the exact old suffix within the
@@ -96,7 +99,7 @@ would outlive recorder health or the observation's maximum age.
 On a kernel built with `CONFIG_KUNIT=y`, build with
 `CONFIG_ACTRYN_AUTHORITY_KUNIT_TEST=m`. Codec/control tests and the actual driver
 transmit/close path then test every encoded byte offset with an injected serdev
-writer. Snapshot 14 passed fifteen cases in each of four separate x86 diagnostic
+writer. Snapshot 15 passed sixteen cases in each of four separate x86 diagnostic
 kernels: plain KUnit, lockdep, KASAN and KCSAN. [Campaign evidence](DIAGNOSTICS.md)
 records exact source identities and preserved earlier failures. Both suites are compiled into the
 authority component only for that diagnostic build; the normal profile omits them.
@@ -109,6 +112,8 @@ handshake synchronization, strict post-mapping parsing and stale ACK rejection.
 Older epochs cannot acknowledge current work. Newer controller epochs
 close authority. RX-capacity/counter tests and direct PM callback tests exercise
 bounded storage, nonwrapping accounting and inhibition.
+The real-workqueue wakeup regression injects a receive callback after the worker
+has checked its queue, then checks that its immediate wakeup survives the tail.
 
 The separate [actual ARM64 regressions](tests/ADVERSARIAL.md) exercise the
 installed module through real ioctl/serdev/PL011 paths. Their software results
