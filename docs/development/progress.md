@@ -524,6 +524,33 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   It binds the sixteen actual cases and four seventeen-case diagnostic runs,
   with physical qualification and the A16 comparison explicitly unverified.
 
+- Actual A10 traffic01 stops on a harness assumption: the valid first proposal
+  reply is PendingIntent without an operation ID. No malicious replay is sent.
+  Separate retirement/recovery exports 228 records with no reader issues or raw
+  remnants; 67 original and 48 retirement artifact hashes verify. `d638dd6`
+  accepts that asynchronous reply and confirms the original handle/full RUNNING
+  identity through bounded read-only queries, without another proposal. All
+  twenty-three focused gateway host checks pass.
+- Separately numbered traffic02 reaches protocol rejection, delayed-key terminal
+  handling and encrypted replay rejection. Its reserved Cancel arrives after
+  the operation reaches its target, so the combined campaign remains FAIL.
+  Recorded guest-helper startup costs about0.67s while holders remain open for
+  0.73–0.77s. Preparation of that helper before the operation is being reviewed;
+  target, operation and ordinary-request deadlines remain unchanged.
+- Before traffic02 retirement can contact the guest, the host QEMU process
+  aborts. Host kernel and QEMU records identify a rejected thread creation at
+  the launcher cgroup's TasksMax64; the core metadata reports64threads and
+  SIGABRT. The cause of thread growth remains unverified. This is not a guest
+  shutdown receipt. Private local metadata and the original disk are retained in
+  `artifacts/robot-qemu-crash01`; no core memory is exported. A separately recorded
+  recovery boot uses the same resource bounds and disk, with new serial/QMP paths
+  in `artifacts/robot-crash-recovery01`. No original operation is replayed.
+- `f82a04d` adds explicit A16 module16 amendment6 while preserving every frozen
+  original helper. Seventeen wrapper/runner host checks and actual provenance
+  verification pass. The new wrapper requires the sixteen-case aggregate and
+  compares the loaded GNU build-id note with the selected module before testing.
+  Target instrumentation pilots, staging and comparison remain NOT_RUN.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
