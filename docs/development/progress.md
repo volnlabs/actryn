@@ -663,6 +663,24 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   remains in progress; the later EXPIRED status alone is not its established
   cause. Original failure, read-only export refusal, recovery and export records
   remain separately numbered under `artifacts/install-robot-run01*`.
+- Capture analysis confirms the first fault is EXPIRED, 4.052596976 seconds
+  after grant and 1.065219906 seconds after operation 2 reconciles; the grant
+  still has 25.945266803 seconds remaining. The 60-second mapping cutoff falls
+  inside bootstrap's recorded Recover exchange, and both later Recover calls
+  reuse that mapping through the runtime's Ready fast path. Source and timing
+  therefore identify the aging mapping as the explanation; no branch trace was
+  captured. The namespace exports 261 records with no issues, raw remnants or
+  source gaps. Root verifies both reconciled allocations, no third allocation
+  and the retained failure/capture/recovery hashes. A narrow runtime change is
+  in progress: fresh explicit recovery refreshes the inhibited mapping, pending
+  recovery only polls, and grants cannot exceed its conservative remaining
+  lifetime. No expiry threshold is widened.
+- The fresh Robot is explicitly stopped and powered off after recovery, with
+  no prepared/live authority, one retired namespace and four preserved records.
+  Root verifies inactive/MainPID0 and the quiescence artifact hashes in
+  `artifacts/install-robot-quiescence02`. A16 now has the sole owned VM window;
+  its exact first boot and guarded deployment pass, with instrumentation pilots
+  and comparison still pending actual results.
 
 ## Decisions
 
