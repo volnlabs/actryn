@@ -48,7 +48,8 @@ python3 -B -E -s packaging/release/tests/guest.py run \
 ```
 
 Before upload, the harness checks the authenticated SSH endpoint's root identity,
-Debian version, architecture, running kernel, QEMU virtualization, exact supplied
+Debian version, architecture, running kernel, QEMU virtualization (`qemu` or
+`kvm` for the server q35 guest, `qemu` only for the robot), exact supplied
 boot/machine identity, absent prior Actryn installation/configuration, inactive
 role services and absent authority module. The exact kernel/package artifacts
 are then checked by the actual installer's `SystemPlatform`. Mismatch aborts;

@@ -161,7 +161,8 @@ def verify_probe(job, probe, boot, machine):
     role = job['role']
     release.require(probe['euid'] == 0 and probe['debian'] == '13.7'
         and probe['machine'] == ('aarch64' if role == 'robot' else 'x86_64')
-        and probe['kernel'] == job['target']['kernel_release'] and probe['virtualization'] == 'qemu'
+        and probe['kernel'] == job['target']['kernel_release']
+        and probe['virtualization'] in (('qemu', 'kvm') if role == 'server' else ('qemu',))
         and probe['boot_id'] == boot and probe['machine_id'] == machine
         and not probe['installed'] and not probe['active_units'] and probe['authority_loaded'] is False,
         'guest is not the explicitly identified fresh inactive disposable tuple')

@@ -87,6 +87,20 @@ class HarnessTests(unittest.TestCase):
             args.image_sha512 = '0' * 128
             with self.assertRaises(release.ReleaseError): module.run(args)
 
+    def test_server_qemu_with_kvm_acceleration_is_accepted_without_weakening_robot(self):
+        module = harness()
+        job = {'role': 'server', 'target': {'architecture': 'amd64', 'kernel_release': release.KERNEL['server']}}
+        probe = {'euid': 0, 'debian': '13.7', 'machine': 'x86_64', 'kernel': release.KERNEL['server'],
+                 'virtualization': 'kvm', 'boot_id': '1' * 32, 'machine_id': '2' * 32,
+                 'installed': [], 'active_units': [], 'authority_loaded': False}
+        module.verify_probe(job, probe, '1' * 32, '2' * 32)
+        for virtualizer in ('none', 'docker', 'vmware'):
+            with self.assertRaises(release.ReleaseError):
+                module.verify_probe(job, dict(probe, virtualization=virtualizer), '1' * 32, '2' * 32)
+        robot = {'role': 'robot', 'target': {'architecture': 'arm64', 'kernel_release': release.KERNEL['robot']}}
+        with self.assertRaises(release.ReleaseError):
+            module.verify_probe(robot, dict(probe, machine='aarch64', kernel=release.KERNEL['robot']), '1' * 32, '2' * 32)
+
     def test_identity_and_freshness_mismatch_rejects_before_upload(self):
         module = harness()
         job = {'role': 'robot', 'target': {'architecture': 'arm64', 'kernel_release': release.KERNEL['robot']}}
