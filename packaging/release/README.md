@@ -154,8 +154,8 @@ remain the manager's responsibility.
 ## Stage, switch, recover and rollback
 
 **Do not run these commands on a development host.** The integration owner must
-first exercise them on fresh disposable supported guests. This lane's tests do
-not perform an actual installation.
+first exercise them on fresh disposable supported guests. The temporary-filesystem
+tests below do not perform an actual installation.
 
 Each action requires the signed bundle, separately provided public key, externally
 verified fingerprint and explicit role:
@@ -214,9 +214,9 @@ copies plus extracted payload are included in the finite installer disk budget.
 Installation preserves every existing `/etc/actryn` configuration, approval map,
 identity/key/revocation file and `/var/lib` runtime/evidence/database byte. It does
 not allocate local UIDs, overwrite configurations, enroll or import an agent.
-On a fresh installation, explicitly apply the selected slot's sysusers file,
-verify the account and configure the existing daemon interfaces documented in
-`apps/server/README.md` and `apps/robotd/README.md`. Serverd supports only these
+On a fresh server installation, use the complete independent-server recipe below.
+Robot enrollment and authority preparation remain separate operator procedures;
+do not substitute the server recipe for robot setup. Serverd supports only these
 optional credential drop-ins, each exactly `[Service]\n` followed by the stated
 line and a final newline:
 
@@ -240,6 +240,160 @@ route after these checks. It runs the daemon's actual `LauncherConfig::read`
 validation, including I/O-device syntax and approved artifact properties, without
 binding listeners, opening accounting databases, acquiring the daemon lock or
 starting work. Failure leaves the installation gate in place during resume.
+
+### Fresh independent server: explicit local bootstrap
+
+Run this as trusted root on the selected disposable Debian server **after** a
+successful `stage` and `activate`, with all three Actryn units inactive and the
+installation gate present. Install the manifest's exact package prerequisites
+beforehand using authenticated OS repositories. This procedure neither upgrades
+packages nor downloads artifacts. Require `containerd.service` active. Do not use
+this fresh-only recipe to overwrite an existing configuration or layout.
+
+Set these values from the externally reviewed candidate, not a key discovered in
+the candidate. The OCI digest is the selected OCI manifest digest, not the hash
+of `offline-oci.tar`. The numeric operator UID/GID 1000 need not have a passwd
+entry; choose and document another numeric operator identity before configuration
+if 1000 is inappropriate for the selected host.
+
+```sh
+set -eu
+export ACTRYN_BUNDLE=/ROOT_PROTECTED_PATH/candidate
+export ACTRYN_PUBLIC_KEY=/ROOT_PROTECTED_PATH/release-public.pem
+export ACTRYN_KEY_SHA256=EXTERNALLY_VERIFIED_SPKI_SHA256
+export ACTRYN_OCI_DIGEST=sha256:EXTERNALLY_SELECTED_64_HEX_OCI_MANIFEST_DIGEST
+/usr/bin/python3 -B -E -s /opt/actryn/server/current/tools/release.py inspect \
+  --bundle "$ACTRYN_BUNDLE" --public-key "$ACTRYN_PUBLIC_KEY" \
+  --key-sha256 "$ACTRYN_KEY_SHA256"
+/usr/bin/systemd-sysusers /usr/lib/sysusers.d/actryn-server.conf
+/usr/bin/systemd-tmpfiles --create /usr/lib/tmpfiles.d/actryn-server.conf
+```
+
+The configuration step verifies the actual sysusers account and whole-disk I/O
+device. In the tested QEMU tuple `/dev/vda` is the whole disk `254:0`; do not
+substitute a partition or guess another device. Existing `/etc/actryn` ancestors
+must be root-owned, non-writable by group/other and searchable by the service UID.
+If a private parent blocks traversal, stop and review a separate local permission
+change; never recursively relax configuration or secret permissions. This script
+sets modes only on the new public directory and new public configuration.
+
+```sh
+/usr/bin/python3 -B -E -s - <<'CONFIG_PY'
+import grp, json, os, pathlib, pwd, stat
+account = pwd.getpwnam('actryn-server')
+group = grp.getgrnam('actryn-server')
+assert account.pw_uid not in (0, 1000) and account.pw_gid == group.gr_gid
+assert account.pw_shell in ('/usr/sbin/nologin', '/sbin/nologin') and not group.gr_mem
+device = pathlib.Path('/dev/vda').stat()
+assert stat.S_ISBLK(device.st_mode)
+assert (os.major(device.st_rdev), os.minor(device.st_rdev)) == (254, 0)
+parent = pathlib.Path('/etc/actryn')
+if not parent.exists():
+    parent.mkdir(mode=0o755)
+    parent.chmod(0o755)
+for path in (pathlib.Path('/etc'), parent):
+    info = path.lstat()
+    assert stat.S_ISDIR(info.st_mode) and info.st_uid == 0
+    assert not info.st_mode & 0o022 and info.st_mode & 0o001
+with (parent / 'server.json').open('x') as stream:
+    json.dump({'server_uid': account.pw_uid, 'operator_uid': 1000,
+               'io_device': '254:0', 'artifacts': {}}, stream)
+    stream.flush()
+    os.fchmod(stream.fileno(), 0o644)
+    os.fsync(stream.fileno())
+CONFIG_PY
+```
+
+Explicitly unpack the signed, verified offline archive into a **new** protected
+layout. This bounded extractor admits only the five regular OCI files, creates
+no links and refuses an existing layout. The importer independently verifies the
+selected digest and contents. A failure leaves the partial layout for inspection;
+do not retry extraction into it or silently erase evidence.
+
+```sh
+/usr/bin/python3 -B -E -s - <<'LAYOUT_PY'
+import json, os, pathlib, re, tarfile
+source = pathlib.Path('/opt/actryn/server/current/share/agent/offline-oci.tar')
+layout = pathlib.Path('/var/lib/actryn-install/server/offline-layout')
+pin = os.environ['ACTRYN_OCI_DIGEST']
+assert re.fullmatch(r'sha256:[0-9a-f]{64}', pin)
+layout.mkdir(mode=0o755)
+layout.chmod(0o755)
+with tarfile.open(source, 'r:') as archive:
+    members = archive.getmembers()
+    names = [member.name for member in members]
+    assert len(names) == len(set(names)) == 5
+    assert {'oci-layout', 'index.json'}.issubset(names)
+    assert sum(member.size for member in members) <= 64 * 1024 * 1024
+    for member in members:
+        assert member.isfile() and 0 <= member.size <= 16 * 1024 * 1024
+        assert member.name in ('oci-layout', 'index.json') or re.fullmatch(
+            r'blobs/sha256/[0-9a-f]{64}', member.name)
+        target = layout / member.name
+        for parent in reversed(target.parents):
+            if parent == layout or layout in parent.parents:
+                if not parent.exists():
+                    parent.mkdir(mode=0o755)
+                    parent.chmod(0o755)
+        data = archive.extractfile(member).read(member.size + 1)
+        assert len(data) == member.size
+        with target.open('xb') as stream:
+            stream.write(data)
+            stream.flush()
+            os.fchmod(stream.fileno(), 0o644)
+            os.fsync(stream.fileno())
+index = json.loads((layout / 'index.json').read_bytes())
+assert len(index['manifests']) == 1 and index['manifests'][0]['digest'] == pin
+LAYOUT_PY
+/usr/bin/actryn server import \
+  --layout /var/lib/actryn-install/server/offline-layout --digest "$ACTRYN_OCI_DIGEST"
+/usr/bin/actryn-serverd --check-config
+```
+
+Require `result=configuration_valid`, the expected artifact count (one for this
+fresh independent-server recipe) and `authority_issued=false`. The importer owns
+the approval-map update; do not write an arbitrary rootfs path into it. The fresh
+configuration's empty artifact map is valid only before this explicit import.
+This offline path needs no Robot peer configuration, provider key or TLS secret.
+
+Resume clears only the installation inhibitor. Check that all units remain
+inactive afterward, then explicitly start the server. Its systemd dependencies
+start the matching launcher and observer. Neither action executes an agent.
+
+```sh
+/usr/bin/python3 -B -E -s /opt/actryn/server/current/tools/release.py resume \
+  --role server --bundle "$ACTRYN_BUNDLE" --public-key "$ACTRYN_PUBLIC_KEY" \
+  --key-sha256 "$ACTRYN_KEY_SHA256"
+/usr/bin/systemctl show -p ActiveState actryn-serverd.service \
+  actryn-launcher.service actryn-observer.service
+# Require all three inactive, then explicitly start:
+/usr/bin/systemctl start actryn-serverd.service
+/usr/bin/systemctl show -p ActiveState -p SubState -p MainPID \
+  actryn-serverd.service actryn-launcher.service actryn-observer.service
+```
+
+Require all services active/running with nonzero PIDs. The observer loads
+`/usr/lib/actryn/observer.bpf.o` through the exact signed current-slot link. A
+failed preflight or observer load is a startup failure, not permission to bypass
+verification. Operator commands use installed `/usr/bin/actryn` under the
+configured numeric operator identity. `server prepare --artifact DIGEST` allocates
+a stopped attempt; retain its returned ID before the separate
+`server launch --attempt ID`. `server status`, `server result --key preview-1` and
+`server export --out NEW_PROTECTED_OUTPUT_FILE` also require `--attempt ID`.
+Cancel once with `server cancel --attempt ID`, then inspect durable state and
+cgroup cleanup. An independent offline proposal is not Robot authority. A lost
+or timed-out mutation reply is an unknown outcome: preserve it, inspect read-only
+and do not automatically resend prepare/start/cancel.
+
+The separately retained fresh-install03 software-fixture campaign exercised
+negative tuple/signature checks, interrupted publication, recovery and rollback,
+then explicit bootstrap/import/start, installed observer loading, real offline
+sandbox isolation, cancellation, export and explicit service restart. Restart
+readbacks retained both reaped histories and the original single stdout record;
+no agent reexecution was observed. The signing key and custodian assertion were
+**integration fixtures**, not a release identity or qualification. This expanded
+recipe records those verified actions; the earlier immutable slot retains the
+earlier guide bytes and is not relabeled as containing this revision.
 
 After trusted robot quiescence and service stop, explicitly unload the old module.
 Only then may `resume` clear the installation gate. It does **not** infer
