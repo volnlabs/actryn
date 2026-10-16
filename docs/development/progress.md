@@ -214,11 +214,39 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   converges with both stores reaped and no remaining task. A separate actual
   delayed-fsync/EIO observer campaign proves timed-out/failed retirement retains
   all eight registrations until durable recovery, then frees exactly one slot.
-  The full amended offline campaign and combined workflow remain pending.
-- Combined workflow harness `28f1949` has eight passing host self-tests for
+  The full amended standalone offline campaign remains pending. Combined run 02
+  below independently exercises the same cleanup and strict final evidence checks.
+- Combined workflow harness `28f1949` initially has eight passing host self-tests for
   lineage, retained grant semantics, writer readiness, serialized public-peer
   restoration and strict final evidence checks. Fresh-install harness `416ce85`
-  has four passing host-only tests. Neither establishes its actual guest workflow.
+  has four passing host-only tests. Its actual fresh-guest workflow remains open.
+- The combined harness now has 12 passing host checks. Actual run 01 stops before
+  attempt creation because its preflight incorrectly requires a passwd entry for
+  the valid numeric operator UID 1000. `d674ae4` uses the configured numeric identity.
+  Separately, `d2a0743` accepts systemd's exact root-owned read-only credential ACL
+  for the configured service UID; unrelated readers and writable/public access
+  remain rejected. Its captured-ACL regression and all 47 server tests pass.
+- Combined offline run 02 passes the real isolated-agent -> trusted Robot ->
+  kernel/serdev/fixture -> reconciliation -> cleanup/export workflow. It also
+  rejects wrong peer, certificate pin and configuration before start, and rejects
+  late binding of an independently running unbound agent. The completed operation
+  has a durable `TargetReached` result and zero outstanding debit. Final evidence
+  has no omissions or observer loss, and preserves the agent output as untrusted.
+  This run exercises one operation, not the separate two-operation grant test.
+  Evidence is retained in `artifacts/combined-offline-guest02*`; server SHA-256
+  `5a3b8f340a2ab6853042d58f4e3f9d12d44bac8a250cf83c817f5f2637b5108f`,
+  manager SHA-256
+  `8192f4a960608bc592b6af8280ded61700378745b0b07dcef907b95a7d173af9`,
+  and the same revision-15 module above identify the actual executables.
+- `b01a098` retains the first raw kernel continuity fault and previous/current
+  sequence, epoch and loss metadata in reserved evidence space before closure.
+  Recorder ordinals remain distinct from external source identities. Fifteen
+  evidence and nineteen runtime host tests pass; actual fault injection for this
+  new record remains open. The updated manager is exercised by combined run 02.
+- Release bundles now require the actual observer BPF object, corresponding
+  source/build recipe and exact executable/Python/OpenSSL shared-library package
+  versions. Twenty-three release tests pass. Actual installed-service startup,
+  reviewed complete third-party notices and a coherent final build remain open.
 - A16 comparison tooling `05a5ac0` has host sanitizer, socket-lifetime, analyzer
   and fixed-profile checks. Target baseline qualification and the frozen eight-run
   comparison remain NOT_RUN; no performance advantage is claimed.
