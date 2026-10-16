@@ -46,6 +46,22 @@ fn checked_clock(
     clock.check(wall, boot)?;
     Ok((wall, boot))
 }
+
+fn publish_clock_checkpoint(
+    durable: &AtomicU64,
+    completed: u64,
+    missed_deadline: impl FnOnce(u64),
+) {
+    // The normal writer and explicit recovery serialize on clock_writer. A late
+    // successful write is durable evidence, but cannot erase the missed interval
+    // if this thread resumes before the watchdog. Latch/close before publishing
+    // the new frontier; only explicit local Recover may restore health.
+    let age = completed.saturating_sub(durable.load(Ordering::Acquire));
+    if age > 10 * NS {
+        missed_deadline(age);
+    }
+    durable.store(completed, Ordering::Release);
+}
 fn report(value: impl serde::Serialize) -> Result<Reply> {
     let value = serde_json::to_value(value)?;
     let value = if value.is_object() {
@@ -426,9 +442,20 @@ pub async fn serve(state: Arc<State>, operator: u32, gateway_uid: u32) -> Result
             ) {
                 Ok(()) => {
                     checkpoint.floor.store(wall, Ordering::Release);
-                    checkpoint
-                        .durable_clock_boot
-                        .store(boottime_ns().unwrap_or(0), Ordering::Release);
+                    match boottime_ns() {
+                        Ok(completed) => publish_clock_checkpoint(
+                            &checkpoint.durable_clock_boot,
+                            completed,
+                            |age| {
+                                checkpoint.clock_fault(format!(
+                                    "clock checkpoint completion age {age} ns exceeds 10000000000 ns"
+                                ));
+                            },
+                        ),
+                        Err(error) => checkpoint.clock_fault(format!(
+                            "clock checkpoint completion time unavailable: {error}"
+                        )),
+                    }
                 }
                 Err(error) => {
                     checkpoint.clock_fault(format!("clock checkpoint persistence: {error}"));
@@ -589,6 +616,13 @@ impl State {
             ));
             bail!("clock durability lost");
         }
+        // A concurrent late writer can publish a new frontier only after it has
+        // latched unhealthy. Do not let that fresh timestamp mask the latch for
+        // a reader which passed the initial health check before publication.
+        ensure!(
+            self.clock_ok.load(Ordering::Acquire),
+            "clock unhealthy; local recovery required"
+        );
         Ok((wall, now))
     }
     fn clock_fault(&self, reason: String) {
@@ -1006,6 +1040,70 @@ impl State {
 #[cfg(test)]
 mod clock_tests {
     use super::*;
+
+    #[test]
+    fn late_successful_checkpoint_latches_fault_before_publishing_progress() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("clock.json");
+        let durable = AtomicU64::new(NS);
+        let healthy = AtomicBool::new(true);
+        // Persistence succeeds after the old deadline, before a watchdog runs.
+        storage::replace(&path, b"42").unwrap();
+        publish_clock_checkpoint(&durable, 12 * NS, |age| {
+            assert_eq!(age, 11 * NS);
+            assert_eq!(durable.load(Ordering::Acquire), NS);
+            healthy.store(false, Ordering::Release);
+        });
+        assert!(!healthy.load(Ordering::Acquire));
+        assert_eq!(durable.load(Ordering::Acquire), 12 * NS);
+        assert_eq!(fs::read(path).unwrap(), b"42");
+    }
+
+    #[test]
+    fn on_time_completion_preserves_health_and_never_clears_a_prior_fault() {
+        let durable = AtomicU64::new(NS);
+        let healthy = AtomicBool::new(true);
+        publish_clock_checkpoint(&durable, 11 * NS, |_| panic!("exact deadline is allowed"));
+        assert_eq!(durable.load(Ordering::Acquire), 11 * NS);
+        assert!(healthy.load(Ordering::Acquire));
+        healthy.store(false, Ordering::Release);
+        publish_clock_checkpoint(&durable, 12 * NS, |_| panic!("within deadline"));
+        assert!(!healthy.load(Ordering::Acquire));
+        assert_eq!(durable.load(Ordering::Acquire), 12 * NS);
+    }
+
+    #[test]
+    fn watchdog_and_late_completion_cannot_publish_over_an_unlatched_fault() {
+        let durable = Arc::new(AtomicU64::new(NS));
+        let healthy = Arc::new(AtomicBool::new(true));
+        let (closing, closed) = std::sync::mpsc::channel();
+        let (release, released) = std::sync::mpsc::channel();
+        let progress = durable.clone();
+        let health = healthy.clone();
+        let writer = std::thread::spawn(move || {
+            publish_clock_checkpoint(&progress, 12 * NS, |_| {
+                health.store(false, Ordering::Release);
+                closing.send(()).unwrap();
+                released.recv().unwrap();
+            });
+        });
+        // While urgent closure is in progress, the completion must not make the
+        // previous missed interval disappear from a concurrent watchdog.
+        let observed = closed.recv_timeout(Duration::from_secs(1));
+        if observed.is_ok() {
+            assert!(!healthy.load(Ordering::Acquire));
+            assert_eq!(durable.load(Ordering::Acquire), NS);
+            healthy.store(false, Ordering::Release); // simultaneous watchdog latch
+        }
+        // Also release a writer scheduled after the assertion deadline, so a
+        // failed test cannot leave its join blocked indefinitely.
+        let _ = release.send(());
+        writer.join().unwrap();
+        assert!(observed.is_ok(), "late completion did not invoke closure");
+        assert!(!healthy.load(Ordering::Acquire));
+        assert_eq!(durable.load(Ordering::Acquire), 12 * NS);
+    }
+
     #[test]
     fn competing_clock_calls_sample_only_after_the_ordering_lock() {
         let clock = Arc::new(Mutex::new(ClockGuard::new(10_000, 100, 0).unwrap()));

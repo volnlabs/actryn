@@ -26,6 +26,14 @@ revocation takes effect before its durable write. Revoked names remain retired.
 Certificate rotation retires established sessions and never rearms a device.
 Clock rollback or lost clock-checkpoint progress closes authority.
 
+A normal checkpoint that finishes after the previous 10-second durability
+deadline retains its successfully written wall floor and completion evidence,
+but latches the clock unhealthy before publishing the new progress timestamp.
+This remains true if the watchdog was delayed too. Later normal writes cannot
+restore clock health; explicit local recovery is required. The historical idle
+checkpoint timeouts remain unattributed: their retained logs do not distinguish
+scheduling, writer-lock delay or storage latency.
+
 Use the `actryn robot` commands for enrollment, pairing, preparation, rearm,
 grant, activation, query, cancellation, reconciliation, retirement and recovery.
 Authenticate the installed workload principal before local preparation. A
