@@ -624,6 +624,46 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   history are preserved; remaining campaigns use the separately prepared fresh
   installation rather than deleting history or widening capacity.
 
+### Read-only recovery and installed Robot startup
+
+- `8a2e36a` fixes the actual SQLite hot-journal reader failure. Only extended
+  error 776 permits validated rollback in a private scratch copy; source files
+  remain read-only. The supported DELETE-journal layout is deliberately bounded,
+  unsupported input fails, and recovery records hashes/unknown-tail provenance.
+  All 23 evidence tests pass on the integration branch (one subprocess helper is
+  intentionally ignored as a standalone test); lane strict Clippy and formatting
+  also pass. Real child-process crash RED/GREEN and malformed-input regressions
+  are retained in `artifacts/evidence-hot-journal01`.
+- Final offline reanalysis of lifetime02 recovers 30 committed records with
+  durable frontiers 16/14. Batch 9 remains an uncommitted raw remnant; volatile
+  tail is unknown and execution replay is ineligible. Root verifies final source,
+  reader and report hashes plus all 27 unchanged original artifact files,
+  including the failed reader result. The new report is
+  `artifacts/robot-a10-lifetime-02-recovery-reanalysis01/report02.json`, SHA-256
+  `830265fe5dfbf112524230d4bed1d89cf35300a2c5f97571923c02f2cc77109f`.
+- `ab74251` prepares the installed Server observer-failure campaign: refused
+  launch without observer readiness, actual reader death during an attempt and
+  a fixed workload producing diagnostic loss. Root's 13 focused and nine reused
+  capacity checks pass. Actual execution remains NOT_RUN; observer loss does
+  not imply an unknown application outcome or automatic termination.
+- Fresh Robot run01 passes launch/identity, exact package prerequisites,
+  installer transitions and installed-slot bootstrap. It verifies module16,
+  manager10, stripped gateway, ARM CLI, device/socket ownership, no TTY bypass,
+  gateway privilege removal and retained installation sentinels. Boot is
+  `bc149601-0fc7-4bbf-b7d9-46a4d8f8e0fb`; machine ID is
+  `edba875c58c24048918291d46afbcce4`. Test signing remains disposable.
+- The unchanged installed lifecycle completes two natural operations under one
+  grant, absent-key cancellation and CLI pre-send cancellation. It then fails
+  during Observe before the planned gateway signal or new proposal because the
+  kernel is faulted. The whole lifecycle remains FAIL. Subsequent read-only
+  diagnostics find no live authority/output, fully durable frontiers 89/172,
+  one retired namespace and four terminal records; the two known completions
+  remain known. A separately authorized, guarded one-shot recovery succeeds;
+  the original namespace is exported without resubmission. First-fault analysis
+  remains in progress; the later EXPIRED status alone is not its established
+  cause. Original failure, read-only export refusal, recovery and export records
+  remain separately numbered under `artifacts/install-robot-run01*`.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
