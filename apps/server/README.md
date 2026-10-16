@@ -161,6 +161,12 @@ DER-leaf SHA-256), `principal`, `robot_configuration_digest`,
 and not group/world writable. The broker reads the private workload key only from
 `/run/credentials/actryn-serverd.service/robot-client-key`; packaging supplies it
 with `LoadCredential`. Neither agent nor privileged launcher receives that key.
+The fixed credential reader accepts owner-private files and systemd's root-owned
+0440 form only when its Linux ACL grants read access exclusively to root and the
+current service UID (no group or other access). It rejects missing, additional,
+malformed or wider ACLs. This matches the pinned
+[systemd 257 credential writer](https://github.com/systemd/systemd/blob/v257/src/core/exec-credential.c#L322-L335);
+the group permission bits in this form describe the ACL mask, not group access.
 TLS 1.3 validates the CA, DNS name, exact leaf pin and workload identity. Describe
 must match the installed Robot identity/configuration/profile before binding.
 

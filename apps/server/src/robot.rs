@@ -356,9 +356,32 @@ pub enum RemoteReply {
 
 /// systemd exposes credentials to the service UID in a protected read-only directory.
 /// Unlike public root configuration, this file may be owned by the service account.
+fn credential_permissions(mode: u32, owner: u32, uid: u32, acl: &[u8]) -> bool {
+    if (owner == 0 || owner == uid) && mode & 0o077 == 0 {
+        return true;
+    }
+    if owner != 0 || mode & 0o777 != 0o440 || uid == 0 {
+        return false;
+    }
+    // Linux POSIX ACL v2: root and this service may read; no group/other access.
+    let mut expected = 2_u32.to_le_bytes().to_vec();
+    for (tag, permissions, id) in [
+        (1_u16, 4_u16, u32::MAX),
+        (2, 4, uid),
+        (4, 0, u32::MAX),
+        (16, 4, u32::MAX),
+        (32, 0, u32::MAX),
+    ] {
+        expected.extend_from_slice(&tag.to_le_bytes());
+        expected.extend_from_slice(&permissions.to_le_bytes());
+        expected.extend_from_slice(&id.to_le_bytes());
+    }
+    acl == expected
+}
 pub(crate) fn read_credential(path: &Path, limit: usize) -> Result<Vec<u8>> {
     use std::{
         io::Read,
+        os::fd::AsRawFd,
         os::unix::fs::{MetadataExt, OpenOptionsExt},
     };
     let uid = unsafe { libc::geteuid() };
@@ -374,11 +397,24 @@ pub(crate) fn read_credential(path: &Path, limit: usize) -> Result<Vec<u8>> {
         .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC)
         .open(path)?;
     let m = f.metadata()?;
+    let mut acl = [0_u8; 44];
+    let acl_len = if m.mode() & 0o077 != 0 {
+        unsafe {
+            libc::fgetxattr(
+                f.as_raw_fd(),
+                c"system.posix_acl_access".as_ptr(),
+                acl.as_mut_ptr().cast(),
+                acl.len(),
+            )
+        }
+    } else {
+        0
+    };
     ensure!(
         m.is_file()
             && m.nlink() == 1
-            && (m.uid() == 0 || m.uid() == uid)
-            && m.mode() & 0o077 == 0
+            && acl_len >= 0
+            && credential_permissions(m.mode(), m.uid(), uid, &acl[..acl_len.max(0) as usize])
             && m.len() <= limit as u64,
         "untrusted credential metadata"
     );
@@ -738,5 +774,35 @@ impl Closures {
         {
             entries.remove(&key);
         }
+    }
+}
+
+#[cfg(test)]
+mod credential_tests {
+    use super::*;
+    #[test]
+    fn systemd_acl_grants_only_root_and_the_named_service_read_access() {
+        // Exact metadata observed on Debian systemd 257, without credential bytes.
+        let acl = unhex::<44>("0200000001000400ffffffff02000400db03000004000000ffffffff10000400ffffffff20000000ffffffff").unwrap().to_vec();
+        assert!(credential_permissions(0o440, 0, 987, &acl));
+        assert!(!credential_permissions(0o440, 0, 988, &acl));
+        assert!(!credential_permissions(0o440, 987, 987, &acl));
+        for mode in [0o444, 0o460, 0o640] {
+            assert!(!credential_permissions(mode, 0, 987, &acl));
+        }
+        for length in 0..acl.len() {
+            assert!(!credential_permissions(0o440, 0, 987, &acl[..length]));
+        }
+        for offset in [0, 4, 6, 14, 22, 30, 38] {
+            let mut changed = acl.clone();
+            changed[offset] ^= 1;
+            assert!(!credential_permissions(0o440, 0, 987, &changed));
+        }
+        let mut additional_reader = acl.clone();
+        additional_reader.extend_from_slice(&acl[12..20]);
+        assert!(!credential_permissions(0o440, 0, 987, &additional_reader));
+        assert!(credential_permissions(0o400, 987, 987, &[]));
+        assert!(credential_permissions(0o600, 0, 987, &[]));
+        assert!(!credential_permissions(0o400, 988, 987, &[]));
     }
 }
