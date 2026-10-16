@@ -247,9 +247,44 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   source/build recipe and exact executable/Python/OpenSSL shared-library package
   versions. Twenty-three release tests pass. Actual installed-service startup,
   reviewed complete third-party notices and a coherent final build remain open.
+- Managed observer loading (`3623ce7`) verifies the installer's fixed link chain,
+  immutable manifest slot and actual BPF bytes before loading the resolved object.
+  Eight observer tests pass. The assembled fixture inputs retain exact upstream
+  license texts and source/version linkage; these are still unqualified test
+  bundles, with disposable signing keys distinct from the release identity.
+- The idle manager later latches a 10-second clock-checkpoint timeout with no
+  prepared operation, grant or nonzero output. Its diagnostics are preserved in
+  `artifacts/pre-fresh-guests-shutdown01`; the cause remains unmeasured. Independent
+  source review finds a different race: a late successful checkpoint can hide its
+  missed interval if the watchdog was also delayed. `4fc5452` closes authority
+  before publishing that new progress; eleven manager tests pass. This does not
+  explain the historical timeouts, which did latch correctly.
+- At `4fc5452`, the full locked workspace suite passes 168 tests; two tests remain
+  explicitly ignored pending their actual ARM guest prerequisites. Workspace
+  formatting and strict all-target Clippy also pass. These host checks do not
+  substitute for installed-runtime or exact-final-artifact acceptance.
+- Fresh server installation 01 verifies the exact guest identity and prerequisite
+  versions, then passes negative tuple cases but fails before staging its first
+  release: stopping nonexistent services returns an error. Its durable inhibition,
+  disk and failed logs remain preserved in `artifacts/install-server-guest01` and
+  `.cache/qemu/install-server`. `0eca2a5` skips only confirmed absent/inactive units;
+  loaded stop failures, ambiguous state and still-active units continue to reject.
+  The corrected fresh campaign and successful installed startup remain open.
 - A16 comparison tooling `05a5ac0` has host sanitizer, socket-lifetime, analyzer
   and fixed-profile checks. Target baseline qualification and the frozen eight-run
   comparison remain NOT_RUN; no performance advantage is claimed.
+- A separate fresh A16 guest now builds the unchanged revision-15 driver and
+  baseline against the exact pinned ARM kernel. The original build and source
+  archive remain retained. Premeasurement amendment 2 (`73e856b`) strengthens
+  terminal/grant checks and lost-start cleanup without changing the workload or
+  limits; its host suite passes 21 Python checks plus C predicates/sanitizers.
+  The actual protected pilot passes the kernel selftest and controller-restart
+  scenario. Module SHA-256 is
+  `2ba895dbabf4f07daa6c830c3af7f427abc3ceb6323089b8310ccf6db69d0270`;
+  this separately built artifact is not substituted for earlier module hashes.
+  Raw records are in `.cache/qemu/a16/qualification/protected01`, build metadata
+  in `artifacts/a16-provision01`. The earlier restart failure is not reproduced
+  or explained by this success. Userspace pilot and comparison remain open.
 - No host kernel module was loaded and no physical interface was attached.
 
 ## Decisions
