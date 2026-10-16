@@ -16,6 +16,15 @@ configuration must exactly match `/etc/actryn/robot-peer.json`, including the
 server-reachable numeric endpoint, device leaf pin and configuration/profile
 digests. The host uses its separate forwarded endpoint for pairing and export.
 
+Credential preflight reads only fixed-path metadata and the POSIX access ACL,
+never the private key contents. Ancestors must be root-owned directories without
+group/other writes. The credential must be a bounded single-link regular file,
+with either private owner-only permissions for root/the configured server UID or
+the exact Debian systemd ACL route: root:root mode 0440, ACL version 2, owner read,
+only the configured named server UID read, owning-group none, mask read, other
+none. Extra/malformed entries, another UID, links or wider permissions reject.
+Metadata is retained separately; it is not proof of key bytes or authentication.
+
 ```sh
 python3 packaging/agent/guest_robot_acceptance.py --self-test
 python3 packaging/agent/guest_robot_acceptance.py \

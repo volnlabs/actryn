@@ -11,6 +11,7 @@ import re
 import secrets
 import shlex
 import subprocess
+import struct
 import sys
 import time
 import unittest
@@ -141,6 +142,25 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
                 and log['retained_sha256'] == 'sha256:' + hashlib.sha256(raw).hexdigest()
                 and log['tail_encoding'] == 'hex' and log['tail_omitted_bytes'] == offset
                 and log['tail'] == raw[offset:].hex(), 'final log bytes/completeness: ' + name)
+
+
+def credential_metadata_safe(metadata, service_uid):
+    """Metadata only; match systemd's bounded named-UID ACL or private owner route."""
+    try:
+        if not (type(service_uid) is int and 0 < service_uid < 2**32 and metadata['regular'] is True
+                and metadata['nlink'] == 1 and 0 < metadata['size'] <= 8192):
+            return False
+        if metadata['uid'] in (0, service_uid) and metadata['mode'] & 0o077 == 0:
+            return True
+        if metadata['uid'] != 0 or metadata['gid'] != 0 or metadata['mode'] != 0o440:
+            return False
+        raw = bytes.fromhex(metadata['acl_hex'])
+        return (len(raw) == 44 and struct.unpack_from('<I', raw)[0] == 2
+                and [struct.unpack_from('<HHI', raw, offset) for offset in range(4, 44, 8)] ==
+                [(1, 4, 2**32-1), (2, 4, service_uid), (4, 0, 2**32-1),
+                 (16, 4, 2**32-1), (32, 0, 2**32-1)])
+    except (KeyError, TypeError, ValueError, struct.error):
+        return False
 
 
 def cleanup_ready(snapshot, inspection):
@@ -397,19 +417,31 @@ print(json.dumps({{'stores':stores,'facts':facts,'observer_epoch':epoch,'summary
             if arch == 'x86_64': self.server_boot = identity['boot']
         require(b'linux,dummy-virt' in self.ssh(self.args.robot_port,
                 "import pathlib,sys;sys.stdout.buffer.write(pathlib.Path('/proc/device-tree/compatible').read_bytes())"), 'ARM target is not disposable virt')
-        program = f'''import json,pathlib,stat,pwd,os,subprocess
+        program = f'''import errno,json,pathlib,stat,pwd,os,subprocess
 subprocess.run(['/usr/bin/actryn-serverd','--check-config'],check=True,capture_output=True,timeout=20)
 p=pathlib.Path({PEER!r});m=p.lstat();assert stat.S_ISREG(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022 and m.st_size<=65536
 peer=json.loads(p.read_bytes());config=json.loads(pathlib.Path('/etc/actryn/server.json').read_bytes())
 root=pathlib.Path(config['artifacts'][{self.args.artifact!r}]['rootfs']);i=json.loads((root/'etc/actryn/input.json').read_bytes())
 assert i.get('mode','offline')=='offline' and i['request_key']=='preview-1'
-credential=pathlib.Path('/run/credentials/actryn-serverd.service/robot-client-key').stat();assert stat.S_ISREG(credential.st_mode) and not credential.st_mode&0o077
+credential_path=pathlib.Path('/run/credentials/actryn-serverd.service/robot-client-key')
+for parent in credential_path.parents:
+ m=parent.lstat();assert stat.S_ISDIR(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022
+credential=credential_path.lstat()
+try:acl=os.getxattr(credential_path,'system.posix_acl_access',follow_symlinks=False).hex()
+except OSError as error:
+ if error.errno not in (errno.ENODATA,errno.ENOTSUP):raise
+ acl=None
+credential_metadata={{'regular':stat.S_ISREG(credential.st_mode),'uid':credential.st_uid,'gid':credential.st_gid,
+'mode':stat.S_IMODE(credential.st_mode),'nlink':credential.st_nlink,'size':credential.st_size,'acl_hex':acl}}
 base=pathlib.Path('/var/lib/actryn-test-campaigns');base.mkdir(mode=0o755,exist_ok=True)
 m=base.lstat();assert stat.S_ISDIR(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022
 out=pathlib.Path({self.remote_output!r});out.mkdir(mode=0o700);uid=config['operator_uid'];os.chown(out,uid,pwd.getpwuid(uid).pw_gid)
-print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i}}))'''
+print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config['server_uid'],'credential_metadata':credential_metadata}}))'''
         installed = json.loads(self.ssh(self.args.server_port, program))
         require(installed['peer'] == self.peer, 'installed public peer configuration mismatch')
+        self.save('server-credential-metadata.json', installed['credential_metadata'])
+        require(credential_metadata_safe(installed['credential_metadata'], installed['server_uid']),
+                'systemd credential metadata/ACL differs from configured service identity')
         self.operator = installed['operator_uid']
         self.agent_input = installed['input']
         require(self.args.ca.read_text().strip() == self.peer['ca_pem'].strip()
@@ -772,6 +804,21 @@ class VerificationTests(unittest.TestCase):
         campaign.ssh = lambda port, program: programs.append(program) or b'{}'
         campaign.cleanup_snapshot('a' * 32)
         compile(programs[0], '<read-only-guest-cleanup-inspection>', 'exec')
+
+    def test_systemd_credential_acl_is_exact_and_bound_to_configured_service_uid(self):
+        metadata = {'regular': True, 'uid': 0, 'gid': 0, 'mode': 0o440, 'nlink': 1, 'size': 1704,
+                    'acl_hex': '0200000001000400ffffffff02000400db03000004000000ffffffff10000400ffffffff20000000ffffffff'}
+        self.assertTrue(credential_metadata_safe(metadata, 987))
+        self.assertFalse(credential_metadata_safe(metadata, 986))
+        for field, value in [('uid', 987), ('gid', 987), ('mode', 0o444), ('nlink', 2), ('regular', False),
+                             ('size', 8193), ('acl_hex', None), ('acl_hex', metadata['acl_hex'] + '00')]:
+            self.assertFalse(credential_metadata_safe(dict(metadata, **{field: value}), 987), field)
+        for index in (0, 6, 14, 22, 30, 38):
+            encoded = bytearray.fromhex(metadata['acl_hex']); encoded[index] ^= 1
+            self.assertFalse(credential_metadata_safe(dict(metadata, acl_hex=encoded.hex()), 987))
+        for uid in (0, 987):
+            self.assertTrue(credential_metadata_safe(dict(metadata, uid=uid, mode=0o600, acl_hex=None), 987))
+        self.assertFalse(credential_metadata_safe(dict(metadata, uid=986, mode=0o600, acl_hex=None), 987))
 
     def test_failed_mutation_is_not_repeated(self):
         campaign = object.__new__(Campaign)
