@@ -1,129 +1,135 @@
 # Paused implementation checkpoint — 2026-10-16
 
-The user explicitly requested another pause, then resumed the goal on
-2026-10-16. The persistent goal is now **active**, not complete. The execution
-state below is the historical pause checkpoint; use the progress ledger for
-subsequent results. The approved scope remains
-[the full v0.0.1 plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md).
-[Progress](progress.md) and [acceptance gaps](acceptance-gaps.md) retain the
-implementation evidence and release boundaries. Earlier checkpoints remain in Git.
+The user requested **push the work and stop for now**. Pause the persistent goal;
+the full v0.0.1 release is incomplete. Resume only on a new user instruction.
+The approved scope remains [the full plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md).
+[Progress](progress.md) and [acceptance gaps](acceptance-gaps.md) retain the evidence.
+Earlier checkpoints and failed attempts remain preserved.
 
 ## Repository and execution state
 
-- Integration branch: `feat/v0.0.1`; implementation/documentation HEAD before this
-  handoff: `6bf2681`. Root tracked state was clean. All task commits carry
+- Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
+  `ec2dfde`. The user authorized pushing this branch to `origin`. Recheck the
+  remote head on resume. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
-  No push, publication, signing or default-branch merge occurred.
-- All three agent lanes stopped without an active owned command. All owned test
-  VMs are off. `artifacts/server-a08-pressure-pause01/result.json` records a
-  successful single graceful shutdown, original lifetime dead and inactive unit.
-  Both Server stores retain exactly eight reaped attempts with zero open calls
-  or Robot debits; no container tasks, child cgroups or fault shim existed.
-  Disk, staged source, seed and SSH trust were preserved.
-- Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The previous pause's fixture
-  processes did not survive the host reboot; none was restarted. Retain fixture
-  state, disks, databases, failed trials and output paths. No physical device used.
-- All 28 worktrees were inspected. Existing Cargo.lock changes remain untouched
-  in `.worktrees/{fixture,observer-install,robot,server,source-gap}`. Do not clean
-  or reset those unrelated retained changes.
+- All three agent lanes stopped. All QEMU and controller-fixture processes are
+  absent. No new native build, guest or campaign was started for this pause.
+  `artifacts/server-a08-import-failure01/pause-result.json` verifies the original
+  Server PID absent and its unit inactive/MainPID0 after one graceful poweroff.
+  Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
+- Both Server stores retain exactly eight reaped attempts with zero open calls
+  or Robot debits. No container tasks, child cgroups, fault shim or drop-in exist.
+  Source, failed import, disks, seed and SSH trust remain preserved. Raw artifacts
+  and VM state are ignored local files; a Git push does not back them up.
+- Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. Prior fixture processes did
+  not survive the host reboot and none was restarted. No physical device used.
+- All linked worktrees were inspected. Existing Cargo.lock changes remain
+  untouched in `.worktrees/{fixture,observer-install,robot,server,source-gap}`.
+  The new `.worktrees/artifact-modes` branch is clean and integrated.
 - Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
-  or provider/signing credentials changed. Account quota telemetry is unavailable;
-  cumulative goal accounting is not an account quota or remaining-budget signal.
+  or provider/signing credentials changed. Account quota telemetry is unavailable.
 
-## Server pressure campaign: failed preflight, continuation not run
+## Server pressure campaign: import defect fixed in source, not deployed
 
-`cd9d551` contains the harness; 43 integration host checks passed previously.
-Actual pressure execution, compiler installation and artifact import are NOT_RUN.
-Plan01 failed its backing-image assumption; plan02 failed the unchanged 4 GiB
-available-memory guard; resumed plan03 refused changed filesystem device metadata.
-All failed attempts remain preserved. Plan04 booted the retained Server03 disk and
-staged source, then preflight failed because it expected an unshipped
-`actryn-artifact` binary. The shipped interface is `actryn server import`.
+`cd9d551` contains the pressure harness; 43 integration host checks passed.
+`1293676` corrects the installed command to `actryn server import`. Plans01–05
+and their failures remain preserved. Plan06 passes seven host checks, then actual
+boot, staging, preflight and toolchain simulation against all 14 runtime pins.
 
-`artifacts/server-a08-pressure-plan05` contains the corrected interface audit,
-amendment diff and continuation. The agent reports seven host checks passed;
-root review and guest execution have not occurred. Plan SHA256:
-`d4d1d7ef328250a13cc84abcb8f575c33950e8c8f61ed62bf6ec003d4d93fe28`.
-Source bundle SHA256:
-`e18af0e8807ff50aab483d52d792d463e22e98c1118ec6c564dd7a8b2b75a318`.
-It validates all 14 signed package pins and uses a fresh guest root05, preserving
-failed root01. Its exact run04 lifetime binding becomes stale after pause shutdown:
-**do not execute plan05 unchanged on a later boot**. Prepare a numbered amendment
-with fresh observed host/guest identities; preserve all earlier plans. Review the
-actual native-toolchain package simulation before installation; keep runtime pins.
+Toolchain install01 failed because the preparation helper's inherited 8 MiB file
+limit interrupted an apt download; all 328 installed package rows stayed unchanged.
+Reviewed plan02 caps output without limiting downloaded files. Six host checks pass,
+including reproduction of the earlier failure. Actual install02 passes with exactly
+35 additions, no change to existing packages/runtime pins, and clean dpkg audit.
+Evidence: `artifacts/server-a08-toolchain-{plan,install}02`.
 
-Run04 identity: unit `actryn-server-a08-pressure04.service`, PID194500,
-start ticks568276, invocation `558f7665c3ef40889a084057cf361375`, guest boot
-`a9762152-24c6-48b6-ac93-3f82e2818dec`. These identify the historical lifetime only.
-The source-level PRESSURE.md installed-binary example is still stale; the plan05
-audit records that pending correction. No campaign acceptance result is inferred.
+Native pressure-agent and fault-library compilation and OCI assembly then pass.
+Actual import fails with `rootfs file mode changed`: process umask 077 filtered
+requested file modes to 0500/0400. The invalid sealed artifact remains at
+`/var/lib/actryn-artifacts/443737b73904317b1ca87741eee2582997dcd1ab9c9fef4f833de7a06b647110`.
+It was not allowlisted, and no pressure attempt, shim or campaign was launched.
+The original approved artifact/configuration remains unchanged. Raw build/import,
+capture and shutdown evidence is under `artifacts/server-a08-pressure-run06` and
+`artifacts/server-a08-import-failure01`.
 
-## A16: diagnostic source committed, build preparation partial
+`ec2dfde` integrates the shared writer fix: apply the requested permissions on the
+exclusively created descriptor after writing and before syncing. RED reproduced
+artifact verification and config-mode failures; all ten Server library tests,
+strict all-target Server Clippy and formatting pass. Subprocess regressions cover
+umasks 027/077 and retain existing-file/symlink rejection. Logs:
+`artifacts/artifact-modes01`. The installed importer remains unchanged. This fix
+neither repairs nor overwrites an existing invalid sealed slot.
+
+Next: rebuild/package the importer from the integrated source and record a new
+coherent candidate. Review explicit recovery of the retained failed slot before
+any new import; do not delete, chmod or silently retry it. Preserve cohort01 and
+prepare a new numbered campaign with fresh lifetime bindings.
+
+Historical run06: unit `actryn-server-a08-pressure06.service`, PID 226766,
+start ticks 686142, invocation `79c8a4c9216b49d698f50625a775b6d4`, guest boot
+`73a11031-bf36-4858-8c97-38a0ff74a91f`. These identities are now dead.
+The retained disk is `.cache/qemu/install-server03/disk.qcow2`, device 56,
+inode 27349874, size 2126446592, mtime_ns 1792174467145588725. Its contents changed
+through compiler installation and the failed import; no full disk hash is claimed.
+
+## A16: reviewed build-only plan, execution not run
 
 Excluded pilot07 remains FAILED: the first HELLO faults before grant/START/SAMPLE;
-nine other trials pass. Exact rejected predicate and cause remain unproven. No
-repeat pilot, userspace pilot or comparison ran. Original evidence is retained in
+nine other trials pass. Exact rejected predicate and cause remain unproven.
+No repeat pilot, userspace pilot or comparison ran. Original evidence remains in
 `artifacts/a16-execution07/tracekernel07`.
 
-`e9b2bd8` integrates five diagnostic files. All 24 focused host checks passed at
-integration. Event loss, gaps and nonzero/unknown RECOVER results prevent success.
-The unchanged HELLO predicate and timestamp sample remain authoritative. This
-admin-only diagnostic cannot replace production module16 or qualify the release.
+`e9b2bd8` integrates five diagnostic files; all 24 focused host checks passed.
+The unchanged HELLO predicate and timestamp sample remain authoritative. Event
+loss, gaps and nonzero/unknown RECOVER results prevent diagnostic success.
+This admin-only diagnostic cannot replace production module 16 or qualify release.
 
-`artifacts/a16-hello8-native-plan01` is partial. It contains eleven derived source
-files, `source8.tar.gz`, `inputs.json`, derivation logs and `build-only.sh`.
-Archive SHA256 `9cad135e205f0eea39f6e2c3a1573119b04f615ab02d8e2115f3f12927f5a0d7`.
-The build script is **UNCHECKED and UNEXECUTED**; there is no completed plan,
-command inventory, native compilation or target execution. Next: review the script
-and finish a guarded, native build-only plan using a disconnected second UART,
-pinned kernel/config/symvers/GCC, fresh outputs and unchanged resource limits.
-A later diagnostic target boot separately requires fresh fixture identity.
+`artifacts/a16-hello8-native-plan01` is now complete and reviewed for compile-only
+execution. Its 24-file inventory SHA256 is
+`8c94877a1aef432c048b6d48f2db6474073e17f141ef36418db30b9c661fc47b`;
+source archive SHA256 is
+`9cad135e205f0eea39f6e2c3a1573119b04f615ab02d8e2115f3f12927f5a0d7`.
+Syntax, eleven source members, ten package pins and five tool pins were checked.
+It uses a disconnected second UART and one bounded native build. No execution
+window was released: disk hashing, VM launch, native compilation, module loading
+and the target diagnostic are NOT_RUN. Revalidate gates before any future launch.
 
 ## Source, notices and unsigned candidates
 
-- Exact offline agent/OCI bytes were reproduced in
-  `artifacts/offline-oci-matching-build03`; installed bytes remain unchanged.
-- `artifacts/release-native-provenance01` retains native package, archive-member,
-  recipe and signature evidence. Complete GCC source was not retrieved.
-- `artifacts/glibc-source-complete01` now contains complete exact glibc source.
-  Its raw Git archive matches the package recipe's Blake2b. Deterministic gzip
-  SHA256 `bc23d9fd3fa73c3d51be5327243d2365b1dbc3e9a2fa8824f6cf8825c52de28c`.
-  Root verified all 74 inventory/reference entries. No native rebuild inferred.
-- Independent notice review verified all 16 selected text slices in
-  `artifacts/release-notices02`; no selected change or omission found. Notice
-  SHA256 `98ec4b48f120976337d35ff57ea16e4b56b18c9c10406a237206c401d410a985`.
-  This is a source corpus, not an exact linked-code inventory or legal assurance.
-- `artifacts/release-cohort01` contains two unsigned candidates. Agent-reported
-  build/inspect results are PASS, qualification incomplete, `promotable=false`.
-  Root read the result receipt; independent inventory review remains pending.
-  Server manifest: `f3018c58da0f2687cfaf54d52244589078ae24d8bd1d83263a141e20feaeb484`.
-  Robot manifest: `878732d88c534a87388c35aff7a6e2b35ef9192fb50210d045b77cd053536800`.
-  Inventory SHA256: `cae34a7154dd80864257a23f0ed9ba87fab70464ff3e28f30936b0aca5e3cede`.
-  Source tar remains pinned to `cc530d2`; later documentation/diagnostic changes
-  are explicitly recorded. Five selected payload changes, component origins,
-  retained build receipts and earlier guard failure are recorded separately.
-  The replacement fixture's versioned ELF imports match the three actual Server
-  runtime libraries collected read-only. Its installed Server execution is NOT_RUN.
-  No candidate was installed, signed or promoted.
+- `artifacts/release-cohort01` remains unchanged, unsigned, qualification incomplete
+  and `promotable=false`. Root independently verifies all 55 inventory files
+  (115,773,094 bytes) and all 44 payload entries/modes. Manifests:
+  Server `f3018c58da0f2687cfaf54d52244589078ae24d8bd1d83263a141e20feaeb484`;
+  Robot `878732d88c534a87388c35aff7a6e2b35ef9192fb50210d045b77cd053536800`.
+  Source revision is `cc530d2`; component origins are separately recorded.
+  This candidate predates the importer fix. No candidate was installed or signed.
+- `artifacts/release-source-materials01` binds 250 files/86,498,309 bytes to those
+  manifests, including ten Git archives and 234 public source/receipt copies.
+  Root independently verifies every file and 2691 Git leaves, including symlinks
+  and executable bits. Material manifest SHA256:
+  `9b3edb584823732c5d8760b02bb818d17441fe8d1ada82d9e14b1e1ff5b65581`.
+  Receipts: `artifacts/release-cohort-root-review01/{source-materials-result,git-source-result}.json`.
+- Exact offline agent/OCI bytes were reproduced in `offline-oci-matching-build03`.
+  Complete exact glibc source and all 74 inventory entries were verified in
+  `glibc-source-complete01`; all 16 selected notice slices pass independent review
+  in `release-notices02`. These are retained `artifacts/` directories.
+  Full GCC source and broader dependency/toolchain source closure remain explicit
+  gaps; no hermetic-build or legal-completeness claim follows from these checks.
+- Replacement fixture ELF imports match the actual Server runtime libraries;
+  its installed Server execution is NOT_RUN. Installed binaries are unchanged.
 
 ## Remaining integration and external gates
 
 `artifacts/robot-retained-debit-plan02` amendment03 remains prepared, NOT_RUN;
-11 host checks previously passed. Inventory SHA256:
-`76bed655345b7c15180688c8155c0bc9527fee1b9049b81401d20c9553b83ab8`.
-Both SQLite stores share the schema; their initial catalogs must be pinned
-separately because a later A08 failure intentionally adds a launcher-only row.
-Its null input template must not execute. Preserve all raw uncertainty/history.
+11 host checks previously passed. Its null template must not execute. Future
+execution needs fresh boot/process/controller identities, post-A08 catalogs and
+a new workload principal under the existing lifecycle03 issuer. The old principal
+is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
 
-Future prerequisites include fresh boot/process/controller identities, actual
-post-A08 catalogs and a new workload principal under the existing lifecycle03
-issuer. The old workload principal is revoked. Preserve device identity and all
-namespaces; six preparations project nine namespaces to fifteen of sixteen.
-
-Resume by reading this handoff and the current ledger, checking branch/worktree
-state, available resources and exact retained identities. Review the unsigned
-cohort and numbered Server continuation; complete diagnostic build preparation.
-Then execute only the next reviewed campaign with fresh evidence paths.
-Authorized live-provider credentials, a release signing custodian and an independent
-developer remain external release inputs. Final coherent qualification is unfinished.
-No result permits live motion or establishes physical qualification.
+Resume with this handoff and current ledgers, then verify branch/worktree state,
+resources and retained evidence. Rebuild/reconcile the importer and resolve its
+failed-slot recovery before another pressure campaign. Run only a reviewed,
+numbered campaign with fresh identities and evidence paths. A16 has no allocated
+window. Authorized live-provider credentials, a release signing custodian and
+an independent developer remain external inputs. Final coherent qualification
+is unfinished. Live motion stays inhibited; no result is physical qualification.

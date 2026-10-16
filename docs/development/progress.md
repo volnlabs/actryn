@@ -5,7 +5,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; remote HEAD absent at preflight.
+- Integration branch: `feat/v0.0.1`; remote exists. User authorized pushing the
+  current pause checkpoint; revalidate the live remote head on resume.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -14,8 +15,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
-- User resumed the goal after the second 2026-10-16 pause. Goal is active;
-  the [handoff](resume.md) preserves the pause checkpoint and pending work.
+- User requested pushing the work and stopping on 2026-10-16. Goal is paused,
+  incomplete; the [handoff](resume.md) records current state and next actions.
 
 ## Component evidence (not release acceptance)
 
@@ -1056,6 +1057,37 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   35 additions, zero upgrades and zero removals. Installation and the pressure
   campaign remain NOT_RUN at this checkpoint. Evidence is retained under
   `artifacts/server-a08-pressure-run06`; earlier failures are unchanged.
+
+- Actual toolchain install01 fails when the preparation helper's inherited
+  8 MiB file limit interrupts an apt download; package-state readback proves all
+  328 installed rows unchanged. Reviewed amendment02 caps output only. Six host
+  checks pass, including the reproduced earlier limit failure. Actual install02
+  passes with exactly 35 additions, unchanged existing/runtime pins and clean
+  dpkg audit. Both failed and successful records are retained separately.
+- Server run06 compiles both native pressure inputs and assembles their OCI image,
+  then the installed importer fails with `rootfs file mode changed` under umask077.
+  The failed sealed slot remains unapproved; configuration and both eight-attempt
+  catalogs are unchanged. No pressure attempt, fault shim or campaign starts.
+  `ec2dfde` fixes the shared writer by setting descriptor permissions before fsync.
+  Two isolated regressions reproduce RED; ten Server library tests, strict Clippy
+  and fmt pass after the fix. Logs: `artifacts/artifact-modes01`. Installed binaries
+  remain unchanged; rebuilding and explicit retained-slot recovery are pending.
+- Root verifies all 250 source-material files/86,498,309 bytes and all 2691 Git
+  leaves across ten archives in `artifacts/release-source-materials01`, bound to
+  the exact unchanged cohort01 manifests. The material manifest is
+  `9b3edb584823732c5d8760b02bb818d17441fe8d1ada82d9e14b1e1ff5b65581`.
+  Root receipts are under `artifacts/release-cohort-root-review01`. These checks
+  do not establish native build reproducibility or complete toolchain sources.
+- A16 diagnostic8 native plan01 is complete and reviewed for compile-only use;
+  its 24-file inventory is `8c94877a1aef432c048b6d48f2db6474073e17f141ef36418db30b9c661fc47b`.
+  No execution window was released. Disk hash, guest boot, native compile and
+  actual diagnostic remain NOT_RUN; pilot07 remains FAILED.
+- User requests push and pause. All agent lanes stop and root confirms all QEMU
+  and controller-fixture processes absent. Run06's single graceful shutdown is
+  recorded in `artifacts/server-a08-import-failure01/pause-result.json` with
+  inactive/MainPID0, dead original PID, unchanged seed/trust and retained failed
+  slot. Disk/source/evidence and unrelated linked-worktree changes are preserved.
+  Raw artifacts remain local and ignored; Git push does not back them up.
 
 ## Decisions
 
