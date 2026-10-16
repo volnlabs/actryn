@@ -1,0 +1,13 @@
+# Preexecution amendment: retain instrumentation 4, replace passive guard only.
+revision = 5
+instrumentation4_sha256 = "4bd1c67206145c64f7ee1eacd54a0f49eab0ac41386295709d5026aeb83803ae"
+entrypoint = "capture_guest5.py"
+module_changed = false
+tracefs_mutated = false
+target_kernel_pilot = "NOT_RUN"
+target_userspace_pilot = "NOT_RUN"
+comparison = "NOT_RUN"
+
+[sources]
+"capture_guest5.py" = "652133811d5855a4be761ed235cf2022e52c0f88f1dfbada1acf974a0086fc45"
+"capture_guest5_test.py" = "bf25d32961f8b1829617f38c2befdde4c586ad43e091bcbd9ed6edf0b139b244"
