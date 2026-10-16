@@ -929,6 +929,27 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   failed lifecycles remain failed. Server outstanding-debit/crash/pressure,
   A16 comparison and final release qualification remain pending.
 
+- A16 amendment7 now has an actual native build against the unchanged Debian
+  ARM64 `6.12.111+deb13-arm64` kernel/config/Module.symvers and GCC `14.2.0-19`.
+  The new workload (`40f75fe9...`) and ABI7 capture module (`fae8eccb...`) compile
+  successfully; the build executes neither. Root independently verifies the
+  bounded archive, exact selected artifacts and all 42 derived-source hashes.
+  `69d8c07` integrates the three frozen manifests and deployment record; all 11
+  focused integration tests pass. Evidence remains in
+  `artifacts/a16-amendment7-native-build01`,
+  `artifacts/a16-amendment7-native-review01` and
+  `artifacts/a16-amendment7-freeze01`. Earlier failed inputs remain immutable;
+  this result does not establish either new excluded pilot or the comparison.
+- A later observed BPF build reproduces the installed observer object byte for
+  byte (`13c4882895fb92567c34abdc1a77a0c00b184cbe61e7af621f3547c9887b734d`).
+  `artifacts/observer-bpf-matching-build01` retains the exact Clang22.1.8 command,
+  compiler identity and 18 source/header inputs, verified before and after the
+  successful build. This closes the earlier source-to-object attribution gap
+  for those bytes; it does not recover an original receipt or establish a
+  hermetic compiler dependency closure. The original object stays unchanged,
+  so its installed guest checks are reused. Offline OCI source attribution and
+  final native/runtime notice mapping remain separate work.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.

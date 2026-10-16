@@ -2,7 +2,7 @@
 
 ## Current disposition
 
-Follow-up audit through integration source `aa91c58` supersedes the historical
+Follow-up audit through integration source `69d8c07` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
@@ -17,7 +17,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
 | A13/A14 | Pinned live-policy/missing-credential checks and operator-executed installation recipes. | Authorized live-provider credentials and an independent developer are still external inputs. |
-| A16 | `observer-installed-01` passes three readiness/death/loss cases and eight descriptive OFF/ON trials, preserving positive loss. Amendment7 source checks and independent review pass. | Kernel/userspace comparison remains incomplete after the failed instrumentation pilot; amendment7 target build/freeze and both new pilots remain pending. Standalone diagnostic timing is not whole-agent overhead or WCET. |
+| A16 | `observer-installed-01` passes three readiness/death/loss cases and eight descriptive OFF/ON trials, preserving positive loss. Amendment7 source checks, exact ARM native build and hash freeze pass; all 11 integration freeze checks pass. | Kernel/userspace comparison remains incomplete after the failed instrumentation pilot; both new excluded pilots and the frozen comparison remain pending. Standalone diagnostic timing is not whole-agent overhead or WCET. |
 
 The current target queue is the outstanding-debit/crash/pressure case and amended
 authority comparison, followed by final artifact, provenance and evidence mapping.
