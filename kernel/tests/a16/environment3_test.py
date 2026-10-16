@@ -47,10 +47,13 @@ class EnvironmentAmendmentTests(unittest.TestCase):
             environment3.require_bootable(compact + b'\0')
 
     def test_live_process_must_match_every_frozen_argument(self):
-        environment3.validate_running(self.correct, self.correct)
-        for actual in (self.original, ['qemu-system-aarch64'], self.correct + ['-S']):
-            with self.subTest(actual=actual), self.assertRaises(ValueError):
-                environment3.validate_running(actual, self.correct)
+        actual = ['/usr/bin/qemu-system-aarch64'] + self.correct[1:]
+        with mock.patch.object(environment3.shutil, 'which', return_value=actual[0]):
+            environment3.validate_running(actual, self.correct)
+            for bad in (self.original, ['qemu-system-aarch64'], actual + ['-S'],
+                        ['/usr/bin/false'] + self.correct[1:], self.correct):
+                with self.subTest(actual=bad), self.assertRaises(ValueError):
+                    environment3.validate_running(bad, self.correct)
 
     def test_existing_pilot_evidence_is_not_annotated_or_retried(self):
         with tempfile.TemporaryDirectory() as directory:

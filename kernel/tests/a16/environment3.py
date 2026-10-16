@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+import shutil
 import struct
 import subprocess
 import sys
@@ -41,7 +42,10 @@ def validate_command(original, amended, root):
 
 
 def validate_running(actual, expected):
-    if actual != expected:
+    executable = shutil.which(expected[0]) if expected else None
+    if (not actual or executable is None or not pathlib.Path(actual[0]).is_absolute()
+            or pathlib.Path(actual[0]).resolve() != pathlib.Path(executable).resolve()
+            or actual[1:] != expected[1:]):
         raise ValueError('running A16 QEMU arguments differ from amendment 3')
 
 
