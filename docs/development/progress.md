@@ -318,6 +318,35 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Seven Python and twelve manager/all-target Rust checks pass. Actual omission,
   durable fault retention and replay rejection remain pending the scheduled guest
   run; manager revision 10 is built but has not yet been exercised in a guest.
+- Fresh server installation 03 passes actual mismatch rejection, staging,
+  activation, interruption after the durable pointer update, recovery and
+  rollback. Configuration/state/evidence sentinels remain intact; the harness
+  finishes inhibited without starting services. Raw records are in
+  `artifacts/install-server-guest03`. A separate positive bootstrap imports the
+  shipped offline OCI artifact through the installed CLI, verifies configuration
+  and explicitly resumes while services remain inactive; installed execution
+  is still being tested separately.
+- Manager revision 10 is now deployed on the original ARM guest, SHA-256
+  `c198a0f61a9c6c8709b013555cef522982a6f75b45d3efb44be6387dd31f9eb7`,
+  with the unchanged revision-15 module. Source omission 01 pauses its threads
+  for 39,884,911 ns and consumes exactly event 81. The manager detects 80 -> 82,
+  inhibits authority and durably records the raw fault with zero FIFO loss.
+  Clock health remains valid; no grant or operation is issued. Retirement and
+  explicit recovery complete. The harness then fails before any export RPC
+  because its SDK-only handle lacks CLI-local fields; that failure is retained.
+- A separately recorded read-only export amendment preserves the same attempt,
+  namespace and key, supplies the CLI fields, and exports the original capture
+  without repeating the omission or a Robot mutation. The production reader
+  validates all 66 records, the original sequence gap at recorder ordinal 32,
+  source gap count 1, contiguous recorder ordinals, no checkpoint/remnant errors
+  and execution replay ineligibility. Evidence is retained in
+  `artifacts/robot-source-gap-01-export-amendment2`; the original campaign remains
+  a harness failure. The corrected harness creates handles through the production
+  CLI and preserves failed command output; nine host tests pass. This establishes
+  the actual omission path, not every A11 case or FIFO-overflow behavior.
+- Common UART trace helper `a97b093` has six passing host guard/restoration tests.
+  Its pointer/count trace has no immutable-frame correlation and remains target
+  NOT_RUN. Full dispatch measurement and the frozen A16 comparison remain open.
 
 ## Decisions
 
