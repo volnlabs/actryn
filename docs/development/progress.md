@@ -950,6 +950,46 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   so its installed guest checks are reused. Offline OCI source attribution and
   final native/runtime notice mapping remain separate work.
 
+- Actual excluded A16 kernel pilot07 fails: trial0 records a protocol fault
+  during Recover, before any grant, START or SAMPLE; the other nine trials pass.
+  All ten stay in the denominator. The first complete 159-byte UART write takes
+  9.915006 ms; the protocol-fault event follows 13.436765 ms after write entry.
+  This is consistent with the unchanged 10 ms HELLO guard, but the captured
+  data does not identify the exact rejected predicate or distinguish cold
+  emulation, instrumentation, scheduling and host contention. No timeout or
+  first-sample limit is changed. ABI7 captures 85 entries/returns with zero
+  capture errors/loss and correlates all 66 eligible dispatches. Capture unload
+  and retirement succeed. Readback preserves UNKNOWN op9 with no authority,
+  zero duties and no helper/FD holders; later undrained event loss is recorded
+  separately from the zero loss during the trials. One guarded graceful
+  shutdown proves the owned PID absent and unit inactive; the unchanged fixture
+  remains disabled with an empty queue. Evidence and the 73-file inventory are
+  retained in `artifacts/a16-execution07/tracekernel07`. Both failed pilot01 and
+  failed pilot07 remain failed; no userspace pilot or comparison follows.
+- `cd9d551` integrates the server-only A08 call-pressure and directory-failure
+  harness. All 43 integration host tests pass, including actual native Unix
+  socket requests and libc interception. The planned guest campaign preserves
+  an unrelated active attempt while testing one ENOSPC allocation, bounded
+  EBUSY reclamation, reserved cancellation and capacity recovery. Its runtime
+  systemd override instruments only the launcher and retains installed preflight
+  and security properties; this is instrumented production-path evidence,
+  not unchanged installed-unit qualification. Actual guest execution remains
+  NOT_RUN. The separate retained-debit coordinator's cold-store collector bug
+  is corrected before execution, with ten focused checks passing; the original
+  draft stays retained under `artifacts/robot-retained-debit-plan02`.
+- `artifacts/offline-oci-matching-build03` reproduces both the original static
+  agent (`56325165...`) and all five original OCI layout files byte for byte,
+  including manifest `c3013959...`. It uses source `b4beaee`, its committed lock,
+  and the verified Rust1.92.0 compiler with the original installed standard-library
+  source paths. The earlier lock-preflight failure and successful but unequal
+  minimal-sysroot build remain recorded. A separate final link with trace/map
+  output also reproduces the same agent, retaining actual native input paths.
+  The 23-file source/build/link/OCI receipt inventory is
+  `403eb15593ad79caf18b063d628f75410a94c800ffb4327d6fe42d977a9a08c6`.
+  This is a later observed matching build, not a recovered original receipt or
+  hermetic-build claim. Original installed bytes and their acceptance evidence
+  remain unchanged; final source/license assembly is still required.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
