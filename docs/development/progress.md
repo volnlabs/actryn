@@ -754,6 +754,37 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   The [acceptance inventory](acceptance-gaps.md) now records the superseding
   component results and the remaining target/external gates.
 
+### Installed manager11 and numbered follow-up campaigns
+
+- Candidate04 activates through the existing installed release tool on the same
+  Robot disk, preserving all three slots, signing trust, private state, captures
+  and the original four records. The exact recovery regression passes once on
+  module16: a new explicit exchange changes controller session 4 to 5 and the
+  runtime nonce; pending polls do not resend. No grant or operation is issued.
+  Installed manager11 and gateway then start with their pinned hashes and no
+  automatic restarts. Explicit recovery leaves them healthy and inhibited on
+  boot `5ab67baf-bf9c-48bf-bdff-b9091fecb842`. Evidence is retained in
+  `artifacts/install-robot-update04-run01`.
+- Three preparation failures remain separate: an overbroad host-QEMU guard,
+  a staging-mode guard and a missing harness import. Each precedes its affected
+  mutation; numbered continuations execute only the unattempted action. The
+  successful update/regression does not relabel these original failures.
+- Lifetime05 verifies the real descriptor-retention preflight, then fails before
+  the planned gateway signal. The sole proposal remains PendingIntent while
+  evidence durable frontiers stay at 21/18. PendingAge closes authority with
+  zero output before a START is established. The helper sends no signal and
+  closes all three descriptors within its lease; cleanup requests one revoke.
+  All 63 original artifact hashes match. This is a failed gateway campaign,
+  with first-fault/storage diagnosis pending, not a retained-FD acceptance pass.
+  Original evidence remains in `artifacts/robot-a10-lifetime-05`.
+- `1a2e9c5` integrates A16 amendment7 source preparation. It requires matched
+  STARTED evidence before the conservative first-sample gate and captures the
+  complete 159-byte HELLO write under a distinct ABI. Original frozen inputs
+  and the failed pilot remain unchanged. All 23 focused Python checks pass in
+  integration and independent review; author C sanitizer checks also pass.
+  Exact target build, binary freeze, both new pilots and comparison remain
+  NOT_RUN. The synthetic conservative clock anchor is not a measured send time.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
