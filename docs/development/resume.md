@@ -1,7 +1,9 @@
 # Paused implementation checkpoint — 2026-10-16
 
-The user explicitly requested another pause. The persistent goal is **paused**,
-not complete. Resume only on the user's instruction. The approved scope remains
+The user explicitly requested another pause, then resumed the goal on
+2026-10-16. The persistent goal is now **active**, not complete. The execution
+state below is the historical pause checkpoint; use the progress ledger for
+subsequent results. The approved scope remains
 [the full v0.0.1 plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md).
 [Progress](progress.md) and [acceptance gaps](acceptance-gaps.md) retain the
 implementation evidence and release boundaries. Earlier checkpoints remain in Git.

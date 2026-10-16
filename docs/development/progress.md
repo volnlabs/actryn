@@ -14,8 +14,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
-- User requested a pause on 2026-10-16; persistent goal paused and agent lanes
-  stopped. See [the current handoff](resume.md) before resuming execution.
+- User resumed the goal after the second 2026-10-16 pause. Goal is active;
+  the [handoff](resume.md) preserves the pause checkpoint and pending work.
 
 ## Component evidence (not release acceptance)
 
@@ -1031,6 +1031,31 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   were found. The common notice remains a source corpus, not an exact linked-code
   inventory. Final role input reconciliation is underway; no release identity,
   signature, installation or qualification is inferred from source/notice checks.
+
+
+- After the second explicit resume, root revalidated clean `eac2de6`, the same
+  host boot, stopped Actryn units, linked worktrees and available memory. The
+  previous turn completed pause cleanup and a signed handoff; it was progress,
+  not a failed or abandoned campaign. `1293676` corrects the installed import
+  command in the pressure instructions. The dead run04 lifetime is not reused;
+  a new numbered Server boot/campaign amendment is being prepared.
+- Root independently checks all 55 files (115,773,094 bytes) in the retained
+  `release-cohort01` inventory and all 44 archived payload entries/modes against
+  their manifests. The Server and Robot manifests remain `f3018c58...` and
+  `878732d8...`, unsigned, incomplete and without custodian attestation.
+  `artifacts/release-cohort-root-review01/result.json` records this byte review;
+  it does not establish fresh installation, signing or release qualification.
+
+
+- Server plan06 passes seven focused host checks at root review, then actual
+  boot, staging, installed preflight and toolchain simulation. Fresh guest boot
+  `73a11031-bf36-4858-8c97-38a0ff74a91f` retains all four selected executable
+  hashes, all 14 runtime package pins, eight reaped attempts in each store,
+  zero open calls/Robot debits and no container tasks. The three services are
+  inactive. The native compiler is absent; apt simulation reports exactly
+  35 additions, zero upgrades and zero removals. Installation and the pressure
+  campaign remain NOT_RUN at this checkpoint. Evidence is retained under
+  `artifacts/server-a08-pressure-run06`; earlier failures are unchanged.
 
 ## Decisions
 
