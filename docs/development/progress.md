@@ -159,12 +159,14 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   stale work, causing TRANSPORT. The complete run is FAILED; manager crash,
   identity rotation and export phases were not reached. Raw records, decoded
   diagnostics, journal and source/binary provenance remain in
-  `artifacts/robotd-guest06*`. Kernel correction and regression are in progress.
+  `artifacts/robotd-guest06*`. Kernel revision 14 subsequently preserves the
+  original quiescence transaction across duplicate/escalated grant revocation.
 - Trusted server delegation `0ce363d` adds immutable fixed-peer bindings, actual
   Robot observations, separately charged remote requests and reserved closure
   transport. Initial host checks pass 43 server and three agent tests. Independent
   review found terminal-durability, closure-worker capacity, malformed report and
-  operator key-exhaustion gaps; these require corrections before acceptance.
+  operator key-exhaustion gaps; `d58dd10` corrects these with 46 server tests
+  passing. Actual combined delegation acceptance remains pending.
   CLI integration `4d6cca8` passes 18 tests and strict Clippy, including identity
   substitution rejection and reserved cancellation routing. Updated finite profile
   SHA-256 is `6b9f174af8b018e0cf95bfd282ed52b5385d364ebe7e372d54ce6a91d1d99be8`;
@@ -172,9 +174,54 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 - Release tooling `52f3fbb` adds deterministic role bundles, external Ed25519
   verification, explicit qualification attestations and inhibited immutable
   installation/update/rollback. Eighteen isolated filesystem/cryptographic tests
-  pass. Review found bytecode pollution of installed slots and an incomplete
-  server configuration readiness check; corrections are in progress. No actual
+  pass. `becd5d3` fixes installed-slot bytecode pollution and `cc1c7c1` adds the
+  daemon's read-only configuration preflight and CLI install route. Twenty release
+  tests and nineteen CLI tests pass. No actual
   role installation or release signing is established by these component tests.
+- Kernel revision 14 (`2b2060a`) passes 15 cases in each of plain, lockdep,
+  KASAN and KCSAN, plus the focused actual ARM duplicate-revocation tests.
+  Its wider campaign retains a handshake setup failure and a controller-restart
+  SAMPLE rejection; those failed cases are not accepted. `edb7e5a` adds exact
+  restart request/deadline diagnostics for the next separately numbered run.
+- Manager guest run 07 fails during initial recovery, before enrollment or
+  authorization, with healthy clock/event state but kernel PROTOCOL. A later
+  traced HELLO succeeds in 3.59 ms; it does not reproduce or explain run 07.
+  A separate deterministic test establishes that the worker tail can postpone
+  an already queued receive wakeup. Kernel revision 15 (`b6a8854`) preserves it
+  without changing the 10 ms deadline. All 16 cases pass in four diagnostic
+  configurations, and one actual ARM campaign passes selftest and Ready recovery.
+  Hash-pinned archives are listed in the kernel diagnostic/adversarial documents.
+- Manager guest run 08 passes the full actual-module/mTLS lifecycle in 94.7 s:
+  two natural completions, absent-key and pre-send cancellation, gateway death,
+  explicit retirement/recovery, manager death with retained unknown outcome and
+  no resubmission, identity rotation, SDK/CLI capture export and principal
+  revocation. Manager SHA-256 is
+  `8a9be8f50a6a241dd63d3c05297450674090589a367bd85952276f1471efeb39`;
+  module SHA-256 is
+  `2405de617a09b4b3beec5eaec8f83ff6ee6c0cc0a1968d091b0c5634fcff8e1e`.
+  `artifacts/robotd-guest08*` retain logs, journal, exports and provenance.
+  `9b84c73` exposes retirement writer readiness; read-only polling does not
+  initiate recovery. Sixteen runtime host tests and strict Clippy pass; the
+  separately amended ignored Rust guest test has not been rerun.
+- The updated server deployment retains the pinned offline artifact and imports
+  live policy `f3939843c248ec6375b3f8cd217e91b656c321b7520c56f601d886400f844237`.
+  Actual configuration validation leaves DB and socket/lock metadata unchanged.
+  Missing-credential campaign 03 passes with a cancelled zero-debit tombstone;
+  its predecessor's obsolete empty-call-list assertion remains a recorded failure.
+  No real provider request has been made.
+- Offline server campaign 03 fails on a cancellation reply while observer
+  retirement persistence exceeds the 500 ms IPC deadline. Normal cleanup later
+  converges with both stores reaped and no remaining task. A separate actual
+  delayed-fsync/EIO observer campaign proves timed-out/failed retirement retains
+  all eight registrations until durable recovery, then frees exactly one slot.
+  The full amended offline campaign and combined workflow remain pending.
+- Combined workflow harness `28f1949` has eight passing host self-tests for
+  lineage, retained grant semantics, writer readiness, serialized public-peer
+  restoration and strict final evidence checks. Fresh-install harness `416ce85`
+  has four passing host-only tests. Neither establishes its actual guest workflow.
+- A16 comparison tooling `05a5ac0` has host sanitizer, socket-lifetime, analyzer
+  and fixed-profile checks. Target baseline qualification and the frozen eight-run
+  comparison remain NOT_RUN; no performance advantage is claimed.
 - No host kernel module was loaded and no physical interface was attached.
 
 ## Decisions
