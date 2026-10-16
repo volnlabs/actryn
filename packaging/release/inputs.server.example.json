@@ -31,7 +31,9 @@
       "libgcc-s1": "REPLACE_WITH_EXACT_DPKG_VERSION",
       "libelf1t64": "REPLACE_WITH_EXACT_DPKG_VERSION",
       "libzstd1": "REPLACE_WITH_EXACT_DPKG_VERSION",
-      "zlib1g": "REPLACE_WITH_EXACT_DPKG_VERSION"
+      "zlib1g": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libssl3t64": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libexpat1": "REPLACE_WITH_EXACT_DPKG_VERSION"
     }
   },
   "provenance": {

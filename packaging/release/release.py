@@ -31,9 +31,10 @@ KERNEL = {'server': '6.12.111+deb13-amd64', 'robot': '6.12.111+deb13-arm64'}
 ARCH = {'server': 'amd64', 'robot': 'arm64'}
 MACHINE = {'server': 62, 'robot': 183}
 BPF_OBJECT = 'lib/observer.bpf.o'
-# Observed ldd dependency closure of the selected Debian production executables.
-RUNTIME_PACKAGES = {'server': {'libc6', 'libgcc-s1', 'libelf1t64', 'libzstd1', 'zlib1g'},
-                    'robot': {'libc6', 'libgcc-s1'}}
+# Observed ldd closure of the selected executables and Python/OpenSSL installer tools.
+TOOL_PACKAGES = {'libssl3t64', 'libexpat1', 'libzstd1', 'zlib1g'}
+RUNTIME_PACKAGES = {'server': {'libc6', 'libgcc-s1', 'libelf1t64'} | TOOL_PACKAGES,
+                    'robot': {'libc6', 'libgcc-s1'} | TOOL_PACKAGES}
 UNITS = {'server': ('actryn-observer', 'actryn-launcher', 'actryn-serverd'),
          'robot': ('actryn-robotd', 'actryn-gatewayd')}
 BINARIES = {'server': ('actryn', 'actryn-observer', 'actryn-launcher', 'actryn-serverd', 'controller-fixture'),

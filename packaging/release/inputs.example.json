@@ -25,7 +25,11 @@
       "openssl": "REPLACE_WITH_EXACT_DPKG_VERSION",
       "python3": "REPLACE_WITH_EXACT_DPKG_VERSION",
       "libc6": "REPLACE_WITH_EXACT_DPKG_VERSION",
-      "libgcc-s1": "REPLACE_WITH_EXACT_DPKG_VERSION"
+      "libgcc-s1": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libssl3t64": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libexpat1": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "libzstd1": "REPLACE_WITH_EXACT_DPKG_VERSION",
+      "zlib1g": "REPLACE_WITH_EXACT_DPKG_VERSION"
     }
   },
   "provenance": {
