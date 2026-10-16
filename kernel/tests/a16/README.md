@@ -11,6 +11,10 @@ The separately frozen [instrumentation amendment 4](INSTRUMENTATION4.md) adds
 accepted-prefix capture and strict full-frame correlation. Its two target pilots
 must pass before the eight-run matrix; pointer/count tracing is not enabled
 alongside it. Neither instrumentation pilot nor comparison has run at this freeze.
+The required [passive-guard amendment 5](INSTRUMENTATION5.md) preserves all
+instrumentation-4 inputs while accepting the target's lazy trace-buffer display.
+The [frozen campaign runner](CAMPAIGN.md) performs the two excluded instrumentation
+pilots, then eight measured runs over four ABBA boots, retaining failed attempts.
 
 Status: host engine, socket-lifetime, analyzer and profile checks PASS;
 target qualification NOT_RUN. No comparison has run. This is a
