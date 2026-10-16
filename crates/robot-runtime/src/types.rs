@@ -188,6 +188,8 @@ pub struct Health {
 #[derive(Clone, Debug, Serialize)]
 pub struct Frontier {
     pub producer: usize,
+    /// Per-producer capture record ordinals; raw kernel sequence/loss identities
+    /// are retained in kernel event and SourceGap metadata, not renumbered here.
     pub read: u64,
     pub queued: u64,
     pub durable: u64,

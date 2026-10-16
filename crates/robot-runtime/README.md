@@ -54,8 +54,22 @@ uses the earliest bound for the 1-second age ceiling and checks the original
 kernel clock mapping too. The fixture emits periodic actual `OBSERVATION` frames;
 missing frames produce stale data and closure, never fabricated refreshes. All
 observations are explicitly marked simulated, with source kernel event sequence.
-Kernel sequence gaps/loss close authority; recorder-local producer cursors are
-separate and do not reset or conceal source gaps.
+Kernel sequence gaps/loss close authority. Producer 1 contains raw kernel event
+metadata; manager-derived observations belong to runtime producer 0. Their
+read/queued/durable positions are separate local capture record ordinals, not
+kernel event numbers. The first sequence discontinuity or loss-counter change
+retains a typed `SourceGap` with the offending raw event, previous/observed
+sequence, epoch and historical/current loss counters. Duplicate, regressed,
+zero and wrapped source sequences can therefore be retained without inventing
+a monotonic device sequence. Later events cannot clear this latched fault.
+
+The fault uses the recorder's bounded reserved metadata path before the existing
+error closes authority. It does not wait for storage, and recording failure
+never replaces the authority-closing error. Exhausted reserve still latches
+source-gap health; absent durable fault bytes remain an unknown volatile tail,
+not proof of complete evidence. Explicit recovery starts a new stream/capture
+with its historical loss baseline while old faults remain unchanged. Older
+captures that omitted the offending event cannot be repaired retrospectively.
 
 `propose` binds a stable key, parent digest, retained observation and relative
 wheel targets. Each wheel is limited to 100 ticks, duration to 10 seconds, and

@@ -32,7 +32,9 @@ A supplied input is bounded by the volatile-byte policy even in metadata mode.
 2. Bind trusted channels with `recorder.producer(index)`. Call
    `producer.read(sequence, source_time_ns, kind, payload)` to copy one record.
    This advances only that producer's `read` frontier. Sequences must increase
-   without wrapping; missing sequence ranges remain explicit source gaps.
+   without wrapping; missing ranges in this declared record sequence remain
+   explicit. An embedding that assigns local record ordinals must retain its
+   external device/source sequence separately rather than equating the two.
 3. Call `recorder.queue_read()` to move copied records into the bounded writer
    batch. This advances `queued`; these records remain volatile.
 4. Move the writer to a dedicated storage thread and call `writer.run(stop)`, or
@@ -46,15 +48,24 @@ A supplied input is bounded by the volatile-byte policy even in metadata mode.
    the manager must actually perform closure. No continuation after detected
    health loss is authorized. Host scheduling still has no hard latency bound.
 
-`Health.frontiers` separates `read`, `queued`, `durable` and source `gap_count` for
-every producer. Reader and writer heartbeat timestamps are separate. While
+`Health.frontiers` separates `read`, `queued`, `durable` and `gap_count` for
+every producer. Positions refer to that producer's declared record sequence.
+`gap_count` counts missing record ranges plus explicit trusted `SourceGap`
+reports; it is not a count of missing external events. A trusted producer can
+retain the external sequence/loss identities with
+`read_metadata(sequence, time, EventKind::SourceGap, metadata)`. This event uses
+reserved capacity and latches `SourceGap` health even if the reserve is full.
+A failed attempt to admit the same fault ordinal is not counted twice. Only
+checkpointed fault records affect recovered counts; a failed volatile record
+does not become a durable claim. Agent channels and hash-only records cannot
+use this kind. Reader and writer heartbeat timestamps are separate. While
 records are pending, their original age expires even if readers heartbeat or
 some writer batches make progress. A health loss latches until a new capture is
 prepared; later disk progress cannot silently restore eligibility. Required-source
 gaps also latch. A dropped/failed writer reports a fault rather than draining or
 blocking a cancellation caller.
 
-Declare `Transition` or `Intervention` on the trusted emitter used for closure
+Declare `Transition`, `Intervention` or `SourceGap` on the trusted emitter used for closure
 evidence. These event kinds may use reserved capacity after health loss. Reserved
 capacity is finite too: overflow returns an error, increments `overflow_count`,
 and remains visible without requiring a final marker to reach disk.
@@ -88,7 +99,9 @@ Each flush writes one complete, uncompressed, unchunked MCAP batch using maintai
 [`mcap` 0.25.0](https://docs.rs/mcap/0.25.0/mcap/write/struct.Writer.html), with
 compression features disabled. Channels carry caller-assigned origin, producer
 identity/session and clock metadata. MCAP's optional 32-bit message sequence is
-zero; the recorder envelope retains the actual nonwrapping 64-bit source sequence.
+zero; the recorder envelope retains the declared nonwrapping 64-bit producer
+record sequence. Robot manager captures use local ordinals here and retain raw
+kernel sequence/loss counters in their trusted structural metadata.
 The writer finishes/flushes the file, calls `sync_all`, and syncs the containing
 directory **before** committing its file hash, length, record count and per-source
 frontiers to SQLite. It uses pinned `rusqlite` 0.40.2 with bundled native SQLite.
@@ -107,10 +120,22 @@ what the supported durable prefix contains.
 
 `Recovery.manifest` and `limits` retain requested streams, source identities,
 clock bounds, digests, payload policy and retention/redaction. `source_summary()`
-reports actually retained metadata/payload streams, durable sequence ranges and
-exact source gaps separately from recorder frontiers. Typed intervention records
+reports actually retained metadata/payload streams and durable record positions.
+`gaps` contains missing producer record ranges; `source_gap_records` separately
+lists positions containing explicit external fault metadata. The latter must be
+read for the actual external identities, counters and reason. Neither an empty
+list nor older captures lacking these records proves absence of historical loss.
+Typed intervention records
 remain available in `records`. Remote exports must preserve each recorder's
 origin and authoritative portion.
+
+`SourceGap` is additive EVR2 event tag 11, carried in the immutable producer
+capability manifest and retained metadata. Existing tag 1–10 captures remain
+readable without mutation or a SQLite migration. Older readers reject tag 11
+through their existing unknown-kind check; they must not reinterpret it or
+silently omit its batch. Recovery never repairs an older capture whose source
+fault was not recorded. A retained source fault makes execution replay
+ineligible even if other streams have complete payloads and prefix seals.
 
 Inspection/event playback can show a partial prefix with explicit gaps and
 unknown reconstructed state. `execution_replay(through_recorder_ns)` is stricter:

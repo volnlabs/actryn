@@ -41,6 +41,7 @@ impl Capture {
                         EventKind::Intervention,
                         EventKind::Observation,
                         EventKind::Transition,
+                        EventKind::SourceGap,
                     ],
                     required_for_replay: false,
                 }
@@ -94,6 +95,11 @@ impl Capture {
         self.recorder.queue_read();
         Ok(())
     }
+    /// Controller observations are derived by the manager from kernel receipts;
+    /// their sequence is not an additional raw kernel event.
+    pub fn record_observation(&self, time: u64, value: &impl Serialize) -> Result<()> {
+        self.record(0, time, EventKind::Observation, value)
+    }
 }
 
 #[cfg(test)]
@@ -115,10 +121,76 @@ mod tests {
         }
         assert!(!capture.preparation_ready());
         writer.flush().unwrap();
-        capture
-            .record(1, 4, EventKind::Observation, &"fresh observation")
-            .unwrap();
+        capture.record_observation(4, &"fresh observation").unwrap();
         assert_eq!(capture.recorder.health().pending_records, 1);
+        assert_eq!(capture.recorder.health().frontiers[0].read, 4);
+        assert_eq!(capture.recorder.health().frontiers[1].read, 0);
         assert!(capture.preparation_ready());
+    }
+
+    #[test]
+    fn exhausted_fault_reserve_does_not_replace_the_authority_closing_error() {
+        let root = tempfile::tempdir().unwrap();
+        let producers = [Origin::Runtime, Origin::Kernel]
+            .into_iter()
+            .enumerate()
+            .map(|(index, origin)| ProducerSpec {
+                identity: [index as u8 + 1; 16],
+                session: 1,
+                origin,
+                clock_domain: "test CLOCK_BOOTTIME".into(),
+                clock_error_ns: 0,
+                requested: vec![EventKind::Transition, EventKind::SourceGap],
+                required_for_replay: false,
+            })
+            .collect();
+        let (recorder, _writer) = Recorder::create(
+            root.path().join("capture"),
+            CaptureSpec {
+                attempt: [2; 16],
+                profile_digest: [3; 32],
+                configuration_digest: [4; 32],
+                policy: CapturePolicy::MetadataOnly,
+                retention: "test".into(),
+                redaction: "test".into(),
+                producers,
+            },
+            evidence::Limits {
+                volatile_records: 2,
+                reserved_records: 1,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let capture = Capture {
+            producers: [recorder.producer(0).unwrap(), recorder.producer(1).unwrap()],
+            recorder,
+            sequences: Mutex::new([0, 0]),
+        };
+        let mut stream = crate::events::Continuity::new([2; 16], 0).unwrap();
+        let mut event = authority_client::Event {
+            sequence: 9,
+            status: authority_client::Status {
+                runtime_nonce: [2; 16],
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        stream.capture_event(&event, Some(&capture), true).unwrap();
+        capture
+            .record(0, 0, EventKind::Transition, &"reserve occupied")
+            .unwrap();
+        event.sequence = 11;
+        assert!(matches!(
+            stream.capture_event(&event, Some(&capture), true),
+            Err(Error::Denied("kernel event source gap"))
+        ));
+        let health = capture.recorder.health();
+        assert!(stream.faulted && health.revoke_required);
+        assert_eq!(health.frontiers[1].gap_count, 1);
+        assert_eq!(health.frontiers[1].read, 1);
+        assert_eq!(health.pending_records, 2);
+        assert!(health.issues.contains(&evidence::HealthIssue::SourceGap));
+        assert!(health.issues.contains(&evidence::HealthIssue::Capacity));
     }
 }

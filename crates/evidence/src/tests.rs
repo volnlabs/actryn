@@ -386,3 +386,117 @@ fn agent_capability_cannot_claim_metadata() {
         .read_metadata(1, 0, EventKind::AgentPayload, b"forged")
         .is_err());
 }
+
+#[test]
+fn external_source_fault_is_durable_without_fabricating_an_ordinal_gap() {
+    let dir = Temp::new();
+    let fault = EventKind::from_byte(11).expect("trusted source-fault event kind");
+    let mut manifest = spec(CapturePolicy::MetadataOnly);
+    manifest.producers[0].required_for_replay = false;
+    manifest.producers[0].requested.push(fault);
+    let (recorder, mut writer) = Recorder::create(&dir.0, manifest, Limits::default()).unwrap();
+    let producer = recorder.producer(0).unwrap();
+    producer
+        .read_metadata(1, 5, EventKind::Transition, b"source sequence 500")
+        .unwrap();
+    producer
+        .read_metadata(
+            2,
+            7,
+            fault,
+            b"source sequence 502; expected 501; lost 9 -> 10",
+        )
+        .unwrap();
+    let health = recorder.health();
+    assert!(health.revoke_required);
+    assert!(health.issues.contains(&HealthIssue::SourceGap));
+    assert_eq!(health.frontiers[0].gap_count, 1);
+    assert_eq!(health.frontiers[0].read, 2);
+    assert_eq!(health.frontiers[0].durable, 0);
+    recorder.queue_read();
+    writer.flush().unwrap();
+    let recovered = Recorder::recover(&dir.0).unwrap();
+    assert_eq!(recovered.frontiers[0].gap_count, 1);
+    assert_eq!(recovered.frontiers[0].durable, 2);
+    assert_eq!(
+        recovered.records[1].payload.as_deref(),
+        Some(b"source sequence 502; expected 501; lost 9 -> 10".as_slice())
+    );
+    assert!(recovered.source_summary()[0].gaps.is_empty());
+    assert_eq!(recovered.source_summary()[0].source_gap_records, vec![2]);
+    assert!(!recovered.execution_replay(0).eligible);
+    assert!(recovered
+        .execution_replay(0)
+        .missing
+        .iter()
+        .any(|reason| reason.contains("source fault")));
+}
+
+#[test]
+fn source_fault_uses_reserve_and_latches_even_when_reserve_is_exhausted() {
+    let fault = EventKind::from_byte(11).expect("trusted source-fault event kind");
+    for exhaust in [false, true] {
+        let dir = Temp::new();
+        let mut manifest = spec(CapturePolicy::MetadataOnly);
+        manifest.producers[0].requested.push(fault);
+        let limits = Limits {
+            volatile_records: 2,
+            reserved_records: 1,
+            ..Limits::default()
+        };
+        let (recorder, mut writer) = Recorder::create(&dir.0, manifest, limits).unwrap();
+        let producer = recorder.producer(0).unwrap();
+        producer
+            .read(1, 0, EventKind::Input, b"fill ordinary capacity")
+            .unwrap();
+        if exhaust {
+            producer
+                .read_metadata(2, 1, EventKind::Transition, b"fill reserve")
+                .unwrap();
+        }
+        let result =
+            producer.read_metadata(if exhaust { 3 } else { 2 }, 2, fault, b"actual source loss");
+        assert_eq!(result.is_err(), exhaust);
+        let health = recorder.health();
+        assert!(health.revoke_required && health.issues.contains(&HealthIssue::SourceGap));
+        assert_eq!(health.frontiers[0].gap_count, 1);
+        if exhaust {
+            assert!(producer
+                .read_metadata(3, 2, fault, b"actual source loss")
+                .is_err());
+            assert_eq!(recorder.health().frontiers[0].gap_count, 1);
+        }
+        recorder.queue_read();
+        writer.flush().unwrap();
+        let recovered = Recorder::recover(&dir.0).unwrap();
+        assert_eq!(recovered.frontiers[0].gap_count, u64::from(!exhaust));
+        assert!(recovered.volatile_tail_unknown);
+    }
+}
+
+#[test]
+fn untrusted_or_unretained_source_faults_cannot_claim_durable_fault_metadata() {
+    let fault = EventKind::from_byte(11).expect("trusted source-fault event kind");
+    let dir = Temp::new();
+    let mut manifest = spec(CapturePolicy::MetadataOnly);
+    manifest.producers[0].requested.push(fault);
+    let (recorder, _writer) = Recorder::create(&dir.0, manifest, Limits::default()).unwrap();
+    assert!(recorder
+        .producer(0)
+        .unwrap()
+        .read(1, 0, fault, b"hash only")
+        .is_err());
+    assert_eq!(recorder.health().frontiers[0].gap_count, 0);
+    let dir = Temp::new();
+    let mut manifest = spec(CapturePolicy::MetadataOnly);
+    manifest.producers[0].origin = Origin::Agent;
+    manifest.producers[0].required_for_replay = false;
+    manifest.producers[0].requested = vec![EventKind::AgentPayload];
+    let (recorder, _writer) = Recorder::create(&dir.0, manifest, Limits::default()).unwrap();
+    assert!(recorder
+        .producer(0)
+        .unwrap()
+        .read_metadata(1, 0, fault, b"forged")
+        .is_err());
+    assert_eq!(recorder.health().frontiers[0].gap_count, 0);
+}

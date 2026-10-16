@@ -68,6 +68,9 @@ pub enum EventKind {
     AgentPayload,
     Transition,
     Prefix,
+    /// A trusted source reports an external discontinuity, independently of
+    /// this producer's recorder-local record ordinals.
+    SourceGap,
 }
 impl EventKind {
     fn from_byte(n: u8) -> Result<Self> {
@@ -82,11 +85,15 @@ impl EventKind {
             8 => Self::AgentPayload,
             9 => Self::Transition,
             10 => Self::Prefix,
+            11 => Self::SourceGap,
             _ => return Err(Error::Rejected("unknown event kind")),
         })
     }
     fn reserved(self) -> bool {
-        matches!(self, Self::Transition | Self::Intervention)
+        matches!(
+            self,
+            Self::Transition | Self::Intervention | Self::SourceGap
+        )
     }
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -142,9 +149,13 @@ impl Default for Limits {
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Frontiers {
+    /// Positions in the producer's declared record sequence, not an implicit
+    /// device sequence. Embeddings must retain external source identities.
     pub read: u64,
     pub queued: u64,
     pub durable: u64,
+    /// Missing record ranges plus explicit source-fault reports; not the
+    /// number of missing external device events. Recovery counts durable only.
     pub gap_count: u64,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -191,6 +202,7 @@ struct State {
     staged: VecDeque<Pending>,
     queued: VecDeque<Pending>,
     frontiers: Vec<Frontiers>,
+    reported_source_faults: Vec<u64>,
     pending_bytes: usize,
     pending_records: usize,
     pending_since: Option<Instant>,
@@ -295,6 +307,7 @@ impl Recorder {
                 staged: VecDeque::new(),
                 queued: VecDeque::new(),
                 frontiers: vec![Frontiers::default(); spec.producers.len()],
+                reported_source_faults: vec![0; spec.producers.len()],
                 pending_bytes: 0,
                 pending_records: 0,
                 pending_since: None,
@@ -437,6 +450,11 @@ impl Producer {
         {
             return Err(Error::Rejected("kind outside source capability"));
         }
+        if kind == EventKind::SourceGap && (!metadata || payload.is_empty()) {
+            return Err(Error::Rejected(
+                "source fault requires retained trusted metadata",
+            ));
+        }
         let reserved = kind.reserved() && spec.origin != Origin::Agent;
         let retained = metadata
             || self.shared.spec.policy == CapturePolicy::FullPayload
@@ -445,6 +463,21 @@ impl Producer {
             .checked_add(if retained { payload.len() } else { 32 })
             .ok_or(Error::Rejected("record size overflow"))?;
         let mut state = lock(&self.shared);
+        let frontier = state.frontiers[self.index];
+        if sequence == 0 || sequence <= frontier.read {
+            return Err(Error::Rejected("retired producer sequence"));
+        }
+        // A known source fault closes health even when its bounded evidence
+        // reserve is exhausted. A repeated failed admission does not count it
+        // twice; no durable claim is made until its record is checkpointed.
+        if kind == EventKind::SourceGap {
+            state.issue(HealthIssue::SourceGap);
+            if sequence > state.reported_source_faults[self.index] {
+                state.reported_source_faults[self.index] = sequence;
+                state.frontiers[self.index].gap_count =
+                    state.frontiers[self.index].gap_count.saturating_add(1);
+            }
+        }
         if state
             .pending_since
             .is_some_and(|start| pending_too_old(start, limits.max_pending_age))
@@ -465,12 +498,9 @@ impl Producer {
             state.overflow_count = state.overflow_count.saturating_add(1);
             return Err(Error::Rejected("bounded recorder capacity"));
         }
-        let frontier = state.frontiers[self.index];
-        if sequence == 0 || sequence <= frontier.read {
-            return Err(Error::Rejected("retired producer sequence"));
-        }
         if frontier.read.checked_add(1) != Some(sequence) {
-            state.frontiers[self.index].gap_count = frontier.gap_count.saturating_add(1);
+            state.frontiers[self.index].gap_count =
+                state.frontiers[self.index].gap_count.saturating_add(1);
             if spec.required_for_replay {
                 state.issue(HealthIssue::SourceGap);
             }

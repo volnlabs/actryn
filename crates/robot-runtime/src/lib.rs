@@ -1043,20 +1043,18 @@ impl Engine {
         let Some(stream) = core.event_stream.as_mut() else {
             return Ok(());
         };
-        match stream.accept(&event) {
+        let capture = core.slot.as_ref().map(|slot| &slot.context.capture);
+        let record_normal = core
+            .slot
+            .as_ref()
+            .is_some_and(|slot| !slot.stop.load(Ordering::Acquire));
+        match stream.capture_event(&event, capture, record_normal) {
             Ok(false) => return Ok(()),
             Ok(true) => (),
             Err(error) => {
                 core.mapping = None;
                 return Err(error);
             }
-        }
-        if let Some(slot) = core.slot.as_ref().filter(|s| {
-            !s.stop.load(Ordering::Acquire) && !s.context.capture.recorder.health().revoke_required
-        }) {
-            slot.context
-                .capture
-                .record(1, event.captured_ns, EventKind::Transition, &event)?;
         }
         if event.status.runtime_nonce != self.bridge.admin.status()?.runtime_nonce {
             return Ok(());
@@ -1120,12 +1118,9 @@ impl Engine {
         if let Some(slot) = core.slot.as_ref().filter(|s| {
             !s.stop.load(Ordering::Acquire) && !s.context.capture.recorder.health().revoke_required
         }) {
-            slot.context.capture.record(
-                1,
-                event.captured_ns,
-                EventKind::Observation,
-                &observation,
-            )?;
+            slot.context
+                .capture
+                .record_observation(event.captured_ns, &observation)?;
         }
         Ok(())
     }

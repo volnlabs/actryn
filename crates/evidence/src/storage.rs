@@ -351,6 +351,9 @@ fn decode(bytes: &[u8], spec: &CaptureSpec) -> Result<CapturedRecord> {
     {
         return Err(Error::Rejected("invalid structural metadata flag"));
     }
+    if kind == EventKind::SourceGap && (!metadata || len == 0) {
+        return Err(Error::Rejected("invalid source fault metadata"));
+    }
     let payload = (bytes[7] & 1 == 1).then(|| bytes[80..].to_vec());
     if let Some(payload) = &payload {
         if Sha256::digest(payload).as_slice() != digest || payload.len() as u64 != get(32) {
@@ -399,12 +402,15 @@ pub struct SourceSummary {
     pub metadata_streams: Vec<EventKind>,
     pub first_sequence: Option<u64>,
     pub last_sequence: Option<u64>,
+    /// Missing producer record ordinals; these are not external device ranges.
     pub gaps: Vec<(u64, u64)>,
+    /// Record ordinals containing retained trusted external fault metadata.
+    pub source_gap_records: Vec<u64>,
     pub durable_frontier: u64,
 }
 impl Recovery {
-    /// Together with `manifest`, this is the capture manifest's actual retention,
-    /// durable sequence ranges and explicit source gaps. Interventions remain typed records.
+    /// Actual retention, durable record ranges and explicit external-fault
+    /// record positions. Interventions and source faults remain typed records.
     pub fn source_summary(&self) -> Vec<SourceSummary> {
         self.manifest
             .producers
@@ -451,6 +457,11 @@ impl Recovery {
                     first_sequence: records.first().map(|r| r.sequence),
                     last_sequence: records.last().map(|r| r.sequence),
                     gaps,
+                    source_gap_records: records
+                        .iter()
+                        .filter(|record| record.kind == EventKind::SourceGap)
+                        .map(|record| record.sequence)
+                        .collect(),
                     durable_frontier: self.frontiers[index].durable,
                 }
             })
@@ -460,6 +471,13 @@ impl Recovery {
     /// credential interface; execution must separately enforce the isolated profile.
     pub fn execution_replay(&self, through_ns: u64) -> ReplayEligibility {
         let mut missing = Vec::new();
+        if self
+            .records
+            .iter()
+            .any(|record| record.kind == EventKind::SourceGap)
+        {
+            missing.push("retained external source fault".into());
+        }
         if self.manifest.policy != CapturePolicy::FullPayload {
             missing.push("metadata-only capture".into());
         }
@@ -686,6 +704,9 @@ pub(crate) fn recover(root: &Path) -> Result<Recovery> {
                     return Err(Error::Rejected("nonmonotonic/excess records"));
                 }
                 if f.durable.checked_add(1) != Some(record.sequence) {
+                    f.gap_count = f.gap_count.saturating_add(1);
+                }
+                if record.kind == EventKind::SourceGap {
                     f.gap_count = f.gap_count.saturating_add(1);
                 }
                 f.durable = record.sequence;
