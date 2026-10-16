@@ -1,12 +1,12 @@
 # Fresh installed Robot campaign preparation
 
-Status: **source preparation; fresh Robot installation and positive startup NOT_RUN**.
+Status: **candidate03 prepared; fresh Robot installation and positive startup NOT_RUN**.
 This uses the existing role-transition harness and manager lifecycle harness.
 It creates no release identity, qualification, provider credential or physical
 actuation claim. Every test signing key/site issuer is disposable integration
 material. Keep all original prepared directories and failed campaigns immutable.
 
-## Selected sources and gaps
+## Retained preparation inputs
 
 The clean preparation checkout starts at root revision
 `2ec9da05bce8f14caff50ad79d0eab9ca67b5600` on `test/fresh-robot-install`.
@@ -37,12 +37,26 @@ private fixture key is uploaded. A missing CLI/fixture source binding must remai
 an explicit unresolved input, not a fabricated qualification record. The new
 source-bound CLI and fixture do not prove the original cache binary's provenance.
 
-**Module decision pending:** a newly identified kernel shutdown-callback
-obligation is under parent review. The module15 input is an explicitly
-intermediate, unqualified test selection. Do not create the final payload, launch
-the new guest or run installation until the parent selects module15 or supplies
-the corrected module and matching source/provenance. Do not relabel module15
-evidence as testing a later module, including any frozen A16 comparison.
+**Current selection:** candidate03 supersedes only the intermediate module15
+input above. `artifacts/install-robot-inputs-03/robot-inputs.json` selects module16,
+SHA256 `a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112`,
+and corresponding source archive
+`56e42e74afc899a726b451c1bf73e1cd6a9f06525d4509ea3241aca7b429a5ee`.
+The compiled driver matches the seventeen-case plain/lockdep/KASAN/KCSAN GREEN
+source; fourteen actual ARM regression cases and both additional owner-lifetime
+cases pass on this exact module. Original module15 inputs/evidence remain intact.
+The amendment also records current installer/guide hashes and verifies every
+unchanged selected input. Mixed binary revisions remain explicit.
+
+The new prepared job is `42fa846cd81c432fa011326549b695ba`; payload SHA256
+`e3df7b2eeb8f638cb43300095c03a3c8e6e48ac68bbbdc6bd175dec8e3932a88`
+and base manifest SHA256
+`dec2aa32b660c3abef80688a903551022e8d811862f04fb236e6f24ce1a5365c`.
+Installing these actual bytes with the test platform adapter under umask0077
+passes payload hashes/modes and private sentinel preservation. This is filesystem
+verification, not guest startup, release qualification or an independent install.
+Use this new prepared directory for the scheduled guest campaign, never the old
+module15 prepared job. A16 needs its own explicit module16 amendment.
 
 ## Disposable guest identity
 
