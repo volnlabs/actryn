@@ -7,10 +7,12 @@ import json
 import os
 from pathlib import Path
 import secrets
+import select
 import shlex
 import socket
 import ssl
 import struct
+import subprocess
 import time
 
 from failure_paths import OneProposal, durable_cancel, operation_id, same_operation
@@ -19,6 +21,83 @@ from gateway_relay import CipherGate
 from guest import phase, wire, write_json
 from actryn import OutcomeUnknown, RpcError
 from source_gap import require
+
+
+HELPER_REPLY_TIMEOUT = 4
+
+
+class PreloadedCancel:
+    """Own one SSH child and one trigger; unknown outcomes are never resent."""
+    def __init__(self, command):
+        self.command, self.process, self.sent = command, None, False
+
+    def __enter__(self):
+        self.process = subprocess.Popen(self.command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, bufsize=0)
+        try:
+            deadline, data = time.monotonic() + 4, bytearray()
+            while b'\n' not in data:
+                remaining = deadline - time.monotonic()
+                require(remaining > 0 and select.select([self.process.stdout], [], [], remaining)[0],
+                        'cancel helper readiness timeout')
+                part = os.read(self.process.stdout.fileno(), 64 - len(data))
+                require(part and len(data) + len(part) < 64, 'cancel helper readiness frame')
+                data.extend(part)
+            require(data == b'READY\n', 'cancel helper readiness mismatch')
+            write_json('saturation-helper-ready.json', {'ready': True, 'host_monotonic_ns': time.monotonic_ns(),
+                       'trigger_attempts': 0, 'guest_wait_seconds': 10, 'automatic_retry': False})
+            return self
+        except BaseException:
+            self.close()
+            raise
+
+    def record(self, process, stdout, stderr, unknown):
+        write_json('saturation-helper-process.json', {'returncode': process.returncode,
+            'stdout': stdout[:262144].decode(errors='replace'), 'stderr': stderr[:65536].decode(errors='replace'),
+            'stdout_bytes': len(stdout), 'stderr_bytes': len(stderr), 'trigger_attempts': int(self.sent),
+            'trigger_outcome_unknown': unknown, 'automatic_retry': False})
+
+    def trigger(self):
+        require(self.process is not None and not self.sent, 'one preloaded cancel trigger only')
+        self.sent = True  # Charge before any I/O, including an uncertain write/reply.
+        write_json('saturation-helper-trigger.json', {'trigger_attempts': 1,
+                   'host_monotonic_ns': time.monotonic_ns(), 'automatic_retry': False})
+        process = self.process
+        try:
+            stdout, stderr = process.communicate(b'run\n', timeout=HELPER_REPLY_TIMEOUT)
+        except BaseException:
+            self.close()  # Never communicate the trigger a second time.
+            raise
+        self.process = None
+        try:
+            require(process.returncode == 0 and len(stdout) <= 262144, 'cancel helper failed or oversized reply')
+            result = json.loads(stdout)
+        except BaseException:
+            self.record(process, stdout, stderr, True)
+            raise
+        self.record(process, stdout, stderr, False)
+        return result
+
+    def close(self):
+        if self.process is None:
+            return
+        process = self.process
+        if self.sent:
+            # Drop any unwritten trigger before collecting a timed-out child's output.
+            if process.stdin is not None:
+                process.stdin.close()
+                process.stdin = None
+            process.kill()
+        try:
+            stdout, stderr = process.communicate(timeout=2)  # Untriggered helper sees EOF.
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate(timeout=2)
+        self.process = None
+        self.record(process, stdout, stderr, self.sent)
+
+    def __exit__(self, *_):
+        self.close()
 
 
 def request(epoch, method, payload):
@@ -191,10 +270,8 @@ class TrafficCampaign(GatewayCampaign):
             write_json('replay-query.json', rpc.query(self.handle))
             return operation
 
-    def saturation(self):
+    def saturation(self, helper, cancel):
         phase('A10 three ordinary slots and two slow handshakes; reserved local cancellation')
-        description = request(self.epoch, 'describe', wire.Empty())
-        cancel = request(self.epoch, 'cancel', self.handle._wire())
         with ExitStack() as stack:
             holders = [stack.enter_context(self.connection()) for _ in range(3)]
             times, observations = [], []
@@ -221,11 +298,8 @@ class TrafficCampaign(GatewayCampaign):
                 'slow_handshakes': 2, 'extra_handshake_rejected': True, 'observations': observations,
                 'cancel_request_hex': cancel.SerializeToString(deterministic=True).hex(), 'automatic_retry': False})
             self.cancel_attempted = True
-            helper = Path(__file__).with_name('gateway_closure.py').read_text()
-            command = 'python3 -c ' + shlex.quote(helper) + ' ' + ' '.join(shlex.quote(base64.b64encode(
-                r.SerializeToString(deterministic=True)).decode()) for r in (description, cancel))
             try:
-                result = json.loads(self.run(command, timeout=4))
+                result = helper.trigger()
             except BaseException as error:
                 write_json('saturation-cancel-unknown.json', {'error': repr(error), 'automatic_retry': False})
                 raise
@@ -256,8 +330,15 @@ class TrafficCampaign(GatewayCampaign):
             self.activate()
             self.forged(denied)
             self.delayed(delayed)
-            operation = self.replay()
-            interval = self.saturation()
+            description = request(self.epoch, 'describe', wire.Empty())
+            cancel = request(self.epoch, 'cancel', self.handle._wire())
+            source = Path(__file__).with_name('gateway_closure.py').read_text()
+            command = 'python3 -u -c ' + shlex.quote(source) + ' --preload ' + ' '.join(
+                shlex.quote(base64.b64encode(r.SerializeToString(deterministic=True)).decode())
+                for r in (description, cancel))
+            with PreloadedCancel(self.ssh + [command]) as helper:
+                operation = self.replay()
+                interval = self.saturation(helper, cancel)
             with self.connection() as rpc:
                 self.poll_read('durable-cancel', lambda: rpc.query(self.handle),
                     lambda value: durable_cancel(value['snapshot'], self.handle, operation))

@@ -47,6 +47,15 @@ The bounded cases are:
   ordinary read deadline. This is a bounded decoder/handshake saturation test,
   not a bulk observation stream or arbitrary sustained-load qualification.
 
+The saturation helper starts over one owned SSH child and returns `READY` before
+the original operation is proposed. It waits at most ten seconds for one `run`
+line; EOF, an expired wait or an invalid trigger aborts without calling Cancel.
+The host sends the trigger once after saturation and never resends an unknown
+outcome. Cleanup closes or terminates only that owned child. Preloading does not
+enter the fault interval: the unchanged probe records CLOCK_BOOTTIME immediately
+around the local Describe and Cancel calls. Operation targets, production
+deadlines, holder-age checks and test leases are unchanged.
+
 After releasing only test-owned sockets, read-only inspection must establish
 durable cancellation and kernel reconciliation with no independent clock,
 recorder or source fault. The campaign retires and recovers once, exports through

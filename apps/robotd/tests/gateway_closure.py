@@ -6,10 +6,33 @@ The host supplies two already prepared bounded protobuf requests, without keys.
 import base64
 import json
 import os
+import select
 import socket
 import struct
 import sys
 import time
+
+
+def wait_for_trigger(input_fd, output_fd, timeout=10):
+    """One bounded preload gate. EOF/expiry/malformed input cannot call Cancel."""
+    if not 0 < timeout <= 10:
+        raise ValueError('preload wait must be positive and at most ten seconds')
+    deadline = time.monotonic() + timeout
+    if os.write(output_fd, b'READY\n') != 6:
+        raise OSError('incomplete readiness reply')
+    data = bytearray()
+    while b'\n' not in data:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0 or not select.select([input_fd], [], [], remaining)[0]:
+            raise TimeoutError('preloaded helper trigger deadline')
+        part = os.read(input_fd, 5 - len(data))
+        if not part:
+            raise EOFError('preloaded helper abandoned before trigger')
+        data.extend(part)
+        if len(data) > 4:
+            raise ValueError('one run trigger required')
+    if data != b'run\n' or time.monotonic() >= deadline:
+        raise ValueError('one timely run trigger required')
 
 
 def probe_cancel(paths, describe, cancel, expected_uid):
@@ -64,8 +87,16 @@ def probe_cancel(paths, describe, cancel, expected_uid):
 
 
 if __name__ == '__main__':
-    assert os.geteuid() == 0 and len(sys.argv) == 3
+    arguments = sys.argv[1:]
+    preload = arguments[:1] == ['--preload']
+    if preload:
+        arguments = arguments[1:]
+    assert os.geteuid() == 0 and len(arguments) == 2
     assert os.uname().machine == 'aarch64' and os.uname().release == '6.12.111+deb13-arm64'
+    describe, cancel = (base64.b64decode(arg, validate=True) for arg in arguments)
+    assert len(describe) <= 65536 and len(cancel) <= 4096
+    if preload:
+        wait_for_trigger(sys.stdin.fileno(), sys.stdout.fileno())
     result = probe_cancel(['/run/actryn-robot/operator.sock', '/run/actryn-robot/closure.sock'],
-                          *(base64.b64decode(arg, validate=True) for arg in sys.argv[1:]), 0)
+                          describe, cancel, 0)
     print(json.dumps(result), flush=True)
