@@ -142,9 +142,20 @@ class LifetimeCampaign(GatewayCampaign):
     def gateway_pid(self):
         return int(self.run('systemctl show --value -p MainPID actryn-gatewayd.service').strip())
 
+    def gateway_status(self):
+        raw = self.run('systemctl show --property=MainPID --property=ActiveState '
+                       '--property=SubState actryn-gatewayd.service').decode()
+        values = dict(line.split('=', 1) for line in raw.splitlines())
+        require(set(values) == {'MainPID', 'ActiveState', 'SubState'}, 'incomplete gateway unit state')
+        return {'pid': int(values['MainPID']), 'active_state': values['ActiveState'],
+                'sub_state': values['SubState']}
+
     def replacement_pid(self):
-        return self.poll_read('gateway-replacement', self.gateway_pid,
-            lambda p: p > 1 and p != self.pins['gateway_pid'], SERVICE_START_TIMEOUT_S)
+        status = self.poll_read('gateway-replacement', self.gateway_status,
+            lambda s: s['pid'] > 1 and s['pid'] != self.pins['gateway_pid']
+                and s['active_state'] == 'active' and s['sub_state'] == 'running',
+            SERVICE_START_TIMEOUT_S)
+        return status['pid']
 
     def ready_read(self):
         try:

@@ -174,3 +174,20 @@ SSH commands retain their thirty-second budget; operation waits and the full
 lifecycle's four-second closure bound are unchanged. A new numbered campaign is
 required to execute either amended harness; prior output and source pins remain
 historical evidence.
+
+## Installed-startup amendment 02
+
+The retained `robot-a10-lifetime-07` campaign found a new gateway MainPID while
+the `Type=exec` service was still `activating/start`. Its two-second authentication
+window ended before systemd reported `active/running`: MainPID preceded that
+transition by 2.64 seconds, and the FD helper released 0.38 seconds before it.
+Authenticated Describe later succeeded without a restart or credential change.
+This does not establish that the retained FDs blocked authentication.
+
+The forty-second replacement poll now requires a new PID **and**
+`ActiveState=active`, `SubState=running` before starting the unchanged two-second
+authentication check. A PID alone is not readiness. No deadline, lease, authority
+bound or production behavior changes in this amendment. The full lifecycle
+already has a separate forty-second authenticated readiness check and needs no
+additional change. Campaign 07 remains failed; the corrected test requires a new
+numbered namespace/key campaign.

@@ -113,19 +113,21 @@ class LifetimeTests(unittest.TestCase):
             campaign = LifetimeCampaign(SimpleNamespace(ssh_key='unused', ssh_port=1, known_hosts='unused'))
             campaign.pins = {'gateway_pid': 42}
             clock = [0.0]
-            def read_pid():
+            def read_status():
                 clock[0] += 6.5
-                return 43 if becomes_ready and clock[0] >= 26 else 0
-            campaign.gateway_pid = Mock(side_effect=read_pid)
+                ready = becomes_ready and clock[0] >= 26
+                return {'pid': 43 if ready else 0, 'active_state': 'active' if ready else 'activating',
+                        'sub_state': 'running' if ready else 'start'}
+            campaign.gateway_status = Mock(side_effect=read_status)
             with patch('failure_paths.time.monotonic', side_effect=lambda: clock[0]), \
                     patch('failure_paths.time.sleep'), patch('failure_paths.write_json'):
                 if becomes_ready:
                     self.assertEqual(campaign.replacement_pid(), 43)
-                    self.assertEqual(campaign.gateway_pid.call_count, 4)
+                    self.assertEqual(campaign.gateway_status.call_count, 4)
                 else:
                     with self.assertRaises(AssertionError):
                         campaign.replacement_pid()
-                    self.assertEqual(campaign.gateway_pid.call_count, 7)
+                    self.assertEqual(campaign.gateway_status.call_count, 7)
 
     def test_installed_start_budget_does_not_expand_stop_or_retry_mutations(self):
         for action, expected in [('start', 40), ('stop', 15)]:
@@ -138,6 +140,28 @@ class LifetimeTests(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     campaign.service_once(action)
                 run.assert_called_once()
+
+    def test_replacement_pid_during_exec_setup_does_not_begin_authentication(self):
+        campaign = LifetimeCampaign(SimpleNamespace(ssh_key='unused', ssh_port=1, known_hosts='unused'))
+        campaign.pins = {'gateway_pid': 42}
+        campaign.gateway_pid = Mock(return_value=43)
+        campaign.gateway_status = Mock(side_effect=[
+            {'pid': 42, 'active_state': 'active', 'sub_state': 'running'},
+            {'pid': 43, 'active_state': 'activating', 'sub_state': 'start'},
+            {'pid': 43, 'active_state': 'active', 'sub_state': 'exited'},
+            {'pid': 43, 'active_state': 'active', 'sub_state': 'running'}])
+        with patch('failure_paths.time.sleep'), patch('failure_paths.write_json'):
+            self.assertEqual(campaign.replacement_pid(), 43)
+        self.assertEqual(campaign.gateway_status.call_count, 4)
+
+    def test_gateway_status_requires_complete_unit_state(self):
+        campaign = LifetimeCampaign(SimpleNamespace(ssh_key='unused', ssh_port=1, known_hosts='unused'))
+        campaign.run = Mock(return_value=b'MainPID=43\nActiveState=activating\nSubState=start\n')
+        self.assertEqual(campaign.gateway_status(),
+            {'pid': 43, 'active_state': 'activating', 'sub_state': 'start'})
+        campaign.run.return_value = b'MainPID=43\n'
+        with self.assertRaises(AssertionError):
+            campaign.gateway_status()
 
 
 if __name__ == '__main__':
