@@ -110,13 +110,13 @@ Describe and a fresh helper retains those three real sockets again. Only after
 the helper reports readiness does the campaign acquire its single observation,
 propose once and confirm RUNNING. Helper startup therefore consumes neither the
 observation freshness horizon nor the operation window. The existing three-second
-command lease and eight-second retention lease remain unchanged; failed readiness
+pre-kill command lease remains unchanged; failed readiness
 cannot send a proposal or signal. Its command lease accepts one `kill` line, then sends
 SIGKILL once through the pinned pidfd. It confirms process death while all three
 duplicate descriptors remain open and attempts one nonblocking `H` heartbeat on
 the retained control socket. That single write may already fail because the
 manager detected death; the failure is recorded. The helper never reads payloads
-or changes shared descriptor flags. Its fd retention lease is eight seconds,
+or changes shared descriptor flags. Its fd retention lease is fifty seconds,
 with explicit success checks against the guest CLOCK_BOOTTIME duration; this is
 a measured test limit, not a scheduler or storage WCET guarantee.
 
@@ -147,3 +147,30 @@ PIDs, socket inodes/peer endpoints, pidfd death, helper/lease timestamps,
 replacement inspection and offline recovery reports are retained alongside the
 capture. This checks the trusted-Linux gateway lifetime contract; it does not
 claim isolation from a hostile root process.
+
+## Installed-startup amendment 01
+
+The retained `robot-a10-lifetime-06` campaign reached RUNNING, signalled the exact
+gateway once, retained all three FDs and observed reason-3 closure/reconciliation
+inside the original three-second bound. It then failed the three-second replacement
+PID poll. The installed gateway's signed-tuple `ExecStartPre` succeeded after
+21.82 seconds; exit-to-running took 25.80 seconds. The effective gateway service
+applies `CPUQuota=25%` to that verification too. These measured startup times do
+not attribute its exact CPU/I/O cost, and the failed campaign remains unchanged.
+
+This numbered test-only amendment allows forty seconds for replacement PID
+readiness and the one explicit maintenance start; maintenance stop remains fifteen
+seconds and replacement authentication remains two seconds. The helper's finite
+retention lease changes from eight to fifty seconds so the test can retain real
+FDs across the installed replacement. That overall lease still expires and closes
+all owned duplicates if any combined phase overruns. The three-second closure
+bound, pre-kill command lease, one-shot signal/start rules and all production
+resource, authority, clock and storage limits are unchanged. No production
+preflight is bypassed or optimized for this test.
+
+The existing full `guest.py` lifecycle uses the same forty-second test readiness
+constant for manager/gateway replacement and an explicit gateway start. Ordinary
+SSH commands retain their thirty-second budget; operation waits and the full
+lifecycle's four-second closure bound are unchanged. A new numbered campaign is
+required to execute either amended harness; prior output and source pins remain
+historical evidence.

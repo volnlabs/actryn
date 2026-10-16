@@ -108,6 +108,37 @@ class LifetimeTests(unittest.TestCase):
                 campaign.service_once('start')
             run.assert_called_once()
 
+    def test_installed_replacement_can_finish_after_preflight_but_remains_bounded(self):
+        for becomes_ready in (True, False):
+            campaign = LifetimeCampaign(SimpleNamespace(ssh_key='unused', ssh_port=1, known_hosts='unused'))
+            campaign.pins = {'gateway_pid': 42}
+            clock = [0.0]
+            def read_pid():
+                clock[0] += 6.5
+                return 43 if becomes_ready and clock[0] >= 26 else 0
+            campaign.gateway_pid = Mock(side_effect=read_pid)
+            with patch('failure_paths.time.monotonic', side_effect=lambda: clock[0]), \
+                    patch('failure_paths.time.sleep'), patch('failure_paths.write_json'):
+                if becomes_ready:
+                    self.assertEqual(campaign.replacement_pid(), 43)
+                    self.assertEqual(campaign.gateway_pid.call_count, 4)
+                else:
+                    with self.assertRaises(AssertionError):
+                        campaign.replacement_pid()
+                    self.assertEqual(campaign.gateway_pid.call_count, 7)
+
+    def test_installed_start_budget_does_not_expand_stop_or_retry_mutations(self):
+        for action, expected in [('start', 40), ('stop', 15)]:
+            campaign = LifetimeCampaign(SimpleNamespace(ssh_key='unused', ssh_port=1, known_hosts='unused'))
+            completed = SimpleNamespace(returncode=0, stdout=b'', stderr=b'', check_returncode=Mock())
+            with patch('gateway_lifetime.write_json'), patch('gateway_lifetime.subprocess.run',
+                    return_value=completed) as run:
+                campaign.service_once(action)
+                self.assertEqual(run.call_args.kwargs['timeout'], expected)
+                with self.assertRaises(AssertionError):
+                    campaign.service_once(action)
+                run.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

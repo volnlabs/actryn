@@ -12,7 +12,7 @@ import time
 from failure_paths import OneProposal, same_operation
 from gateway_campaign import GatewayCampaign, main
 from gateway_fds import HOLD_NS, validate_roles
-from guest import phase, wire, write_json
+from guest import SERVICE_START_TIMEOUT_S, phase, wire, write_json
 from actryn import OutcomeUnknown, RpcError
 from source_gap import require
 
@@ -142,6 +142,10 @@ class LifetimeCampaign(GatewayCampaign):
     def gateway_pid(self):
         return int(self.run('systemctl show --value -p MainPID actryn-gatewayd.service').strip())
 
+    def replacement_pid(self):
+        return self.poll_read('gateway-replacement', self.gateway_pid,
+            lambda p: p > 1 and p != self.pins['gateway_pid'], SERVICE_START_TIMEOUT_S)
+
     def ready_read(self):
         try:
             with self.connection() as rpc:
@@ -158,7 +162,7 @@ class LifetimeCampaign(GatewayCampaign):
         write_json('gateway-' + action + '-intent.json', {'unit': 'actryn-gatewayd.service', 'automatic_retry': False})
         try:
             result = subprocess.run(self.ssh + ['systemctl ' + action + ' actryn-gatewayd.service'],
-                                    capture_output=True, timeout=15)
+                capture_output=True, timeout=SERVICE_START_TIMEOUT_S if action == 'start' else 15)
         except BaseException as error:
             write_json('gateway-' + action + '-unknown.json', {'error': repr(error),
                 'automatic_retry': False, 'service_action_outcome_unknown': True})
@@ -194,8 +198,7 @@ class LifetimeCampaign(GatewayCampaign):
                     check_retirement(closed, operation)
                     require(closed['runtime']['kernel']['now_ns'] - killed['signal_ns'] < 3_000_000_000,
                             'gateway closure observation exceeded original liveness bound')
-                    replacement = self.poll_read('gateway-replacement', self.gateway_pid,
-                        lambda p: p > 1 and p != self.pins['gateway_pid'], 3)
+                    replacement = self.replacement_pid()
                     self.poll_read('replacement-authentication', self.ready_read, lambda d: d['ready'], 2)
                     with self.connection() as fresh:
                         inspection = fresh.query(self.handle)

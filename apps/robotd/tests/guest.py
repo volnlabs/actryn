@@ -25,6 +25,9 @@ from actryn import Client, RequestHandle, RpcError
 from actryn import robot_v1_pb2 as wire
 
 CAMPAIGN = {'phase': 'arguments', 'started': time.monotonic()}
+# Installed services verify the complete signed tuple before creating their PID.
+# This test readiness budget never extends a grant, closure or RPC deadline.
+SERVICE_START_TIMEOUT_S = 40
 
 
 def write_json(name, value):
@@ -58,8 +61,8 @@ def main():
            '-o', 'ConnectTimeout=5', '-o', 'UserKnownHostsFile=' + args.known_hosts,
            'root@127.0.0.1']
 
-    def run(command):
-        return subprocess.check_output(ssh + [command], timeout=30)
+    def run(command, timeout=30):
+        return subprocess.check_output(ssh + [command], timeout=timeout)
 
     phase('guest identity preflight')
     assert run('uname -m').strip() == b'aarch64'
@@ -257,7 +260,7 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
                'nonzero_output_asserted': False, 'exact_signal_state_independently_measured': False,
                'elapsed_after_signal_s': time.monotonic() - trigger, 'description': closed})
     poll(lambda: int(run('systemctl show --property=MainPID --value actryn-gatewayd.service').strip()),
-         lambda pid: pid > 0 and pid != old_pid, 5)
+         lambda pid: pid > 0 and pid != old_pid, SERVICE_START_TIMEOUT_S)
 
     def gateway_ready():
         # Reconnection/Describe is read-only. Only this readiness probe tolerates
@@ -268,7 +271,7 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
         except (RpcError, OSError) as error:
             return {'ready': False, 'error': repr(error)}
 
-    poll(gateway_ready, lambda value: value['ready'], 5)
+    poll(gateway_ready, lambda value: value['ready'], SERVICE_START_TIMEOUT_S)
     with connection('', server_pin) as rpc:
         retained = rpc.query(absent)
         assert retained['snapshot']['cancellation_durable'] and not retained['live_authority']
@@ -315,7 +318,7 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
         write_json('manager-before-kill.json', {'description': running, 'durable': durable})
         run('systemctl kill --kill-whom=main --signal=SIGKILL actryn-robotd.service')
     poll(lambda: int(run('systemctl show --property=MainPID --value actryn-robotd.service').strip()),
-         lambda pid: pid > 0 and pid != manager_pid, 8)
+         lambda pid: pid > 0 and pid != manager_pid, SERVICE_START_TIMEOUT_S)
     epoch = b''  # Describe discovers the replacement before inspecting retained identities.
 
     def manager_ready():
@@ -324,15 +327,15 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
         except (subprocess.SubprocessError, OSError, RuntimeError) as error:
             return {'ready': False, 'error': repr(error)}
 
-    recovered = poll(manager_ready, lambda value: value['ready'], 8)['description']
+    recovered = poll(manager_ready, lambda value: value['ready'], SERVICE_START_TIMEOUT_S)['description']
     assert epoch != previous_epoch
     assert recovered['runtime']['health']['inhibited']
     assert recovered['runtime']['prepared'] is None
     assert not recovered['runtime']['kernel']['flags'] & 8
     write_json('manager-restarted.json', recovered)
     # Restart the relay explicitly if systemd stopped the dependent unit.
-    run('systemctl start actryn-gatewayd.service')
-    poll(gateway_ready, lambda value: value['ready'], 5)
+    run('systemctl start actryn-gatewayd.service', timeout=SERVICE_START_TIMEOUT_S)
+    poll(gateway_ready, lambda value: value['ready'], SERVICE_START_TIMEOUT_S)
     with connection('', server_pin) as rpc:
         retained = rpc.query(crashed)
         snapshot = retained['snapshot']

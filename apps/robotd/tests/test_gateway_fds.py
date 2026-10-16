@@ -6,9 +6,9 @@ import threading
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
-from gateway_fds import classify_socket, command, now, Retained, SignalOnce, validate_roles
+from gateway_fds import HOLD_NS, classify_socket, command, now, Retained, SignalOnce, validate_roles
 
 
 class RetainedFdTests(unittest.TestCase):
@@ -93,6 +93,19 @@ class RetainedFdTests(unittest.TestCase):
         original.sendall(b'x')
         self.assertEqual(peer.recv(1), b'x')
         original.close(); peer.close()
+
+    def test_installed_restart_release_fits_finite_lease_and_expiry_never_reads(self):
+        with patch('gateway_fds.now', return_value=25_800_000_000), \
+                patch('gateway_fds.select.select', return_value=([23], [], [])) as ready, \
+                patch('gateway_fds.os.read', return_value=b'release\n') as read:
+            command(b'release\n', HOLD_NS, 23)
+            self.assertEqual(ready.call_args.args[-1], 24.2)
+            read.assert_called_once()
+        with patch('gateway_fds.now', return_value=50_000_000_000), \
+                patch('gateway_fds.select.select') as ready, patch('gateway_fds.os.read') as read:
+            with self.assertRaises(AssertionError):
+                command(b'release\n', HOLD_NS, 23)
+            ready.assert_not_called(); read.assert_not_called()
 
 
 if __name__ == '__main__':

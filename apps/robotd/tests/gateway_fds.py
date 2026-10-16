@@ -17,7 +17,9 @@ import struct
 import sys
 import time
 
-HOLD_NS = 8_000_000_000
+# Test-only installed-startup amendment: closure remains bounded to three seconds.
+# This standalone helper retains its own finite CLOCK_BOOTTIME cleanup deadline.
+HOLD_NS = 50_000_000_000
 PATHS = {'/run/actryn-robot/gateway-control.sock': 'control', '/run/actryn-robot/relay.sock': 'relay'}
 
 
