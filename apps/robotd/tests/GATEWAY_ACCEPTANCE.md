@@ -32,6 +32,12 @@ The bounded cases are:
   record is replayed once on the same connection. TLS must reject it and the
   original operation must still be the only allocated operation. This is an
   intentional malicious replay, never a client retry.
+  A valid PendingIntent reply need not contain an operation ID. Before replay,
+  one preconnected observer queries the original handle and checks the full
+  RUNNING kernel identity within one second. The original encrypted stream stays
+  idle during this check. The lifetime case uses the same bounded read-only
+  confirmation before process interruption. Unknown/terminal replies, changed
+  identities and expired confirmation deadlines fail without another proposal.
 * Three authenticated observation connections hold the three ordinary request
   slots using incomplete next-frame headers. Two incomplete TLS handshakes occupy
   the handshake permits; an additional handshake must be rejected. The test

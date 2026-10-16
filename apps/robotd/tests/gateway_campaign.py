@@ -7,11 +7,38 @@ import re
 import secrets
 import shlex
 import subprocess
+import time
 
 from failure_paths import Campaign as FailureCampaign, operation_id, same_operation
 from guest import CAMPAIGN, ROOT, RequestHandle, phase, wire, write_json
 from source_gap import no_effect, require, sha
 from ssh_campaign import SharedSsh
+
+
+def acknowledged_running(handle, result, query, description):
+    require(result.get('calls') == 1 and result.get('automatic_retries') == 0
+            and 'reply' in result and not result.get('outcome_unknown'), 'proposal reply not acknowledged')
+    reply, snapshot = result['reply'], query['snapshot']
+    require(query['live_authority'] and snapshot is not None, 'original handle unavailable')
+    for value in (reply, snapshot):
+        require(value['namespace'] == list(handle.namespace) and value['key'] == list(handle.key)
+                and value['phase'] in ('PendingIntent', 'IntentDurable', 'Submitted')
+                and value['revision'] > 0 and not value['terminal']
+                and not value['persistence_failed'] and not value['cancellation_durable'],
+                'proposal identity changed or became terminal/unknown')
+    runtime = description['runtime']
+    require(description['clock_healthy'] and runtime['health']['healthy'] and runtime['event_stream_healthy']
+            and runtime['prepared'] is not None
+            and runtime['prepared']['binding']['attempt'] == list(handle.attempt)
+            and runtime['prepared']['binding']['namespace'] == list(handle.namespace), 'proposal binding/health changed')
+    kernel = runtime['kernel']
+    require(kernel['state'] == 2 and kernel['flags'] & 8, 'proposal authority closed')
+    if snapshot['operation'] is None or kernel['operation_state'] != 2:
+        return None
+    operation = operation_id(kernel)
+    require(snapshot['operation'] == operation
+            and (reply['operation'] is None or reply['operation'] == operation), 'acknowledged/running identity mismatch')
+    return operation
 
 
 def validate_gateway_capture(decoded, handle, prepared, operation, mode, interval):
@@ -51,6 +78,28 @@ def validate_gateway_capture(decoded, handle, prepared, operation, mode, interva
 
 
 class GatewayCampaign(FailureCampaign):
+    def confirm_running(self, rpc, result):
+        deadline, original_timeout, index = time.monotonic() + 1, rpc._timeout, 0
+        try:
+            while True:
+                remaining = deadline - time.monotonic()
+                require(remaining > 0, 'original proposal confirmation deadline; no resend')
+                rpc._timeout = min(original_timeout, remaining)
+                query = rpc.query(self.handle)
+                remaining = deadline - time.monotonic()
+                require(remaining > 0, 'original proposal confirmation deadline; no resend')
+                rpc._timeout = min(original_timeout, remaining)
+                description = rpc.describe()
+                write_json(f'confirmed-running-{index:03}.json', {'query': query, 'description': description})
+                require(time.monotonic() < deadline, 'original proposal confirmation deadline; no resend')
+                operation = acknowledged_running(self.handle, result, query, description)
+                if operation is not None:
+                    return operation
+                index += 1
+                time.sleep(.01)
+        finally:
+            rpc._timeout = original_timeout
+
     def setup(self, preflight=lambda *_: None):
         a = self.args
         self.cancel_attempted = False

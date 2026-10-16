@@ -9,7 +9,7 @@ import shlex
 import subprocess
 import time
 
-from failure_paths import OneProposal, operation_id, same_operation
+from failure_paths import OneProposal, same_operation
 from gateway_campaign import GatewayCampaign, main
 from gateway_fds import HOLD_NS, validate_roles
 from guest import phase, wire, write_json
@@ -177,13 +177,7 @@ class LifetimeCampaign(GatewayCampaign):
                     'target': [100, -100, 10000], 'automatic_retry': False})
                 self.start_checked(rpc, self.handle, call)
                 result = call.finish()
-                require('reply' in result and result['reply']['operation'] is not None, 'proposal not acknowledged')
-                running = self.poll_read('running', rpc.describe,
-                    lambda d: d['runtime']['kernel']['operation_state'] == 2 and d['runtime']['kernel']['flags'] & 8, 1)
-                operation = operation_id(running['runtime']['kernel'])
-                require(result['reply']['operation'] == operation and running['clock_healthy']
-                        and running['runtime']['health']['healthy'] and running['runtime']['event_stream_healthy'],
-                        'running identity or health changed')
+                operation = self.confirm_running(rpc, result)
                 with RemoteRetainer(self) as retained:
                     killed = retained.kill_once()
                     closed = self.poll_read('gateway-closed', lambda: self.local('describe', label='closure-read'),

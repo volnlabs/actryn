@@ -158,7 +158,7 @@ class TrafficCampaign(GatewayCampaign):
 
     def replay(self):
         phase('A10 one acknowledged proposal followed by one malicious ciphertext replay')
-        with CipherGate(self.args.tcp_port) as gate, self.connection(gate.port) as sender:
+        with CipherGate(self.args.tcp_port) as gate, self.connection(gate.port) as sender, self.connection() as observer:
             observation = sender.observe(self.handle.attempt, self.handle.namespace)
             call = OneProposal(sender, self.handle, observation)
             write_json('proposal-intent.json', {'handle': self.handle.json(), 'observation': observation,
@@ -166,8 +166,9 @@ class TrafficCampaign(GatewayCampaign):
             self.start_checked(sender, self.handle, call, lambda: gate.arm('capture'))
             try:
                 result = call.finish()
-                require('reply' in result and result['reply']['operation'] is not None, 'proposal was not acknowledged')
+                require('reply' in result, 'proposal was not acknowledged')
                 gate.seal()
+                operation = self.confirm_running(observer, result)
                 # The SDK response proves the captured record reached the manager once.
                 gate.forward_once()
                 sender._socket.settimeout(.75)
@@ -186,8 +187,7 @@ class TrafficCampaign(GatewayCampaign):
         with self.connection() as rpc:
             running = self.poll_read('running-after-replay', rpc.describe, lambda d:
                 d['runtime']['kernel']['operation_state'] == 2 and d['runtime']['kernel']['flags'] & 8, 1)
-            operation = operation_id(running['runtime']['kernel'])
-            require(result['reply']['operation'] == operation, 'acknowledged/running operation mismatch')
+            require(operation_id(running['runtime']['kernel']) == operation, 'running operation changed after replay')
             write_json('replay-query.json', rpc.query(self.handle))
             return operation
 
