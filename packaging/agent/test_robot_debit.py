@@ -1,0 +1,261 @@
+import contextlib
+import copy
+import hashlib
+import json
+import socket
+import socketserver
+import threading
+import time
+from types import SimpleNamespace
+import unittest
+from unittest.mock import patch
+import guest_robot_debit as campaign
+from debit_gate import ConnectionGate
+
+
+def fixture(*, active=False, crashed=False):
+    attempt, binding = 'a' * 32, {'attempt_id': 'a' * 32, 'namespace': 'b' * 32}
+    handle = {'attempt': attempt, 'namespace': 'b' * 32, 'key': 'c' * 64}
+    observer = {'ready': True, 'lost': 0, 'collector_epoch': 'original-epoch',
+                'coverage': list(campaign.common.REQUIRED_COVERAGE)}
+    intent = {'request_key': 'preview-1', 'handle': handle, 'robot_epoch': 'd' * 32,
+              'observation_digest': 'sha256:' + 'e' * 64, 'proposal_digest': 'sha256:' + 'f' * 64,
+              'artifact_digest': 'sha256:' + '1' * 64,
+              'runtime_binding': {'boot_id': 'original-boot', 'observer': observer}}
+    logs = {'stdout.log': 'one original agent reply\n', 'stderr.log': ''}
+    state, outcome = ('running', 'pending') if active else ('reaped', 'unknown' if crashed else 'cancelled')
+    values = {
+        'attempt': {'id': attempt, 'state': state, 'outcome': outcome, 'artifact_digest': intent['artifact_digest']},
+        'runtime_binding': intent['runtime_binding'],
+        'broker': {'attempt_state': state, 'attempt_outcome': outcome,
+                   'calls': [{'request_key': 'preview-1', 'state': 'settled', 'consumed_tokens': 0,
+                              'publication_closed': not active}], 'policy_denials': [],
+                   'policy_denials_retained': 0, 'evidence_gaps': ['log_incomplete'] if crashed else []},
+        'robot': {'classification': 'trusted_peer_delegation_metadata', 'binding': binding,
+                  'outstanding_debits': 1, 'requests_retained': 1,
+                  'requests': [{**{key: intent[key] for key in ('request_key', 'handle', 'robot_epoch',
+                                  'observation_digest', 'proposal_digest')},
+                                'outstanding_debit': True, 'cancellation_requested': not active,
+                                'phase': 'accepted' if active else 'unknown'}]}}
+    omissions = []
+    if active or crashed:
+        omissions.append({'artifact': 'runtime_facts', 'reason': 'final_resource_snapshot_unavailable', 'omitted_records': 1})
+    else:
+        values['runtime_facts'] = {'observer_health_unavailable': False, 'observer': observer,
+            'resources': {'classification': 'observed_cgroup_v2_counters',
+                          'stage': 'after_descendants_empty_before_runtime_delete',
+                          'counters': {key: '0\n' for key in campaign.common.RESOURCE_COUNTERS}, 'unavailable': []}}
+    if crashed:
+        omissions.append({'artifact': 'runtime_facts', 'reason': 'log_incomplete', 'omitted_records': 1})
+    for name in ('stdout', 'stderr'):
+        raw = logs[name + '.log'].encode()
+        values[name] = {'classification': 'untrusted_agent_output_not_policy_attribution',
+                        'retained_bytes': len(raw), 'retained_sha256': 'sha256:' + hashlib.sha256(raw).hexdigest(),
+                        'file_complete': not active and not crashed, 'source_truncated': False,
+                        'tail_encoding': 'hex', 'tail': raw.hex(), 'tail_omitted_bytes': 0}
+    bundle = {'schema': 'actryn.server.evidence.v1', 'attempt_id': attempt,
+              'execution_replay_eligible': False, 'omissions': omissions,
+              'artifacts': [{'name': name, 'content': copy.deepcopy(content)} for name, content in values.items()]}
+    rehash(bundle)
+    return bundle, attempt, binding, intent, logs
+
+
+def rehash(bundle):
+    for item in bundle['artifacts']:
+        item['bytes'] = len(campaign.common.compact(item['content']))
+        item['sha256'] = campaign.common.digest(item['content'])
+
+
+def wait(predicate):
+    until = time.monotonic() + 1
+    while not predicate():
+        if time.monotonic() >= until: raise AssertionError('host predicate timeout')
+        time.sleep(.005)
+
+
+IDENTITY = {'device': [1] * 16, 'boot': 1, 'session': 2, 'runtime_nonce': [2] * 16,
+            'grant': 3, 'instance': 4, 'operation': 5, 'stream': 6}
+
+
+@contextlib.contextmanager
+def echo_server():
+    class Handler(socketserver.BaseRequestHandler):
+        def handle(self):
+            while True:
+                data = self.request.recv(4096)
+                if not data: return
+                self.request.sendall(data)
+    class Server(socketserver.ThreadingTCPServer):
+        daemon_threads = True
+        def handle_error(self, *_): pass
+    with Server(('127.0.0.1', 0), Handler) as server:
+        thread = threading.Thread(target=server.serve_forever, kwargs={'poll_interval': .01})
+        thread.start()
+        try: yield server.server_address[1]
+        finally: server.shutdown(); thread.join(1)
+
+
+class PartialEvidenceTests(unittest.TestCase):
+    def test_actual_partial_shapes_preserve_distinct_states(self):
+        for active, crashed in ((False, False), (True, False), (False, True)):
+            campaign.verify_partial(*fixture(active=active, crashed=crashed), active=active, crashed=crashed)
+
+    def test_known_remote_settlement_does_not_erase_crash_uncertainty(self):
+        args = list(fixture(crashed=True))
+        remote = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'robot')
+        remote['outstanding_debits'] = 0
+        remote['requests'][0].update(outstanding_debit=False, phase='settled',
+                                     reconciled=True, remote_verdict='TargetReached')
+        rehash(args[0])
+        campaign.verify_partial(*args, crashed=True, settled=True)
+        with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True)
+        remote['requests'][0]['reconciled'] = False
+        rehash(args[0])
+        with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True, settled=True)
+
+    def test_rehashed_wrong_debit_identity_publication_and_log_cannot_pass(self):
+        for fault in ('debit', 'handle', 'binding', 'phase', 'closed', 'call_state',
+                      'raw_hash', 'complete', 'resources', 'missing_artifact'):
+            args = list(fixture())
+            bundle = args[0]; values = {v['name']: v['content'] for v in bundle['artifacts']}
+            if fault == 'debit': values['robot']['outstanding_debits'] = 0
+            elif fault == 'handle': values['robot']['requests'][0]['handle']['key'] = '9' * 64
+            elif fault == 'binding': values['robot']['binding']['namespace'] = '9' * 32
+            elif fault == 'phase': values['robot']['requests'][0]['phase'] = 'settled'
+            elif fault == 'closed': values['broker']['calls'][0]['publication_closed'] = False
+            elif fault == 'call_state': values['broker']['calls'][0]['state'] = 'unknown'
+            elif fault == 'raw_hash': values['stdout']['retained_sha256'] = 'sha256:' + '0' * 64
+            elif fault == 'complete': values['stdout']['file_complete'] = False
+            elif fault == 'resources': values['runtime_facts']['resources']['unavailable'] = ['io.stat']
+            else: bundle['artifacts'].pop()
+            rehash(bundle)
+            with self.subTest(fault=fault), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args)
+
+    def test_crash_uncertainty_cannot_disappear_or_be_called_complete(self):
+        for fault in ('omission', 'complete', 'gap', 'invented_gap'):
+            args = list(fixture(crashed=True)); values = {v['name']: v['content'] for v in args[0]['artifacts']}
+            if fault == 'omission': args[0]['omissions'].pop()
+            elif fault == 'complete': values['stdout']['file_complete'] = True
+            elif fault == 'gap': values['broker']['evidence_gaps'] = []
+            else: args[0]['omissions'].append({'artifact': 'robot', 'reason': 'arbitrary', 'omitted_records': 1})
+            rehash(args[0])
+            with self.subTest(fault=fault), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args, crashed=True)
+
+    def test_missing_postcrash_log_requires_independent_absence_and_omission(self):
+        args = list(fixture(crashed=True))
+        args[0]['artifacts'] = [v for v in args[0]['artifacts'] if v['name'] != 'stdout']
+        args[0]['omissions'].append({'artifact': 'stdout', 'reason': 'retained_log_unavailable', 'omitted_records': 1})
+        with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True)
+        args[4]['stdout.log'] = None
+        campaign.verify_partial(*args, crashed=True)
+
+    def test_empty_artifact_list_is_not_partial_evidence(self):
+        bundle = {'schema': 'actryn.server.evidence.v1', 'attempt_id': 'a' * 32,
+                  'execution_replay_eligible': False, 'artifacts': [], 'omissions': []}
+        with self.assertRaises(AssertionError):
+            campaign.verify_partial(bundle, 'a' * 32, {}, {}, {})
+
+    def test_peer_digest_matches_typed_struct_order_not_configuration_file_order(self):
+        keys = ('endpoint', 'dns_name', 'robot_leaf_sha256', 'principal',
+                'robot_configuration_digest', 'robot_profile_digest', 'ca_pem', 'client_certificate_pem')
+        original = {key: key for key in keys}
+        reversed_file = {key: key for key in reversed(keys)}
+        self.assertEqual(campaign.peer_digest(original), campaign.peer_digest(reversed_file))
+        self.assertNotEqual(campaign.peer_digest(original), campaign.common.digest(original))
+
+    def test_reviewed_source_limits_are_unchanged(self):
+        self.assertEqual(campaign.source_limits()['GLOBAL_JOBS'], 4)
+
+    def test_wrong_target_pin_fails_before_inherited_recovery_or_guest_output_creation(self):
+        run = object.__new__(campaign.DebitCampaign)
+        run.peer = {'endpoint': '10.0.2.2:1234'}
+        run.gate = SimpleNamespace(port=1234)
+        with (patch.object(run, 'mark'),
+              patch.object(run, 'pin_platforms', side_effect=AssertionError('wrong machine')),
+              patch.object(run, 'preflight') as inherited):
+            with self.assertRaises(AssertionError): run.execute()
+            inherited.assert_not_called()
+
+    def test_running_gate_requires_matching_full_runtime_kernel_identity(self):
+        binding = {'attempt': list(bytes.fromhex('a' * 32)), 'namespace': list(bytes.fromhex('b' * 32))}
+        status = {'state': 2, 'operation_state': 2, 'flags': 8,
+                  'device_identity': IDENTITY['device'], 'controller_boot': 1, 'controller_session': 2,
+                  **{k: IDENTITY[k] for k in ('runtime_nonce', 'grant', 'instance', 'operation', 'stream')}}
+        description = {'runtime': {'prepared': {'binding': binding}, 'kernel': status,
+                                   'operation': {'operation': IDENTITY}}}
+        self.assertEqual(campaign.operation_identity(description, 'a' * 32, 'b' * 32), IDENTITY)
+        for field, value in [('operation', 99), ('controller_boot', 9), ('runtime_nonce', [9] * 16)]:
+            changed = copy.deepcopy(description); changed['runtime']['kernel'][field] = value
+            with self.subTest(field=field), self.assertRaises(AssertionError):
+                campaign.operation_identity(changed, 'a' * 32, 'b' * 32)
+        description['runtime']['kernel']['flags'] = 0
+        self.assertIsNone(campaign.operation_identity(description, 'a' * 32, 'b' * 32))
+
+
+class GateTests(unittest.TestCase):
+    def test_existing_connection_keeps_flowing_but_new_connections_are_not_forwarded(self):
+        with echo_server() as upstream, ConnectionGate(0, upstream, lifetime=3) as gate:
+            with socket.create_connection(('127.0.0.1', gate.port)) as old:
+                old.settimeout(.5); old.sendall(b'before'); self.assertEqual(old.recv(6), b'before')
+                gate.arm(IDENTITY)
+                with socket.create_connection(('127.0.0.1', gate.port)) as blocked:
+                    blocked.settimeout(.05); blocked.sendall(b'held')
+                    with self.assertRaises(TimeoutError): blocked.recv(4)
+                    old.sendall(b'after'); self.assertEqual(old.recv(5), b'after')
+                wait(lambda: gate.report()['blocked_active'] == 0)
+                gate.pass_future()
+                with socket.create_connection(('127.0.0.1', gate.port)) as fresh:
+                    fresh.settimeout(.5); fresh.sendall(b'new'); self.assertEqual(fresh.recv(3), b'new')
+                report = gate.report()
+                self.assertEqual(report['blocked_bytes'], 4)
+                self.assertEqual(report['automatic_reconnects'], 0)
+                self.assertFalse(report['tls_terminated'])
+                self.assertFalse(report['withheld_replayed'])
+
+    def test_connection_byte_and_lifetime_caps_fail_closed(self):
+        with echo_server() as upstream:
+            with ConnectionGate(0, upstream, lifetime=3, connections=1) as gate:
+                with socket.create_connection(('127.0.0.1', gate.port)) as first:
+                    first.sendall(b'a'); self.assertEqual(first.recv(1), b'a')
+                    with socket.create_connection(('127.0.0.1', gate.port)): pass
+                    wait(lambda: gate.report()['error'] is not None)
+                    self.assertLessEqual(gate.report()['connections'], 1)
+            with ConnectionGate(0, upstream, lifetime=3, per_connection=4) as gate:
+                with socket.create_connection(('127.0.0.1', gate.port)) as client:
+                    client.sendall(b'12345'); wait(lambda: gate.report()['error'] is not None)
+                self.assertEqual(gate.report()['bytes_forwarded'], 0)
+            with ConnectionGate(0, upstream, lifetime=3, total_bytes=4) as gate:
+                with socket.create_connection(('127.0.0.1', gate.port)) as client:
+                    client.sendall(b'12345'); wait(lambda: gate.report()['error'] is not None)
+                self.assertEqual(gate.report()['bytes_forwarded'], 0)
+            with ConnectionGate(0, upstream, lifetime=.05) as gate:
+                wait(lambda: gate.report()['error'] is not None)
+                self.assertIn('lifetime', gate.report()['error'])
+
+    def test_gate_configuration_cannot_raise_fixed_caps(self):
+        for arguments in ({'connections': 65}, {'active': 9}, {'lifetime': 1201},
+                          {'per_connection': 262145}, {'total_bytes': 8 * 1024 * 1024 + 1}):
+            with self.subTest(arguments=arguments), self.assertRaises(AssertionError):
+                ConnectionGate(0, 12345, **arguments)
+
+    def test_gate_rejects_incomplete_or_zero_operation_identity(self):
+        with echo_server() as upstream, ConnectionGate(0, upstream, lifetime=3) as gate:
+            bad = dict(IDENTITY, operation=0)
+            with self.assertRaises(AssertionError): gate.arm(bad)
+            with self.assertRaises(AssertionError): gate.arm({'operation': 1})
+
+    def test_retained_gate_identity_cannot_be_changed_by_caller_or_report(self):
+        with echo_server() as upstream, ConnectionGate(0, upstream, lifetime=3) as gate:
+            identity = copy.deepcopy(IDENTITY)
+            gate.arm(identity)
+            identity['device'][0] = 99
+            report = gate.report()
+            self.assertEqual(report['arms'][0]['operation'], IDENTITY)
+            report['arms'][0]['operation']['device'][0] = 98
+            self.assertEqual(gate.report()['arms'][0]['operation'], IDENTITY)
+
+
+if __name__ == '__main__':
+    unittest.main()
