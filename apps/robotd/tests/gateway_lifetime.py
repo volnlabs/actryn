@@ -19,9 +19,13 @@ from source_gap import require
 
 def check_retirement(description, operation):
     runtime, kernel = description['runtime'], description['runtime']['kernel']
+    fault = runtime['health']['registry_fault']
+    # The registry writer's Drop records WriterStopped after normal retirement.
+    registry_closed = fault is None or (fault == 'WriterStopped'
+        and runtime.get('retiring') is True and runtime.get('retirement_ready') is True)
     require(description['clock_healthy'] and runtime['event_stream_healthy']
         and set(runtime['health']['evidence_issues']).issubset({'WriterStopped'})
-        and runtime['health']['registry_fault'] is None and same_operation(kernel, operation)
+        and registry_closed and same_operation(kernel, operation)
         and kernel['reason'] == 3 and not kernel['flags'] & 8
         and kernel['operation_state'] == 4 and kernel['left_permille'] == kernel['right_permille'] == 0,
         'gateway revocation not reconciled, or independent health fault')

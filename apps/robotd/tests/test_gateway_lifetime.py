@@ -83,6 +83,21 @@ class LifetimeTests(unittest.TestCase):
                 retained.kill_once()
         retained.process.stdin.write.assert_called_once_with(b'kill\n')
 
+    def test_registry_writer_stop_requires_completed_retirement(self):
+        _, _, _, operation, _, _ = test_failure_paths.CapturePredicateTests().fixture()
+        kernel = {'device_identity': operation['device'], 'controller_boot': operation['boot'],
+            'controller_session': operation['session'], **{k: operation[k] for k in
+            ('runtime_nonce', 'grant', 'operation', 'stream')}, 'reason': 3, 'flags': 1,
+            'operation_state': 4, 'left_permille': 0, 'right_permille': 0}
+        value = {'clock_healthy': True, 'runtime': {'kernel': kernel, 'event_stream_healthy': True,
+            'retiring': True, 'retirement_ready': True,
+            'health': {'registry_fault': 'WriterStopped', 'evidence_issues': ['WriterStopped']}}}
+        check_retirement(value, operation)
+        for field in ('retiring', 'retirement_ready'):
+            bad = copy.deepcopy(value); bad['runtime'][field] = False
+            with self.subTest(field=field), self.assertRaises(AssertionError):
+                check_retirement(bad, operation)
+
     def test_start_outcome_unknown_cannot_trigger_second_start(self):
         campaign = LifetimeCampaign(SimpleNamespace(ssh_key='unused', ssh_port=1, known_hosts='unused'))
         with patch('gateway_lifetime.write_json'), patch('gateway_lifetime.subprocess.run',
