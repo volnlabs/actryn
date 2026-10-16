@@ -52,7 +52,8 @@ def observer_health(health, initial):
             and COVERAGE <= set(health['coverage']), 'observer loss, coverage or epoch changed')
 
 
-def validate_export(bundle, attempt, artifact, binding, inspection, logs, summary, trace_bytes, started):
+def validate_export(bundle, attempt, artifact, binding, inspection, logs, summary, trace_bytes, started,
+                    agent_check=None):
     """Correlate exported descriptors with retained identities and independent raw files."""
     require(bundle.get('schema') == 'actryn.server.evidence.v1'
             and bundle.get('attempt_id') == attempt
@@ -122,6 +123,9 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
             and inspection['denials_omitted'] == 0 and broker['calls'] == inspection['calls'],
             'broker evidence incomplete or changed')
     calls = broker['calls']
+    if agent_check is not None:
+        agent_check(logs, inspection)
+        return
     require(len(calls) == (1 if started else 0)
             and all(call['publication_closed'] is True and call['state'] == 'settled'
                     and call['request_key'] == 'preview-1' and call['consumed_tokens'] == 0 for call in calls),
@@ -230,7 +234,7 @@ class Campaign:
         require(len(proposals) == 1 and proposals[0]['value']['origin'] == 'server_attested',
                 'active agent output changed or repeated')
 
-    def export(self, attempt):
+    def export(self, attempt, agent_check=None):
         path = self.output / (attempt + '-export.json')
         self.cli('export', '--attempt', attempt, '--out', str(path))
         bundle_bytes = read_bounded(path, 60 * 1024)
@@ -251,7 +255,7 @@ class Campaign:
         trace_raw = read_bounded(trace, 16 * 1024 * 1024)
         summary = json.loads(read_bounded(trace.with_suffix('.summary.json'), 4096))
         validate_export(bundle, attempt, self.artifact, binding, self.status(attempt), logs,
-                        summary, len(trace_raw), attempt in self.active_stdout)
+                        summary, len(trace_raw), attempt in self.active_stdout, agent_check)
         require(not Path('/sys/fs/cgroup/actryn', attempt).exists(), 'export retained cgroup')
         self.record('export-verified', {'attempt': attempt,
                     'bundle_sha256': hashlib.sha256(bundle_bytes).hexdigest(),
