@@ -104,6 +104,10 @@
     "units/actryn-robotd.service": {
       "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/units/actryn-robotd.service",
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/docs/INSTALL.md": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/docs/INSTALL.md",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   }
 }

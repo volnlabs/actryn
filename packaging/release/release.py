@@ -39,7 +39,7 @@ UNITS = {'server': ('actryn-observer', 'actryn-launcher', 'actryn-serverd'),
          'robot': ('actryn-robotd', 'actryn-gatewayd')}
 BINARIES = {'server': ('actryn', 'actryn-observer', 'actryn-launcher', 'actryn-serverd', 'controller-fixture'),
             'robot': ('actryn', 'actryn-robotd', 'actryn-gatewayd')}
-COMMON = {'tools/release.py', 'tools/install.py', 'share/target/profile.toml', 'share/target/build-inputs.toml',
+COMMON = {'share/docs/INSTALL.md', 'tools/release.py', 'tools/install.py', 'share/target/profile.toml', 'share/target/build-inputs.toml',
           'share/licenses/Apache-2.0.txt', 'share/licenses/THIRD-PARTY.txt'}
 FILES = {role: COMMON | {f'bin/{name}' for name in BINARIES[role]} |
          {f'units/{name}.service' for name in UNITS[role]} | {f'sysusers/{role}.conf'}

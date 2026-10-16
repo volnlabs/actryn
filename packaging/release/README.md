@@ -298,3 +298,6 @@ verified before installation changes state and at startup preflight. A fresh
 guest must already contain those exact packages; the installer never downloads
 packages or performs an OS upgrade. These pins supplement the exact Debian,
 kernel, containerd/runc and Python prerequisites.
+
+This guide is included verbatim as the pinned `share/docs/INSTALL.md` in each
+role payload, available below `/opt/actryn/ROLE/current/` after installation.

@@ -148,6 +148,10 @@
     "share/source/observer.Makefile": {
       "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/source/observer.Makefile",
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "share/docs/INSTALL.md": {
+      "source": "/REPLACE_WITH_VERIFIED_BUILD_OUTPUT/share/docs/INSTALL.md",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   }
 }
