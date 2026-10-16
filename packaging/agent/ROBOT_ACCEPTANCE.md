@@ -42,7 +42,8 @@ python3 packaging/agent/guest_robot_acceptance.py \
 The output parent must already exist, be protected against other users' writes,
 and the campaign directory must be new. The
 harness creates a private guest export directory under
-`/var/lib/actryn-test-campaigns/`. It uses the installed nonroot server operator UID.
+`/var/lib/actryn-test-campaigns/`. It uses the installed numeric nonroot server operator UID as both UID and GID,
+with supplementary groups cleared; a passwd entry is not required.
 Local Robot requests check the root daemon peer and retain the exact manager epoch.
 The Python SDK/protobuf dependencies and native host CLI must already be available.
 

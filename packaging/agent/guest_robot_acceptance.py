@@ -276,9 +276,9 @@ class Campaign:
         return value
 
     def server(self, *arguments, expected=True, allow_unknown=False):
-        program = f'''import json,pwd,subprocess
-uid={self.operator!r};entry=pwd.getpwuid(uid)
-p=subprocess.run({[self.args.guest_cli, 'server', *arguments]!r},capture_output=True,text=True,timeout=20,user=uid,group=entry.pw_gid,extra_groups=[])
+        program = f'''import json,subprocess
+uid={self.operator!r}
+p=subprocess.run({[self.args.guest_cli, 'server', *arguments]!r},capture_output=True,text=True,timeout=20,user=uid,group=uid,extra_groups=[])
 print(json.dumps({{'exit':p.returncode,'value':json.loads(p.stdout),'stderr':p.stderr[:4096]}}))'''
         result = json.loads(self.ssh(self.args.server_port, program))
         uncertain = result['value'].get('outcome_unknown') is True and result['value'].get('automatic_retry') is False
@@ -417,7 +417,7 @@ print(json.dumps({{'stores':stores,'facts':facts,'observer_epoch':epoch,'summary
             if arch == 'x86_64': self.server_boot = identity['boot']
         require(b'linux,dummy-virt' in self.ssh(self.args.robot_port,
                 "import pathlib,sys;sys.stdout.buffer.write(pathlib.Path('/proc/device-tree/compatible').read_bytes())"), 'ARM target is not disposable virt')
-        program = f'''import errno,json,pathlib,stat,pwd,os,subprocess
+        program = f'''import errno,json,pathlib,stat,os,subprocess
 subprocess.run(['/usr/bin/actryn-serverd','--check-config'],check=True,capture_output=True,timeout=20)
 p=pathlib.Path({PEER!r});m=p.lstat();assert stat.S_ISREG(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022 and m.st_size<=65536
 peer=json.loads(p.read_bytes());config=json.loads(pathlib.Path('/etc/actryn/server.json').read_bytes())
@@ -435,7 +435,7 @@ credential_metadata={{'regular':stat.S_ISREG(credential.st_mode),'uid':credentia
 'mode':stat.S_IMODE(credential.st_mode),'nlink':credential.st_nlink,'size':credential.st_size,'acl_hex':acl}}
 base=pathlib.Path('/var/lib/actryn-test-campaigns');base.mkdir(mode=0o755,exist_ok=True)
 m=base.lstat();assert stat.S_ISDIR(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022
-out=pathlib.Path({self.remote_output!r});out.mkdir(mode=0o700);uid=config['operator_uid'];os.chown(out,uid,pwd.getpwuid(uid).pw_gid)
+out=pathlib.Path({self.remote_output!r});out.mkdir(mode=0o700);uid=config['operator_uid'];os.chown(out,uid,uid)
 print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config['server_uid'],'credential_metadata':credential_metadata}}))'''
         installed = json.loads(self.ssh(self.args.server_port, program))
         require(installed['peer'] == self.peer, 'installed public peer configuration mismatch')
@@ -804,6 +804,36 @@ class VerificationTests(unittest.TestCase):
         campaign.ssh = lambda port, program: programs.append(program) or b'{}'
         campaign.cleanup_snapshot('a' * 32)
         compile(programs[0], '<read-only-guest-cleanup-inspection>', 'exec')
+
+    def test_operator_commands_use_numeric_uid_without_passwd_lookup(self):
+        import ast
+        import contextlib
+        import io
+        from unittest import mock
+        campaign = object.__new__(Campaign)
+        campaign.operator = 1000
+        campaign.args = type('Args', (), {'server_port': 1, 'guest_cli': '/usr/local/bin/actryn'})()
+        calls = []
+        def execute(port, program):
+            def run(argv, **kwargs):
+                calls.append(kwargs)
+                return type('Reply', (), {'returncode': 0, 'stdout': '{"result":"ok"}', 'stderr': ''})()
+            output = io.StringIO()
+            with mock.patch('pwd.getpwuid', side_effect=KeyError('numeric UID has no passwd entry')), \
+                    mock.patch('subprocess.run', side_effect=run), contextlib.redirect_stdout(output):
+                exec(compile(program, '<numeric-operator-command>', 'exec'), {})
+            return output.getvalue().encode()
+        campaign.ssh = execute
+        self.assertEqual(campaign.server('status')['result'], 'ok')
+        self.assertEqual((calls[0]['user'], calls[0]['group'], calls[0]['extra_groups']), (1000, 1000, []))
+        # Check the generated preflight ownership operation too, without touching a guest.
+        import inspect
+        source = inspect.getsource(Campaign.preflight)
+        self.assertNotIn('getpwuid', source)
+        ownership = next(line for line in source.splitlines() if 'os.chown(out,' in line)
+        statement = ownership[ownership.index('os.chown'):]
+        call = ast.parse(statement).body[0].value
+        self.assertEqual([ast.dump(arg) for arg in call.args[1:]], [ast.dump(ast.Name(id='uid', ctx=ast.Load()))] * 2)
 
     def test_systemd_credential_acl_is_exact_and_bound_to_configured_service_uid(self):
         metadata = {'regular': True, 'uid': 0, 'gid': 0, 'mode': 0o440, 'nlink': 1, 'size': 1704,
