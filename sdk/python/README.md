@@ -1,6 +1,29 @@
 # Actryn Python SDK
 
-Install the pinned package into a virtual environment: `python -m pip install .`.
+For an installed Server bundle, use the shipped SDK and wheel without network
+access. Run as the developer in a new writable working directory; Python 3.13
+and the tuple's exact `python3-venv` prerequisite must already be installed:
+
+```sh
+set -e
+test ! -e .venv
+python3 -m venv .venv
+.venv/bin/python -m pip install --no-index --no-deps \
+  /opt/actryn/server/current/share/wheels/protobuf-7.36.1-py3-none-any.whl
+export PYTHONPATH=/opt/actryn/server/current/share/sdk
+.venv/bin/python -c 'from actryn import Client, RequestHandle'
+```
+
+These assets belong to the **server** role; the Robot payload does not ship the
+SDK or a wheel. Use the installed Server as the SDK client or separately provision
+the reviewed SDK/dependency artifacts on a client. Never run pip inside an
+immutable release slot. The installed guide is
+`/opt/actryn/server/current/share/docs/INSTALL.md`.
+
+For **source development**, from `sdk/python` in a checkout, create a virtual
+environment and run `python -m pip install .`. That build requires
+`setuptools==82.0.0` and `protobuf==7.36.1` from a separately provisioned package
+source; it is not the offline installed-bundle procedure.
 Generated Protobuf code is from `libprotoc 36.1`; the runtime is pinned to
 `protobuf 7.36.1`. Regenerate from the repository root with:
 
@@ -19,7 +42,7 @@ from actryn import Client, RequestHandle
 
 # Values come from the operator's prepared attempt/namespace, not a model reply.
 handle = RequestHandle.create(attempt_id_bytes, namespace_bytes)
-# Persist handle.json() before the first request if the application needs recovery.
+# Durably persist handle.json() before proposing; retain it through uncertainty.
 with Client(host, server_name="robot.example", ca="site-ca.pem",
             certificate="workload.pem", key="workload.key",
             paired_fingerprint=locally_verified_sha256) as robot:

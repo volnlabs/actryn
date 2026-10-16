@@ -120,6 +120,24 @@ install the shipped protobuf wheel with `pip --no-index --no-deps`, and set
 never runs pip. SDK build-backend tooling is not needed for this source-path use;
 creating a distributable SDK wheel is a separate build step.
 
+Run this as the developer in a new writable working directory, outside the slot:
+
+```sh
+set -e
+test ! -e .venv
+python3 -m venv .venv
+.venv/bin/python -m pip install --no-index --no-deps \
+  /opt/actryn/server/current/share/wheels/protobuf-7.36.1-py3-none-any.whl
+export PYTHONPATH=/opt/actryn/server/current/share/sdk
+.venv/bin/python -c 'from actryn import Client, RequestHandle'
+```
+
+The SDK and wheel exist only in the server payload. Both roles contain the native
+`bin/actryn` CLI and this `share/docs/INSTALL.md`. A separate SDK client needs its
+own reviewed dependency provisioning. `pip install .` is a source-development
+build requiring separately supplied setuptools 82.0.0; the bundle does not ship
+that build backend or require it for the source-path procedure above.
+
 ## Host prerequisites and maintenance
 
 The only supported tuples are Debian **13.7**, amd64 server and ARM64 QEMU
@@ -215,8 +233,8 @@ Installation preserves every existing `/etc/actryn` configuration, approval map,
 identity/key/revocation file and `/var/lib` runtime/evidence/database byte. It does
 not allocate local UIDs, overwrite configurations, enroll or import an agent.
 On a fresh server installation, use the complete independent-server recipe below.
-Robot enrollment and authority preparation remain separate operator procedures;
-do not substitute the server recipe for robot setup. Serverd supports only these
+Use the fresh-Robot recipe below for Robot account/configuration setup and explicit
+enrollment/authority preparation. Do not substitute the server recipe. Serverd supports only these
 optional credential drop-ins, each exactly `[Service]\n` followed by the stated
 line and a final newline:
 
@@ -395,12 +413,275 @@ no agent reexecution was observed. The signing key and custodian assertion were
 recipe records those verified actions; the earlier immutable slot retains the
 earlier guide bytes and is not relabeled as containing this revision.
 
-After trusted robot quiescence and service stop, explicitly unload the old module.
-Only then may `resume` clear the installation gate. It does **not** infer
-quiescence from unloading. Next load the exact signed
-`/opt/actryn/robot/current/module/actryn_authority.ko` explicitly and explicitly
-start the manager and then gateway units. Resume never loads a module or starts a
-service itself. Server resume likewise only permits a later explicit unit start.
+### Fresh Robot: explicit local bootstrap
+
+Run the following as trusted root on the selected disposable ARM64 Robot after
+successful `stage` and `activate`. Require both Robot units inactive, the module
+absent and the installation gate present. The guest must already boot the selected
+DTB with its `actryn,fixture-v2` serdev node and connected deterministic controller
+fixture. The bundle supplies the DTB; this recipe does not alter boot configuration
+or launch a controller. Physical outputs remain unavailable.
+
+Set the bundle/key variables to the independently reviewed **Robot** candidate
+and its external trust pin; do not reuse the Server bundle path by accident.
+For an existing Robot, first obtain the matched inhibited recovery described
+under maintenance, stop its services and explicitly unload its old module.
+Module absence alone does not establish quiescence. Do not use this fresh recipe
+to overwrite existing configuration or identities.
+
+```sh
+set -eu
+export ACTRYN_BUNDLE=/ROOT_PROTECTED_PATH/robot-candidate
+export ACTRYN_PUBLIC_KEY=/ROOT_PROTECTED_PATH/release-public.pem
+export ACTRYN_KEY_SHA256=EXTERNALLY_VERIFIED_SPKI_SHA256
+/usr/bin/systemd-sysusers /usr/lib/sysusers.d/actryn-robot.conf
+/usr/bin/python3 -B -E -s - <<'ROBOT_CONFIG_PY'
+import grp, json, os, pathlib, pwd, stat
+account = pwd.getpwnam('actryn-gateway')
+group = grp.getgrnam('actryn-gateway')
+assert account.pw_uid not in (0, 1000) and account.pw_gid == group.gr_gid
+assert account.pw_shell == '/usr/sbin/nologin' and not group.gr_mem
+parent = pathlib.Path('/etc/actryn')
+if not parent.exists():
+    parent.mkdir(mode=0o755)
+    parent.chmod(0o755)
+for path in (pathlib.Path('/etc'), parent):
+    info = path.lstat()
+    assert stat.S_ISDIR(info.st_mode) and info.st_uid == 0 and not info.st_mode & 0o022
+with (parent / 'robot.json').open('x') as stream:
+    json.dump({'operator_uid': 1000, 'gateway_uid': account.pw_uid}, stream)
+    stream.flush()
+    os.fchmod(stream.fileno(), 0o600)
+    os.fsync(stream.fileno())
+ROBOT_CONFIG_PY
+/usr/bin/python3 -B -E -s /opt/actryn/robot/current/tools/release.py resume \
+  --role robot --bundle "$ACTRYN_BUNDLE" --public-key "$ACTRYN_PUBLIC_KEY" \
+  --key-sha256 "$ACTRYN_KEY_SHA256"
+/usr/bin/systemctl show -p ActiveState actryn-robotd.service actryn-gatewayd.service
+```
+
+Choose a different numeric operator UID before creating the configuration if 1000
+is inappropriate. Require both units still inactive after resume. It clears the
+installation gate; it does not load the module, start services or issue authority.
+Then explicitly load the signed slot module and start each service once:
+
+```sh
+wait_unit() {
+  /usr/bin/python3 -B -E -s - "$1" <<'UNIT_WAIT_PY'
+import subprocess, sys, time
+unit = sys.argv[1]
+assert unit in ('actryn-robotd.service', 'actryn-gatewayd.service')
+deadline = time.monotonic() + 90
+last = ''
+while time.monotonic() < deadline:
+    result = subprocess.run(['/usr/bin/systemctl', 'show', unit,
+                             '-p', 'ActiveState', '-p', 'SubState', '-p', 'MainPID'],
+                            check=True, capture_output=True, text=True,
+                            timeout=max(.001, deadline - time.monotonic()))
+    last = result.stdout
+    state = dict(line.split('=', 1) for line in last.splitlines())
+    if state['ActiveState'] == 'failed':
+        raise SystemExit(last)
+    if (state['ActiveState'], state['SubState']) == ('active', 'running') and int(state['MainPID']) > 0:
+        print(last, end='')
+        break
+    time.sleep(min(.2, max(0, deadline - time.monotonic())))
+else:
+    raise SystemExit(f'startup timeout; inspect the existing job, do not restart: {last}')
+UNIT_WAIT_PY
+}
+/usr/sbin/insmod /opt/actryn/robot/current/module/actryn_authority.ko
+/usr/bin/systemctl start --no-block actryn-robotd.service
+wait_unit actryn-robotd.service
+/usr/bin/systemctl start --no-block actryn-gatewayd.service
+wait_unit actryn-gatewayd.service
+/usr/bin/actryn robot doctor
+```
+
+Require the signed loaded-module build-id check to pass, the root-owned mode-0600
+authority device to be bound to the selected serdev node, and no `/dev/ttyAMA1`
+bypass. Retain unit journals and actual executable/slot identities. The installed
+signed-tuple `ExecStartPre` is part of startup: one manager11/module16 campaign
+measured 21.82 s of successful gateway preflight and 25.80 s until replacement was
+available under the shipped CPU quota. Those observations are not bounds or a
+reason to disable preflight/resource limits. The 90 s waiter is an operator stop
+condition, separate from authority, recorder and heartbeat deadlines. On failure
+or timeout inspect the queued job, journal and state; do not submit another start.
+
+### Robot enrollment and read-only readiness
+
+Use the configured operator or root for local CLI commands. In a new private
+working directory, retain each JSON response (`umask 077` and shell noclobber are
+appropriate). `doctor` returns the current `robot_epoch` at the top level. Select
+that value as `ROBOT_EPOCH`; a manager restart requires fresh inspection. Enrollment
+keeps the device private key inside the manager:
+
+```sh
+actryn robot enroll-request --dns robot.example
+# Give report.csr_pem to the chosen offline site issuer.
+# Receive device.pem with the reviewed DNS identity and ca.pem through that issuer.
+actryn robot enroll-install --cert device.pem --ca ca.pem
+actryn robot install-principal --epoch ROBOT_EPOCH --principal developer \
+  --pin CLIENT_LEAF_SHA256 --can-propose
+mkdir -m 700 session
+actryn robot pair --endpoint 127.0.0.1:7443 --dns robot.example \
+  --pin DEVICE_LEAF_SHA256 --ca ca.pem --cert client.pem --key client.key \
+  --out session/pair.json
+```
+
+The issuer also supplies the scoped client certificate/chain and its protected
+private key to this operator. No issuer private key belongs in a bundle or on the
+gateway. `CLIENT_LEAF_SHA256` is the reviewed client leaf DER hash;
+`DEVICE_LEAF_SHA256` is the device leaf DER hash returned by local enrollment,
+not the CSR SPKI hash or a value learned from an untrusted connection. Pairing
+checks TLS 1.3, CA/DNS/ALPN and the explicit pin; it issues no authority.
+
+This compact walkthrough runs client commands on the Robot operator account,
+using localhost so the stable handle need not be copied between machines. For
+a remote client use its reviewed numeric IP:port and maintain the same handle
+custody. The CLI is shipped in both roles; certificate/key files are local inputs.
+
+Define the following waiter in the Robot operator shell. Every iteration sends
+only a read-only status request; mutations remain one-shot commands outside it:
+
+```sh
+wait_robot() {
+  python3 - "$1" <<'WAIT_PY'
+import json, subprocess, sys, time
+phase = sys.argv[1]
+limits = {'recovered': 14, 'rearmed': 8, 'prepared': 8, 'retired': 8}
+deadline = time.monotonic() + limits[phase]
+last = None
+while time.monotonic() < deadline:
+    remaining = deadline - time.monotonic()
+    reply = subprocess.run(['/usr/bin/actryn', 'robot', 'status'], check=True,
+                           capture_output=True, text=True, timeout=max(.001, remaining))
+    last = json.loads(reply.stdout)
+    assert last['result'] == 'report', last
+    runtime = last['report']['runtime']
+    kernel = runtime['kernel']
+    ready = {
+        'recovered': runtime['recovery_ready'] and not runtime['recovery_pending']
+                     and runtime['prepared'] is None and kernel['state'] == 0
+                     and kernel['operation_state'] == 0 and bool(kernel['flags'] & 1),
+        'rearmed': kernel['state'] == 1 and bool(kernel['flags'] & 1),
+        'prepared': runtime['preparation_ready'],
+        'retired': runtime['retirement_ready'],
+    }[phase]
+    if ready and last['report']['clock_healthy'] and runtime['health']['healthy']:
+        print(reply.stdout, end='')
+        break
+    time.sleep(min(.1, max(0, deadline - time.monotonic())))
+else:
+    raise SystemExit(f'{phase} readiness timeout; retain state, do not resend: {last}')
+WAIT_PY
+}
+```
+
+These finite operator wait bounds do not extend any production deadline. Stop on
+timeout, malformed/unavailable status or unhealthy state. Preserve the response
+and original handle; never resend an uncertain mutation to make a wait succeed.
+
+### Offline proposal and explicit operator submission
+
+This is a **manual operator-reviewed handoff** from the isolated offline agent to
+the Robot CLI. It does not establish server-to-Robot broker delegation or combined
+acceptance. The implemented delegated path separately requires local
+`robot-peer.json`, its pinned site/client identity, the documented
+`robot-client-key` credential drop-in, an explicit `server bind-robot` for the
+same prepared attempt/namespace, and local Robot preparation/authority. Its source
+integration recipe is `packaging/agent/guest_robot_acceptance.py` in a checkout;
+that test harness and its test CA material are not shipped operator assets.
+
+After the independent Server bootstrap/import/start above, run as its configured
+operator. Use the actual OCI manifest digest already imported:
+
+```sh
+actryn server prepare --artifact sha256:REVIEWED_DIGEST
+# Retain inspection.attempt.id from this response as ATTEMPT_ID before launch.
+actryn server launch --attempt ATTEMPT_ID
+actryn server status --attempt ATTEMPT_ID
+actryn server result --attempt ATTEMPT_ID --key preview-1
+```
+
+Poll only `status`/`result` for up to 30 s if the result is not ready. Retain the last
+response on timeout and inspect/cancel the same attempt; never repeat prepare or
+launch. The fixed offline agent keeps publication open for 60 s after its output,
+within the attempt ceiling. Save the successful result in a new private
+`proposal.json`, check its attempt/request identity and typed `value.output`, and
+review the deltas/duration before granting. Retain the exact file on the Robot
+operator's side and its SHA-256 as `PARENT_DIGEST`. The offline reference string
+is diagnostic provenance; obtain a fresh Robot observation below.
+
+Stage all reviewed inputs first. The example target must equal the reviewed
+proposal; substitute its typed `LEFT`, `RIGHT` and `DURATION_MS` values. Use the
+Server's retained `ATTEMPT_ID`. Pairing above authenticates the selected principal;
+if its session has expired, authenticate again before preparation. Then:
+
+```sh
+set -e
+actryn robot handle --pair session/pair.json --attempt ATTEMPT_ID \
+  --out session/operation.json
+actryn robot recover --pair session/pair.json
+wait_robot recovered
+actryn robot rearm --pair session/pair.json
+wait_robot rearmed
+actryn robot prepare --handle session/operation.json --principal developer
+wait_robot prepared
+actryn robot grant --pair session/pair.json --duration-ms 30000
+actryn robot activate --pair session/pair.json
+observation_json=$(actryn robot observe --pair session/pair.json --cert client.pem --key client.key \
+  --handle session/operation.json)
+observation_id=$(printf '%s\n' "$observation_json" | python3 -c \
+  'import json,sys; print(json.load(sys.stdin)["observation"]["id"])')
+# Submit immediately, within the observation's original freshness limit:
+actryn robot propose --pair session/pair.json --cert client.pem --key client.key \
+  --handle session/operation.json --observation "$observation_id" \
+  --parent-digest PARENT_DIGEST --left LEFT --right RIGHT --duration-ms DURATION_MS
+actryn robot query --pair session/pair.json --cert client.pem --key client.key \
+  --handle session/operation.json
+```
+
+Fresh Recover starts a new inhibited clock exchange even if an old mapping is
+valid; a pending recovery is inspected, not resent. Grant must fit the remaining
+mapping/session/preparation lifetime and is rejected before authority mutation if
+it reaches the mapping cutoff. Never grant merely because a HELLO was received.
+An expired or unhealthy preparation needs explicit retirement/recovery and a new
+reviewed preparation, not an automatic extension.
+
+The CLI durably marks this handle before proposal transmission and refuses its
+resubmission. Query that same handle for at most the reviewed operation duration
+plus 8 s. Require a terminal snapshot, successful task verdict (`TargetReached`
+for normal completion) and reconciliation separately. After terminal controller
+evidence, use `actryn robot reconcile --pair session/pair.json` once and inspect
+read-only status/query until `reconciled=true`; a finite wait expiring is a failure,
+not proof of completion. A second operation under the same still-valid grant needs
+a fresh handle key with the same attempt/namespace, a fresh observation and the
+first operation reconciled. Do not Recover between those operations: it retires
+the prepared namespace.
+
+To interrupt, send `actryn robot cancel --local --handle session/operation.json`
+once on the Robot, even if the initial proposal reply/operation ID was lost. Query
+the same handle afterward. An unknown reply or failed cancellation does not
+establish remote closure; retain the handle and use explicit local revoke if
+needed. To retire the workflow and release the capture writer:
+
+```sh
+actryn robot revoke --pair session/pair.json
+actryn robot retire --pair session/pair.json
+wait_robot retired
+actryn robot recover --pair session/pair.json
+wait_robot recovered
+actryn robot export --local --handle session/operation.json --out robot-evidence
+# On the Server, cancel its same retained attempt if still active, then export:
+actryn server cancel --attempt ATTEMPT_ID
+actryn server status --attempt ATTEMPT_ID
+actryn server export --attempt ATTEMPT_ID --out server-evidence.json
+```
+
+Export destinations must be new. Retain incomplete exports, raw uncertainty and
+original IDs on failure. Neither software completion nor these installation
+instructions establish physical qualification or close the release gates.
 
 The installed entry is `/opt/actryn/ROLE/current/tools/release.py`; invoke it as
 `/usr/bin/python3 -B -E -s /opt/actryn/ROLE/current/tools/release.py ...`.

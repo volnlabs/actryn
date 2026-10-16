@@ -120,24 +120,70 @@ Supply the protected key file on each network command. Pairing issues no authori
 
 ## One operation and recovery
 
-Use the server's generated attempt ID. Save a fresh handle **before** proposing:
+Use the server's generated attempt ID. Save a fresh handle **before** proposing.
+Prepare all reviewed inputs before issuing authority. On the Robot, define this
+bounded read-only waiter in the operator's shell; it sends only `status` requests:
 
 ```sh
+wait_robot() {
+  python3 - "$1" <<'WAIT_PY'
+import json, subprocess, sys, time
+phase = sys.argv[1]
+limits = {'recovered': 14, 'rearmed': 8, 'prepared': 8, 'retired': 8}
+deadline = time.monotonic() + limits[phase]
+last = None
+while time.monotonic() < deadline:
+    remaining = deadline - time.monotonic()
+    reply = subprocess.run(['/usr/bin/actryn', 'robot', 'status'], check=True,
+                           capture_output=True, text=True, timeout=max(.001, remaining))
+    last = json.loads(reply.stdout)
+    assert last['result'] == 'report', last
+    runtime = last['report']['runtime']
+    kernel = runtime['kernel']
+    ready = {
+        'recovered': runtime['recovery_ready'] and not runtime['recovery_pending']
+                     and runtime['prepared'] is None and kernel['state'] == 0
+                     and kernel['operation_state'] == 0 and bool(kernel['flags'] & 1),
+        'rearmed': kernel['state'] == 1 and bool(kernel['flags'] & 1),
+        'prepared': runtime['preparation_ready'],
+        'retired': runtime['retirement_ready'],
+    }[phase]
+    if ready and last['report']['clock_healthy'] and runtime['health']['healthy']:
+        print(reply.stdout, end='')
+        break
+    time.sleep(min(.1, max(0, deadline - time.monotonic())))
+else:
+    raise SystemExit(f'{phase} readiness timeout; retain state, do not resend: {last}')
+WAIT_PY
+}
+```
+
+These are operator wait bounds, not extensions to preparation, observation or
+authority deadlines. A timeout, failed status request or unhealthy state stops
+the sequence; inspect the retained state before deciding on explicit closure.
+Do not rerun a mutation to make a readiness check succeed.
+
+```sh
+set -e
 actryn robot handle --pair session/pair.json --attempt ATTEMPT_ID \
   --out session/operation.json
 # On the robot after enrollment/setup, with that handle file and a recent
 # authenticated client session:
 actryn robot recover --epoch ROBOT_EPOCH
-# Poll robot status until recovery_ready; do not resend a pending recovery.
+wait_robot recovered
 actryn robot rearm --epoch ROBOT_EPOCH
+wait_robot rearmed
 actryn robot prepare --handle session/operation.json --principal developer
+wait_robot prepared
 actryn robot grant --epoch ROBOT_EPOCH --duration-ms 30000
 actryn robot activate --epoch ROBOT_EPOCH
 # On the client:
-actryn robot observe --pair session/pair.json --cert client.pem --key client.key \
-  --handle session/operation.json
+observation_json=$(actryn robot observe --pair session/pair.json --cert client.pem --key client.key \
+  --handle session/operation.json)
+observation_id=$(printf '%s\n' "$observation_json" | python3 -c \
+  'import json,sys; print(json.load(sys.stdin)["observation"]["id"])')
 actryn robot propose --pair session/pair.json --cert client.pem --key client.key \
-  --handle session/operation.json --observation OBSERVATION_ID \
+  --handle session/operation.json --observation "$observation_id" \
   --parent-digest PARENT_DIGEST --left 1 --right 1 --duration-ms 1000
 actryn robot query --pair session/pair.json --cert client.pem --key client.key \
   --handle session/operation.json
@@ -176,8 +222,10 @@ actryn robot cancel --pair session/pair.json --cert client.pem --key client.key 
 actryn robot cancel --local --handle session/operation.json --epoch ROBOT_EPOCH
 actryn robot query --local --handle session/operation.json --epoch ROBOT_EPOCH
 actryn robot revoke --epoch ROBOT_EPOCH
-actryn robot recover --epoch ROBOT_EPOCH
 actryn robot retire --epoch ROBOT_EPOCH
+wait_robot retired
+actryn robot recover --epoch ROBOT_EPOCH
+wait_robot recovered
 ```
 
 Cancellation durably closes the local handle before transmission and works before

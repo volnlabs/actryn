@@ -1,6 +1,13 @@
 # Fresh installed Robot campaign preparation
 
-Status: **candidate03 prepared; fresh Robot installation and positive startup NOT_RUN**.
+Status: **historical candidate03 preparation; superseded by installed candidate04**.
+Candidate04 changes the manager to manager11 and retains module16. Its actual
+installed update/resume/startup and one explicit recovery regression pass, as
+recorded in [the progress ledger](../../../docs/development/progress.md#installed-manager11-and-numbered-follow-up-campaigns).
+The full installed manager11 lifecycle and combined release acceptance remain
+incomplete. The inputs, hashes, preparation jobs and NOT_RUN statements below
+describe the original preparation; they are not instructions to select manager10
+for a new campaign. Preserve every frozen candidate03 input and original result.
 This uses the existing role-transition harness and manager lifecycle harness.
 It creates no release identity, qualification, provider credential or physical
 actuation claim. Every test signing key/site issuer is disposable integration
@@ -37,7 +44,7 @@ private fixture key is uploaded. A missing CLI/fixture source binding must remai
 an explicit unresolved input, not a fabricated qualification record. The new
 source-bound CLI and fixture do not prove the original cache binary's provenance.
 
-**Current selection:** candidate03 supersedes only the intermediate module15
+**Historical candidate03 selection:** candidate03 superseded only the intermediate module15
 input above. `artifacts/install-robot-inputs-03/robot-inputs.json` selects module16,
 SHA256 `a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112`,
 and corresponding source archive
@@ -55,8 +62,9 @@ and base manifest SHA256
 Installing these actual bytes with the test platform adapter under umask0077
 passes payload hashes/modes and private sentinel preservation. This is filesystem
 verification, not guest startup, release qualification or an independent install.
-Use this new prepared directory for the scheduled guest campaign, never the old
-module15 prepared job. A16 needs its own explicit module16 amendment.
+That preparation selected this directory for its scheduled guest campaign rather
+than the old module15 job. Later work must use its own reviewed numbered input
+selection; neither candidate03 nor an A16 amendment is implicitly reusable.
 
 ## Disposable guest identity
 
