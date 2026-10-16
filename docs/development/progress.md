@@ -743,6 +743,17 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   no blocker. The new actual-driver regression is compiled but NOT_RUN; an ARM
   manager11 build and separately signed immutable candidate04 are in preparation.
 
+- Fresh workspace verification at `02779a0` passes 180 tests with five explicit
+  opt-in/helper tests ignored; strict workspace all-target Clippy and formatting
+  also pass. Logs remain in `artifacts/runtime-recovery-integration01`.
+  Manager11 and its actual-driver regression cross-build successfully. Candidate04
+  replaces only the manager and reuses the original disposable signer; root
+  verifies all selected binary/bundle hashes and its signature. Host installer
+  verification preserves both old slots and private sentinels, using slot 3/3.
+  Actual update/regression remains pending, separately from this host evidence.
+  The [acceptance inventory](acceptance-gaps.md) now records the superseding
+  component results and the remaining target/external gates.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
