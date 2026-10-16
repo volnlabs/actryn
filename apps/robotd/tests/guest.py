@@ -108,8 +108,12 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
 
     def recover_once(label):
         phase(label)
+        if local('describe')['runtime']['prepared'] is not None:
+            local('retire', closure=True)
+            poll(lambda: local('describe'), lambda d: d['runtime']['retirement_ready'])
         write_json(label.replace(' ', '-') + '.json', local('recover'))
         return poll(lambda: local('describe'), lambda d: d['runtime']['recovery_ready']
+                    and d['runtime']['prepared'] is None
                     and not d['runtime']['recovery_pending']
                     and d['runtime']['kernel']['state'] == 0
                     and d['runtime']['kernel']['flags'] & 1, 14)

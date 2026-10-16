@@ -158,6 +158,21 @@ fn actual_module_two_steps_and_pre_id_tombstone() {
         .is_none());
     engine.revoke().unwrap();
     assert!(engine.activate().is_err());
+    assert!(!engine.status().unwrap().retirement_ready);
+    engine.retire().unwrap();
+    poll(
+        &engine,
+        "retirement writers",
+        Duration::from_secs(3),
+        || engine.status().unwrap().retirement_ready,
+    );
+    assert!(engine.status().unwrap().prepared.is_some());
+    engine.recover().unwrap();
+    poll(&engine, "retired recovery", Duration::from_secs(13), || {
+        let status = engine.status().unwrap();
+        status.recovery_ready && status.prepared.is_none()
+    });
+    assert!(!engine.status().unwrap().retirement_ready);
     drop(engine);
     let historical = Engine::inspect(dir.path(), [1; 32], [2; 16], [3; 16], [8; 32]).unwrap();
     assert!(!historical.live_authority);

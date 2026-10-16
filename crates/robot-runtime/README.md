@@ -33,7 +33,12 @@ rejected second preparation preserves the current one. Construction has a
 A staged instance expires after 60 seconds, session ceilings are at most 120
 seconds, and grants at most 60 seconds. `retire`/`recover` cannot release writer
 resources while a writer is blocked; callers see pending. A fresh preparation
-after retirement requires explicit recovery/rearm. This is narrower than the
+after retirement requires explicit recovery/rearm. After `retire`, poll
+`status.retirement_ready` before calling `recover` once. This flag reports only
+that the retiring slot's writer threads have finished; it does not establish
+downstream reconciliation or resolve unknown outcomes. Recovery releases the
+slot and initiates the new handshake; read-only polling never initiates recovery.
+This is narrower than the
 profile's separate active/staged/retiring maxima; concurrent replacement is not
 implemented.
 

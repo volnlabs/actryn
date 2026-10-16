@@ -830,6 +830,9 @@ impl Engine {
             kernel,
             prepared,
             retiring: core.slot.as_ref().is_some_and(|s| s.retiring),
+            retirement_ready: core.slot.as_ref().is_some_and(|slot| {
+                slot.retiring && slot.workers.iter().all(JoinHandle::is_finished)
+            }),
             recovery_pending: core.recovery.is_some(),
             preparation_ready: core.slot.as_ref().is_some_and(|slot| {
                 !slot.retiring

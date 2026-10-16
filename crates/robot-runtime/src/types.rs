@@ -198,6 +198,7 @@ pub struct RuntimeStatus {
     pub kernel: authority_client::Status,
     pub prepared: Option<Prepared>,
     pub retiring: bool,
+    pub retirement_ready: bool,
     pub recovery_pending: bool,
     pub preparation_ready: bool,
     pub recovery_ready: bool,
