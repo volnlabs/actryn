@@ -916,10 +916,12 @@ TMPDIR=/dev/shm PYTHONDONTWRITEBYTECODE=1 \
 ```
 
 Temporary-filesystem interruption tests model failures after recorded durable
-boundaries. They do not establish arbitrary-media power-loss guarantees. Fresh
-QEMU install/update/startup, module-note availability, unit hardening interactions,
-operator repeatability and the real externally signed candidate remain open
-qualification gates.
+boundaries. They do not establish arbitrary-media power-loss guarantees. Retained
+QEMU campaigns cover fresh installation, update/startup, module-note verification
+and installed Server/Robot workflows; see the
+[implementation ledger](../../docs/development/progress.md).
+Qualification against the final coherent artifact set, independent operator
+repeatability and the real externally signed candidate remain open.
 
 The server tuple includes `lib/observer.bpf.o`, linked immutably at the observer's
 fixed `/usr/lib/actryn/observer.bpf.o` path. The matching observer C source, unchanged `bpf/Makefile` retained as

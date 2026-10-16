@@ -2,25 +2,25 @@
 
 ## Current disposition
 
-Follow-up audit through integration source `7f52d00` supersedes the historical
+Follow-up audit through integration source `aa91c58` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|
-| A01/A03 | Manager guest08 lifecycle; installed Robot run01 also retains two reconciled natural completions under one grant. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Installed run01 as a whole remains failed. The full installed lifecycle with manager11 remains pending. |
+| A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
 | A04/A05/A08 | Existing daemon-death/accounting tests and one settled combined Robot debit; installed Server capacity01 preserves active work during exhaustion. Robot A04 freeze/crash01 and same-disk inspect01 preserve a durable unfinished operation, raw history and sticky read-only UNKNOWN without resend. | Actual outstanding-debit cancellation, Server guest crash/restart and debit pressure remain pending. Robot freeze/fixture closure/kill is not an instantaneous powercut; the exported uncommitted tail remains unknown. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
-| A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history. | Corrected Robot lifecycle and final coherent artifact binding remain; disposable test signing is not release signing. |
+| A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
 | A13/A14 | Pinned live-policy/missing-credential checks and operator-executed installation recipes. | Authorized live-provider credentials and an independent developer are still external inputs. |
 | A16 | `observer-installed-01` passes three readiness/death/loss cases and eight descriptive OFF/ON trials, preserving positive loss. Amendment7 source checks and independent review pass. | Kernel/userspace comparison remains incomplete after the failed instrumentation pilot; amendment7 target build/freeze and both new pilots remain pending. Standalone diagnostic timing is not whole-agent overhead or WCET. |
 
-The current target queue is the full installed Robot lifecycle,
-outstanding-debit/crash/pressure case, and amended authority comparison.
+The current target queue is the outstanding-debit/crash/pressure case and amended
+authority comparison, followed by final artifact, provenance and evidence mapping.
 Release signing, live credentials and independent
 installation remain separate external gates. No software result qualifies motion.
 

@@ -7,8 +7,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
 - Integration branch: `feat/v0.0.1`; remote HEAD absent at preflight.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
-  M1 and M2 are in implementation. M3/M4 remain incomplete. No A01-A16 row
-  has a complete integrated acceptance pass.
+  M1–M3 implementations have component and installed-path evidence, including
+  the full installed Robot lifecycle. M4 release qualification remains incomplete;
+  no A01–A16 row is closed against a final coherent release artifact set.
 - Host: Omarchy x86-64 kernel 7.2.5; Rust 1.92.0; QEMU, cross GCC,
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
@@ -897,6 +898,36 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Evidence remains in `artifacts/robot-a04-{freeze,inspect}-01` and
   `artifacts/robot-a04-review01`. The full installed lifecycle and Server guest
   crash/outstanding-debit case remain separate pending work.
+
+- Installed manager11 lifecycle03 passes once in 114.63 seconds on candidate04
+  and module16. Two natural operations finish and reconcile under one grant;
+  absent-key and CLI pre-send cancellation, gateway death, manager death without
+  resend, identity rotation and final principal revocation all pass. The second
+  saved completion reply still has durable revision 2; the later read-only
+  database inspection confirms both natural records at terminal revision 3.
+  The manager-crash record retains its original operation and projects terminal
+  UNKNOWN while the raw row remains Submitted revision 2, without a durable
+  completion or cancellation claim.
+- SDK and CLI exports match 40 files and 295,096 bytes. The pinned production
+  reader recovers 350 metadata records, frontiers 104/246, with no reported gaps,
+  issues or raw remnants. The volatile tail remains unknown and execution replay
+  ineligible. The read-only postcampaign comparison preserves all prior seven
+  namespaces and ten records, allowing only A04's documented startup promotion
+  to durable UNKNOWN; operation, intent and closure bytes remain identical.
+  Exactly two new namespaces and six saved request keys are present.
+- Final runtime state is healthy, inhibited and unprepared, with no live grant or
+  operation. Its cached duties still show the earlier observation; a separate
+  authenticated native-fixture status reports disabled zero output and an empty
+  queue. Both installed services stop and the Robot guest powers off gracefully,
+  preserving its disk and history for the later debit campaign. Evidence:
+  `artifacts/robot-manager11-lifecycle03`,
+  `artifacts/robot-manager11-lifecycle03-history01` and
+  `artifacts/install-robot-quiescence03`. Independent local review verifies 129
+  nonsecret evidence files and the unchanged shutdown snapshot in
+  `artifacts/robot-manager11-lifecycle03-review01`; the export covers the first
+  namespace, with the manager-crash namespace inspected separately. Earlier
+  failed lifecycles remain failed. Server outstanding-debit/crash/pressure,
+  A16 comparison and final release qualification remain pending.
 
 ## Decisions
 
