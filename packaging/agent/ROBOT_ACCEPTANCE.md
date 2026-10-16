@@ -69,9 +69,10 @@ Robot rearm/prepare/readiness/grant/activate, then isolated agent launch. The ha
 checks the original trusted observation and lineage digests, stable request/remote
 handle, fixed 10/10-tick 1,000 ms target, actual kernel identity, and a terminal,
 reconciled `TargetReached` whose terminal revision is durable. Natural completion
-requires operation state 4 and zero duties; grant-authorized bit 8 may remain set
-for normal reuse and is not an output-open flag. It then closes server publication
-and retires the Robot namespace. Read-only `retirement_ready` must become true
+requires kernel state 2 (Active), reason 1 (SkillFinished), operation state 4
+(Reconciled), zero duties, and both handshaken bit 1 and grant-authorized bit 8
+retained for normal reuse. Grant authorization is not an output-open flag. It then
+closes server publication and retires the Robot namespace. Read-only `retirement_ready` must become true
 before exactly one final Recover request; only recovery releases the prepared
 slot. That readiness proves writer termination, not downstream reconciliation or
 a known task outcome, and does not require operation state 4 globally. Subsequent
@@ -81,7 +82,12 @@ installed manager must expose this current Report field.
 Final server JSON evidence must have the exact schema and all seven artifacts
 with valid hashes, no omissions, no final broker gaps/denials, and matching attempt,
 artifact, guest boot, cgroup lifetime, Robot binding, original handle/observation
-lineage and settled debit. Cleanup must retain a ready observer with zero loss,
+lineage and settled debit. The recorded runtime snapshot must independently show
+UID/GID 65532, no capabilities, no-new-privileges, seccomp mode 2, private namespaces,
+no network routes, a read-only root and no unexpected mounts. It must retain the
+fixed memory/PID/CPU limits, an installed device enforcement program, and the fixed
+I/O rates on the device read from installed configuration during preflight.
+Cleanup must retain a ready observer with zero loss,
 required probe coverage, the same collector epoch and monotone sequence, plus all
 selected resource counters captured after descendants are empty. Complete,
 untruncated stdout/stderr must match the separately retained actual log bytes,

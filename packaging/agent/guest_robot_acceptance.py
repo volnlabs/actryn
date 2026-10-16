@@ -69,9 +69,10 @@ def verify_kernel_completion(kernel, operation):
                            ('controller_session', 'session'), ('runtime_nonce', 'runtime_nonce'),
                            ('grant', 'grant'), ('instance', 'instance'), ('operation', 'operation'), ('stream', 'stream')]:
         require(kernel[source] == operation[target], 'actual kernel identity: ' + source)
-    # Natural completion keeps the grant reusable; bit 8 is grant authorization.
-    require(kernel['operation_state'] == 4 and kernel['left_permille'] == kernel['right_permille'] == 0,
-            'kernel operation is not reconciled at zero output')
+    # ACTIVE / SKILL_FINISHED / RECONCILED keeps the original grant reusable.
+    require(kernel['state'] == 2 and kernel['reason'] == 1 and kernel['flags'] & 9 == 9
+            and kernel['operation_state'] == 4 and kernel['left_permille'] == kernel['right_permille'] == 0,
+            'kernel operation did not finish naturally at zero output with its grant retained')
 
 
 def verify_bundle(bundle, attempt):
@@ -87,7 +88,7 @@ def verify_bundle(bundle, attempt):
     return names
 
 
-def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifact_digest):
+def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifact_digest, io_device):
     required = {'attempt', 'runtime_binding', 'runtime_facts', 'stdout', 'stderr', 'broker', 'robot'}
     require(verify_bundle(bundle, attempt) == required and bundle['omissions'] == [], 'final artifacts incomplete')
     artifacts = {value['name']: value['content'] for value in bundle['artifacts']}
@@ -99,6 +100,23 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
             and runtime['snapshot']['cgroup'] == '/actryn/' + attempt
             and runtime['snapshot']['pid'] > 0 and runtime['snapshot']['start_ticks'] > 0,
             'runtime lifetime binding')
+    snapshot = runtime['snapshot']
+    require(snapshot['uid'] == snapshot['gid'] == 65532 and snapshot['capabilities'] == 0
+            and snapshot['no_new_privileges'] is True and snapshot['seccomp_mode'] == 2,
+            'runtime process restrictions missing')
+    require(snapshot['private_namespaces'] is True and snapshot['network_routes'] == 0
+            and snapshot['root_readonly'] is True and snapshot['unexpected_mounts'] == [],
+            'runtime namespace/network/mount isolation missing')
+    require(snapshot['memory_max'] == 268435456 and snapshot['pids_max'] == 64
+            and snapshot['cpu_max'].strip() == '50000 100000', 'runtime cgroup limits missing')
+    io_lines = [line.split() for line in snapshot['io_max'].splitlines()]
+    require(re.fullmatch(r'[0-9]+:[0-9]+', io_device) and len(io_lines) == 1
+            and len(io_lines[0]) == 5 and io_lines[0][0] == io_device
+            and set(io_lines[0][1:]) == {'rbps=1048576', 'wbps=1048576', 'riops=128', 'wiops=128'},
+            'runtime I/O limits differ from configured device/policy')
+    require(isinstance(snapshot['device_programs'], list) and snapshot['device_programs']
+            and all(type(value) is int and value > 0 for value in snapshot['device_programs']),
+            'runtime device enforcement missing')
     facts = artifacts['runtime_facts']
     require(facts['observer_health_unavailable'] is False and facts['observer'] is not None, 'cleanup observer unavailable')
     first, final = runtime['observer'], facts['observer']
@@ -436,7 +454,8 @@ credential_metadata={{'regular':stat.S_ISREG(credential.st_mode),'uid':credentia
 base=pathlib.Path('/var/lib/actryn-test-campaigns');base.mkdir(mode=0o755,exist_ok=True)
 m=base.lstat();assert stat.S_ISDIR(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022
 out=pathlib.Path({self.remote_output!r});out.mkdir(mode=0o700);uid=config['operator_uid'];os.chown(out,uid,uid)
-print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config['server_uid'],'credential_metadata':credential_metadata}}))'''
+print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config['server_uid'],
+'io_device':config['io_device'],'credential_metadata':credential_metadata}}))'''
         installed = json.loads(self.ssh(self.args.server_port, program))
         require(installed['peer'] == self.peer, 'installed public peer configuration mismatch')
         self.save('server-credential-metadata.json', installed['credential_metadata'])
@@ -444,6 +463,9 @@ print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config[
                 'systemd credential metadata/ACL differs from configured service identity')
         self.operator = installed['operator_uid']
         self.agent_input = installed['input']
+        self.io_device = installed['io_device']
+        require(re.fullmatch(r'[0-9]+:[0-9]+', self.io_device), 'configured I/O device')
+        self.save('server-io-device.json', {'io_device': self.io_device})
         require(self.args.ca.read_text().strip() == self.peer['ca_pem'].strip()
                 and self.args.certificate.read_text().strip() == self.peer['client_certificate_pem'].strip(), 'supplied public workload differs from installed peer')
         description = self.local('describe')
@@ -588,7 +610,7 @@ print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config[
         require(final_logs == logs, 'agent logs changed during final cleanup')
         self.save('combined-final-agent-logs.json', final_logs)
         bundle = self.export_server('combined', attempt)
-        verify_final_bundle(bundle, attempt, binding, completed, final_logs, self.server_boot, self.args.artifact)
+        verify_final_bundle(bundle, attempt, binding, completed, final_logs, self.server_boot, self.args.artifact, self.io_device)
         handle = dict(completed['handle'], robot_epoch=completed['robot_epoch'], state='cancel_requested', proposal=None)
         self.save('retained-handle.json', handle)
         report = self.host_cli('export', '--pair', str(self.output / 'pair.json'),
@@ -643,10 +665,12 @@ class VerificationTests(unittest.TestCase):
                      'grant': 4, 'instance': 5, 'operation': 6, 'stream': 7}
         kernel = {'device_identity': [1]*16, 'controller_boot': 1, 'controller_session': 2,
                   'runtime_nonce': [3]*16, 'grant': 4, 'instance': 5, 'operation': 6,
-                  'stream': 7, 'flags': 9, 'operation_state': 4, 'left_permille': 0, 'right_permille': 0}
+                  'stream': 7, 'state': 2, 'reason': 1, 'flags': 9, 'operation_state': 4,
+                  'left_permille': 0, 'right_permille': 0}
         verify_kernel_completion(kernel, operation)
-        for field, value in [('operation_state', 2), ('left_permille', 10), ('operation', 8)]:
-            with self.assertRaises(AssertionError):
+        for field, value in [('operation_state', 2), ('left_permille', 10), ('operation', 8),
+                             ('state', 1), ('state', 4), ('reason', 2), ('reason', 3), ('flags', 1), ('flags', 8)]:
+            with self.subTest(field=field, value=value), self.assertRaises(AssertionError):
                 verify_kernel_completion(dict(kernel, **{field: value}), operation)
 
     def test_retirement_waits_for_workers_then_recovers_once(self):
@@ -711,7 +735,12 @@ class VerificationTests(unittest.TestCase):
         content = {
             'attempt': {'id': attempt, 'state': 'reaped', 'artifact_digest': 'sha256:' + '1' * 64},
             'runtime_binding': {'boot_id': 'boot-1', 'cgroup_id': 42, 'ambiguous_create': False,
-                                'observer': observer, 'snapshot': {'cgroup': '/actryn/' + attempt, 'pid': 2, 'start_ticks': 3}},
+                                'observer': observer, 'snapshot': {'cgroup': '/actryn/' + attempt, 'pid': 2, 'start_ticks': 3,
+                                'uid': 65532, 'gid': 65532, 'capabilities': 0, 'no_new_privileges': True,
+                                'seccomp_mode': 2, 'private_namespaces': True, 'network_routes': 0,
+                                'memory_max': 268435456, 'pids_max': 64, 'cpu_max': '50000 100000\n',
+                                'io_max': '254:0 rbps=1048576 wbps=1048576 riops=128 wiops=128\n',
+                                'device_programs': [42], 'root_readonly': True, 'unexpected_mounts': []}},
             'runtime_facts': {'observer_health_unavailable': False, 'observer': dict(observer, sequence=12),
                               'resources': {'classification': 'observed_cgroup_v2_counters', 'captured_boottime_ms': 123,
                                             'stage': 'after_descendants_empty_before_runtime_delete',
@@ -732,8 +761,18 @@ class VerificationTests(unittest.TestCase):
             return {'schema': 'actryn.server.evidence.v1', 'attempt_id': attempt, 'execution_replay_eligible': False,
                     'omissions': omissions or [], 'artifacts': [{'name': name, 'content': value,
                     'bytes': len(compact(value)), 'sha256': digest(value)} for name, value in values.items()]}
-        check = lambda value: verify_final_bundle(value, attempt, binding, completed, logs, 'boot-1', 'sha256:' + '1' * 64)
+        check = lambda value: verify_final_bundle(value, attempt, binding, completed, logs, 'boot-1', 'sha256:' + '1' * 64, '254:0')
         check(bundle(content))
+        for field, value in [('uid', 0), ('gid', 0), ('capabilities', 1), ('no_new_privileges', False),
+                             ('seccomp_mode', 0), ('private_namespaces', False), ('network_routes', 1),
+                             ('memory_max', 0), ('pids_max', 0), ('cpu_max', 'max 100000'), ('io_max', ''),
+                             ('io_max', '8:0 rbps=1048576 wbps=1048576 riops=128 wiops=128'),
+                             ('io_max', '254:0 rbps=max wbps=1048576 riops=128 wiops=128'),
+                             ('device_programs', []), ('device_programs', [0]),
+                             ('root_readonly', False), ('unexpected_mounts', ['/host'])]:
+            changed = copy.deepcopy(content); changed['runtime_binding']['snapshot'][field] = value
+            with self.subTest(isolation=field), self.assertRaises(AssertionError):
+                check(bundle(changed))
         with self.assertRaises(AssertionError): check(bundle(content, [{'artifact': 'runtime_facts', 'reason': 'observer_unavailable'}]))
         faults = [('runtime_facts', 'observer_health_unavailable', True), ('runtime_facts', 'observer', None),
                   ('broker', 'evidence_gaps', ['log_incomplete']), ('runtime_binding', 'boot_id', 'wrong-boot'),
