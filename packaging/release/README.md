@@ -582,16 +582,220 @@ These finite operator wait bounds do not extend any production deadline. Stop on
 timeout, malformed/unavailable status or unhealthy state. Preserve the response
 and original handle; never resend an uncertain mutation to make a wait succeed.
 
-### Offline proposal and explicit operator submission
+### Delegated offline agent execution
+
+This path connects the installed isolated agent, Server broker and Robot. It uses
+the shipped offline OCI asset and native CLI; no provider credential, source
+checkout, test harness or issuer private key is needed. Complete Robot bootstrap,
+enrollment and operator pairing above first, leaving no prepared namespace or
+live authority. On the Server, complete account/configuration/import setup but
+install the peer inputs below **before** its explicit resume/start. If services
+already ran, first close and inspect every retained attempt/debit, then stop all
+three Server units for this local configuration change. Preserve existing inputs;
+this recipe creates new files and refuses replacement.
+
+The site issuer supplies a separate Server workload certificate/chain
+`server-client.pem` and matching key **only to the Server**. It uses the site CA
+trusted by the Robot. Obtain the workload leaf DER SHA-256 through the trusted
+issuance process. On the inhibited Robot, install that public pin with proposal
+scope and retain a current public description:
+
+```sh
+actryn robot install-principal --epoch ROBOT_EPOCH --principal server-broker \
+  --pin SERVER_CLIENT_LEAF_SHA256 --can-propose
+actryn robot doctor
+```
+
+Retain the doctor's complete JSON as `robot-description.json` and transfer this
+public file to trusted Server staging. Verify its `robot_epoch`, device leaf pin,
+DNS name, configuration digest and profile against the selected Robot. Do not
+learn those approvals from a remote connection. The existing operator's
+`session/pair.json` remains on the Robot; the Server workload key never goes there.
+
+As root on the stopped Server, place the reviewed public description, `ca.pem`,
+and `server-client.pem` in `/ROOT_PROTECTED_SITE_INPUTS`; the issuer-delivered key
+is `server-client.key` in that protected Server staging directory. Set the
+numeric Robot address reachable **from the Server guest**, including its reviewed
+port (IPv6 uses brackets). The configuration stores exactly these eight public
+fields; digest strings are bare lowercase hex, not `sha256:` strings:
+
+```sh
+set -eu
+export ACTRYN_ROBOT_ENDPOINT=192.0.2.10:7443
+/usr/bin/python3 -B -E -s - <<'PEER_CONFIG_PY'
+import json, os, pathlib, stat
+source = pathlib.Path('/ROOT_PROTECTED_SITE_INPUTS')
+def read_input(name, limit):
+    path = source / name
+    info = path.lstat()
+    assert stat.S_ISREG(info.st_mode) and info.st_uid == 0 and info.st_nlink == 1
+    assert not info.st_mode & 0o022 and 0 < info.st_size <= limit
+    with path.open('rb') as stream:
+        data = stream.read(limit + 1)
+    assert len(data) <= limit
+    return data
+def create(path, data, mode):
+    with path.open('xb') as stream:
+        os.fchmod(stream.fileno(), mode)
+        stream.write(data)
+        stream.flush()
+        os.fsync(stream.fileno())
+    directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+description = json.loads(read_input('robot-description.json', 65536))
+assert description['result'] == 'report'
+report = description['report']
+configuration = bytes(report['configuration_digest']).hex()
+profile = bytes(report['profile_sha256']).hex()
+assert len(configuration) == len(profile) == 64
+peer = {'endpoint': os.environ['ACTRYN_ROBOT_ENDPOINT'],
+        'dns_name': report['identity']['dns_name'],
+        'robot_leaf_sha256': report['identity']['device_certificate_sha256'],
+        'principal': 'server-broker', 'robot_configuration_digest': configuration,
+        'robot_profile_digest': profile, 'ca_pem': read_input('ca.pem', 24576).decode(),
+        'client_certificate_pem': read_input('server-client.pem', 24576).decode()}
+encoded = json.dumps(peer).encode()
+assert len(encoded) <= 65536
+parent = pathlib.Path('/etc/actryn')
+for path in (source, parent):
+    info = path.lstat()
+    assert stat.S_ISDIR(info.st_mode) and info.st_uid == 0 and not info.st_mode & 0o022
+create(parent / 'robot-peer.json', encoded, 0o644)
+credentials = parent / 'credentials'
+if not credentials.exists():
+    credentials.mkdir(mode=0o700)
+info = credentials.lstat()
+assert stat.S_ISDIR(info.st_mode) and info.st_uid == 0 and not info.st_mode & 0o077
+key_info = (source / 'server-client.key').lstat()
+assert not key_info.st_mode & 0o077
+create(credentials / 'robot-client-key', read_input('server-client.key', 8192), 0o600)
+dropins = pathlib.Path('/etc/systemd/system/actryn-serverd.service.d')
+if not dropins.exists():
+    dropins.mkdir(mode=0o755)
+info = dropins.lstat()
+assert stat.S_ISDIR(info.st_mode) and info.st_uid == 0 and not info.st_mode & 0o022
+create(dropins / '50-robot-credential.conf',
+       b'[Service]\nLoadCredential=robot-client-key:/etc/actryn/credentials/robot-client-key\n', 0o644)
+PEER_CONFIG_PY
+/usr/bin/systemctl daemon-reload
+```
+
+The script prints no key material. Retain the site's protected source credential
+according to its custody policy; never place key bytes in arguments, public JSON,
+the OCI image or evidence. On partial failure inspect the new files; do not rerun
+the script to overwrite them. Complete the earlier Server resume/start checks,
+requiring all three installed services active before preparing an attempt. The
+allowed drop-in supplies the key only through the Server service credential.
+Actual binding below verifies the peer, certificate and configuration together.
+
+Stage the following commands in the two operator terminals before starting. The
+Server preparation and binding have finite lifetimes, and the local grant lasts
+30 seconds; copying IDs or pausing does not extend them. Choose one new namespace
+on the Server and retain it alongside the attempt:
+
+```sh
+# Server operator:
+python3 -c 'import secrets; print(secrets.token_hex(16))'
+# Retain that 32-hex value as NAMESPACE_ID.
+actryn server prepare --artifact sha256:REVIEWED_OFFLINE_DIGEST
+# Retain inspection.attempt.id as ATTEMPT_ID.
+actryn server bind-robot --attempt ATTEMPT_ID --namespace NAMESPACE_ID
+```
+
+Require `result=robot_binding`, the intended attempt/namespace,
+`principal=server-broker`, and the selected manager epoch and digests. Binding
+authenticates the Server workload without granting authority. If the reply is
+unknown, inspect `server status --attempt ATTEMPT_ID`; never bind a replacement
+namespace to evade the uncertain result. Continue only with the retained binding.
+
+On the Robot, use its current operator pairing and exactly those public IDs. This
+CLI handle selects the namespace for preparation/export; **its random key is
+never submitted**. The broker will allocate and durably retain the actual operation
+key. Use `wait_robot` from the preceding readiness section:
+
+```sh
+set -e
+actryn robot handle --pair session/pair.json --attempt ATTEMPT_ID \
+  --namespace NAMESPACE_ID --out session/delegation-namespace.json
+actryn robot recover --pair session/pair.json
+wait_robot recovered
+actryn robot rearm --pair session/pair.json
+wait_robot rearmed
+actryn robot prepare --handle session/delegation-namespace.json --principal server-broker
+wait_robot prepared
+actryn robot grant --pair session/pair.json --duration-ms 30000
+actryn robot activate --pair session/pair.json
+# Server operator, immediately after local activation:
+actryn server launch --attempt ATTEMPT_ID
+actryn server status --attempt ATTEMPT_ID
+actryn server result --attempt ATTEMPT_ID --key preview-1
+actryn server robot-query --attempt ATTEMPT_ID --key preview-1
+```
+
+Review the pinned offline fixture target (left 10, right 10, duration 1000 ms) before
+the grant. Launch once. The broker commits its own stable handle, obtains the
+actual Robot observation, persists the proposal intent, then submits the typed
+target through the kernel gate. It retains the original observation's one-second freshness bound and never
+refreshes or resends an expired/uncertain request. Do not issue `robot propose`
+from the namespace handle or copy the broker's key into a new submission.
+
+Poll only `server status`, `server result` and `server robot-query` for up to 12 s;
+unknown/pending/absent output is not a successful operation. The latter queries
+the same remote key and updates retained reconciliation/accounting, without
+dispatching again. Require the result's `value.robot_handle` to equal the
+`robot-query` response's `request.handle`, with matching attempt/namespace and
+`preview-1`. Retain `trusted_robot_observation`, `observation_digest` and
+`lineage_digest`. After terminal controller evidence, the Robot operator may issue
+one `robot reconcile --pair session/pair.json`; continue read-only inspection.
+Normal success requires `request.phase=settled`, `outstanding_debit=false`, and
+`last_remote` terminal/reconciled with `verdict=TargetReached` and equal positive
+durable/current revisions. A published model result alone does not prove dispatch
+or completion.
+
+For interruption, use `actryn server robot-cancel --attempt ATTEMPT_ID --key preview-1`
+once, including before an operation-ID reply, then inspect that same broker key.
+An absent broker key may be fenced without any remote handle existing; it is not
+a remote cancellation receipt. If Server transport is unavailable, the Robot
+operator can revoke locally using its retained epoch/pair. Unknown remote work
+remains charged until the retained outcome is reconciled; never clear databases,
+replace IDs or repeat launch to escape it.
+
+After retaining the actual broker operation outcome, close publication and export:
+
+```sh
+# Server operator: cancel the attempt once, then inspect its same identity.
+actryn server cancel --attempt ATTEMPT_ID
+actryn server status --attempt ATTEMPT_ID
+actryn server robot-query --attempt ATTEMPT_ID --key preview-1
+# Robot operator:
+actryn robot retire --pair session/pair.json
+wait_robot retired
+actryn robot recover --pair session/pair.json
+wait_robot recovered
+actryn robot export --local --handle session/delegation-namespace.json --out delegated-robot-evidence
+# Server operator, after reaped state and settled retained debit:
+actryn server export --attempt ATTEMPT_ID --out delegated-server-evidence.json
+```
+
+Before export, inspect Server status for up to 12 s for `attempt.state=reaped` and
+every retained `robot_requests[].outstanding_debit=false`; otherwise preserve
+the unresolved accounting and report the failure. Robot export reads the whole
+retired namespace. Its inspection snapshot for the unused preparation key is
+expected to be empty; that key is not the operation. The actual broker
+`robot_handle`/`robot-query` response and Server export retain the operation and
+debit identities. Keep both exports and the binding/result/query responses.
+This source-backed operator recipe has not itself been executed as an independent
+installed walkthrough and does not close any release or physical acceptance gate.
+
+### Manual offline proposal and explicit operator submission
 
 This is a **manual operator-reviewed handoff** from the isolated offline agent to
 the Robot CLI. It does not establish server-to-Robot broker delegation or combined
-acceptance. The implemented delegated path separately requires local
-`robot-peer.json`, its pinned site/client identity, the documented
-`robot-client-key` credential drop-in, an explicit `server bind-robot` for the
-same prepared attempt/namespace, and local Robot preparation/authority. Its source
-integration recipe is `packaging/agent/guest_robot_acceptance.py` in a checkout;
-that test harness and its test CA material are not shipped operator assets.
+acceptance. Use the delegated offline recipe above for the installed
+agent-to-broker-to-Robot path; this manual alternative is a diagnostic handoff.
 
 After the independent Server bootstrap/import/start above, run as its configured
 operator. Use the actual OCI manifest digest already imported:
