@@ -287,6 +287,38 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   or explained by this success. Userspace pilot and comparison remain open.
 - No host kernel module was loaded and no physical interface was attached.
 
+### Subsequent installation and evidence checks
+
+- Fresh server installation 02 preserves all 27 payload hashes but fails exact
+  mode verification: the caller's umask 0077 produces 0600/0700 payload entries.
+  Its disk and partial slot remain retained. `0a7c96f` explicitly sets modes only
+  on new entries, with 0700/0600 installer state and unchanged existing private
+  configuration. All 25 release tests pass. The actual 69,898,240-byte payload
+  also passes stage, activation, interrupted pointer update, recovery, rollback,
+  resume and preflight under umask 0077 in an isolated host directory using the
+  existing fake platform. `artifacts/install-server-host03` records this filesystem
+  check; guest startup and platform behavior are not established by it.
+- Raw A16 boot 01 fails before console/SSH. The original padded device tree is
+  1,048,576 bytes; QEMU's source-defined expansion exceeds ARM64's 2 MiB limit.
+  The failed input, empty console and QMP diagnostics remain retained. Environment
+  amendment 3 (`0ef8dca`) pins a separately compacted, semantically identical
+  8,268-byte tree and a new boot command; original source/build pins are unchanged.
+  Raw boot 02 succeeds on the exact kernel with `/dev/ttyAMA1` available and no
+  authority device. `ec3a1fe` checks systemd's resolved executable path while
+  preserving the remaining frozen arguments exactly; six guard tests pass.
+- The actual userspace A16 correctness pilot passes all ten fixed scenarios with
+  zero new event loss. Separate ownership checks cover inherited/SCM_RIGHTS FDs
+  and owner exit. Both pilot and environment guard pass; evidence remains under
+  `.cache/qemu/a16/qualification/{userspace01,environment3-userspace01}` for boot
+  `508df926-66e8-4fd0-a7ee-830d37017571`. The eight-run comparison and common UART
+  tracing remain NOT_RUN. No performance or physical claim follows from this pilot.
+- `45910e4` adds an opt-in actual source-omission harness and a read-only adapter
+  to the production checkpoint/MCAP reader. It uses a bounded manager pause and
+  exactly one existing EVENTS read, without granting or activating authority.
+  Seven Python and twelve manager/all-target Rust checks pass. Actual omission,
+  durable fault retention and replay rejection remain pending the scheduled guest
+  run; manager revision 10 is built but has not yet been exercised in a guest.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
