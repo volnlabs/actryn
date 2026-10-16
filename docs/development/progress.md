@@ -14,6 +14,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
+- User requested a pause on 2026-10-16; persistent goal paused and agent lanes
+  stopped. See [the current handoff](resume.md) before resuming execution.
 
 ## Component evidence (not release acceptance)
 
