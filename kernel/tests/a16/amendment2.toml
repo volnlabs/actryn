@@ -1,0 +1,20 @@
+# Premeasurement revision 2: stronger qualification, unchanged workload/limits.
+# Revision-1 prepared inputs and original build are retained, never replaced.
+revision = 2
+base_revision = 1
+base_source_commit = "cee3a2db674559355dcd6fc89918f72274839f4b"
+base_manifest_sha256 = "cc6a4c2421b09dcacbf812220ed8af52e09973d1613fcf16eab234fb38a5b49a"
+base_source_archive_sha256 = "34b37b2b399b3af1917e8f62762364c92ed9c8aaf0532d8ab5f81d5503355d6d"
+guest_source = "/opt/actryn-a16/src-amendment2"
+guest_build = "/opt/actryn-a16/build-amendment2"
+target_qualification = "NOT_RUN"
+comparison = "NOT_RUN"
+physical_acceptance = false
+
+[sources]
+"kernel/tests/a16/workload.c" = "14148767c53566ce0c274e23af49fdf51c3d900b2e95af7e762fb49eba8ca7a9"
+"kernel/tests/a16/workload_test.c" = "2eded27e3e4842deb883b4e906d65300de0627a8baa3842f42daeda95dd0b7e5"
+"kernel/tests/a16/pilot.py" = "9121b77c22e28744939ed4729e58be1d3292823ffc051620acafaefc4d078730"
+"kernel/tests/a16/pilot_test.py" = "7618b7c01201d01c507c3528a583f16f678efc06e61d6f0e1d1d58566ef8249d"
+"kernel/tests/a16/live_qualify.py" = "96c4cdd63a86c487709c11ed36b501c49b33242c4edcbfad4fcee60ef6a18c25"
+"kernel/tests/a16/provision-amendment2.sh" = "6455483895732731ecc5512ec858b50bb5cba26aadf38b0d223288db26d6b2a7"

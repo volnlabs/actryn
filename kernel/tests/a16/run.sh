@@ -13,6 +13,9 @@ ASAN_OPTIONS=detect_leaks=0 "$out/gateway-test"
 cc -std=c11 -Wall -Wextra -Werror "$here/gateway.c" "$here/engine.c" \
   "$here/../../actryn_wire.c" -o "$out/a16-gateway"
 cc -std=c11 -Wall -Wextra -Werror "$here/workload.c" -o "$out/a16-workload"
+cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer \
+  "$here/workload_test.c" -o "$out/workload-test"
+ASAN_OPTIONS=detect_leaks=0 "$out/workload-test"
 python3 -m unittest discover -s "$here" -p '*_test.py'
 python3 - "$here/../../.." <<'PY'
 import pathlib

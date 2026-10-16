@@ -1,5 +1,8 @@
 # A16 fixed software comparison (revision 1)
 
+Qualification now requires the [premeasurement revision-2 amendment](amendment2.toml)
+below. Original revision-1 inputs and builds remain immutable.
+
 Status: host engine, socket-lifetime, analyzer and profile checks PASS;
 target qualification NOT_RUN. No comparison has run. This is a
 test-only userspace baseline, never a production Robot backend or installer.
@@ -201,3 +204,55 @@ budget is a campaign timeout, not a latency bound. Target preparation, boot,
 provisioning and these live pilot commands remain **NOT_RUN** until their actual
 records exist. A passing pilot permits the already-authorized frozen ABBA
 experiment; pilot rows never enter its measurement denominator.
+
+## Premeasurement amendment 2
+
+Read-only review found two qualification gaps before any pilot or comparison ran:
+an unknown gateway-start reply skipped cleanup, and normal/cancel trials did not
+check the specific closure reason or retained grant. Amendment 2 changes those
+checks and the corresponding evidence only. Scenario order, request rate, sample
+and health deadlines, duties, guest resources, authority driver, baseline engine,
+gateway executable and controller remain the revision-1 configuration.
+
+The original preparation is commit `cee3a2db674559355dcd6fc89918f72274839f4b`,
+source archive SHA-256 `34b37b2b399b3af1917e8f62762364c92ed9c8aaf0532d8ab5f81d5503355d6d`.
+Keep `.cache/qemu/a16/{prepared.json,manifest.toml,source.tar.gz}`, the original
+guest `/opt/actryn-a16/src` and `/opt/actryn-a16/build`, and all provision logs.
+`prepare.py` intentionally still validates revision-1 source; do not rerun it over
+the prepared guest or rewrite its old workload pin to conceal this amendment.
+
+Before either pilot, the integration owner archives the signed amendment commit's
+`kernel/` and target profile into a **new** `source-amendment2.tar.gz`, retains its
+commit/hash alongside the original preparation, and extracts it into the new
+guest directory `/opt/actryn-a16/src-amendment2`. Then run only:
+
+```sh
+sh /opt/actryn-a16/src-amendment2/kernel/tests/a16/provision-amendment2.sh
+```
+
+The script requires the successful original build, checks original and amended
+source pins and the exact compiler package, then creates a separate
+`/opt/actryn-a16/build-amendment2`. It copies the hash-verified original module,
+gateway and authority selftests, builds the corrected workload and its predicate
+test, and records separate binary hashes/build IDs and an amendment marker. It
+does not install packages, load a module, change a service or execute a pilot.
+A failed amendment build is retained and cannot be overwritten. The corrected
+host `pilot.py` requires this new build and matching amendment manifest before
+using its executables; both original boot modes and pilot result names remain
+unchanged because no pilot was executed under revision 1.
+
+Normal/cancel completion now requires Active/Reconciled, SkillFinished/Cancelled
+respectively, zero duties, the original grant/operation/stream and runtime nonce,
+and both handshaken and grant-authorized flags. A retained terminal-status row
+lets the host independently check the state, reason, duties and retained
+grant/operation/stream instead of relying on child exit status. The event
+format remains revision 1 and its manifest explicitly records `amendment: 2`.
+
+Gateway start and cleanup share a bounded guest `flock`. Cleanup records a closed
+fence before stopping/readback, including when the first start reply was lost;
+a delayed original SSH command cannot launch after that fence. A prior unit or
+closed fence rejects startup. Start is never retried, and a missing cleanup reply
+retains failure/uncertainty. Host RED/GREEN tests cover both lost replies and a
+delayed start overtaken by cleanup using real subprocesses/locks with temporary
+service-command fixtures. These tests and the C terminal-predicate tests qualify
+the harness checks only; actual target pilot and comparison remain **NOT_RUN**.

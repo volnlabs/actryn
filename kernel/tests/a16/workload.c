@@ -114,6 +114,15 @@ static struct actryn_status wait_state(int admin,int events,unsigned state,unsig
  emit("{\"type\":\"wait_failure\",\"trial\":%u,\"state\":%u,\"operation_state\":%u,\"reason\":%u}\n",trial,s.state,s.operation_state,s.reason);
  abort();
 }
+static bool terminal_matches(const struct actryn_status *s,const struct actryn_request *closing)
+{
+ unsigned reason=closing->opcode==ACTRYN_FINISH?ACTRYN_SKILL_FINISHED:ACTRYN_CANCELLED;
+ return (closing->opcode==ACTRYN_FINISH || closing->opcode==ACTRYN_CANCEL) &&
+  s->state==ACTRYN_ACTIVE && s->operation_state==ACTRYN_OP_RECONCILED && s->reason==reason &&
+  (s->flags&9)==9 && !s->left_permille && !s->right_permille && closing->grant &&
+  s->grant==closing->grant && s->operation==closing->operation && s->stream==closing->stream &&
+  !memcmp(s->runtime_nonce,closing->runtime_nonce,16);
+}
 static void control(const char *command)
 { char ack; printf("CONTROL %s\n",command); fflush(stdout); assert(read(STDIN_FILENO,&ack,1)==1 && ack=='Y'); }
 static void observe(int acquisition,int admin)
@@ -168,7 +177,12 @@ static void child_trial(int parent_socket,int intent)
  if(s.state==ACTRYN_ACTIVE) {
   r=req(!strcmp(scenarios[trial],"cancel")?ACTRYN_CANCEL:ACTRYN_FINISH,s);
   r.grant=s.grant; r.operation=s.operation; r.stream=s.stream;
-  assert(!request(runtime,&r)); wait_state(admin,events,ACTRYN_ACTIVE,ACTRYN_OP_RECONCILED);
+  assert(!request(runtime,&r)); s=wait_state(admin,events,ACTRYN_ACTIVE,ACTRYN_OP_RECONCILED);
+  emit("{\"type\":\"terminal\",\"trial\":%u,\"state\":%u,\"operation_state\":%u,\"reason\":%u,\"flags\":%u,\"left\":%d,\"right\":%d,\"grant\":%llu,\"operation\":%llu,\"stream\":%llu,\"expected_grant\":%llu,\"expected_operation\":%llu,\"expected_stream\":%llu}\n",
+   trial,s.state,s.operation_state,s.reason,s.flags,s.left_permille,s.right_permille,
+   (unsigned long long)s.grant,(unsigned long long)s.operation,(unsigned long long)s.stream,
+   (unsigned long long)r.grant,(unsigned long long)r.operation,(unsigned long long)r.stream);
+  assert(terminal_matches(&s,&r));
  }
  drain(events); close(runtime); close(acquisition); close(events); close(admin); _exit(0);
 }
@@ -180,7 +194,7 @@ int main(int argc,char **argv)
  assert(!mkdir(argv[2],0700)); directory=open(argv[2],O_RDONLY|O_DIRECTORY|O_CLOEXEC); assert(directory>=0);
  journal=openat(directory,"events.jsonl",O_WRONLY|O_CREAT|O_EXCL|O_APPEND|O_CLOEXEC,0600); assert(journal>=0);
  bootfd=open("/proc/sys/kernel/random/boot_id",O_RDONLY|O_CLOEXEC); assert(bootfd>=0); assert(read(bootfd,boot,36)==36); close(bootfd);
- emit("{\"type\":\"manifest\",\"revision\":1,\"arm\":\"%s\",\"boot\":\"%s\",\"planned_trials\":10}\n",argv[1],boot);
+ emit("{\"type\":\"manifest\",\"revision\":1,\"amendment\":2,\"arm\":\"%s\",\"boot\":\"%s\",\"planned_trials\":10}\n",argv[1],boot);
  admin=bind_role(ACTRYN_ADMIN); events=bind_role(ACTRYN_EVENTS);
  resources("begin",admin);
  for(trial=0;trial<10;trial++) {
