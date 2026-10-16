@@ -1,0 +1,29 @@
+# Environment-only correction, frozen before raw boot 02 and userspace pilot.
+# Original manifest, amendment 2, source archives and failed boot remain intact.
+revision = 3
+base_revision = 1
+source_amendment = 2
+amendment2_sha256 = "6389f04e3e1c6cbb4fc82ac5d176ba1c2fd44fc6606f18781c6cae52edcef182"
+dtc_version = "Version: DTC v1.8.1"
+original_bytes = 1048576
+compact_bytes = 8268
+qemu_expanded_original_bytes = 2117152
+qemu_expanded_compact_bytes = 36536
+linux_max_fdt_size = 2097152
+raw_boot02 = "NOT_RUN"
+userspace_pilot = "NOT_RUN"
+comparison = "NOT_RUN"
+physical_acceptance = false
+
+[files]
+"boot/raw.dtb" = "e39cb80b55a7391176ee478436abbea0ba44e83134f0cbffa1cb5596ebfd15a1"
+"boot/raw-compact-amendment3.dtb" = "d168b0d8d40ad598f66d705351aaa65ce2c6fe55b4b47f829deac5c858fac6a5"
+"boot/protected.dtb" = "b7a13e2f87dccf996274d65e91603b988b4d170bfa3ca9f2610f173d0dcc2011"
+"qemu-pilot01.json" = "dc96262da7bc4ae1a300df41a9b42d75d7928483f4ae60dfd575de9d5a90798b"
+"qemu-rawboot02.json" = "34ece0c4270850f9595327deefd104ac34165a7aef6b66b49d08d946be84a9ad"
+"environment-amendment3/proof.json" = "131ea13f24ac24440cb32c99c77ade723cbc90b1a9a2afa19f797b2f3a8de6fe"
+"environment-amendment3/raw.normalized.dts" = "0de56fd8d2557141e0adf8b8ae34fb8fbc53908b414b598f644f858abc31c463"
+"environment-amendment3/compact.normalized.dts" = "0de56fd8d2557141e0adf8b8ae34fb8fbc53908b414b598f644f858abc31c463"
+"RAW_BOOT01_FAILED" = "23e3b0285b91124dba21c31311c370b5a89fbd546be5a7cdc7a649b1a20b030f"
+"raw-boot01-diagnostics.json" = "028d18a6d722f780ce61da7c5d9242b237b35b0790251414a71bc4bcf025a2d0"
+"raw-boot01-stop.json" = "3dffe613f7bd07342b50b1f374dd657e67f690fde87ad6d2d350ce83015a384a"

@@ -2,6 +2,9 @@
 
 Qualification now requires the [premeasurement revision-2 amendment](amendment2.toml)
 below. Original revision-1 inputs and builds remain immutable.
+The raw guest additionally requires [environment amendment 3](ENVIRONMENT3.md):
+the original padded DTB failed before boot, so a separately pinned compact DTB
+and a required pilot wrapper preserve the failed attempt and environment identity.
 
 Status: host engine, socket-lifetime, analyzer and profile checks PASS;
 target qualification NOT_RUN. No comparison has run. This is a
