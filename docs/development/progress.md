@@ -583,6 +583,47 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   byte-verified; guest deployment, instrumentation pilots and comparison remain
   NOT_RUN.
 
+### Gateway campaigns and preserved crash evidence
+
+- `313dbb8` corrects the traffic03 offline validator: one proposal tuple and
+  four canonical SAMPLE requests are distinct Runtime Execution records. The
+  unchanged capture passes independent reanalysis with 313 selected records,
+  durable frontiers runtime 91/kernel 307, no reader issues, raw remnants or
+  source gaps, and one allocation/START/cancellation closure. All 136 original
+  hashes remain unchanged. The original campaign failure remains retained;
+  `artifacts/robot-a10-traffic-03-reanalysis01` records the amended analysis.
+- `a12060f` prepares the actual gateway descriptor helper before observation and
+  proposal. Lifetime01 confirms one gateway SIGKILL while its three original
+  descriptors remain held, followed by kernel quiescence and zero output. The
+  campaign then stops because its harness rejects WriterStopped after completed
+  namespace retirement. `b32fc26` accepts that state only when retirement is
+  complete; all 39 focused gateway checks pass. Separate retirement02 exports
+  128 records with no reader issues or raw remnants and verified hashes. The
+  historical runtime outcome remains uncertain; replacement-while-held phases
+  were not reached, so the full lifetime case is still incomplete.
+- Lifetime02 loses the VM during the Activate reply, before Propose. Host
+  evidence again records QEMU thread creation rejected at TasksMax64 and SIGABRT;
+  the cause of thread growth remains unverified. Original disk and private core
+  metadata remain preserved, with no core memory exported. Recovery02 fails
+  before boot due to an incorrect serial-path argument. Explicit recovery03 uses
+  the original successful argv with only new serial/QMP paths and TasksMax256;
+  guest RAM and production limits are unchanged. The retained namespace has no
+  operation records, and no uncertain Activate or Propose is resent.
+- Lifetime02's raw recovery export succeeds, but the read-only evidence reader
+  rejects its hot SQLite journal with extended error 776 (READONLY_ROLLBACK).
+  The original export remains immutable. A narrow scratch-copy rollback fix
+  and real SQLite crash regression are in progress; capture decoding is not
+  claimed successful. Evidence is under
+  `artifacts/robot-a10-lifetime-02-recovery-export01`.
+- Lifetime03 is refused at Prepare because the original installation has reached
+  its fixed 16 retained namespaces. No grant, proposal or intended fault is sent.
+  Final explicit recovery leaves it healthy and inhibited; read-only SQLite
+  integrity is OK, all 16 namespaces are retired and all 21 records remain.
+  Both services stop, then the owned QEMU shuts down with inactive/MainPID0.
+  `artifacts/robot-original-quiescence01` retains this final state. Its disk and
+  history are preserved; remaining campaigns use the separately prepared fresh
+  installation rather than deleting history or widening capacity.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
