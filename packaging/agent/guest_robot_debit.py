@@ -23,6 +23,24 @@ require = common.require
 NAMES = {'attempt', 'runtime_binding', 'runtime_facts', 'stdout', 'stderr', 'broker', 'robot'}
 
 
+def read_continuation(fd, deadline):
+    raw = bytearray()
+    while True:
+        left = deadline - time.monotonic()
+        require(left > 0 and select.select([fd], [], [], left)[0]
+                and time.monotonic() < deadline,
+                'root continuation cutoff; no retry/reboot attempted')
+        chunk = os.read(fd, 1025 - len(raw))
+        require(chunk, 'root continuation EOF before complete frame')
+        raw.extend(chunk)
+        require(len(raw) <= 1024, 'bounded explicit continuation required')
+        if b'\n' in raw:
+            require(raw.count(b'\n') == 1 and raw.endswith(b'\n'),
+                    'exactly one continuation line required')
+            return bytes(raw)
+        require(len(raw) < 1024, 'bounded explicit continuation required')
+
+
 def peer_digest(peer):
     # robot::PeerConfig is a Rust struct, not a sorted serde_json::Value map.
     fields = ('endpoint', 'dns_name', 'robot_leaf_sha256', 'principal',
@@ -371,10 +389,7 @@ print(json.dumps(result))'''
         print(json.dumps({'phase': 'WAITING_FOR_ROOT_CRASH_REBOOT_EXPLICIT_UNIT_START',
                           'handoff': str(self.output / 'immutable-handoff.json'),
                           'cutoff_monotonic': self.phase_deadline}), flush=True)
-        require(select.select([sys.stdin], [], [], max(0, self.phase_deadline - time.monotonic()))[0],
-                'root continuation cutoff; no retry/reboot attempted')
-        raw = sys.stdin.readline(1025)
-        require(len(raw) <= 1024 and raw.endswith('\n'), 'bounded explicit continuation required')
+        raw = read_continuation(sys.stdin.fileno(), min(self.phase_deadline, self.gate.deadline))
         continuation = json.loads(raw)
         require(set(continuation) == {'continue', 'new_server_boot_id', 'crash_record'}
                 and continuation['continue'] == 'AFTER_REVIEWED_SERVER_REBOOT', 'unknown continuation')
@@ -488,13 +503,25 @@ print(json.dumps(result))'''
             self.partial(case, 'restored-capacity-settled-export', settled=True)
         require(not self.catalog()['tasks'] and all(self.snapshot(attempt)[name]['state'] == 'reaped'
                 for attempt in self.attempts for name in ('broker', 'launcher')), 'final local cleanup incomplete')
-        self.save('PASS.json', {'scope': 'real Robot debit cancellation/server guest crash'
+        return {'scope': 'real Robot debit cancellation/server guest crash'
                   + ('/global-four pressure' if self.args.pressure else ''),
-                  'attempts': self.attempts, 'gate': self.gate.report(),
+                  'attempts': self.attempts,
                   'provider_pressure_tested': False, 'closure_inventory_exhausted': False,
                   'physical_acceptance': False, 'automatic_proposal_retries': 0,
                   'peer_restoration_tested': False,
-                  'next_operator_action': 'stop server units; restore separately retained original peer/credential configuration'})
+                  'next_operator_action': 'stop server units; restore separately retained original peer/credential configuration'}
+
+    def complete(self):
+        result = self.execute()
+        self.gate.close()  # Reap all workers inside the recorded failure boundary, before PASS.
+        final = self.gate.report()
+        require(final['error'] is None and final['active'] == final['blocked_active'] == 0
+                and final['remaining_s'] > 0 and 0 <= final['connections'] <= 64
+                and 0 <= final['bytes_observed'] <= 8 * 1024 * 1024
+                and 0 <= final['bytes_forwarded'] + final['blocked_bytes'] <= final['bytes_observed']
+                and final['bytes_forwarded'] >= 0 and final['blocked_bytes'] >= 0,
+                {'gate_finalization_failed': final})
+        self.save('PASS.json', dict(result, gate=final))
 
     def abort_revoke(self):
         # One distinct, planned urgent closure; no retire/recovery or mutation resend.
@@ -556,18 +583,27 @@ def main():
     sys.path.insert(0, str(common.ROOT / 'sdk/python'))
     source_limits()
     os.umask(0o077)
-    with ConnectionGate(args.gate_port, args.tcp_port) as gate:
+    gate = ConnectionGate(args.gate_port, args.tcp_port)
+    try:
         campaign = DebitCampaign(args, gate)
-        try:
-            campaign.execute()
-        except BaseException as error:
-            campaign.save('FAILED.json', {'error': repr(error), 'phase': campaign.phase,
-                          'attempts': campaign.attempts, 'cases': campaign.cases,
-                          'gate': gate.report(), 'automatic_retry': False,
-                          'cleanup_or_remote_settlement_unconfirmed': True,
-                          'next_action': 'retain peer endpoint/keys/disk; inspect exact handles before explicit closure'})
-            campaign.abort_revoke()
-            raise
+    except BaseException:
+        gate.close()
+        raise
+    try:
+        gate.__enter__()
+        campaign.complete()
+    except BaseException as error:
+        cleanup_error = None
+        try: gate.close()
+        except BaseException as failed_cleanup: cleanup_error = repr(failed_cleanup)
+        campaign.save('FAILED.json', {'error': repr(error), 'phase': campaign.phase,
+                      'attempts': campaign.attempts, 'cases': campaign.cases,
+                      'gate': gate.report(), 'gate_cleanup_error': cleanup_error,
+                      'automatic_retry': False,
+                      'cleanup_or_remote_settlement_unconfirmed': True,
+                      'next_action': 'retain peer endpoint/keys/disk; inspect exact handles before explicit closure'})
+        campaign.abort_revoke()
+        raise
 
 
 if __name__ == '__main__':

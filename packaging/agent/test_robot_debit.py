@@ -2,13 +2,14 @@ import contextlib
 import copy
 import hashlib
 import json
+import os
 import socket
 import socketserver
 import threading
 import time
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, Mock, patch
 import guest_robot_debit as campaign
 from debit_gate import ConnectionGate
 
@@ -192,6 +193,130 @@ class PartialEvidenceTests(unittest.TestCase):
                 campaign.operation_identity(changed, 'a' * 32, 'b' * 32)
         description['runtime']['kernel']['flags'] = 0
         self.assertIsNone(campaign.operation_identity(description, 'a' * 32, 'b' * 32))
+
+
+class ContinuationTests(unittest.TestCase):
+    @contextlib.contextmanager
+    def pipe(self):
+        reader, writer = os.pipe()
+        try:
+            yield reader, writer
+        finally:
+            os.close(reader)
+            try: os.close(writer)
+            except OSError: pass
+
+    def test_partial_line_times_out_under_original_absolute_deadline(self):
+        with self.pipe() as (reader, writer):
+            os.write(writer, b'{')
+            # Release the old blocking readline even when this regression fails.
+            closer = threading.Timer(.2, os.close, args=(writer,))
+            closer.start()
+            started = time.monotonic()
+            try:
+                with self.assertRaisesRegex(AssertionError, 'continuation cutoff'):
+                    campaign.read_continuation(reader, started + .04)
+                self.assertLess(time.monotonic() - started, .15)
+            finally:
+                closer.join(1)
+
+    def test_eof_without_a_complete_line_is_rejected(self):
+        for partial in (b'', b'{'):
+            with self.subTest(partial=partial), self.pipe() as (reader, writer):
+                os.write(writer, partial); os.close(writer)
+                with self.assertRaisesRegex(AssertionError, 'continuation EOF'):
+                    campaign.read_continuation(reader, time.monotonic() + .2)
+
+    def test_incremental_complete_line_and_exact_byte_boundary(self):
+        with self.pipe() as (reader, writer):
+            os.write(writer, b'{')
+            complete = threading.Timer(.02, os.write, args=(writer, b'}\n'))
+            complete.start()
+            try:
+                self.assertEqual(campaign.read_continuation(reader, time.monotonic() + .2), b'{}\n')
+            finally:
+                complete.join(1)
+        with self.pipe() as (reader, writer):
+            frame = b'x' * 1023 + b'\n'
+            os.write(writer, frame)
+            self.assertEqual(campaign.read_continuation(reader, time.monotonic() + .2), frame)
+
+    def test_oversize_multiple_lines_and_trailing_bytes_are_rejected(self):
+        for frame in (b'x' * 1024 + b'\n', b'{}\n{}\n', b'{}\nx'):
+            with self.subTest(frame=frame[:16]), self.pipe() as (reader, writer):
+                os.write(writer, frame)
+                with self.assertRaises(AssertionError):
+                    campaign.read_continuation(reader, time.monotonic() + .2)
+
+
+class FinalGateTests(unittest.TestCase):
+    def campaign(self):
+        run = object.__new__(campaign.DebitCampaign)
+        run.gate = MagicMock()
+        run.gate.report.return_value = {'error': None, 'active': 0, 'blocked_active': 0,
+            'remaining_s': 1, 'connections': 4, 'bytes_observed': 30,
+            'bytes_forwarded': 20, 'blocked_bytes': 10}
+        run.save = Mock()
+        return run
+
+    def test_late_gate_error_cannot_publish_pass(self):
+        run = self.campaign()
+        def execute():
+            run.gate.report.return_value['error'] = 'late forwarding failure'
+            return {'scope': 'test'}
+        run.execute = execute
+        with self.assertRaises(AssertionError): run.complete()
+        run.gate.close.assert_called_once()
+        run.save.assert_not_called()
+
+    def test_gate_cleanup_failure_cannot_publish_pass(self):
+        run = self.campaign()
+        run.execute = lambda: {'scope': 'test'}
+        run.gate.close.side_effect = AssertionError('gate cleanup unknown')
+        with self.assertRaisesRegex(AssertionError, 'gate cleanup unknown'): run.complete()
+        run.save.assert_not_called()
+
+    def test_final_cutoff_counters_and_drained_workers_are_required(self):
+        for field, value in [('remaining_s', 0), ('active', 1), ('blocked_active', 1),
+                             ('connections', 65), ('bytes_observed', 8 * 1024 * 1024 + 1),
+                             ('bytes_forwarded', 31)]:
+            run = self.campaign()
+            run.execute = lambda: {'scope': 'test'}
+            run.gate.report.return_value[field] = value
+            with self.subTest(field=field), self.assertRaises(AssertionError): run.complete()
+            run.save.assert_not_called()
+
+    def test_pass_is_saved_only_after_gate_close_and_final_validation(self):
+        run = self.campaign()
+        events = []
+        run.execute = lambda: events.append('execute') or {'scope': 'test'}
+        run.gate.close.side_effect = lambda: events.append('closed')
+        run.save.side_effect = lambda name, value: events.append(name)
+        run.complete()
+        self.assertEqual(events, ['execute', 'closed', 'PASS.json'])
+
+    def test_main_retains_cleanup_failure_in_failed_record(self):
+        run = self.campaign()
+        run.phase, run.attempts, run.cases = 'test', [], []
+        run.execute = lambda: {'scope': 'test'}
+        run.abort_revoke = Mock()
+        run.gate.close.side_effect = AssertionError('gate cleanup unknown')
+        args = SimpleNamespace(server_port=1, robot_port=2, tcp_port=3, gate_port=4,
+            artifact='sha256:c3013959f5cca4a2275fa5f26de6f030dcc011241dbbe5961993a406e2e53d45',
+            server_manifest='a' * 64, robot_manager_sha256='b' * 64,
+            robot_module_note_sha256='c' * 64, server_machine_id='d' * 32,
+            robot_machine_id='e' * 32, server_qemu_unit='actryn-install-server03.service',
+            server_ssh_key='unused')
+        with (patch.object(campaign.argparse.ArgumentParser, 'parse_args', return_value=args),
+              patch.object(campaign, 'ConnectionGate', return_value=run.gate),
+              patch.object(campaign, 'DebitCampaign', return_value=run),
+              patch.object(campaign, 'source_limits'), patch.object(campaign.os, 'umask')):
+            with self.assertRaisesRegex(AssertionError, 'gate cleanup unknown'): campaign.main()
+        name, record = run.save.call_args.args
+        self.assertEqual(name, 'FAILED.json')
+        self.assertIn('gate cleanup unknown', record['gate_cleanup_error'])
+        self.assertEqual(run.save.call_count, 1)
+        run.abort_revoke.assert_called_once()
 
 
 class GateTests(unittest.TestCase):

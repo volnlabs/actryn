@@ -128,7 +128,10 @@ evidence of abrupt termination. The explicit stdin line is:
 
 There is no shell interpretation of this line or VM-command field. Each ordinary
 phase has180s, final settlement300s, plus the independent overall gate cutoff.
-Every SSH/command wait is bounded by its phase cutoff. On failure the script
+Continuation bytes are read incrementally under the original absolute phase/gate
+deadline: at most1024 bytes including exactly one terminating newline. Partial
+input does not extend that deadline; premature EOF, extra buffered lines and
+oversize frames fail. Every SSH/command wait is bounded by its phase cutoff. On failure the script
 retains FAILED, attempts, handles and gate state, then attempts one distinct
 reserved local revoke only if the original Robot machine was verified. Failed
 closure remains explicitly unknown; no automatic retire/recovery erases it.
@@ -165,7 +168,9 @@ exact core identities, canonical hashes, independent raw logs/absence and declar
 omissions. It must never invent a complete episode, clean tail or new source epoch.
 
 After success, the gate closes; peer configuration intentionally remains
-unchanged. Parent explicitly stops server units and restores the separately
+unchanged. PASS is written only after gate workers have joined and final error,
+counter and lifetime checks pass. Gate shutdown failures are retained as FAILED.
+Parent explicitly stops server units and restores the separately
 retained original peer/credential configuration only after all debits are0.
 Restoration is not silently claimed tested by this harness. On failure retain the
 stable endpoint, keys, disk and records for deliberate closure/reconciliation.
