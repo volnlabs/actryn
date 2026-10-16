@@ -7,6 +7,10 @@ the original padded DTB failed before boot, so a separately pinned compact DTB
 and a required pilot wrapper preserve the failed attempt and environment identity.
 Common per-block UART diagnostic capture uses [UART_TRACE.md](UART_TRACE.md);
 complete-frame dispatch measurement remains explicitly NOT_RUN.
+The separately frozen [instrumentation amendment 4](INSTRUMENTATION4.md) adds
+accepted-prefix capture and strict full-frame correlation. Its two target pilots
+must pass before the eight-run matrix; pointer/count tracing is not enabled
+alongside it. Neither instrumentation pilot nor comparison has run at this freeze.
 
 Status: host engine, socket-lifetime, analyzer and profile checks PASS;
 target qualification NOT_RUN. No comparison has run. This is a

@@ -16,6 +16,9 @@ cc -std=c11 -Wall -Wextra -Werror "$here/workload.c" -o "$out/a16-workload"
 cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer \
   "$here/workload_test.c" -o "$out/workload-test"
 ASAN_OPTIONS=detect_leaks=0 "$out/workload-test"
+cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer \
+  "$here/capture/prefix_test.c" -o "$out/prefix-test"
+ASAN_OPTIONS=detect_leaks=0 "$out/prefix-test"
 python3 -m unittest discover -s "$here" -p '*_test.py'
 python3 - "$here/../../.." <<'PY'
 import pathlib

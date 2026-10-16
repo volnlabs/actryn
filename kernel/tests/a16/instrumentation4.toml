@@ -1,0 +1,35 @@
+# Frozen before separately numbered target instrumentation pilots and comparison.
+revision = 4
+base_revision = 1
+source_amendment = 2
+environment_amendment = 3
+kernel_release = "6.12.111+deb13-arm64"
+kernel_package = "6.12.111-1"
+kernel_config_sha256 = "0f442d89365ea22dc5169463634ee62903925200844558479666cbe3eeb7e555"
+module_sha256 = "535b1e5c653993a7a1ba716da9d569501875198a668ac94747bf119c95805bc8"
+module_build_id = "c73b09989d7d25016825d2ab63054069d4f63f91"
+module_source_archive_sha256 = "9033207e98b5d6c7facceea5ec3a2b570d21b00a6f540de9f23f1e5998d473ca"
+module_build_evidence_sha256 = "6a56ae4481b162c89333f8e3785012fee011eac4ccece9342c8670c590d7e15d"
+exact_module_symvers_sha256 = "42fe7f2b8e33b9f95bf259092f437bf2a5927e231c07ea6e90869a7d2ac0b35d"
+record_capacity = 4096
+record_bytes = 256
+header_bytes = 128
+max_prefix_bytes = 158
+kretprobe_maxactive = 64
+target = "ttyAMA1"
+clock = "CLOCK_BOOTTIME"
+paired_count_only_trace = false
+target_kernel_pilot = "NOT_RUN"
+target_userspace_pilot = "NOT_RUN"
+comparison = "NOT_RUN"
+physical_acceptance = false
+
+[sources]
+"capture/Makefile" = "c47d5e6b76a54c8d823a180f0e87d949a75e15e79cf0c08c3cb647a58db2c332"
+"capture/prefix.h" = "bc908e2669c5922d23b898952da97d30e57f1ae14301f13c53b15f46d74a5497"
+"capture/actryn_a16_capture.c" = "4aa8967bdb5757a1958a5cc34f7592ce48c255a3af92472009d114b545364c73"
+"capture/prefix_test.c" = "78b627ae13b4082410a2e2d86856db01a66341eb019a3c07a62a6eae0aa181d7"
+"capture_guest.py" = "e9a77544688ecb0fabf180a71e21403a4ee6789bd901505ff2bc48719dbc733a"
+"dispatch.py" = "6ef48963be6734ff6bbe479a9ced71ec6424a5410bdc6be071de7eda1b88d61b"
+"dispatch_test.py" = "e3378b0e16835b6552af58cb45fa817f724a2b2fb9f614a261f0c0c0bc215f05"
+"uart_trace.py" = "1b35bc8a536ade0beb4b5a6580e5f15a10b34650e4fa6ce709f6257fe3f642ca"
