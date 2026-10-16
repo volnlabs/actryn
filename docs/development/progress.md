@@ -974,9 +974,15 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   systemd override instruments only the launcher and retains installed preflight
   and security properties; this is instrumented production-path evidence,
   not unchanged installed-unit qualification. Actual guest execution remains
-  NOT_RUN. The separate retained-debit coordinator's cold-store collector bug
-  is corrected before execution, with ten focused checks passing; the original
-  draft stays retained under `artifacts/robot-retained-debit-plan02`.
+  NOT_RUN. Review of the separate retained-debit coordinator initially mistook
+  logical broker ownership for a missing launcher table. Both installed stores
+  share the same schema, so the original table query was valid. Amendment02
+  corrects that review premise and tests the actual schema: unexpected launcher
+  Robot rows are collected and rejected, and only SQLite read-only recovery or
+  rollback errors retain explicit uncertainty. Other SQL failures stop before
+  service startup with raw evidence preserved. All ten focused host checks pass;
+  both earlier drafts remain under `artifacts/robot-retained-debit-plan02`.
+  The guest crash/restart campaign remains NOT_RUN.
 - `artifacts/offline-oci-matching-build03` reproduces both the original static
   agent (`56325165...`) and all five original OCI layout files byte for byte,
   including manifest `c3013959...`. It uses source `b4beaee`, its committed lock,
