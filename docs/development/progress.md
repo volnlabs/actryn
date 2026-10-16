@@ -710,6 +710,39 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   execution is now in progress, after exact boot/manifest/binary and quiescence
   verification; the observer-gap campaign must pass before overhead runs.
 
+### Installed observer results and recovery correction
+
+- Installed Server03 passes all three observer cases on boot
+  `336fa972-64c5-4f0d-a4aa-fbbc90ad0436`: missing readiness refuses launch,
+  actual reader death is recorded during an attempt, and the fixed workload
+  produces explicit loss. All three new attempts are reaped; both stores retain
+  eight total attempts with no unresolved ordinary calls or Robot debits.
+  The loss case retains 22,597 lost records at sequence 60,279. Old tails from
+  reader death retain unknown durability; diagnostic gaps are not relabeled
+  as unknown application outcomes.
+- All eight observer OFF/ON trials complete without retries or discarded runs.
+  Under the fixed standalone Python 30,000-open workload, OFF wall time is
+  318.04–349.01 ms and ON is 437.88–460.90 ms. Paired ON-minus-OFF differences
+  are +98.12–134.37 ms (+28.88–42.25%). Every ON trial reports loss:
+  24,958–26,475 records at sequence 60,108. The measurements include configured
+  CPU throttling and guest scheduling; loss changes observer work. These are
+  workload observations, not whole-agent overhead, complete traces or WCET.
+- Root verifies all 396 exported file hashes and sizes (65,369,233 bytes), plus
+  capture archive SHA-256
+  `fe6b552d6a56de7da8ac9e3ac1b858200ba6523fab5f3ed1a795b9e91eee15c6`.
+  Reports, raw original-epoch traces and source/pin readbacks remain under
+  `artifacts/observer-installed-01`. After exact quiescence checks, one graceful
+  poweroff succeeds; the owned QEMU is inactive/MainPID0 with its PID gone.
+  Disk, configuration and SSH trust remain preserved.
+- `25f82da` corrects runtime recovery: a fresh explicit Recover starts a new
+  inhibited clock exchange; calls during a pending exchange only poll. Grant
+  preflight rejects deadlines at or beyond the conservative mapping cutoff
+  before issuing kernel authority or changing the local grant. The two intended
+  cutoff/overflow tests fail before the fix; all 22 runtime host tests then pass,
+  with strict all-target Clippy and formatting. Independent source review finds
+  no blocker. The new actual-driver regression is compiled but NOT_RUN; an ARM
+  manager11 build and separately signed immutable candidate04 are in preparation.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
