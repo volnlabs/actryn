@@ -301,3 +301,8 @@ kernel, containerd/runc and Python prerequisites.
 
 This guide is included verbatim as the pinned `share/docs/INSTALL.md` in each
 role payload, available below `/opt/actryn/ROLE/current/` after installation.
+
+New public installation directories and payload modes are set explicitly before
+syncing, independently of the caller's umask. New installer-state directories and
+metadata remain 0700/0600. Existing configuration, evidence and directory modes are
+preserved; installation never relaxes them to make startup succeed.

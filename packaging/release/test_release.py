@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import struct
+import stat
 import subprocess
 import sys
 import tarfile
@@ -476,6 +477,34 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(before, self.tree(slot))
         self.assertFalse((slot / 'payload/tools/__pycache__').exists())
         installer.verify_slot(slot, {'manifest_sha256': identity, 'key_fingerprint': self.fingerprint})
+
+    def test_new_payload_modes_ignore_umask_and_existing_private_modes_survive(self):
+        for mask in (0o077, 0o027):
+            spec, bundle = self.bundle('server', mask)
+            root = self.install_root('umask-' + str(mask))
+            existing = root / 'var/lib/existing-private'
+            existing.mkdir(mode=0o700)
+            secret = existing / 'private-state'
+            secret.write_bytes(b'preserve private state'); secret.chmod(0o600)
+            installer = self.installer(root, spec)
+            old_mask = os.umask(mask)
+            try:
+                installer.mkdir(existing)
+                identity = self.run_install(installer, 'activate', bundle)['manifest_sha256']
+            finally:
+                os.umask(old_mask)
+            for name, item in spec['files'].items():
+                path = installer.slots / identity / 'payload' / name
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), release.mode_for(name), name)
+            for path in (root / 'opt').rglob('*'):
+                if path.is_dir() and not path.is_symlink():
+                    self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o755, str(path))
+            self.assertEqual(stat.S_IMODE(installer.state.stat().st_mode), 0o700)
+            for path in installer.state.iterdir():
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600, path.name)
+            self.assertEqual(stat.S_IMODE(existing.stat().st_mode), 0o700)
+            self.assertEqual(stat.S_IMODE(secret.stat().st_mode), 0o600)
+            self.assertEqual(secret.read_bytes(), b'preserve private state')
 
     def test_fresh_absent_units_need_no_stop_but_loaded_failures_still_inhibit(self):
         adapter = SystemPlatform()

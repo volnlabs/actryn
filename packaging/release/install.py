@@ -162,15 +162,19 @@ class Installer:
             require(path.is_dir(), 'installation directory type')
             return
         self.mkdir(path.parent)
-        path.mkdir(mode=0o755)
+        # Apply only to a new directory; preserve all existing state/config modes.
+        path.mkdir(mode=0o700)
+        os.chmod(path, 0o700 if path.is_relative_to(self.state) else 0o755, follow_symlinks=False)
+        sync_dir(path)
         sync_dir(path.parent)
 
     def write_new(self, path, data, mode=0o644):
         self.mkdir(path.parent)
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode)
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, 'wb') as stream:
             stream.write(data)
             stream.flush()
+            os.fchmod(stream.fileno(), 0o600 if path.is_relative_to(self.state) else mode)
             os.fsync(stream.fileno())
         sync_dir(path.parent)
 
