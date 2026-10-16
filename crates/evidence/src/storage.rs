@@ -1,6 +1,6 @@
 use super::*;
 use mcap::{records::MessageHeader, WriteOptions};
-use rusqlite::{params, Connection, OpenFlags};
+use rusqlite::{params, Connection};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs::{self, File, OpenOptions as FileOptions},
@@ -623,14 +623,12 @@ fn load_manifest(db: &Connection) -> Result<CaptureSpec> {
     })
 }
 pub(crate) fn recover(root: &Path) -> Result<Recovery> {
-    // Recovery opens only SQLite read-only and recording files read-only. It cannot
-    // resume a capture, repair raw data, mint producer handles or dispatch work.
-    let db = Connection::open_with_flags(
-        root.join("checkpoints.sqlite"),
-        OpenFlags::SQLITE_OPEN_READ_ONLY,
-    )?;
-    let manifest = load_manifest(&db)?;
-    let number = |key| sequence(meta(&db, key)?);
+    // Originals stay read-only. A hot journal is rolled back only in a private
+    // scratch copy, never in the capture and never into a resumed writer.
+    let recovered_db = crate::recovery_db::open(root)?;
+    let db = &recovered_db.db;
+    let manifest = load_manifest(db)?;
+    let number = |key| sequence(meta(db, key)?);
     let limits = Limits {
         disk_bytes: number("disk_bytes")?,
         batch_bytes: number("batch_bytes")?,
@@ -656,7 +654,7 @@ pub(crate) fn recover(root: &Path) -> Result<Recovery> {
         limits,
         records: Vec::new(),
         raw_remnants: Vec::new(),
-        issues: Vec::new(),
+        issues: recovered_db.issues.clone(),
         volatile_tail_unknown: true,
     };
     let mut supported = BTreeSet::new();

@@ -109,7 +109,7 @@ There is no per-sample fsync in the control path.
 
 ## Recovery, manifest and replay
 
-`Recorder::recover(path)` is read-only. It validates each checkpoint's complete
+`Recorder::recover(path)` leaves the original capture read-only. It validates each checkpoint's complete
 MCAP hash/length, decoded records, channel identity and durable source frontiers.
 The first unsupported/missing/corrupt batch and all subsequent batches are
 excluded from authoritative results. Uncommitted/unsupported `.mcap` files remain
@@ -117,6 +117,39 @@ untouched in `raw_remnants`, with explicit issues. A synced file without a SQLit
 checkpoint is never promoted. Recovery cannot know the lost volatile read/queued
 tail, so `volatile_tail_unknown` remains true; recovered frontiers assert only
 what the supported durable prefix contains.
+
+If SQLite returns extended error 776 (`READONLY_ROLLBACK`), an interrupted DELETE
+transaction needs rollback before its checkpoints can be read. Recovery copies
+the bounded database and its hot journal to a private temporary directory, lets
+bundled SQLite roll back **only that copy**, requires `integrity_check` success,
+then applies the same MCAP/checkpoint validation. It never deletes/ignores the
+original journal or resumes recording. `issues` retains the original database
+and journal SHA-256 hashes and explicit private-rollback/unknown-tail provenance;
+execution replay remains ineligible.
+
+The supported fallback is deliberately narrow: 4 KiB database pages, at most
+128 MiB database and 256 MiB journal, one complete synced journal segment, with
+at most one complete empty next header initialized by SQLite's cache flush.
+Page IDs, counts, sector alignment and SQLite's sampled page checksums are
+checked before rollback. Partial/nonempty/additional tails, WAL/SHM companions,
+symlinks, special files, hardlinks and changed inputs reject. SQLite checksums
+and `integrity_check` are not cryptographic authentication or proof against all
+semantic corruption. Other SQLite errors are not repaired; cold journals remain
+subject to the normal SQLite read path.
+
+Fallback inputs must be a retired capture or an immutable exported copy in a
+trusted directory tree. An existing `capture.lock` must be exclusively available;
+exports omit that lock. Two-pass identity/size/timestamp/hash checks reject
+changes during copying, but do not turn arbitrary concurrent filesystem writers
+into a supported input. Normal read-only inspection of a live recorder remains
+available without invoking this fallback. Scratch memory/disk use is bounded
+by the file ceilings plus SQLite/allocator overhead; failed scratch recovery
+removes its temporary copy and never promotes unsupported MCAP files.
+
+Format sources: SQLite's [rollback-journal format](https://www.sqlite.org/fileformat2.html#the_rollback_journal)
+and [hot-journal locking rules](https://www.sqlite.org/lockingv3.html#the_rollback_journal).
+The checked implementation is `libsqlite3-sys` 0.38.2's bundled `sqlite3.c`,
+specifically `writeJournalHdr`, `readJournalHdr`, `pager_cksum` and `pager_playback`.
 
 `Recovery.manifest` and `limits` retain requested streams, source identities,
 clock bounds, digests, payload policy and retention/redaction. `source_summary()`

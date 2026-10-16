@@ -1,5 +1,6 @@
 //! Bounded recorder memory. Storage belongs exclusively to `Writer`; no admission,
 //! health or transition-event method performs filesystem/database operations.
+mod recovery_db;
 mod storage;
 use sha2::{Digest, Sha256};
 use std::{

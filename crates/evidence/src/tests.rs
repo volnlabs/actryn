@@ -45,6 +45,289 @@ fn spec(policy: CapturePolicy) -> CaptureSpec {
         }],
     }
 }
+
+// A separate process exits without dropping its SQLite connection, reproducing
+// a crash after dirty database pages reach disk but before transaction commit.
+#[test]
+#[ignore = "subprocess used only by hot-journal recovery tests"]
+fn crash_with_hot_checkpoint_journal() {
+    let root = std::env::var_os("ACTRYN_HOT_JOURNAL_TEST_ROOT").expect("test child only");
+    let db = rusqlite::Connection::open(Path::new(&root).join("checkpoints.sqlite")).unwrap();
+    db.execute_batch("PRAGMA synchronous=FULL; BEGIN IMMEDIATE; DELETE FROM checkpoints; DELETE FROM batches; UPDATE meta SET value=x'63726173686564' WHERE key='retention';").unwrap();
+    // SAFETY: this live connection is used only by this thread; cacheflush does
+    // not close or transfer ownership of its handle.
+    assert_eq!(
+        unsafe { rusqlite::ffi::sqlite3_db_cacheflush(db.handle()) },
+        0
+    );
+    std::process::exit(71);
+}
+
+fn hot_capture() -> Temp {
+    let dir = Temp::new();
+    let (recorder, mut writer) =
+        Recorder::create(&dir.0, spec(CapturePolicy::FullPayload), Limits::default()).unwrap();
+    recorder
+        .producer(0)
+        .unwrap()
+        .read(1, 10, EventKind::Input, b"committed")
+        .unwrap();
+    recorder.queue_read();
+    writer.flush().unwrap();
+    drop(writer);
+    drop(recorder);
+    let mut child = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "tests::crash_with_hot_checkpoint_journal",
+            "--ignored",
+        ])
+        .env("ACTRYN_HOT_JOURNAL_TEST_ROOT", &dir.0)
+        .spawn()
+        .unwrap();
+    let until = Instant::now() + Duration::from_secs(5);
+    let status = loop {
+        if let Some(status) = child.try_wait().unwrap() {
+            break status;
+        }
+        if Instant::now() >= until {
+            child.kill().unwrap();
+            child.wait().unwrap();
+            panic!("SQLite crash helper timed out");
+        }
+        thread::sleep(Duration::from_millis(5));
+    };
+    assert_eq!(status.code(), Some(71));
+    dir
+}
+
+fn capture_hashes(root: &Path) -> std::collections::BTreeMap<PathBuf, Vec<u8>> {
+    fs::read_dir(root)
+        .unwrap()
+        .map(|entry| {
+            let path = entry.unwrap().path();
+            (
+                path.file_name().unwrap().into(),
+                Sha256::digest(fs::read(&path).unwrap()).to_vec(),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn hot_journal_recovers_committed_prefix_without_touching_originals() {
+    let dir = hot_capture();
+    let before = capture_hashes(&dir.0);
+    let db = rusqlite::Connection::open_with_flags(
+        dir.0.join("checkpoints.sqlite"),
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+    )
+    .unwrap();
+    let error = db
+        .query_row("SELECT count(*) FROM meta", [], |r| r.get::<_, i64>(0))
+        .unwrap_err();
+    assert!(matches!(error, rusqlite::Error::SqliteFailure(e, _) if e.extended_code == 776));
+    drop(db);
+    let recovered = Recorder::recover(&dir.0).unwrap();
+    assert_eq!(recovered.manifest.retention, "local test only");
+    assert_eq!(recovered.frontiers[0].durable, 1);
+    assert_eq!(
+        recovered.records[0].payload.as_deref(),
+        Some(b"committed".as_slice())
+    );
+    assert!(recovered
+        .issues
+        .iter()
+        .any(|issue| issue.contains("private SQLite rollback")));
+    assert!(recovered.volatile_tail_unknown);
+    assert!(!recovered.execution_replay(u64::MAX).eligible);
+    assert_eq!(capture_hashes(&dir.0), before);
+}
+
+#[test]
+fn hot_journal_rejects_truncated_corrupt_and_unsupported_tails() {
+    let dir = hot_capture();
+    let path = dir.0.join("checkpoints.sqlite-journal");
+    let journal = fs::read(&path).unwrap();
+    let be = |range: std::ops::Range<usize>| {
+        u32::from_be_bytes(journal[range].try_into().unwrap()) as usize
+    };
+    let sector = be(20..24);
+    let end = sector + be(8..12) * (4096 + 8);
+    let next = end.div_ceil(sector) * sector;
+    assert_eq!(
+        journal.len(),
+        next + sector,
+        "real empty next-header fixture"
+    );
+    let mut bad = Vec::new();
+    for length in [1, 27, sector - 1, sector, end - 1, next, journal.len() - 1] {
+        bad.push((format!("truncated-{length}"), journal[..length].to_vec()));
+    }
+    for (name, offset) in [
+        ("magic", 1),
+        ("checksum", sector + 4 + 4096),
+        ("empty-header-magic", next),
+        ("empty-header-count", next + 11),
+        ("empty-header-padding", next + 28),
+        ("alignment-padding", end),
+    ] {
+        let mut bytes = journal.clone();
+        bytes[offset] ^= 1;
+        bad.push((name.into(), bytes));
+    }
+    for (name, range, number) in [
+        ("unsynced-count", 8..12, 0u32),
+        ("unbounded-count", 8..12, u32::MAX),
+        ("zero-pages", 16..20, 0),
+        ("bad-sector", 20..24, 513),
+        ("wrong-page-size", 24..28, 8192),
+    ] {
+        let mut bytes = journal.clone();
+        bytes[range].copy_from_slice(&number.to_be_bytes());
+        bad.push((name.into(), bytes));
+    }
+    let mut duplicate = journal.clone();
+    duplicate[sector + 4104..sector + 4108].copy_from_slice(&journal[sector..sector + 4]);
+    bad.push(("duplicate-page".into(), duplicate));
+    let mut appended = journal.clone();
+    appended.push(0);
+    bad.push(("appended-tail".into(), appended));
+    for (name, bytes) in bad {
+        fs::write(&path, bytes).unwrap();
+        let before = capture_hashes(&dir.0);
+        assert!(Recorder::recover(&dir.0).is_err(), "accepted {name}");
+        assert_eq!(capture_hashes(&dir.0), before, "changed {name}");
+    }
+    // The exact complete segment without an initialized next header is also
+    // supported (the retained actual QEMU-crash capture has this layout).
+    fs::write(&path, &journal[..end]).unwrap();
+    assert_eq!(Recorder::recover(&dir.0).unwrap().frontiers[0].durable, 1);
+}
+
+#[test]
+fn hot_journal_integrity_check_rejects_btree_corruption_beyond_sampled_checksum() {
+    let dir = hot_capture();
+    let path = dir.0.join("checkpoints.sqlite-journal");
+    let mut journal = fs::read(&path).unwrap();
+    let sector = u32::from_be_bytes(journal[20..24].try_into().unwrap()) as usize;
+    let count = u32::from_be_bytes(journal[8..12].try_into().unwrap()) as usize;
+    let btree = (0..count)
+        .map(|n| sector + n * 4104)
+        .find(|offset| {
+            journal[*offset..*offset + 4] != [0, 0, 0, 1]
+                && matches!(journal[*offset + 4], 2 | 5 | 10 | 13)
+        })
+        .unwrap();
+    // Offset 0 is the non-page-one btree type and is outside SQLite's sampled
+    // checksum (96, 296, ...). SQLite must reject it after scratch rollback.
+    journal[btree + 4] = 0xff;
+    fs::write(path, journal).unwrap();
+    let before = capture_hashes(&dir.0);
+    assert!(Recorder::recover(&dir.0).is_err());
+    assert_eq!(capture_hashes(&dir.0), before);
+}
+
+#[test]
+fn hot_journal_rejects_active_writer_wal_and_unsafe_input_files() {
+    use std::os::unix::fs::symlink;
+    let dir = hot_capture();
+    let lock = fs::File::open(dir.0.join("capture.lock")).unwrap();
+    lock.try_lock().unwrap();
+    assert!(matches!(
+        Recorder::recover(&dir.0),
+        Err(Error::Rejected("capture writer active during rollback"))
+    ));
+    drop(lock);
+    for name in ["checkpoints.sqlite-wal", "checkpoints.sqlite-shm"] {
+        fs::write(dir.0.join(name), []).unwrap();
+        assert!(Recorder::recover(&dir.0).is_err());
+        fs::remove_file(dir.0.join(name)).unwrap();
+    }
+    for name in [
+        "checkpoints.sqlite",
+        "checkpoints.sqlite-journal",
+        "capture.lock",
+    ] {
+        let path = dir.0.join(name);
+        let saved = dir.0.join("saved-original");
+        fs::rename(&path, &saved).unwrap();
+        symlink(&saved, &path).unwrap();
+        assert!(Recorder::recover(&dir.0).is_err(), "symlink {name}");
+        fs::remove_file(&path).unwrap();
+        // A nonblocking type guard must reject a FIFO before SQLite opens it.
+        let cpath = std::ffi::CString::new(path.as_os_str().as_encoded_bytes()).unwrap();
+        assert_eq!(unsafe { libc::mkfifo(cpath.as_ptr(), 0o600) }, 0);
+        assert!(Recorder::recover(&dir.0).is_err(), "FIFO {name}");
+        fs::remove_file(&path).unwrap();
+        fs::hard_link(&saved, &path).unwrap();
+        assert!(Recorder::recover(&dir.0).is_err(), "hardlink {name}");
+        fs::remove_file(&path).unwrap();
+        fs::rename(saved, path).unwrap();
+    }
+    let link = dir.0.with_extension("symlink");
+    symlink(&dir.0, &link).unwrap();
+    assert!(Recorder::recover(&link).is_err());
+    fs::remove_file(link).unwrap();
+    // Exported immutable capture copies intentionally have no writer lock.
+    fs::remove_file(dir.0.join("capture.lock")).unwrap();
+    assert_eq!(Recorder::recover(&dir.0).unwrap().frontiers[0].durable, 1);
+}
+
+#[test]
+fn hot_journal_input_caps_reject_sparse_oversized_files_without_copying() {
+    for (name, maximum) in [
+        ("checkpoints.sqlite", 128u64 << 20),
+        ("checkpoints.sqlite-journal", 256u64 << 20),
+    ] {
+        let dir = hot_capture();
+        let file = fs::OpenOptions::new()
+            .write(true)
+            .open(dir.0.join(name))
+            .unwrap();
+        file.set_len(maximum + 1).unwrap();
+        assert!(matches!(
+            Recorder::recover(&dir.0),
+            Err(Error::Rejected("private rollback input type/link/size"))
+        ));
+        assert_eq!(file.metadata().unwrap().len(), maximum + 1);
+    }
+}
+
+#[test]
+fn invalid_database_is_not_repaired_by_hot_journal_fallback() {
+    let dir = hot_capture();
+    let path = dir.0.join("checkpoints.sqlite");
+    for bytes in [
+        b"not a database".as_slice(),
+        b"SQLite format 3\0".as_slice(),
+        b"".as_slice(),
+    ] {
+        fs::write(&path, bytes).unwrap();
+        let before = capture_hashes(&dir.0);
+        assert!(Recorder::recover(&dir.0).is_err());
+        assert_eq!(capture_hashes(&dir.0), before);
+    }
+}
+
+#[test]
+fn normal_reader_rejects_wal_sidecars_before_sqlite_opens_them() {
+    let dir = Temp::new();
+    let (recorder, writer) =
+        Recorder::create(&dir.0, spec(CapturePolicy::MetadataOnly), Limits::default()).unwrap();
+    drop(writer);
+    drop(recorder);
+    for name in ["checkpoints.sqlite-wal", "checkpoints.sqlite-shm"] {
+        fs::write(dir.0.join(name), []).unwrap();
+        let before = capture_hashes(&dir.0);
+        assert!(matches!(
+            Recorder::recover(&dir.0),
+            Err(Error::Rejected("WAL/SHM not supported by private rollback"))
+        ));
+        assert_eq!(capture_hashes(&dir.0), before);
+        fs::remove_file(dir.0.join(name)).unwrap();
+    }
+}
 #[test]
 fn stalled_writer_expires_despite_reader_heartbeat() {
     let dir = Temp::new();

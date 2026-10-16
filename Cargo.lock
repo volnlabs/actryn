@@ -570,9 +570,11 @@ dependencies = [
 name = "evidence"
 version = "0.0.1"
 dependencies = [
+ "libc",
  "mcap",
  "rusqlite",
  "sha2",
+ "tempfile",
 ]
 
 [[package]]
