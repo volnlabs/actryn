@@ -306,6 +306,40 @@ def finalize_result(result):
     durable_record('phase-result.json',dict(result,artifact_hashes_sha256=sha(output/'artifact-hashes.json')))
 
 
+def verify_phase_handoff(directory, plan, plan_sha256, source_pins):
+    require(directory.is_dir() and not directory.is_symlink(),'regular original phase directory required')
+    require(not os.path.lexists(directory/'failure.json'),'original phase failure sentinel exists')
+    completed=json_file(directory/'phase-result.json',65536)
+    require(completed['status']=='FROZEN_CRASH_COMPLETE' and completed['actual_inspection']=='NOT_RUN'
+            and completed['automatic_retry'] is False and completed['pure_instantaneous_powercut'] is False,
+            'original phase failed or incomplete')
+    raw=read_file(directory/'artifact-hashes.json',1024*1024)
+    require(hashlib.sha256(raw).hexdigest()==completed['artifact_hashes_sha256'],'original inventory hash mismatch')
+    inventory=json.loads(raw)
+    require(isinstance(inventory,dict) and 0<len(inventory)<=2048
+            and all(isinstance(name,str) and isinstance(digest,str)
+                    and re.fullmatch('[0-9a-f]{64}',digest) for name,digest in inventory.items()),
+            'original inventory shape/capacity')
+    values={}
+    for name,limit in [('plan.json',131072),('source-pins.json',1024*1024),
+                       ('before-freeze.json',8*1024*1024),('crashed.json',8*1024*1024),
+                       ('handle.json',65536),('fixture-closure.json',1024*1024)]:
+        raw=read_file(directory/name,limit)
+        require(inventory.get(name)==hashlib.sha256(raw).hexdigest(),'original handoff hash mismatch: '+name)
+        values[name]=json.loads(raw)
+    crashed=values['crashed.json'];handoff=values['before-freeze.json']
+    require(values['plan.json']==plan and values['source-pins.json']==source_pins
+            and handoff['plan_sha256']==plan_sha256 and crashed['handoff']==handoff
+            and values['handle.json']==handoff['handle']
+            and values['fixture-closure.json']['proof']==crashed['fixture_proof']
+            and crashed['signal_attempts']==['SIGSTOP','SIGKILL']
+            and crashed['same_disk_restart_required'] is True
+            and crashed['pure_instantaneous_powercut'] is False and crashed['automatic_retry'] is False,
+            'original source/plan/crash handoff chain mismatch')
+    require(not os.path.lexists(directory/'failure.json'),'original phase failure sentinel appeared')
+    return crashed
+
+
 def validate_crash_capture(decoded, handoff, handle):
     from gateway_campaign import execution_counts
     from failure_paths import operation_id
@@ -515,32 +549,34 @@ def main():
     require(sha(rpc['cli'])==plan['cli_sha256'] and sha(rpc['reader'])==plan['reader_sha256'], 'host CLI/reader changed')
     require(plan['qemu']['argv'][plan['qemu']['argv'].index('-chardev')+1]
         =='socket,id=controller,path='+plan['fixture']['controller_path'],'QEMU does not use pinned native fixture socket')
+    plan_sha256=hashlib.sha256(raw).hexdigest()
+    source_pins={str(p.relative_to(ROOT)):sha(p) for p in sorted(Path(__file__).parent.glob('*.py'))}
+    before=restart=None
+    if options.phase=='inspect':
+        require(options.before is not None and options.restart is not None,'reviewed before/restart handoff required')
+        before=verify_phase_handoff(options.before,plan,plan_sha256,source_pins)
+        restart=json_file(options.restart,131072)
+    else:
+        require(options.before is None and options.restart is None,'freeze has no restart inputs')
     os.umask(0o077);options.output.mkdir(mode=0o700,parents=True,exist_ok=False)
     CAMPAIGN['output']=options.output.resolve();CAMPAIGN['started']=time.monotonic()
     for path in (options.plan,Path(__file__)):
         require(path.is_file() and not path.is_symlink(),'regular plan/source required')
     args=argparse.Namespace(**rpc,output=CAMPAIGN['output'],mode='freeze-then-crash')
     args.cli=Path(args.cli);args.reader=Path(args.reader)
-    campaign=CrashCampaign(args);campaign.plan_sha256=hashlib.sha256(raw).hexdigest()
+    campaign=CrashCampaign(args);campaign.plan_sha256=plan_sha256
     def cutoff(*_):raise TimeoutError('absolute harness phase cutoff; no retry')
     old_handler=signal.signal(signal.SIGALRM,cutoff)
     signal.setitimer(signal.ITIMER_REAL,90 if options.phase=='freeze' else 240)
     try:
         durable_record('plan.json',plan)
-        write_json('source-pins.json',{str(p.relative_to(ROOT)):sha(p) for p in
-            sorted(Path(__file__).parent.glob('*.py'))})
+        write_json('source-pins.json',source_pins)
         with SharedSsh(campaign.ssh,args.output) as connection:
             campaign.ssh=connection.command
             if options.phase=='freeze':
-                require(options.before is None and options.restart is None,'freeze has no restart inputs')
                 phase('A04 explicitly frozen QEMU then crash; not instantaneous powercut')
                 campaign.freeze(plan)
             else:
-                require(options.before is not None and options.restart is not None,'reviewed before/restart handoff required')
-                completed=json_file(options.before/'phase-result.json',65536)
-                require(completed['status']=='FROZEN_CRASH_COMPLETE' and not (options.before/'failure.json').exists(),'original phase failed or incomplete')
-                restart=json_file(options.restart,131072)
-                before=json_file(options.before/'crashed.json',8*1024*1024)
                 durable_record('restart-handoff.json',restart)
                 campaign.inspect(plan,restart,before)
         # Shared SSH cleanup and hash collection must finish inside the failure

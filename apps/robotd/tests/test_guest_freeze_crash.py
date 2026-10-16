@@ -17,8 +17,8 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from guest_freeze_crash import (CAMPAIGN, HISTORY, SignalSequence, expiry_inference, finalize_result, process_identity,
-    json_file,parse_fixture,same_disk_restart,unit_state,validate_crash_capture,validate_history,validate_unknown,verify_raw_archive,wait_read)
+from guest_freeze_crash import (CAMPAIGN, HISTORY, SignalSequence, expiry_inference, finalize_result, main, process_identity,
+    json_file,parse_fixture,same_disk_restart,unit_state,validate_crash_capture,validate_history,validate_unknown,verify_phase_handoff,verify_raw_archive,wait_read)
 
 
 class FreezeTests(unittest.TestCase):
@@ -180,6 +180,81 @@ class FreezeTests(unittest.TestCase):
         with self.assertRaises(AssertionError):validate_crash_capture(decoded,handoff,handle)
         decoded['records'].pop();decoded['records'].append(copy.deepcopy(decoded['records'][1]))
         with self.assertRaises(AssertionError):validate_crash_capture(decoded,handoff,handle)
+
+    def handoff(self, directory):
+        plan={'boot_id':'original-boot'};pins={'apps/robotd/tests/guest_freeze_crash.py':'a'*64}
+        digest='b'*64
+        handoff={'plan_sha256':digest,'handle':{'key':'original-key'}}
+        values={'plan.json':plan,'source-pins.json':pins,'before-freeze.json':handoff,
+                'handle.json':handoff['handle'],'fixture-closure.json':{'proof':{'disabled_zero':True}},
+                'crashed.json':{'handoff':handoff,'fixture_proof':{'disabled_zero':True},
+                    'signal_attempts':['SIGSTOP','SIGKILL'],'same_disk_restart_required':True,
+                    'pure_instantaneous_powercut':False,'automatic_retry':False}}
+        for name,value in values.items():(directory/name).write_text(json.dumps(value))
+        with patch.dict(CAMPAIGN,output=directory):
+            finalize_result({'status':'FROZEN_CRASH_COMPLETE','actual_inspection':'NOT_RUN',
+                             'automatic_retry':False,'pure_instantaneous_powercut':False})
+        return plan,digest,pins,values['crashed.json']
+
+    def test_phase_handoff_verifies_crash_bytes_and_inventory_before_use(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);plan,digest,pins,crashed=self.handoff(p)
+            self.assertEqual(verify_phase_handoff(p,plan,digest,pins),crashed)
+            (p/'crashed.json').write_text(json.dumps(dict(crashed,signal_attempts=['SIGKILL'])))
+            with self.assertRaises(AssertionError):verify_phase_handoff(p,plan,digest,pins)
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);plan,digest,pins,_=self.handoff(p)
+            inventory=json_file(p/'artifact-hashes.json',65536);inventory['crashed.json']='f'*64
+            (p/'artifact-hashes.json').write_text(json.dumps(inventory))
+            with self.assertRaises(AssertionError):verify_phase_handoff(p,plan,digest,pins)
+
+    def test_phase_handoff_rejects_failure_missing_inputs_and_mixed_chain(self):
+        for name,change in [('failure.json',{}),('before-freeze.json',{'plan_sha256':'c'*64}),
+                            ('plan.json',{'boot_id':'another-boot'}),('source-pins.json',{'different':'f'*64}),
+                            ('handle.json',{'key':'different'}),('fixture-closure.json',{'proof':{}})]:
+            with self.subTest(name=name),tempfile.TemporaryDirectory() as d:
+                p=Path(d);plan,digest,pins,_=self.handoff(p)
+                (p/name).write_text(json.dumps(change))
+                # Even a freshly hashed inventory cannot hide an inconsistent required chain.
+                result=json_file(p/'phase-result.json',65536);result.pop('artifact_hashes_sha256')
+                (p/'artifact-hashes.json').unlink();(p/'phase-result.json').unlink()
+                with patch.dict(CAMPAIGN,output=p):finalize_result(result)
+                with self.assertRaises(AssertionError):verify_phase_handoff(p,plan,digest,pins)
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);plan,digest,pins,_=self.handoff(p);(p/'before-freeze.json').unlink()
+            with self.assertRaises((AssertionError,FileNotFoundError)):verify_phase_handoff(p,plan,digest,pins)
+
+    def test_phase_handoff_rejects_nonregular_and_oversized_metadata(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);plan,digest,pins,_=self.handoff(p)
+            (p/'artifact-hashes.json').unlink();os.mkfifo(p/'artifact-hashes.json')
+            with self.assertRaises(AssertionError):verify_phase_handoff(p,plan,digest,pins)
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);plan,digest,pins,_=self.handoff(p)
+            (p/'artifact-hashes.json').write_bytes(b' '*(1024*1024+1))
+            with self.assertRaises(AssertionError):verify_phase_handoff(p,plan,digest,pins)
+
+    def test_inspect_rejects_bad_handoff_before_output_or_ssh_open(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);binary=p/'binary';binary.write_bytes(b'pinned')
+            digest=hashlib.sha256(binary.read_bytes()).hexdigest()
+            rpc={k:str(binary) for k in ('cli','reader','ssh_key','known_hosts','ca','cert','key')}
+            rpc.update(ssh_port=26223,tcp_port=27445,principal='existing',dns='robot.test',
+                       pin='a'*64,manager_sha256='a'*64,gateway_sha256='a'*64,module_note_sha256='a'*64)
+            plan={'allow_disposable_guest':True,'machine_id':'a'*32,
+                  'boot_id':'11111111-1111-4111-8111-111111111111','manifest_sha256':'b'*64,
+                  'rpc':rpc,'cli_sha256':digest,'reader_sha256':digest,
+                  'qemu':{'argv':['qemu','-chardev','socket,id=controller,path=/controller']},
+                  'fixture':{'controller_path':'/controller'}}
+            (p/'plan.json').write_text(json.dumps(plan))
+            argv=['guest_freeze_crash.py','inspect','--plan',str(p/'plan.json'),'--before',str(p/'before'),
+                  '--restart',str(p/'restart.json'),'--output',str(p/'output')]
+            with (patch.object(sys,'argv',argv),patch('guest_freeze_crash.verify_phase_handoff',
+                    side_effect=AssertionError('tampered')) as verify,patch('guest_freeze_crash.SharedSsh') as ssh,
+                    patch('guest_freeze_crash.CrashCampaign') as campaign):
+                with self.assertRaisesRegex(AssertionError,'tampered'):main()
+            verify.assert_called_once();ssh.assert_not_called();campaign.assert_not_called()
+            self.assertFalse((p/'output').exists())
 
     def test_fixture_status_parser_preserves_origin_fields_and_rejects_ambiguous_frame(self):
         raw=b'state=Active boot=3 session=4 duties=(100, -100, true) encoders=[2, -2] queued=0 now_ns=123\n'

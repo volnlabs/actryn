@@ -139,10 +139,16 @@ PASS is written only after SSH cleanup, actual history/export checks and hash
 collection. `phase-result.json` binds the artifact inventory hash and is its final
 sentinel; the inventory excludes itself and that sentinel. A `failure.json` always
 invalidates success. Earlier failures/unknown acknowledgements are never relabeled.
+Before opening SSH or creating inspection output, inspect verifies that sentinel's
+inventory digest and bounded regular-file hashes for the original plan, source
+pins, handle, before-freeze handoff, crash record and fixture closure. The retained
+plan/source must match the selected current inputs; embedded handoffs and closure
+proofs must agree. Missing, substituted or mixed phase records reject inspection.
 
 Host-only checks exercise signal order/no retry, a real owned temporary child with
 pidfd SIGSTOP/SIGKILL, real read-only SQLite bytes, immutable history, UNKNOWN
-identity, malformed archive bounds, late-read rejection and final hash failure:
+identity, malformed archive bounds, late-read rejection, final hash failure and
+tampered handoff rejection before any SSH/output opening:
 
 ```sh
 python3 -B -m unittest discover -s apps/robotd/tests -p test_guest_freeze_crash.py -v
