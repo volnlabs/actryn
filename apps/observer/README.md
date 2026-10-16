@@ -6,6 +6,19 @@ before it serves `/run/actryn/observer.sock`. Revision 1 requires the exact
 Debian `6.12.111+deb13-amd64` kernel and x86-64 native syscall ABI. It is not
 an enforcement program. The BPF feature manifest is `bpf/features.json`.
 
+The fixed object may be a protected regular file for manual deployment. Packaged
+deployment additionally accepts exactly the managed link to
+`/opt/actryn/server/current/lib/observer.bpf.o`, where `current` points to
+`releases/<manifest-sha256>/payload`. The observer checks protected root-owned
+ancestors, a bounded single-link manifest whose bytes match the slot identity,
+the server release/kernel/architecture pins and the object's unique manifest
+entry, mode, size, SHA256 and BPF ELF identity. It opens the resolved immutable
+slot path, so a later `current` switch cannot redirect the load. Other links,
+writable parents and modified bytes fail closed. These checks also apply to a
+direct daemon invocation. Installed-unit preflight additionally verifies the
+release signature and complete host/package tuple; the object resolver does not
+independently authenticate a release signer.
+
 The restricted root launcher registers its generated attempt, boot ID and
 cgroup inode/path before container task creation. The observer verifies the
 canonical root-owned cgroup and assigns its own collector epoch. Only root can
@@ -45,7 +58,8 @@ system default and grants that startup capability alongside BPF/perf/resource;
 both threads clear all capabilities before serving requests. Cgroups remain
 read-only and kernel module loading is unavailable under the systemd unit.
 
-Run `cargo test -p actryn-observer` for decode/registration checks.
+Run `cargo test -p actryn-observer` for decode/registration and managed-object
+path, ownership, manifest, content and ELF checks.
 `tests/observer/guest.py` runs actual attach/process/syscall/retention tests as
 root in a disposable supported guest, with no existing observer service.
 It checks successful and failed OS access, lifecycle events, rejected identity

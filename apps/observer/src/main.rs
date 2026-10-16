@@ -20,8 +20,9 @@ use std::{
     time::Duration,
 };
 
+mod object_path;
+
 const SOCKET: &str = "/run/actryn/observer.sock";
-const OBJECT: &str = "/usr/lib/actryn/observer.bpf.o";
 const OUTPUT: &str = "/var/lib/actryn-observer";
 const RETAINED_BYTES: usize = 16 * 1024 * 1024;
 type Command = (Request, mpsc::SyncSender<Result<Status>>);
@@ -64,7 +65,7 @@ fn collector(commands: mpsc::Receiver<Command>, ready: mpsc::SyncSender<Result<(
             && fs::read_to_string("/proc/sys/kernel/osrelease")?.trim() == "6.12.111+deb13-amd64",
         "unsupported observer tuple"
     );
-    trusted(Path::new(OBJECT))?;
+    let object_path = object_path::resolve_object()?;
     let boot = fs::read_to_string("/proc/sys/kernel/random/boot_id")?
         .trim()
         .to_owned();
@@ -76,7 +77,7 @@ fn collector(commands: mpsc::Receiver<Command>, ready: mpsc::SyncSender<Result<(
     let output = Path::new(OUTPUT).join(&epoch);
     fs::create_dir(&output)?;
     fs::set_permissions(&output, fs::Permissions::from_mode(0o700))?;
-    let object = ObjectBuilder::default().open_file(OBJECT)?.load()?;
+    let object = ObjectBuilder::default().open_file(&object_path)?.load()?;
     let mut links = Vec::new();
     let mut programs = Vec::new();
     for program in object.progs_mut() {
