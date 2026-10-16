@@ -811,6 +811,33 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   review closes the finding. Actual execution remains NOT_RUN. The campaign
   distinguishes frozen-guest expiry inference from instantaneous power loss,
   preserves raw unfinished rows and checks read-only historical UNKNOWN.
+- `dba4dd5` gives installed-service readiness its own 40-second test budget and
+  the retained-descriptor helper a 50-second lease. Lifetime07 still fails:
+  systemd assigns a replacement PID before the gateway becomes active; the
+  two-second authentication check finishes 0.38 seconds before active/running.
+  `fd19e6a` requires active/running before that unchanged authentication check.
+  All 91 Robot Python tests pass at that source. Production authority, closure,
+  persistence and resource bounds are unchanged.
+- Lifetime07's separate, one-shot recovery/export preserves 20 files and
+  141,835 bytes. Its 147 decoded records contain one allocation/START, closure
+  17.84 ms after the signal and reconciled zero output at 20.57 ms, with no
+  reported gaps/loss. All 233 original hashes match. This proves the closure
+  prefix, not authenticated replacement while descriptors remained held; the
+  original campaign remains failed.
+- Lifetime08 reaches authenticated replacement and historical query while the
+  three old descriptors remain held. The original operation is durably cancelled
+  with no live authority. The campaign then fails at its negative-proposal
+  expectation: production reports the changed gateway binding as conservative
+  `OutcomeUnknown("principal mismatch")`, which the SDK preserves correctly.
+  Read-only diagnosis finds the original negative key absent; all 155 original
+  hashes match and the helper closes its descriptors within the lease. This
+  remains a failed campaign pending a test correction and separate export;
+  an uncertain reply alone is not proof that no effect occurred.
+- `7fb1a55` documents fresh installed Robot bootstrap and readiness, offline SDK
+  use from bundled assets, and the manual operator-reviewed proposal handoff.
+  Syntax/link checks pass; these instructions have not been independently
+  executed. The delegated broker walkthrough remains separate work, and the
+  manual handoff is not combined-path acceptance evidence.
 
 ## Decisions
 

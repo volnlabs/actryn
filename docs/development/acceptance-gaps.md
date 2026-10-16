@@ -2,7 +2,7 @@
 
 ## Current disposition
 
-Follow-up audit through integration source `1a2e9c5` supersedes the historical
+Follow-up audit through integration source `7fb1a55` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
@@ -13,7 +13,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
 | A04/A05/A08 | Existing daemon-death/accounting tests and one settled combined Robot debit; installed Server capacity01 preserves active work during exhaustion. | Actual outstanding-debit cancellation, Server guest crash/restart and debit pressure remain pending. A Robot guest crash with a durable unfinished operation is also missing: retained traffic02 had already completed, and lifetime02 had no operation record. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
-| A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. | Original traffic03 campaign remains failed with separate reanalysis. Lifetime05 fails with PendingAge before any gateway signal; replacement while old descriptors remain held is still incomplete. |
+| A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime06/07 exports prove closure while descriptors remain held. Lifetime08 reaches authenticated replacement and a no-authority historical query. | Original campaigns remain failed. Lifetime08 stops at an incorrect expectation of a definite rejection where the protocol reports uncertainty; the negative-key/capture proof and complete offline recovery sequence still need the corrected campaign. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history. | Corrected Robot lifecycle and final coherent artifact binding remain; disposable test signing is not release signing. |
 | A13/A14 | Pinned live-policy/missing-credential checks and operator-executed installation recipes. | Authorized live-provider credentials and an independent developer are still external inputs. |
