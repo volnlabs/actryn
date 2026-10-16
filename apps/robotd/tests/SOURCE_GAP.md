@@ -11,6 +11,9 @@ certificate; it does not enroll or replace either. Supply the locally reviewed
 device leaf pin, loaded manager SHA256 and loaded module build-ID note SHA256.
 Use a new output directory and schedule exclusive guest ownership with the
 other acceptance campaigns. Do not launch it against a live robot.
+The production CLI creates the saved handle; the SDK uses those same immutable
+identity fields. The SDK's three-field JSON alone is not the CLI saved-handle
+schema. Every CLI invocation retains bounded stdout/stderr, including failures.
 
 The procedure is deliberately narrow:
 

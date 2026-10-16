@@ -1,7 +1,11 @@
 import copy
 import signal
 import struct
+import subprocess
+import json
+import tempfile
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -122,6 +126,39 @@ class MutationReplyTests(unittest.TestCase):
                 self.assertEqual(filename, 'once-unknown.json')
                 self.assertTrue(document['mutation_outcome_unknown'])
                 self.assertFalse(document['automatic_retry'])
+
+
+class CLIHandleTests(unittest.TestCase):
+    def test_production_cli_handle_is_the_single_source_of_sdk_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            campaign = Campaign(SimpleNamespace(ssh_key='unused', ssh_port=26221, known_hosts='unused', output=output))
+            campaign.epoch = bytes([4]*16)
+            handle = {'robot_epoch': campaign.epoch.hex(), 'attempt': '01'*16,
+                      'namespace': '02'*16, 'key': '03'*32, 'state': 'ready', 'proposal': None}
+            def create(*arguments):
+                self.assertEqual(arguments, ('handle', '--pair', str(output/'pair.json'), '--attempt',
+                    '01'*16, '--namespace', '02'*16, '--out', str(output/'handle.json')))
+                (output/'handle.json').write_text(json.dumps(handle))
+                return {'result': 'handle_saved', 'authority_issued': False, 'handle': handle}
+            campaign.cli = Mock(side_effect=create)
+            saved = campaign.create_handle(bytes([1]*16), bytes([2]*16))
+            self.assertEqual(saved.key, bytes([3]*32))
+            self.assertEqual(saved.attempt, bytes([1]*16))
+            campaign.cli.assert_called_once()
+
+    def test_cli_failure_retains_both_streams_without_retry(self):
+        campaign = Campaign(SimpleNamespace(ssh_key='unused', ssh_port=26221, known_hosts='unused', cli=Path('/unused')))
+        result = subprocess.CompletedProcess([], 1, b'{"error":"missing robot_epoch"}', b'detail')
+        with patch('source_gap.subprocess.run', return_value=result) as run, patch('source_gap.write_json') as save:
+            with self.assertRaises(subprocess.CalledProcessError):
+                campaign.cli('export')
+            run.assert_called_once()
+            report = save.call_args.args[1]
+            self.assertIn('missing robot_epoch', report['stdout'])
+            self.assertEqual(report['stderr'], 'detail')
+            self.assertEqual(report['returncode'], 1)
+            self.assertFalse(report['automatic_retry'])
 
 
 if __name__ == '__main__':

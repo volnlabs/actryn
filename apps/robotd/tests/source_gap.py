@@ -66,6 +66,7 @@ def validate_capture(decoded, omitted, attempt, baseline):
 class Campaign:
     def __init__(self, args):
         self.args, self.epoch = args, b''
+        self.cli_calls = 0
         self.ssh = ['ssh', '-i', args.ssh_key, '-p', str(args.ssh_port), '-o', 'BatchMode=yes',
                     '-o', 'ConnectTimeout=5', '-o', 'UserKnownHostsFile=' + args.known_hosts,
                     'root@127.0.0.1']
@@ -127,7 +128,34 @@ b=f.read(n);assert len(b)==n;sys.stdout.buffer.write(b)
             time.sleep(.05)
 
     def cli(self, *arguments, timeout=30):
-        return json.loads(subprocess.check_output([str(self.args.cli), 'robot', *arguments], timeout=timeout))
+        label = f'cli-{self.cli_calls:03}-{arguments[0]}.json'
+        self.cli_calls += 1
+        command = [str(self.args.cli), 'robot', *arguments]
+        try:
+            result = subprocess.run(command, capture_output=True, timeout=timeout)
+        except subprocess.TimeoutExpired as error:
+            write_json(label, {'returncode': None, 'timeout': True, 'automatic_retry': False,
+                       'stdout': (error.stdout or b'')[:65536].decode(errors='replace'),
+                       'stderr': (error.stderr or b'')[:65536].decode(errors='replace')})
+            raise
+        write_json(label, {'returncode': result.returncode, 'automatic_retry': False,
+                   'stdout': result.stdout[:65536].decode(errors='replace'),
+                   'stderr': result.stderr[:65536].decode(errors='replace'),
+                   'stdout_bytes': len(result.stdout), 'stderr_bytes': len(result.stderr)})
+        result.check_returncode()
+        return json.loads(result.stdout)
+
+    def create_handle(self, attempt, namespace):
+        path = self.args.output / 'handle.json'
+        result = self.cli('handle', '--pair', str(self.args.output / 'pair.json'),
+                          '--attempt', attempt.hex(), '--namespace', namespace.hex(), '--out', str(path))
+        saved = json.loads(path.read_text())
+        require(result['result'] == 'handle_saved' and result['authority_issued'] is False
+                and result['handle'] == saved and saved['robot_epoch'] == self.epoch.hex()
+                and saved['state'] == 'ready' and saved['proposal'] is None
+                and saved['attempt'] == attempt.hex() and saved['namespace'] == namespace.hex(),
+                'production CLI handle mismatch')
+        return RequestHandle(*(bytes.fromhex(saved[name]) for name in ('attempt', 'namespace', 'key')))
 
     def run_campaign(self):
         args = self.args
@@ -161,8 +189,7 @@ print(json.dumps({'machine':os.uname().machine,'kernel':os.uname().release,
                    '--dns', args.dns, '--pin', args.pin, '--ca', args.ca, '--cert', args.cert,
                    '--key', args.key, '--out', str(args.output / 'pair.json')))
         attempt, namespace = secrets.token_bytes(16), secrets.token_bytes(16)
-        handle = RequestHandle.create(attempt, namespace)
-        write_json('handle.json', handle.json())
+        handle = self.create_handle(attempt, namespace)
         with Client('127.0.0.1', port=args.tcp_port, server_name=args.dns, ca=args.ca,
                     certificate=args.cert, key=args.key, paired_fingerprint=args.pin) as rpc:
             write_json('authenticated.json', rpc.describe())
