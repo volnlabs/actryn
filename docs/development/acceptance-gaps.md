@@ -11,7 +11,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 |---|---|---|
 | A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
-| A04/A05/A08 | Existing daemon-death/accounting tests and one settled combined Robot debit; installed Server capacity01 preserves active work during exhaustion. Robot A04 freeze/crash01 and same-disk inspect01 preserve a durable unfinished operation, raw history and sticky read-only UNKNOWN without resend. The server call-pressure/directory-failure harness passes all 43 integration host checks. | Actual outstanding-debit cancellation, Server guest crash/restart, debit pressure and the instrumented directory-failure guest campaign remain pending. Robot freeze/fixture closure/kill is not an instantaneous powercut; the exported uncommitted tail remains unknown. |
+| A04/A05/A08 | Existing daemon-death/accounting tests and one settled combined Robot debit; installed Server capacity01 preserves active work during exhaustion. Robot A04 freeze/crash01 and same-disk inspect01 preserve a durable unfinished operation, raw history and sticky read-only UNKNOWN without resend. The server call-pressure/directory-failure harness passes all 43 integration host checks. | Actual outstanding-debit cancellation, Server guest crash/restart and debit pressure remain pending. Run11 verifies the instrumented directory-fault/call-pressure path. Robot freeze/fixture closure/kill is not an instantaneous powercut; the exported uncommitted tail remains unknown. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
@@ -51,13 +51,22 @@ uses protected executable storage and exact executable-mapping checks; 58 host
 tests pass. Separate failed-run finalization verifies both exports, restores
 original properties, stops the services and captures all eleven histories and
 both failed campaigns. The 91-file archive is independently hash-checked;
-run10 remains FAILED and corrected target execution is pending. A16 diagnostic8 native
+run10 remains FAILED. Corrected run11 passes approved-call pressure, one ENOSPC
+allocation failure and EBUSY retirement pressure with active-work preservation
+and autonomous cleanup. Its verified 213-file capture preserves all older rows,
+fifteen launcher/fourteen broker histories and zero outstanding work; original
+properties are restored and the VM is powered off. This instrumented result
+does not close all A08. The outstanding-debit/guest-restart campaign remains.
+A16 diagnostic8 native
 build01 passes; its single cold-case plan
 is root-reviewed, but the module was never loaded and target execution remains
 NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.
 The remaining target queue includes outstanding-debit/crash/pressure and the amended
 authority comparison, followed by final artifact, provenance and evidence mapping.
-Release signing, live credentials and independent
+The corrected ARM universal CLI is built, with all 28 allocated sections
+preserved after stripping; exact Debian ARM provider ABI and installed-path
+checks remain pending. No manager/module source rebuild is indicated by the
+cohort audit. Release signing, live credentials and independent
 installation remain separate external gates. No software result qualifies motion.
 
 ## Historical audit

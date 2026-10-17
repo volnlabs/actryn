@@ -1248,6 +1248,39 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   SHA256 `3c0b3c594d2bd73b693a7dfce569b9138902ba7581013fabdd2b999523a17649`.
   Corrected fixture execution, full A08 and physical acceptance remain unclaimed.
 
+- Corrected pressure run11 passes all three instrumented phases: four approved
+  calls, four budget refusals/zero-reservation tombstones and four uncertain
+  burst replies; one ENOSPC allocation failure; and EBUSY cleanup pressure
+  preserving active identity/output and refusing new preparation until the
+  original cleanup tick converges. No repeated Cancel is used. Replacement
+  preparation succeeds. All eleven prior full rows remain unchanged; final
+  launcher15/broker14 histories are reaped, with zero open calls or Robot debits.
+  Final exports/restoration/stop pass. Root verifies all 213 capture files,
+  1538917 bytes, both raw databases/libraries and all 88 prior custody files.
+  Evidence: `artifacts/server-a08-pressure-run11`, capture SHA256
+  `a67d3402ce7eeec656289958653990bcc254562b86c5c6a1a7d8cb20147816c0`.
+  One guarded Server07 poweroff proves its recorded lifetime dead, preserving
+  seed/trust/disk. No heap OOM, whole A08 or physical qualification is claimed.
+- Installed fixture startup, inhibited admin status, valid boot1 journal and
+  supported shutdown are verified from retained smoke evidence. The original
+  harness fails its incorrect empty-stderr assertion; read-only diagnosis02
+  accepts only the exact source-defined startup banner and verifies the dead
+  process with unchanged Server databases. The first diagnosis predicate error
+  is also preserved. No fixture restart, wire command or full protocol run.
+- Cohort audit01 finds only importer product-source drift since `cc530d2`.
+  Existing x64 CLI includes both fixes. One targeted ARM CLI build at `544c382`
+  passes in 70.450 seconds, with all 28 allocated sections unchanged after
+  strip-debug. SHA256 `4102e793c48fc43767680ed3c9cf4ffd2f8512171271e3340ab2632090fd1fc5`.
+  Native/link receipts retain 17 archive inputs and 14 native/CRT/link-script
+  inputs; both local metadata-analysis errors remain preserved. The 136
+  versioned imports add only `fchmod@GLIBC_2.17`; exact Debian ARM provider ELF
+  verification remains pending. Candidate04/cohort01 remain unchanged.
+- Additive debit amendments04/05 bind the new Server manifest/CLI and actual
+  post-run11 catalogs, including the launcher-only failed-allocation row.
+  Seven and nine host checks pass; original 40 source pins are unchanged.
+  Fresh runtime/controller/principal/host-CLI inputs remain pending and the
+  unchanged coordinator rejects the draft before I/O. No debit campaign ran.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.

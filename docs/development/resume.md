@@ -10,21 +10,23 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `f963067`. Remote `6eac6ab` was verified on 2026-10-17. CI for the new
+  `8cbfafa`. Remote `8cbfafa` was verified on 2026-10-17. CI for the new
   checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
 - Three bounded agent lanes resumed. A16 native build01 finished and its VM is
-  off; Server importer07 owns the sole VM window. No fixture process runs.
+  off; Server importer07 has now been gracefully powered off after run11.
+  A16 cold-case host preflight is next. No fixture process runs.
   `artifacts/server-a08-import-failure01/pause-result.json` verifies the original
   Server PID absent and its unit inactive/MainPID0 after one graceful poweroff.
   Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
-- Fresh readback after pressure run10 retains eleven reaped attempts with zero
+- Fresh readback after pressure run11 retains fifteen launcher histories and
+  fourteen broker histories, all reaped, with zero
   open calls or Robot debits, no container tasks, child cgroups or broker
-  directories. Separate failure finalization verifies both final exports,
-  restores the original service configuration and stops all three services.
-  The old test library remains retained with no mapping users; no control or
-  event files remain. Source, failed import, disks, seed and SSH trust
+  directories. Run11 finalization restores the original service configuration
+  and stops all three services. Both old and corrected test libraries, the
+  latched identity and injection events are retained; no fault control remains.
+  Source, failed import, disks, seed and SSH trust
   remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. Prior fixture processes did
@@ -36,7 +38,7 @@ Earlier checkpoints and failed attempts remain preserved.
 - Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
   or provider/signing credentials changed. Account quota telemetry is unavailable.
 
-## Server pressure campaign: import passes; property collector fixed
+## Server pressure: instrumented campaign verified, VM off
 
 `cd9d551` contains the pressure harness; 43 integration host checks passed.
 `1293676` corrects the installed command to `actryn server import`. Plans01–05
@@ -178,7 +180,7 @@ Fix `343572e` places the test library in protected `/opt` storage while keeping
 controls under `/run`. Setup requires an executable mapping of the exact file,
 one launcher user and no legacy mapping. RED reproduces the false acceptance;
 58 host tests pass in `artifacts/server-a08-executable-shim-fix01`. No native
-code, mount or production policy changes. Corrected target execution is NOT_RUN.
+code, mount or production policy changes. Corrected target execution follows below.
 
 Separate failure finalization now passes all seven steps: read-only readiness,
 both final exports, old-override restoration, restored-state verification, one
@@ -190,19 +192,43 @@ databases with eleven exact reaped rows each, no outstanding calls/debits, all
 22 run10 and 15 run09 records, both attempts' logs and observer trace/summary.
 Evidence: `artifacts/server-a08-failure-finalization-{plan,run}01`; capture
 SHA256 `3c0b3c594d2bd73b693a7dfce569b9138902ba7581013fabdd2b999523a17649`.
-Preserve the old control directory by a reviewed non-overwriting rename before
-the separately numbered corrected setup; do not delete or reuse its files.
+The old control directory is now retained by one verified non-overwriting rename
+to `/run/actryn/a08-pressure-retained-through-run10`; its inode and bytes match.
 
-Current VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
+Run11 passes all three phases with the corrected executable-mapping check:
+four approved calls with durable cancellation and four uncertain burst replies;
+one ENOSPC allocation failure; and EBUSY retirement pressure that preserves
+active identity/output, refuses another preparation and converges without a
+second Cancel. A replacement preparation then succeeds. All eleven earlier
+full rows remain unchanged. Final exports, restoration, stop and capture pass.
+Root verifies 213 files/1538917 bytes, all 88 prior custody files, both libraries,
+raw SQLite integrity, fifteen launcher/fourteen broker histories and zero
+outstanding work. Evidence: `artifacts/server-a08-pressure-run11`; capture
+SHA256 `a67d3402ce7eeec656289958653990bcc254562b86c5c6a1a7d8cb20147816c0`.
+This is instrumented directory-fault/call-pressure evidence, not heap OOM,
+unchanged-unit qualification, complete A08 or physical acceptance.
+
+One installed controller-fixture process also starts, reports inhibited boot1,
+zero duties/encoders/queue and exits after one supported shutdown. The smoke
+validator incorrectly expected empty stderr; the source's normal startup banner
+causes its retained failure. Separate read-only reanalysis verifies that banner,
+the boot journal, dead process and unchanged Server databases without restarting
+the fixture. Evidence: `artifacts/server-installed-fixture-smoke01` and
+`server-installed-fixture-smoke-diagnosis02`; the first read-only validator error
+is also retained. No wire commands or full protocol campaign ran in this smoke.
+
+Closed VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
 invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
-`3138459f-e5b3-411c-ab6a-932418cf2f0a`. Boot/readiness passes. Revalidate this
-lifetime before each guest action. Package update, quarantine, fresh import and
-service-UID checks pass. All three services are now inactive/dead/PID0, with
-original properties restored and no library users; revalidate before acting.
+`3138459f-e5b3-411c-ab6a-932418cf2f0a`. One guarded poweroff verifies the original
+lifetime dead and unit inactive/MainPID0; see `server-a08-pressure-run11/poweroff`.
+Seed and strict SSH trust are unchanged. The retained disk now has device56,
+inode27349874, size2542731264, mtime_ns1792229032069201011. Fresh identities are
+required for the next window. Package update, quarantine, fresh import and
+service-UID checks pass. Original properties were restored before shutdown.
 Run07 failed
 before mutation; run08 failed after instrumentation but before any attempt;
 run09 failed after one pressure attempt; run10 failed after an active attempt
-and unexpected successful preparation. All eleven retained attempts are reaped.
+and unexpected successful preparation. Those failures remain unchanged.
 
 Historical run06: unit `actryn-server-a08-pressure06.service`, PID 226766,
 start ticks 686142, invocation `79c8a4c9216b49d698f50625a775b6d4`, guest boot
@@ -267,20 +293,32 @@ observed attempt, preserving any failure. No target window is allocated yet.
   Full GCC source and broader dependency/toolchain source closure remain explicit
   gaps; no hermetic-build or legal-completeness claim follows from these checks.
 - Replacement fixture ELF imports match the actual Server runtime libraries;
-  it is installed by the new test package, but its Server execution is NOT_RUN.
+  installed startup/admin-status/shutdown is now verified by separate read-only
+  reanalysis of the retained smoke. This is not a full installed protocol test.
+- `artifacts/cohort-reconciliation-audit01` identifies only importer product
+  source drift since the original cohort. The x64 CLI already includes both
+  fixes. One targeted ARM CLI build at `544c382` passes in 70.450 seconds;
+  all 28 allocated sections survive strip-debug unchanged. New CLI SHA256:
+  `4102e793c48fc43767680ed3c9cf4ffd2f8512171271e3340ab2632090fd1fc5`.
+  Its 136 versioned imports add only `fchmod@GLIBC_2.17`. Exact Debian ARM
+  provider ELF verification and installed-path validation remain pending.
+  `artifacts/arm-cli-importer-build01` retains build/native/link receipts and
+  both corrected metadata-analysis failures. No manager/module rebuild or
+  candidate/cohort replacement occurred. Final source/evidence association
+  must use new manifests and preserve the older per-component source origins.
 
 ## Remaining integration and external gates
 
-`artifacts/robot-retained-debit-plan02` amendment03 remains prepared, NOT_RUN;
-11 host checks previously passed. Its null template must not execute. Future
-execution needs fresh boot/process/controller identities, post-A08 catalogs and
+`artifacts/robot-retained-debit-plan02` remains prepared, NOT_RUN. Additive
+amendments04/05 bind the new Server manifest/CLI and actual run11 catalogs
+(fifteen launcher/fourteen broker IDs); seven and nine host checks pass.
+The draft still must not execute. Future execution needs fresh boot/process/controller identities and
 a new workload principal under the existing lifecycle03 issuer. The old principal
 is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
 
 Continue with this handoff and current ledgers, verifying branch/worktree state,
-resources and retained evidence. Failed run10 export/restoration/capture is
-verified; the corrected test-library setup remains pending. Run only a reviewed,
-numbered campaign with fresh identities and evidence paths. A16 has no allocated
-window. Authorized live-provider credentials, a release signing custodian and
+resources and retained evidence. Run11 is verified and the Server window is
+closed. Run only a reviewed, numbered campaign with fresh identities and evidence
+paths. A16 cold-case preflight is next. Authorized live-provider credentials, a release signing custodian and
 an independent developer remain external inputs. Final coherent qualification
 is unfinished. Live motion stays inhibited; no result is physical qualification.
