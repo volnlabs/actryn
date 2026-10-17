@@ -1,8 +1,8 @@
 # Implementation checkpoint — 2026-10-17
 
-The user requested **continue** after the pushed pause checkpoint. Work resumed;
-the full v0.0.1 release is incomplete. The goal tracker still reports `paused`
-and exposes no resume action; this is a tracker limitation, not a new user pause.
+The user explicitly requested **stop for now** on 2026-10-17. Work is paused;
+the full v0.0.1 release is incomplete. The goal tracker is `paused`. No active
+agent build, test guest or fixture remains. Resume only after user instruction.
 The approved scope remains [the full plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md).
 [Progress](progress.md) and [acceptance gaps](acceptance-gaps.md) retain the evidence.
 Earlier checkpoints and failed attempts remain preserved.
@@ -10,7 +10,7 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `8d6e71d`. Preceding remote `874525f` was verified on 2026-10-17. CI for the new
+  `8d6e71d`. Remote checkpoint `db0fcbb` was verified on 2026-10-17. CI for the new
   checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -333,6 +333,25 @@ new instrumentation or changed limits.
   must use new manifests and preserve the older per-component source origins.
 
 ## Remaining integration and external gates
+
+Pause checkpoint: native Server daemon build and static checks completed before
+the stop request, with no candidate execution. Lane receipt:
+`artifacts/server-reconciliation-build01/provenance.json`; binary SHA256
+`afef317ba581fe2feedf24bd46c244c17fdbd5aacf4b75dd62058a64a93ada5b`.
+The lane reports 31 allocated sections unchanged and 176 exact target-library
+imports matched. Root confirmed the build receipt and absence of owned build
+processes; independent review of its full inventory remains pending.
+
+ARM build preparation stopped before Cargo: its recorder attempted to create
+`build-intent.json` twice. Preserve
+`artifacts/robot-reconciliation-build01/{failure.json,driver.stderr}` and the
+source/tool/preflight records. Compiler attempt count is zero; a separately
+numbered recorder correction is required before the first ARM build. No retry
+was run. `artifacts/retained-release-archive-plan01/archive.py` is only an
+unverified draft: no syntax checks, tests, source pins or root review exist.
+Do not execute it. All three lanes report no owned child remains; root's process
+readback found no repository build or QEMU process. No packaging, signing,
+archival, guest boot or target installation followed the stop request.
 
 Retained-debit campaign01 is **FAILED**, not NOT_RUN or passed. Publication01
 installs the exact peer/key/drop-in and starts the three packaged Server services

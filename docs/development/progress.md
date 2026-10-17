@@ -5,7 +5,7 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding remote checkpoint `874525f` verified on
+- Integration branch: `feat/v0.0.1`; preceding remote checkpoint `db0fcbb` verified on
   2026-10-17. Current implementation source is `8d6e71d`; CI for the new
   checkpoint has not been checked, so no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
@@ -16,9 +16,11 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
-- User requested continuation on 2026-10-17. Work resumed against the approved
-  objective. The goal tool still reports `paused` and exposes no resume action;
-  the release remains incomplete. The [handoff](resume.md) records next actions.
+- User requested a fresh pause on 2026-10-17. All agent lanes and owned builds
+  are stopped; all test guests and fixtures are off. The goal is `paused` and
+  the release remains incomplete. The [handoff](resume.md) records next actions,
+  the completed native Server build, the ARM preparation failure before Cargo,
+  and the unverified archival draft. No target update or archival was performed.
 
 ## Component evidence (not release acceptance)
 
