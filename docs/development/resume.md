@@ -10,8 +10,8 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `544c382`. Remote `b06cdf5` was verified on 2026-10-17. No GitHub Actions run
-  was found for that checkpoint. The user authorized pushing this branch to
+  `fabd894`. Remote `78bf92d` was verified on 2026-10-17. CI for the new
+  checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
 - Three bounded agent lanes resumed. A16 native build01 finished and its VM is
@@ -33,7 +33,7 @@ Earlier checkpoints and failed attempts remain preserved.
 - Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
   or provider/signing credentials changed. Account quota telemetry is unavailable.
 
-## Server pressure campaign: importer deployed; same-OCI import pending
+## Server pressure campaign: import passes; property collector fixed
 
 `cd9d551` contains the pressure harness; 43 integration host checks passed.
 `1293676` corrects the installed command to `actryn server import`. Plans01–05
@@ -102,15 +102,35 @@ The guarded same-parent NOREPLACE rename also passes in
 `.quarantine-443737b73904317b1ca87741eee2582997dcd1ab9c9fef4f833de7a06b647110-import06`.
 All nine files, thirteen directories, invalid modes and inodes are preserved;
 only the moved-root ctime and registry-parent timestamps may change. The parent
-is synced and both entries remain charged. There is no repair, deletion or new
-approval. Next: import the same retained OCI with the new CLI under 077, verify
-configuration as the service UID, then run the reviewed pressure campaign.
+is synced and both entries remain charged. The quarantine step performs no repair,
+deletion or new approval.
+
+The subsequent single import of that same OCI under umask 077 passes in
+`artifacts/server-importer-reimport-execution01`: nine files and thirteen
+directories have the required modes, the quarantine/source layout remain exact,
+and both stores retain their eight rows and raw database bytes. Registry occupancy
+is now three and approvals two. New configuration SHA256:
+`b03fe8c8f53e534339c71218ec36f19f50070afc662050aa4b1673d5a9aea461`.
+The actual service UID/GID 987 with no supplemental groups passes `--check-config`.
+
+Run07 then starts the three installed services but fails during the pressure
+helper's initial property read, before setup or instrumentation. Systemd's text
+output omits the empty `DeviceAllow` array even with `--all`; the typed D-Bus getter
+returns `{"type":"a(ss)","data":[]}`. Readback confirms eight unchanged rows per
+store, zero outstanding work and no shim/drop-in/setup directory. Evidence:
+`artifacts/server-a08-pressure-run07`, `server-a08-property-diagnosis01` and
+`server-a08-deviceallow-diagnosis01`. `fabd894` fixes only the test helper to read
+the typed array, including all nonempty entries; RED reproduces the failure and
+48 host tests pass. Run08 preparation uses a fresh output/source directory and the
+retained native agent, fault library and OCI. No campaign has run yet.
 
 Current VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
 invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
 `3138459f-e5b3-411c-ab6a-932418cf2f0a`. Boot/readiness passes. Revalidate this
-lifetime before each guest action. Package update and quarantine have passed;
-the fresh import and pressure campaign remain NOT_RUN.
+lifetime before each guest action. Package update, quarantine, fresh import and
+service-UID checks pass. Services are active (observer PID1794, launcher PID1850,
+serverd PID1907); these observations require fresh verification. Pressure setup
+run07 failed before mutation; amended run08 remains NOT_RUN.
 
 Historical run06: unit `actryn-server-a08-pressure06.service`, PID 226766,
 start ticks 686142, invocation `79c8a4c9216b49d698f50625a775b6d4`, guest boot

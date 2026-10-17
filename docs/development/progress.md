@@ -5,9 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; remote checkpoint `b06cdf5` verified on
-  2026-10-17. Current implementation source is `544c382`; no GitHub Actions run
-  was found for the pushed checkpoint, so no CI pass is claimed.
+- Integration branch: `feat/v0.0.1`; remote checkpoint `78bf92d` verified on
+  2026-10-17. Current implementation source is `fabd894`; CI for the new
+  checkpoint has not been checked, so no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -1155,6 +1155,22 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   databases unchanged and no approval/import. Evidence:
   `artifacts/server-importer-quarantine-execution01`. Fresh same-OCI import and
   service-UID configuration validation are the next steps before pressure testing.
+- One installed import of the original OCI under umask 077 passes in
+  `artifacts/server-importer-reimport-execution01`. The nine canonical files and
+  thirteen directories have their required modes; the old quarantined tree and
+  source layout remain byte/metadata-identical. Charged entries increase from two
+  to three and approvals from one to two; all eight retained rows in both stores
+  and raw databases remain unchanged. The actual service UID 987, primary GID
+  987 and no supplemental groups then passes `--check-config` for both artifacts.
+- Run07 starts the three installed services, then pressure setup fails before
+  instrumentation or any attempt: systemd 257 omits an empty `DeviceAllow` array
+  from text output, even with `--all`. Guarded readback confirms the typed D-Bus
+  value is empty, eight rows per store remain unchanged, and no shim, drop-in or
+  setup directory exists. Failure and diagnosis remain in
+  `artifacts/server-a08-pressure-run07`, `server-a08-property-diagnosis01` and
+  `server-a08-deviceallow-diagnosis01`. `fabd894` reads the typed array and
+  preserves every entry while retaining all other property checks. RED reproduces
+  the failure; 48 host tests pass. The amended run08 is still preparation only.
 - The A16 diagnostic8 cold-case plan passes seven host checks. Root reviews the
   exact commands and independently verifies its 21-file inventory and four-file
   frozen payload. No fixture startup, module load or target case has run; the

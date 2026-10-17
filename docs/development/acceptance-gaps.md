@@ -28,8 +28,12 @@ and all 138 versioned imports match the captured target libraries. A separate
 same-trust disposable test package passes actual installed inspect/stage/activate/
 resume while preserving old slots/config/databases. The unapproved invalid slot
 is quarantined by one guarded same-parent rename; its evidence and capacity
-charge remain intact. Installed fresh-import validation and the pressure campaign
-remain pending. A16 diagnostic8 native build01 passes; its single cold-case plan
+charge remain intact. One installed import of the same OCI under umask077 and
+configuration validation as UID987 pass, preserving eight rows in each store.
+Pressure setup run07 fails before instrumentation because text property output
+omits an empty DeviceAllow array. `fabd894` preserves the typed array; 48 host
+tests pass. The amended pressure campaign remains NOT_RUN. A16 diagnostic8 native
+build01 passes; its single cold-case plan
 is root-reviewed, but the module was never loaded and target execution remains
 NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.
 The remaining target queue includes outstanding-debit/crash/pressure and the amended
