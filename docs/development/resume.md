@@ -10,7 +10,7 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `fabd894`. Remote `78bf92d` was verified on 2026-10-17. CI for the new
+  `f3953a0`. Remote `9db46cc` was verified on 2026-10-17. CI for the new
   checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -124,13 +124,27 @@ the typed array, including all nonempty entries; RED reproduces the failure and
 48 host tests pass. Run08 preparation uses a fresh output/source directory and the
 retained native agent, fault library and OCI. No campaign has run yet.
 
+Run08's actual ready check then passes. Setup installs the shim and restarts
+launcher/serverd, but its inherited-property check fails because the descriptor
+regex leaves alternating volatile fields, including the pre-start completion
+timestamp. `artifacts/server-a08-instrumentation-diagnosis01` preserves exact
+before/after records and current observations: only the intended launcher command
+differs after correct timestamp normalization; eight original rows per store and
+zero outstanding work remain. The shim contains only the pinned library, mapped
+by launcher PID2244/start308811; no control/events or campaign exists. Preserve
+run08 FAILED. Parser fix `f3953a0` passes both exact-input regressions and all
+50 host checks, with raw RED/GREEN logs retained in
+`artifacts/server-a08-command-normalization-fix01`. Fresh run09 verification of
+the existing instrumentation is being prepared; do not repeat install or rewrite
+old setup.
+
 Current VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
 invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
 `3138459f-e5b3-411c-ab6a-932418cf2f0a`. Boot/readiness passes. Revalidate this
 lifetime before each guest action. Package update, quarantine, fresh import and
-service-UID checks pass. Services are active (observer PID1794, launcher PID1850,
-serverd PID1907); these observations require fresh verification. Pressure setup
-run07 failed before mutation; amended run08 remains NOT_RUN.
+service-UID checks pass. Services are active (observer PID1794, launcher PID2244,
+serverd PID2277); these observations require fresh verification. Run07 failed
+before mutation; run08 failed after instrumentation but before any attempt.
 
 Historical run06: unit `actryn-server-a08-pressure06.service`, PID 226766,
 start ticks 686142, invocation `79c8a4c9216b49d698f50625a775b6d4`, guest boot
@@ -206,8 +220,8 @@ a new workload principal under the existing lifecycle03 issuer. The old principa
 is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
 
 Continue with this handoff and current ledgers, verifying branch/worktree state,
-resources and retained evidence. Validate the corrected installed import before
-the pressure campaign. Run only a reviewed,
+resources and retained evidence. Verify the existing instrumentation under the
+corrected collector before the pressure campaign. Run only a reviewed,
 numbered campaign with fresh identities and evidence paths. A16 has no allocated
 window. Authorized live-provider credentials, a release signing custodian and
 an independent developer remain external inputs. Final coherent qualification

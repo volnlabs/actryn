@@ -2,7 +2,7 @@
 
 ## Current disposition
 
-Follow-up audit through integration source `544c382` supersedes the historical
+Follow-up audit through integration source `f3953a0` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
@@ -32,7 +32,11 @@ charge remain intact. One installed import of the same OCI under umask077 and
 configuration validation as UID987 pass, preserving eight rows in each store.
 Pressure setup run07 fails before instrumentation because text property output
 omits an empty DeviceAllow array. `fabd894` preserves the typed array; 48 host
-tests pass. The amended pressure campaign remains NOT_RUN. A16 diagnostic8 native
+tests pass. Run08 ready checks pass, then setup rejects a pre-start timestamp
+left by descriptor normalization after installing the shim. Its eight original
+rows per store remain unchanged; no pressure attempt runs. The failed setup is
+preserved; parser fix `f3953a0` passes 50 host checks and the guarded continuation
+is being prepared. A16 diagnostic8 native
 build01 passes; its single cold-case plan
 is root-reviewed, but the module was never loaded and target execution remains
 NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.

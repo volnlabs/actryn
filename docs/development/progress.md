@@ -5,8 +5,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; remote checkpoint `78bf92d` verified on
-  2026-10-17. Current implementation source is `fabd894`; CI for the new
+- Integration branch: `feat/v0.0.1`; remote checkpoint `9db46cc` verified on
+  2026-10-17. Current implementation source is `f3953a0`; CI for the new
   checkpoint has not been checked, so no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
@@ -1171,6 +1171,19 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   `server-a08-deviceallow-diagnosis01`. `fabd894` reads the typed array and
   preserves every entry while retaining all other property checks. RED reproduces
   the failure; 48 host tests pass. The amended run08 is still preparation only.
+- Run08's actual ready check passes the fixed property reader and verifies the
+  original eight rows per store. Its setup installs the pinned shim and restarts
+  launcher/serverd, then rejects a remaining `ExecStartPre` timestamp difference.
+  The descriptor regex consumed separator whitespace and skipped alternating
+  volatile fields. Guarded readback confirms the intended `ExecStart` change is
+  the only semantic difference; one launcher maps the shim, no control/event
+  file or campaign exists, and all eight rows remain unchanged. Run08 stays
+  FAILED. Evidence: `artifacts/server-a08-instrumentation-diagnosis01`; the
+  read-only normalization analysis changes no earlier result. A narrow parser
+  fix is integrated as `f3953a0`: both exact-input regressions fail before the
+  fix and all 50 host checks pass afterward, with retained raw logs under
+  `artifacts/server-a08-command-normalization-fix01`. Separate verification of
+  the existing instrumentation is being prepared; no install or attempt repeats.
 - The A16 diagnostic8 cold-case plan passes seven host checks. Root reviews the
   exact commands and independently verifies its 21-file inventory and four-file
   frozen payload. No fixture startup, module load or target case has run; the
