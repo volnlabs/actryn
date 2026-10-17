@@ -53,7 +53,7 @@ def observer_health(health, initial):
 
 
 def validate_export(bundle, attempt, artifact, binding, inspection, logs, summary, trace_bytes, started,
-                    agent_check=None):
+                    agent_check=None, expected_outcome='cancelled'):
     """Correlate exported descriptors with retained identities and independent raw files."""
     require(bundle.get('schema') == 'actryn.server.evidence.v1'
             and bundle.get('attempt_id') == attempt
@@ -69,13 +69,13 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
     contents = {item['name']: item['content'] for item in entries}
     outcome = contents['attempt']
     require(outcome['id'] == attempt and outcome['artifact_digest'] == artifact
-            and outcome['state'] == 'reaped' and outcome['outcome'] == 'cancelled'
+            and outcome['state'] == 'reaped' and outcome['outcome'] == expected_outcome
             and outcome['binding'] is None, 'export terminal attempt identity')
     require(contents['runtime_binding'] == binding
             and json.loads(inspection['attempt']['binding']) == binding
             and inspection['attempt']['artifact_digest'] == artifact
             and inspection['attempt']['state'] == 'reaped'
-            and inspection['attempt']['outcome'] == 'cancelled'
+            and inspection['attempt']['outcome'] == expected_outcome
             and inspection['evidence_gaps'] == []
             and inspection['robot_binding'] is None and inspection['robot_requests'] == [],
             'retained binding or terminal inspection changed')
@@ -117,7 +117,7 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
                 and descriptor['tail_omitted_bytes'] == max(0, len(raw) - 2048), 'raw log integrity')
     broker = contents['broker']
     require(broker['classification'] == 'broker_application_policy_and_delegated_accounting'
-            and broker['attempt_state'] == 'reaped' and broker['attempt_outcome'] == 'cancelled'
+            and broker['attempt_state'] == 'reaped' and broker['attempt_outcome'] == expected_outcome
             and broker['evidence_gaps'] == [] and broker['policy_denials'] == []
             and broker['policy_denials_retained'] == 0 and inspection['denials'] == []
             and inspection['denials_omitted'] == 0 and broker['calls'] == inspection['calls'],
