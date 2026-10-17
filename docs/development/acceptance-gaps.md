@@ -2,7 +2,7 @@
 
 ## Current disposition
 
-Follow-up audit through integration source `ec2dfde` supersedes the historical
+Follow-up audit through integration source `544c382` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
@@ -19,12 +19,15 @@ evidence map. See [progress](progress.md) for the individual results and failure
 | A13/A14 | Pinned live-policy/missing-credential checks and operator-executed installation recipes. | Authorized live-provider credentials and an independent developer are still external inputs. |
 | A16 | `observer-installed-01` passes three readiness/death/loss cases and eight descriptive OFF/ON trials, preserving positive loss. Amendment7 source checks, exact ARM native build and hash freeze pass. Actual excluded kernel pilot07 retains nine passed trials and one initial-handshake failure, with complete loss-free capture for the recorded run. | Pilot07 is FAILED; the userspace pilot and comparison remain blocked. The exact rejected handshake predicate and cause of the long first UART call remain unproven. Standalone diagnostic timing is not whole-agent overhead or WCET. |
 
-Work is paused at the user's request. Actual Server run06 compiled the pressure
-inputs but stopped at artifact import: umask077 changed the published file modes.
-`ec2dfde` fixes this in source with ten passing library tests and strict Clippy;
-installed import validation and the pressure campaign remain pending. The invalid
-sealed slot is preserved and unapproved. Rebuild the importer and review explicit
-recovery before another import. A16's reviewed native build plan remains NOT_RUN.
+Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled
+the pressure inputs but stopped at artifact import: umask077 changed published
+file modes. `ec2dfde` fixes file publication; `544c382` also fixes fresh registry
+directory modes and rejects unsafe existing registries without changing them.
+The focused tests and strict Clippy pass, and the CLI/new unsigned bundle are
+built. Installed import validation and the pressure campaign remain pending.
+The invalid sealed slot is preserved and unapproved. Review explicit recovery
+before another import. A16 diagnostic8 native build01 passes; the module was
+never loaded and its target diagnostic remains NOT_RUN. Pilot07 remains FAILED.
 The remaining target queue includes outstanding-debit/crash/pressure and the amended
 authority comparison, followed by final artifact, provenance and evidence mapping.
 Release signing, live credentials and independent

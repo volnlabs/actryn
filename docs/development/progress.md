@@ -5,8 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; remote exists. User authorized pushing the
-  current pause checkpoint; revalidate the live remote head on resume.
+- Integration branch: `feat/v0.0.1`; remote checkpoint `b06cdf5` verified on
+  2026-10-17. Current implementation source is `544c382`; no GitHub Actions run
+  was found for the pushed checkpoint, so no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -15,8 +16,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
-- User requested pushing the work and stopping on 2026-10-16. Goal is paused,
-  incomplete; the [handoff](resume.md) records current state and next actions.
+- User requested continuation on 2026-10-17. Work resumed against the approved
+  objective. The goal tool still reports `paused` and exposes no resume action;
+  the release remains incomplete. The [handoff](resume.md) records next actions.
 
 ## Component evidence (not release acceptance)
 
@@ -1088,6 +1090,51 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   inactive/MainPID0, dead original PID, unchanged seed/trust and retained failed
   slot. Disk/source/evidence and unrelated linked-worktree changes are preserved.
   Raw artifacts remain local and ignored; Git push does not back them up.
+
+## Resumed execution — 2026-10-17
+
+- `544c382` fixes fresh artifact-registry creation under restrictive umasks.
+  New directories receive descriptor-applied 0755 and durable parent publication;
+  an existing registry must already have exactly 0755 and is never chmod-repaired.
+  RED reproduces the 027/077 failures and acceptance of unsafe existing paths.
+  Nine focused artifact tests, strict all-target Server Clippy and formatting
+  pass. Root reviewed the source and integrated the signed-off commit. Evidence:
+  `artifacts/artifact-registry-mode-verification01.json`, SHA256
+  `f44e0288aadb3b8cb8ad6bad2e0dd963b6357a45864cef89e18ddb114a6c0872`.
+- The CLI builds once from frozen `544c382`; two CLI library tests, strict
+  all-target CLI Clippy and help smoke pass. Stripping preserves all allocated
+  ELF sections. CLI SHA256 is
+  `f5840d33b5ffff7b9de58cf32581299fb25289c186ba38f1ede69a1f9c42443c`.
+  Native link provenance is retained. All 137 checked versioned imports match
+  the three retained Debian providers; target `libm` remains to be collected.
+  The unsigned Server bundle builds and inspects successfully with incomplete
+  qualification, null custodian and `promotable=false`. Manifest SHA256:
+  `60e35e538562c610091f0d70d4873b433a5f61292c6c444035332caea791e535`.
+  Its four installed-payload changes are CLI, reviewed fixture, installation
+  documentation and notices. It has not been signed or installed.
+- A16 diagnostic8 native build01 passes against the pinned ARM64 kernel, with
+  no module loading or diagnostic execution. Root independently verifies its
+  124-file inventory, source leaves, ELF/module identity and stopped VM lifetime.
+  Module SHA256 is
+  `e701dcd825d8101eed58cb96bb87029d293ccdfa616ef13fcf0d3e5e68f6aede`;
+  inventory SHA256 is
+  `12f4368b272287b838b67cfc5db2c25de1e10fdc99b51f18d9692718293e09bb`.
+  The root checker initially expected the wrong success-marker text; its failed
+  review is retained separately and corrected against the unchanged build script.
+  No native build or target trial was retried. Pilot07 remains FAILED.
+- Server importer07 now owns the sole VM window: guest boot
+  `3138459f-e5b3-411c-ab6a-932418cf2f0a`, host unit
+  `actryn-server-importer07.service`, PID 388472/start 5541602,
+  invocation `821b6ac077fc4fb0932a5f482d2f43ae`. Boot/readiness passes;
+  installed-state preflight, update, retained-slot quarantine and the pressure
+  campaign remain pending. No controller-fixture process or physical device runs.
+- Read-only preflight02 confirms eight reaped attempts per store, no open work,
+  two charged artifact entries, registry mode 0755 and unchanged failed-slot
+  files. It then fails on a harness assumption: the actual installer correctly
+  points `current` to the release's `payload` subdirectory. A separate guarded
+  layout readback confirms that pointer and two retained release slots. The
+  failed preflight remains in `artifacts/server-importer-preflight-execution01`;
+  a numbered harness amendment is being prepared, with no product change.
 
 ## Decisions
 
