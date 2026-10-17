@@ -19,10 +19,11 @@ Earlier checkpoints and failed attempts remain preserved.
   `artifacts/server-a08-import-failure01/pause-result.json` verifies the original
   Server PID absent and its unit inactive/MainPID0 after one graceful poweroff.
   Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
-- Fresh Server readback retains eight reaped attempts with zero open calls or
-  Robot debits. No container tasks, child cgroups, fault shim or drop-in exist.
-  Corrected read-only preflight03 passes. Source, failed import, disks, seed
-  and SSH trust remain preserved. Raw artifacts
+- Fresh readback after pressure run09 retains nine reaped attempts with zero
+  open calls or Robot debits, no container tasks, child cgroups or broker
+  directories. The pinned launcher shim/drop-in remains installed; it has no
+  control or event files. Source, failed import, disks, seed and SSH trust
+  remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. Prior fixture processes did
   not survive the host reboot and none was restarted. No physical device used.
@@ -134,9 +135,25 @@ zero outstanding work remain. The shim contains only the pinned library, mapped
 by launcher PID2244/start308811; no control/events or campaign exists. Preserve
 run08 FAILED. Parser fix `f3953a0` passes both exact-input regressions and all
 50 host checks, with raw RED/GREEN logs retained in
-`artifacts/server-a08-command-normalization-fix01`. Fresh run09 verification of
-the existing instrumentation is being prepared; do not repeat install or rewrite
-old setup.
+`artifacts/server-a08-command-normalization-fix01`.
+
+Run09 verifies the existing instrumentation without reinstalling or restarting.
+Its first pressure attempt then fails the harness's four-record assertion:
+`Inspection.calls` includes durable rejection tombstones as well as approved
+calls. Retained inspection and raw broker accounting confirm four settled
+digest-bearing base reservations plus four closed, cancelled burst tombstones
+with NULL digests/output and zero reservation/token/deadline fields. Four other
+burst replies remain uncertain. The harness sends one cancellation and both
+stores reap attempt `f6d7570800dc4710190a1e0755e5b9a0`; the original eight full
+rows remain unchanged. No fault control was armed and allocation/reclaim phases
+were not run. Run09 remains FAILED. Evidence:
+`artifacts/server-a08-pressure-run09` and
+`artifacts/server-a08-call-accounting-diagnosis02` (capture SHA256
+`a9abf15dd6cc5557cf088b9b7f4504dd5715397fac474b20a91312c5b23c7c26`).
+The first read-only capture rejected the expected uppercase FAILED filename;
+that capture error is retained separately. The validator correction and a new
+campaign with the nine-row baseline are being prepared; do not repeat old
+attempts, setup or cancellation.
 
 Current VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
 invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
@@ -144,7 +161,8 @@ invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
 lifetime before each guest action. Package update, quarantine, fresh import and
 service-UID checks pass. Services are active (observer PID1794, launcher PID2244,
 serverd PID2277); these observations require fresh verification. Run07 failed
-before mutation; run08 failed after instrumentation but before any attempt.
+before mutation; run08 failed after instrumentation but before any attempt;
+run09 failed after one pressure attempt, which is now reaped.
 
 Historical run06: unit `actryn-server-a08-pressure06.service`, PID 226766,
 start ticks 686142, invocation `79c8a4c9216b49d698f50625a775b6d4`, guest boot

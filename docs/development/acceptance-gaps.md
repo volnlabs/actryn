@@ -35,8 +35,14 @@ omits an empty DeviceAllow array. `fabd894` preserves the typed array; 48 host
 tests pass. Run08 ready checks pass, then setup rejects a pre-start timestamp
 left by descriptor normalization after installing the shim. Its eight original
 rows per store remain unchanged; no pressure attempt runs. The failed setup is
-preserved; parser fix `f3953a0` passes 50 host checks and the guarded continuation
-is being prepared. A16 diagnostic8 native
+preserved; parser fix `f3953a0` passes 50 host checks. Run09 verifies the existing
+instrumentation, then its pressure validator fails because it counts durable
+rejection tombstones as approved reservations. Raw accounting confirms four
+settled approved calls and four zero-reservation tombstones; four burst replies
+remain uncertain. Its one attempt is cancelled once and reaped in both stores,
+preserving all eight older rows. Run09 remains FAILED; allocation/reclaim phases
+were not run. A separate correction/campaign is being prepared against the
+nine-row baseline. A16 diagnostic8 native
 build01 passes; its single cold-case plan
 is root-reviewed, but the module was never loaded and target execution remains
 NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.

@@ -1189,6 +1189,21 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   frozen payload. No fixture startup, module load or target case has run; the
   Server VM retains the sole execution window.
 
+- Run09 verifies the existing instrumentation without reinstalling or restarting
+  it, then fails its first pressure accounting assertion. Source and retained
+  raw broker rows establish a harness mismatch: `Inspection.calls` includes
+  four durable rejection tombstones alongside four approved, settled calls.
+  Each tombstone has a NULL digest/output and zero reservation/token/deadline
+  fields; four other burst replies remain uncertain. The one known attempt
+  `f6d7570800dc4710190a1e0755e5b9a0` is cancelled once and reaped in both stores.
+  All eight older full rows remain unchanged; zero open calls/Robot debits and
+  empty task/cgroup/broker directories are verified. No fault control was armed;
+  allocation/reclaim phases remain NOT_RUN and run09 remains FAILED. Evidence:
+  `artifacts/server-a08-call-accounting-diagnosis02`; capture SHA256
+  `a9abf15dd6cc5557cf088b9b7f4504dd5715397fac474b20a91312c5b23c7c26`.
+  The first read-only capture's uppercase-filename guard error is preserved.
+  A narrow validator correction and separately numbered campaign are pending.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
