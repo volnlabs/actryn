@@ -289,6 +289,38 @@ fn seal_dir(path: &Path) -> Result<()> {
     File::open(path)?.sync_all()?;
     Ok(())
 }
+fn initialize_registry(path: &Path) -> Result<()> {
+    // The production caller has already checked root and the trusted fixed parent.
+    let created = match fs::create_dir(path) {
+        Ok(()) => true,
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => false,
+        Err(error) => return Err(error.into()),
+    };
+    let directory = OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_DIRECTORY | libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
+        .open(path)?;
+    let metadata = directory.metadata()?;
+    ensure!(
+        metadata.is_dir() && metadata.uid() == unsafe { libc::geteuid() },
+        "artifact registry directory owner/type"
+    );
+    if created {
+        directory.set_permissions(fs::Permissions::from_mode(0o755))?;
+        directory.sync_all()?;
+        OpenOptions::new()
+            .read(true)
+            .custom_flags(libc::O_DIRECTORY | libc::O_NOFOLLOW | libc::O_CLOEXEC)
+            .open(path.parent().context("artifact registry parent")?)?
+            .sync_all()?;
+    } else {
+        ensure!(
+            metadata.mode() & 0o7777 == 0o755,
+            "existing artifact registry must have mode 0755"
+        );
+    }
+    Ok(())
+}
 fn available(registry: &Path, cap: usize) -> Result<()> {
     let mut count = 0;
     for entry in fs::read_dir(registry)? {
@@ -433,7 +465,12 @@ pub fn import(layout: &Path, expected: &str) -> Result<Value> {
         "artifact import requires root"
     );
     trusted_path(layout)?;
-    fs::create_dir_all(REGISTRY)?;
+    trusted_path(
+        Path::new(REGISTRY)
+            .parent()
+            .context("artifact registry parent")?,
+    )?;
+    initialize_registry(Path::new(REGISTRY))?;
     trusted_path(Path::new(REGISTRY))?;
     let _lock = crate::launcher::lock_service(&Path::new(REGISTRY).join("import.lock"))?;
     let _launcher =
@@ -601,6 +638,132 @@ mod tests {
                 String::from_utf8_lossy(&output.stderr)
             );
         }
+    }
+    #[test]
+    fn fresh_registry_is_searchable_with_restrictive_umasks() {
+        under_restrictive_umasks(
+            "artifact::tests::fresh_registry_is_searchable_with_restrictive_umasks",
+            || {
+                let parent = tempfile::tempdir().unwrap();
+                let registry = parent.path().join("registry");
+                initialize_registry(&registry).unwrap();
+                assert_eq!(fs::metadata(&registry).unwrap().mode() & 0o7777, 0o755);
+                let source = tempfile::tempdir().unwrap();
+                let hash = image(source.path(), &valid_layer());
+                let verified = Verified::read(source.path(), &hash).unwrap();
+                let installed = verified.install(&registry).unwrap();
+                verify_installed(&installed, &hash, false).unwrap();
+                // Mode contract for traversal after the privileged import, not
+                // an assertion of an actual unprivileged guest execution.
+                for directory in [
+                    registry,
+                    installed.clone(),
+                    installed.join("rootfs"),
+                    installed.join("rootfs/bin"),
+                ] {
+                    assert_eq!(fs::metadata(directory).unwrap().mode() & 0o005, 0o005);
+                }
+                assert_eq!(
+                    fs::metadata(installed.join("ready.json")).unwrap().mode() & 0o7777,
+                    0o444
+                );
+                assert_eq!(
+                    fs::metadata(installed.join("rootfs/bin/agent"))
+                        .unwrap()
+                        .mode()
+                        & 0o7777,
+                    0o555
+                );
+            },
+        );
+    }
+    #[test]
+    fn existing_valid_registry_is_preserved() {
+        let parent = tempfile::tempdir().unwrap();
+        let registry = parent.path().join("registry");
+        fs::create_dir(&registry).unwrap();
+        fs::set_permissions(&registry, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::write(registry.join("retained"), b"old registry evidence").unwrap();
+        let before = fs::metadata(&registry).unwrap();
+        initialize_registry(&registry).unwrap();
+        let after = fs::metadata(&registry).unwrap();
+        assert_eq!(
+            (
+                before.dev(),
+                before.ino(),
+                before.mode(),
+                before.ctime(),
+                before.ctime_nsec()
+            ),
+            (
+                after.dev(),
+                after.ino(),
+                after.mode(),
+                after.ctime(),
+                after.ctime_nsec()
+            )
+        );
+        assert_eq!(
+            fs::read(registry.join("retained")).unwrap(),
+            b"old registry evidence"
+        );
+    }
+    #[test]
+    fn unsupported_existing_registry_modes_are_rejected_unchanged() {
+        for mode in [0o700, 0o750, 0o775, 0o1755] {
+            let parent = tempfile::tempdir().unwrap();
+            let registry = parent.path().join("registry");
+            fs::create_dir(&registry).unwrap();
+            fs::write(registry.join("retained"), b"do not chmod or remove").unwrap();
+            fs::set_permissions(&registry, fs::Permissions::from_mode(mode)).unwrap();
+            let before = fs::metadata(&registry).unwrap();
+            let result = initialize_registry(&registry);
+            let after = fs::metadata(&registry).unwrap();
+            assert_eq!(
+                (
+                    before.ino(),
+                    before.mode(),
+                    before.ctime(),
+                    before.ctime_nsec()
+                ),
+                (after.ino(), after.mode(), after.ctime(), after.ctime_nsec())
+            );
+            assert_eq!(
+                fs::read(registry.join("retained")).unwrap(),
+                b"do not chmod or remove"
+            );
+            assert!(result.is_err(), "existing registry mode {mode:o} accepted");
+        }
+    }
+    #[test]
+    fn registry_symlinks_and_files_are_rejected_unchanged() {
+        use std::os::unix::fs::symlink;
+        let parent = tempfile::tempdir().unwrap();
+        let target = parent.path().join("target");
+        fs::create_dir(&target).unwrap();
+        fs::set_permissions(&target, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::write(target.join("retained"), b"target unchanged").unwrap();
+        for (name, destination) in [
+            ("symlink", target.clone()),
+            ("dangling", parent.path().join("absent")),
+        ] {
+            let path = parent.path().join(name);
+            symlink(&destination, &path).unwrap();
+            assert!(initialize_registry(&path).is_err());
+            assert_eq!(fs::read_link(path).unwrap(), destination);
+        }
+        let file = parent.path().join("file");
+        fs::write(&file, b"not a registry").unwrap();
+        let before = fs::metadata(&file).unwrap();
+        assert!(initialize_registry(&file).is_err());
+        let after = fs::metadata(&file).unwrap();
+        assert_eq!((before.ino(), before.mode()), (after.ino(), after.mode()));
+        assert_eq!(fs::read(file).unwrap(), b"not a registry");
+        assert_eq!(fs::metadata(&target).unwrap().mode() & 0o7777, 0o755);
+        assert_eq!(
+            fs::read(target.join("retained")).unwrap(),
+            b"target unchanged"
+        );
     }
     #[test]
     fn imported_artifact_survives_restrictive_umasks() {
