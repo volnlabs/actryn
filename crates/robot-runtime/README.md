@@ -121,11 +121,23 @@ without binding a kernel device, reads those artifacts and the registry read-onl
 and validates the stored association. An absent record is distinct from missing
 or malformed binding/namespace metadata. Unfinished historical work remains
 `OutcomeUnknown`; no restart resubmits or restores a grant. Historical inspection
-cannot request a new durable cancellation or claim downstream reconciliation.
+cannot request a new durable cancellation. It preserves reconciliation already
+proven by a durable terminal `Completed` row, or by an exact durable cancellation
+reconciliation marker. It never infers reconciliation from a tombstone alone.
 Historical cancellation of already retired unknown operations remains a service
 policy/reporting limitation, not an available live operation route. Exact past
 task verdicts beyond the current operation require retained evidence; inspection
 reports unknown rather than inferring target success from registry completion.
+
+All public snapshots use durable registry reconciliation proof, including live
+query and cancellation of an already completed key. An in-memory kernel receipt
+does not make the public proof durable. A matched cancellation receipt queues the
+marker before normal retirement/recovery signals the writers to stop; their final
+flush and existing joins precede slot reclamation. Failed storage, unknown work,
+faulted kernel status or a mismatched operation does not gain a marker. Local
+closure and cleanup can still finish while the unproven external debit remains
+charged. Phase strings, cancellation fences and task-verdict uncertainty remain
+unchanged.
 
 Finite defaults are inherited from the registry (1024 keys, 128 pending jobs,
 32 closure jobs, 16 MiB DB) and recorder (1 MiB/4096 pending records, 2-second

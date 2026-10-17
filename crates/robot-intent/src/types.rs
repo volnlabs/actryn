@@ -133,8 +133,35 @@ pub struct Snapshot {
     pub terminal: bool,
     pub closure: Closure,
     pub persistence_failed: bool,
+    /// Manager-observed reconciliation, bound to this exact record revision.
+    /// This is not durable until `reconciled_durable()` is true.
+    pub reconciliation_revision: Option<u64>,
 }
 impl Snapshot {
+    pub fn reconciled_durable(&self) -> bool {
+        self.terminal
+            && !self.persistence_failed
+            && self.revision > 0
+            && self.durable_revision == self.revision
+            && self.digest.is_some()
+            && self.operation.is_some_and(|id| {
+                id.device != [0; 16]
+                    && id.runtime_nonce != [0; 16]
+                    && [
+                        id.boot,
+                        id.session,
+                        id.grant,
+                        id.instance,
+                        id.operation,
+                        id.stream,
+                    ]
+                    .into_iter()
+                    .all(|n| n != 0)
+            })
+            && (self.phase == Phase::Completed
+                || (self.phase == Phase::CancelledDurable
+                    && self.reconciliation_revision == Some(self.revision)))
+    }
     pub fn key_cancelled_durable(&self) -> bool {
         self.phase == Phase::CancelledDurable
             && self.durable_revision >= self.revision
@@ -185,7 +212,8 @@ pub struct Health {
 }
 
 /// Historical projection only; unfinished durable records are OUTCOME_UNKNOWN.
-/// This does not mutate a durable revision or claim downstream reconciliation.
+/// This does not mutate a durable revision; retained reconciliation proof is
+/// available through Snapshot::reconciled_durable(), never inferred from expiry.
 #[derive(Clone, Debug)]
 pub struct Inspection {
     pub namespace_exists: bool,

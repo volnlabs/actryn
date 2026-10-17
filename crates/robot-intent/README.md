@@ -98,6 +98,30 @@ the kernel/controller lifecycle. It neither finishes nor reconciles control by
 itself. A cancellation fence wins over a later completion report. Terminal
 bindings/tombstones are retained; they are not reused for another operation.
 
+`reconcile(namespace, key, operation)` records a trusted manager's matched kernel
+reconciliation. It verifies the complete stored operation identity and queues a
+reserved control transaction; it never dispatches work. Submitted work becomes
+`Completed`. Cancelled work keeps its cancellation phase and closure, advances
+its revision, and gains a marker in the additive `reconciliations` table. Each
+marker contains the namespace, key, exact terminal revision and 80-byte operation
+identity; the marker and record revision commit atomically. Repeats are
+idempotent. Public reconciliation credit requires that exact revision to be
+durable, with no persistence failure. A durable terminal `Completed` row already
+records manager-established reconciliation, including in the original format.
+Neither representation invents a task verdict or physical stopping evidence.
+
+The optional table retains at most one marker per existing key under the same
+key count and database byte limits. Startup and historical inspection audit all
+markers for duplicate/orphan, revision/identity and eligible-phase mismatches;
+invalid proof rejects the read/open. Opening an old format-1 database adds only
+the empty table, with no reconciliation backfill or rewrite of legacy terminal
+records. A missing table or marker never credits an allocated cancellation.
+Historical inspection does not create the table. Old readers ignore the additive
+table and remain conservative about cancellation reconciliation; this is a file
+format property, not qualification of a software downgrade. Normal fresh-epoch
+startup still retires namespaces and marks unfinished work unknown, never
+resubmitting it. Preserve evidence before any managed software transition.
+
 ## Finite policy and persistence
 
 Default limits are engineering policy, not timing guarantees:

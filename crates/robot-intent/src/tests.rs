@@ -551,3 +551,210 @@ fn read_only_history_never_dispatches_or_promotes_unfinished_work() {
     assert!(inspect(&absent.0, [2; 16], [3; 16], [4; 32], Limits::default()).is_err());
     assert!(!absent.0.exists());
 }
+
+#[test]
+fn cancellation_reconciliation_is_atomic_durable_and_survives_retirement() {
+    let temp = Temp::new();
+    let (registry, mut writer, ns, kernel) = ready(&temp.0, Limits::default());
+    registry.propose(&ns, [7; 32], intent()).unwrap();
+    writer.flush().unwrap();
+    let cancelled = registry.cancel(&ns, [7; 32]).unwrap();
+    let id = cancelled.operation.unwrap();
+    writer.flush().unwrap();
+    assert!(!registry
+        .query(ns.id(), [7; 32])
+        .unwrap()
+        .reconciled_durable());
+    let marked = registry.reconcile(&ns, [7; 32], &id).unwrap();
+    assert_eq!(marked.phase, Phase::CancelledDurable);
+    assert_eq!(marked.revision, cancelled.revision + 1);
+    assert!(!marked.reconciled_durable());
+    assert_eq!(registry.reconcile(&ns, [7; 32], &id).unwrap(), marked);
+    assert_eq!(registry.cancel(&ns, [7; 32]).unwrap(), marked);
+    assert_eq!(registry.complete(&ns, [7; 32]).unwrap(), marked);
+    registry.retire_namespace(&ns).unwrap();
+    // The actual writer's normal stop path must flush the marker before exit.
+    writer
+        .run(Arc::new(AtomicBool::new(true)), Duration::from_millis(1))
+        .unwrap();
+    let calls = kernel.events.lock().unwrap().len();
+    let historical = inspect(&temp.0, [2; 16], [3; 16], [7; 32], Limits::default())
+        .unwrap()
+        .snapshot
+        .unwrap();
+    assert!(historical.reconciled_durable());
+    assert!(historical.key_cancelled_durable());
+    assert_eq!(historical.operation, Some(id));
+    assert_eq!(historical.closure, cancelled.closure);
+    drop(registry);
+    let (_restarted, _writer) =
+        Registry::open(&temp.0, [2; 16], Limits::default(), kernel.clone()).unwrap();
+    assert_eq!(kernel.events.lock().unwrap().len(), calls);
+}
+
+#[test]
+fn cancellation_reconciliation_rejects_wrong_identity_and_missing_commit() {
+    let temp = Temp::new();
+    let (registry, mut writer, ns, _) = ready(&temp.0, Limits::default());
+    let id = registry
+        .propose(&ns, [7; 32], intent())
+        .unwrap()
+        .operation
+        .unwrap();
+    writer.flush().unwrap();
+    registry.cancel(&ns, [7; 32]).unwrap();
+    writer.flush().unwrap();
+    let mut wrong = id;
+    wrong.instance += 1;
+    assert!(registry.reconcile(&ns, [7; 32], &wrong).is_err());
+    registry.reconcile(&ns, [7; 32], &id).unwrap();
+    writer.inject_failure();
+    assert!(writer.flush().is_err());
+    assert!(!registry
+        .query(ns.id(), [7; 32])
+        .unwrap()
+        .reconciled_durable());
+    let old = inspect(&temp.0, [2; 16], [3; 16], [7; 32], Limits::default())
+        .unwrap()
+        .snapshot
+        .unwrap();
+    assert!(old.key_cancelled_durable());
+    assert!(!old.reconciled_durable());
+}
+
+#[test]
+fn legacy_layout_preserves_completed_proof_but_never_promotes_cancelled_rows() {
+    let temp = Temp::new();
+    let (registry, mut writer, ns, kernel) = ready(&temp.0, Limits::default());
+    for key in [[7; 32], [8; 32]] {
+        registry.propose(&ns, key, intent()).unwrap();
+        writer.flush().unwrap();
+    }
+    registry.complete(&ns, [7; 32]).unwrap();
+    registry.cancel(&ns, [8; 32]).unwrap();
+    writer.flush().unwrap();
+    drop(writer);
+    drop(registry);
+    let db = rusqlite::Connection::open(&temp.0).unwrap();
+    db.execute_batch("DROP TABLE reconciliations").unwrap();
+    let records: Vec<(Vec<u8>, i64, i64, i64)> = db
+        .prepare("SELECT key,revision,terminal,phase FROM records ORDER BY key")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)))
+        .unwrap()
+        .map(|r| r.unwrap())
+        .collect();
+    drop(db);
+    let before = fs::read(&temp.0).unwrap();
+    for (key, expected) in [([7; 32], true), ([8; 32], false)] {
+        let row = inspect(&temp.0, [2; 16], [3; 16], key, Limits::default())
+            .unwrap()
+            .snapshot
+            .unwrap();
+        assert_eq!(row.reconciled_durable(), expected);
+    }
+    assert_eq!(fs::read(&temp.0).unwrap(), before);
+    let calls = kernel.events.lock().unwrap().len();
+    let (_registry, _writer) =
+        Registry::open(&temp.0, [2; 16], Limits::default(), kernel.clone()).unwrap();
+    let db = rusqlite::Connection::open(&temp.0).unwrap();
+    let after: Vec<(Vec<u8>, i64, i64, i64)> = db
+        .prepare("SELECT key,revision,terminal,phase FROM records ORDER BY key")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)))
+        .unwrap()
+        .map(|r| r.unwrap())
+        .collect();
+    assert_eq!(records, after);
+    assert_eq!(kernel.events.lock().unwrap().len(), calls);
+}
+
+#[test]
+fn reconciliation_audit_rejects_orphan_duplicate_wrong_revision_identity_and_phase() {
+    for corruption in [
+        "UPDATE reconciliations SET key=zeroblob(32)",
+        "UPDATE reconciliations SET revision=revision+1",
+        "UPDATE reconciliations SET operation=zeroblob(80)",
+        "UPDATE reconciliations SET operation=zeroblob(81)",
+        "DELETE FROM namespaces",
+        "UPDATE records SET phase=6 WHERE key=x'0707070707070707070707070707070707070707070707070707070707070707'",
+        "UPDATE records SET terminal=0 WHERE key=x'0707070707070707070707070707070707070707070707070707070707070707'",
+        "ALTER TABLE reconciliations RENAME TO saved; CREATE TABLE reconciliations AS SELECT * FROM saved; INSERT INTO reconciliations SELECT * FROM saved; DROP TABLE saved",
+    ] {
+        let temp=Temp::new();
+        let (registry,mut writer,ns,kernel)=ready(&temp.0,Limits::default());
+        let id=registry.propose(&ns,[7;32],intent()).unwrap().operation.unwrap();
+        writer.flush().unwrap();
+        registry.cancel(&ns,[7;32]).unwrap();
+        registry.cancel(&ns,[8;32]).unwrap();
+        registry.reconcile(&ns,[7;32],&id).unwrap();
+        writer.flush().unwrap();
+        drop(writer); drop(registry);
+        rusqlite::Connection::open(&temp.0).unwrap().execute_batch(corruption).unwrap();
+        let before=fs::read(&temp.0).unwrap();
+        assert!(inspect(&temp.0,[2;16],[3;16],[8;32],Limits::default()).is_err(),"{corruption}");
+        assert_eq!(fs::read(&temp.0).unwrap(),before);
+        assert!(Registry::open(&temp.0,[2;16],Limits::default(),kernel).is_err(),"{corruption}");
+        assert_eq!(fs::read(&temp.0).unwrap(),before);
+    }
+}
+
+#[test]
+fn failed_marker_insert_rolls_back_the_terminal_revision_too() {
+    let temp = Temp::new();
+    let (registry, mut writer, ns, _) = ready(&temp.0, Limits::default());
+    let id = registry
+        .propose(&ns, [7; 32], intent())
+        .unwrap()
+        .operation
+        .unwrap();
+    writer.flush().unwrap();
+    registry.cancel(&ns, [7; 32]).unwrap();
+    writer.flush().unwrap();
+    let old = registry.query(ns.id(), [7; 32]).unwrap();
+    let db = rusqlite::Connection::open(&temp.0).unwrap();
+    db.execute_batch("CREATE TRIGGER reject_marker BEFORE INSERT ON reconciliations BEGIN SELECT RAISE(ABORT,'marker failure'); END").unwrap();
+    registry.reconcile(&ns, [7; 32], &id).unwrap();
+    assert!(writer.flush().is_err());
+    let row = inspect(&temp.0, [2; 16], [3; 16], [7; 32], Limits::default())
+        .unwrap()
+        .snapshot
+        .unwrap();
+    assert_eq!(row, old);
+    assert_eq!(
+        db.query_row("SELECT COUNT(*) FROM reconciliations", [], |r| r
+            .get::<_, i64>(0))
+            .unwrap(),
+        0
+    );
+}
+
+#[test]
+fn allocated_cancel_proof_never_submits_and_control_exhaustion_never_claims_durability() {
+    for full in [false, true] {
+        let temp = Temp::new();
+        let mut limits = Limits::default();
+        if full {
+            limits.pending_jobs = 2;
+            limits.closure_jobs = 1;
+        }
+        let (registry, mut writer, ns, kernel) = ready(&temp.0, limits);
+        let id = registry
+            .propose(&ns, [7; 32], intent())
+            .unwrap()
+            .operation
+            .unwrap();
+        registry.cancel(&ns, [7; 32]).unwrap();
+        let observed = registry.reconcile(&ns, [7; 32], &id).unwrap();
+        assert!(!observed.reconciled_durable());
+        assert_eq!(observed.persistence_failed, full);
+        writer.flush().unwrap();
+        assert_eq!(kernel.count("submit"), 0);
+        let durable = inspect(&temp.0, [2; 16], [3; 16], [7; 32], Limits::default())
+            .unwrap()
+            .snapshot
+            .unwrap();
+        assert_eq!(durable.reconciled_durable(), !full);
+        assert!(durable.key_cancelled_durable());
+    }
+}

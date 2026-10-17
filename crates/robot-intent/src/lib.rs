@@ -279,6 +279,7 @@ impl Registry {
                 terminal: false,
                 closure: Closure::NotRequested,
                 persistence_failed: false,
+                reconciliation_revision: None,
             },
             intent: Some(intent),
         };
@@ -357,6 +358,64 @@ impl Registry {
         let mut s = lock(&self.shared);
         retire_locked(&self.shared, &mut s, namespace.id);
         Ok(())
+    }
+    /// Records matched reconciliation without removing a cancellation fence.
+    /// The trusted manager must first observe a matched, nonfaulted kernel
+    /// reconciliation. This method neither contacts nor drives the authority.
+    pub fn reconcile(
+        &self,
+        namespace: &Namespace,
+        key: RequestKey,
+        operation: &OperationId,
+    ) -> Result<Snapshot> {
+        if !Arc::ptr_eq(&self.shared, &namespace.shared) {
+            return Err(Error::Rejected("foreign namespace handle"));
+        }
+        let mut s = lock(&self.shared);
+        if s.fault.is_some() || s.persistence_failed {
+            return Err(Error::Faulted);
+        }
+        let entry = s
+            .entries
+            .get_mut(&(namespace.id, key))
+            .ok_or(Error::Rejected("absent key"))?;
+        if entry.snapshot.operation.as_ref() != Some(operation) || entry.intent.is_none() {
+            return Err(Error::Rejected("reconciliation identity mismatch"));
+        }
+        if entry.snapshot.phase == Phase::Completed
+            || entry.snapshot.reconciliation_revision.is_some()
+        {
+            return Ok(entry.snapshot.clone());
+        }
+        let cancelled = matches!(
+            entry.snapshot.phase,
+            Phase::CancelPending | Phase::CancelledDurable
+        );
+        if !cancelled && entry.snapshot.phase != Phase::Submitted {
+            return Err(Error::Rejected("operation not reconcilable"));
+        }
+        entry.snapshot.revision = entry
+            .snapshot
+            .revision
+            .checked_add(1)
+            .ok_or(Error::Faulted)?;
+        entry.snapshot.terminal = true;
+        if cancelled {
+            entry.snapshot.reconciliation_revision = Some(entry.snapshot.revision);
+        } else {
+            entry.snapshot.phase = Phase::Completed;
+        }
+        let job = entry.clone();
+        if !enqueue(&mut s, &self.shared.limits, Job::Key(Box::new(job)), true) {
+            s.fault = Some(Fault::Queue);
+            s.persistence_failed = true;
+            s.entries
+                .get_mut(&(namespace.id, key))
+                .unwrap()
+                .snapshot
+                .persistence_failed = true;
+        }
+        Ok(s.entries[&(namespace.id, key)].snapshot.clone())
     }
     /// Records completion already established by the manager/kernel/controller.
     /// It neither dispatches, finishes nor reconciles an operation itself.
@@ -440,6 +499,7 @@ fn cancel_locked(
             terminal: true,
             closure: Closure::NotAllocated,
             persistence_failed: false,
+            reconciliation_revision: None,
         },
         intent: None,
     });

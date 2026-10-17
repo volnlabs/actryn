@@ -148,12 +148,11 @@ pub struct Snapshot {
     pub reconciled: bool,
 }
 impl Snapshot {
-    pub(crate) fn from_registry(
-        v: robot_intent::Snapshot,
-        verdict: Verdict,
-        reconciled: bool,
-    ) -> Self {
+    pub(crate) fn from_registry(v: robot_intent::Snapshot, verdict: Verdict) -> Self {
         let cancellation_durable = v.key_cancelled_durable();
+        // Public reconciliation is durable evidence. The current operation's
+        // in-memory observation alone cannot release a remote reservation.
+        let reconciled = v.reconciled_durable();
         Self {
             namespace: v.namespace,
             key: v.key,
@@ -226,7 +225,7 @@ pub struct Historical {
 mod tests {
     use super::*;
     #[test]
-    fn external_id_is_withheld_until_its_binding_is_durable() {
+    fn external_projection_requires_durable_identity_and_reconciliation() {
         let id = robot_intent::OperationId {
             device: [1; 16],
             boot: 1,
@@ -248,15 +247,37 @@ mod tests {
             terminal: false,
             closure: robot_intent::Closure::NotRequested,
             persistence_failed: false,
+            reconciliation_revision: None,
         };
-        assert!(
-            Snapshot::from_registry(raw.clone(), Verdict::Pending, false)
-                .operation
-                .is_none()
-        );
+        assert!(Snapshot::from_registry(raw.clone(), Verdict::Pending)
+            .operation
+            .is_none());
         raw.durable_revision = 1;
-        assert!(Snapshot::from_registry(raw, Verdict::Pending, false)
+        assert!(Snapshot::from_registry(raw.clone(), Verdict::Pending)
             .operation
             .is_some());
+        raw.phase = robot_intent::Phase::Completed;
+        raw.terminal = true;
+        let historical = Snapshot::from_registry(raw.clone(), Verdict::OutcomeUnknown);
+        assert!(historical.reconciled);
+        assert!(matches!(historical.verdict, Verdict::OutcomeUnknown));
+        for mutation in 0..5 {
+            let mut incomplete = raw.clone();
+            match mutation {
+                0 => incomplete.durable_revision = 0,
+                1 => incomplete.terminal = false,
+                2 => incomplete.operation = None,
+                3 => incomplete.persistence_failed = true,
+                _ => incomplete.phase = robot_intent::Phase::CancelledDurable,
+            }
+            assert!(!Snapshot::from_registry(incomplete, Verdict::OutcomeUnknown).reconciled);
+        }
+        raw.phase = robot_intent::Phase::CancelledDurable;
+        assert!(!Snapshot::from_registry(raw.clone(), Verdict::Cancelled).reconciled);
+        raw.revision += 1;
+        raw.reconciliation_revision = Some(raw.revision);
+        assert!(!Snapshot::from_registry(raw.clone(), Verdict::Cancelled).reconciled);
+        raw.durable_revision = raw.revision;
+        assert!(Snapshot::from_registry(raw, Verdict::Cancelled).reconciled);
     }
 }
