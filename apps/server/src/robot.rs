@@ -314,18 +314,20 @@ impl RemoteSnapshot {
             && self.revision > 0
             && self.durable_revision == self.revision
             && self.terminal
-            && self.verdict != Verdict::OutcomeUnknown
             && ((self.cancellation_durable
                 && self.phase == "CancelledDurable"
                 && self.closure == "NotAllocated"
-                && self.operation.is_none())
+                && self.operation.is_none()
+                && self.verdict != Verdict::OutcomeUnknown)
                 || (matches!(self.phase.as_str(), "Completed" | "CancelledDurable")
                     && self.reconciled
                     && self.operation.is_some()
-                    && matches!(
+                    // Durable Completed/reconciled proves resource closure even when
+                    // task success remains unknown. Unknown work is a different phase.
+                    && (matches!(
                         self.verdict,
                         Verdict::TargetReached | Verdict::TimedOut | Verdict::Cancelled
-                    )))
+                    ) || (self.phase == "Completed" && self.verdict == Verdict::OutcomeUnknown))))
     }
 }
 

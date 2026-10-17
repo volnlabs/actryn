@@ -1,6 +1,6 @@
 use actryn_server::{
-    robot::{Binding, Observation, RemoteSnapshot},
-    Limits, Store,
+    robot::{Binding, Observation, RemoteSnapshot, Verdict},
+    Limits, Publication, Store,
 };
 use serde_json::json;
 
@@ -86,7 +86,7 @@ fn cancellation_before_dispatch_and_restart_preserve_the_original_handle() {
     assert!(s.robot_reserve(&a, "key", "input-digest", 103).is_err());
 }
 #[test]
-fn terminal_unknown_stays_charged_and_only_matching_reconciled_result_settles() {
+fn unknown_work_stays_charged_and_only_matching_reconciled_result_settles() {
     let dir = tempfile::tempdir().unwrap();
     let mut s = Store::open(dir.path().join("db"), Limits::default()).unwrap();
     let a = prepared(&mut s);
@@ -97,8 +97,9 @@ fn terminal_unknown_stays_charged_and_only_matching_reconciled_result_settles() 
     s.robot_dispatch(&a, "first", &format!("sha256:{}", "0".repeat(64)), 103)
         .unwrap();
     assert!(s.robot_reserve(&a, "second", "input-2", 104).is_err());
-    s.robot_snapshot(&a, "first", &snapshot(&intent, true))
-        .unwrap();
+    let mut unknown_work = snapshot(&intent, true);
+    unknown_work.phase = "OutcomeUnknown".into();
+    s.robot_snapshot(&a, "first", &unknown_work).unwrap();
     assert!(s.robot_intent(&a, "first").unwrap().outstanding_debit);
     let mut wrong = snapshot(&intent, false);
     wrong.key = [0; 32];
@@ -117,6 +118,144 @@ fn terminal_unknown_stays_charged_and_only_matching_reconciled_result_settles() 
     assert!(!s.robot_intent(&a, "first").unwrap().outstanding_debit);
     assert!(s.robot_reserve(&a, "second", "input-2", 105).is_ok());
 }
+#[test]
+fn unknown_task_requires_durable_completed_reconciliation_and_exact_identity() {
+    for fault in [
+        "none",
+        "unknown_work",
+        "unreconciled",
+        "partial",
+        "persistence",
+        "cancelled",
+        "absent",
+        "key",
+        "namespace",
+        "operation",
+        "zero_revision",
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let mut store = Store::open(dir.path().join("db"), Limits::default()).unwrap();
+        let a = prepared(&mut store);
+        store.robot_bind(&binding(&a), 100).unwrap();
+        store.start(&a, 100).unwrap();
+        let intent = store.robot_reserve(&a, "first", "digest", 101).unwrap();
+        let mut accepted = snapshot(&intent, true);
+        accepted.reconciled = false;
+        store.robot_snapshot(&a, "first", &accepted).unwrap();
+        let mut completed = snapshot(&intent, true);
+        match fault {
+            "none" => (),
+            "unknown_work" => completed.phase = "OutcomeUnknown".into(),
+            "unreconciled" => completed.reconciled = false,
+            "partial" => completed.revision = 2,
+            "persistence" => completed.persistence_failed = true,
+            "cancelled" => completed.phase = "CancelledDurable".into(),
+            "absent" => completed.operation = None,
+            "key" => completed.key = [7; 32],
+            "namespace" => completed.namespace = [7; 16],
+            "operation" => completed.operation.as_mut().unwrap().stream += 1,
+            "zero_revision" => {
+                completed.revision = 0;
+                completed.durable_revision = 0;
+            }
+            _ => unreachable!(),
+        }
+        let result = store.robot_snapshot(&a, "first", &completed);
+        if matches!(
+            fault,
+            "absent" | "key" | "namespace" | "operation" | "zero_revision"
+        ) {
+            assert!(result.is_err(), "{fault}");
+        } else {
+            result.unwrap();
+        }
+        let saved = store.robot_intent(&a, "first").unwrap();
+        assert_eq!(saved.outstanding_debit, fault != "none", "{fault}");
+        assert_eq!(
+            saved.summary().remote_verdict,
+            Some(Verdict::OutcomeUnknown)
+        );
+        assert_eq!(
+            store.robot_reserve(&a, "second", "digest2", 102).is_ok(),
+            fault == "none",
+            "{fault}"
+        );
+    }
+}
+
+#[test]
+fn late_unknown_task_completion_settles_once_after_restart_without_publication() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("db");
+    let mut store = Store::open(&path, Limits::default()).unwrap();
+    let a = prepared(&mut store);
+    store.robot_bind(&binding(&a), 100).unwrap();
+    store.start(&a, 100).unwrap();
+    let intent = store.robot_reserve(&a, "first", "digest", 101).unwrap();
+    store
+        .robot_observe(&a, "first", &observation(), 102)
+        .unwrap();
+    let proposal = format!("sha256:{}", "0".repeat(64));
+    store.robot_dispatch(&a, "first", &proposal, 103).unwrap();
+    let call = store.reserve_call(&a, "first", "digest", 1, 101).unwrap();
+    store.mark_dispatched(&call.id, 102).unwrap();
+    let mut pending = snapshot(&intent, true);
+    pending.reconciled = false;
+    store.robot_snapshot(&a, "first", &pending).unwrap();
+    store.cancel(&a).unwrap();
+    store.mark_reaped(&a).unwrap();
+    drop(store);
+    let mut store = Store::open(&path, Limits::default()).unwrap();
+    store.recover().unwrap();
+    assert!(store.robot_intent(&a, "first").unwrap().outstanding_debit);
+    let completed = snapshot(&intent, true);
+    let saved = store.robot_snapshot(&a, "first", &completed).unwrap();
+    assert!(!saved.outstanding_debit && saved.cancellation_requested);
+    assert_eq!(
+        saved.summary().remote_verdict,
+        Some(Verdict::OutcomeUnknown)
+    );
+    assert_eq!(
+        store.settle(&call.id, 0, b"late reply", 104).unwrap(),
+        Publication::Suppressed
+    );
+    assert!(store.robot_dispatch(&a, "first", &proposal, 104).is_err());
+    assert_eq!(store.result(&a, "first", 104).unwrap().1, None);
+    assert_eq!(store.inspect(&a).unwrap().attempt.outcome, "cancelled");
+    let next = prepared(&mut store);
+    store.robot_bind(&binding(&next), 100).unwrap();
+    store.start(&next, 100).unwrap();
+    let next_intent = store.robot_reserve(&next, "next", "digest2", 105).unwrap();
+    for reply in [completed.clone(), pending, completed] {
+        let again = store.robot_snapshot(&a, "first", &reply).unwrap();
+        assert!(!again.outstanding_debit && again.last_remote.unwrap().reconciled);
+        let outstanding = store.robot_pending().unwrap();
+        assert_eq!(outstanding.len(), 1);
+        assert_eq!(outstanding[0].1.handle, next_intent.handle);
+        assert!(store
+            .robot_reserve(&next, "overflow", "digest3", 106)
+            .is_err());
+        assert_eq!(store.result(&a, "first", 106).unwrap().1, None);
+    }
+}
+
+#[test]
+fn absent_unknown_task_cancellation_remains_charged() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut store = Store::open(dir.path().join("db"), Limits::default()).unwrap();
+    let a = prepared(&mut store);
+    store.robot_bind(&binding(&a), 100).unwrap();
+    store.start(&a, 100).unwrap();
+    let intent = store.robot_reserve(&a, "key", "digest", 101).unwrap();
+    let mut absent = snapshot(&intent, true);
+    absent.operation = None;
+    absent.phase = "CancelledDurable".into();
+    absent.closure = "NotAllocated".into();
+    absent.cancellation_durable = true;
+    store.robot_snapshot(&a, "key", &absent).unwrap();
+    assert!(store.robot_intent(&a, "key").unwrap().outstanding_debit);
+}
+
 #[test]
 fn original_observation_cannot_be_replaced_and_dispatch_cannot_repeat() {
     let dir = tempfile::tempdir().unwrap();

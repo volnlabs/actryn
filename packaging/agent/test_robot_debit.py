@@ -101,18 +101,63 @@ class PartialEvidenceTests(unittest.TestCase):
         for active, crashed in ((False, False), (True, False), (False, True)):
             campaign.verify_partial(*fixture(active=active, crashed=crashed), active=active, crashed=crashed)
 
-    def test_known_remote_settlement_does_not_erase_crash_uncertainty(self):
+    def settled_fixture(self, verdict='TargetReached'):
         args = list(fixture(crashed=True))
         remote = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'robot')
         remote['outstanding_debits'] = 0
         remote['requests'][0].update(outstanding_debit=False, phase='settled',
-                                     reconciled=True, remote_verdict='TargetReached')
+                                     reconciled=True, remote_verdict=verdict)
+        args[3]['operation'] = copy.deepcopy(IDENTITY)
+        args[3]['settlement'] = {
+            'namespace': list(bytes.fromhex(args[3]['handle']['namespace'])),
+            'key': list(bytes.fromhex(args[3]['handle']['key'])),
+            'operation': copy.deepcopy(IDENTITY), 'phase': 'Completed',
+            'terminal': True, 'revision': 3, 'durable_revision': 3,
+            'persistence_failed': False, 'verdict': verdict, 'reconciled': True}
         rehash(args[0])
-        campaign.verify_partial(*args, crashed=True, settled=True)
-        with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True)
-        remote['requests'][0]['reconciled'] = False
-        rehash(args[0])
-        with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True, settled=True)
+        return args
+
+    def test_completed_unknown_task_settlement_preserves_verdict_and_crash_uncertainty(self):
+        for verdict in ('TargetReached', 'TimedOut', 'Cancelled', 'OutcomeUnknown'):
+            args = self.settled_fixture(verdict)
+            before = copy.deepcopy(args)
+            campaign.verify_partial(*args, crashed=True, settled=True)
+            self.assertEqual(args, before)
+            with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True)
+
+    def test_unknown_task_without_exact_durable_completion_cannot_settle(self):
+        for fault in ('unknown_work', 'cancelled', 'unreconciled', 'partial', 'persistence',
+                      'zero', 'overdurable', 'absent', 'key', 'namespace', 'operation',
+                      'nonterminal', 'summary_verdict', 'summary_reconciliation', 'missing_proof'):
+            args = self.settled_fixture('OutcomeUnknown')
+            proof = args[3]['settlement']
+            remote = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'robot')['requests'][0]
+            if fault == 'unknown_work': proof['phase'] = 'OutcomeUnknown'
+            elif fault == 'cancelled': proof['phase'] = 'CancelledDurable'
+            elif fault == 'unreconciled': proof['reconciled'] = False
+            elif fault == 'partial': proof['durable_revision'] = 2
+            elif fault == 'persistence': proof['persistence_failed'] = True
+            elif fault == 'zero': proof.update(revision=0, durable_revision=0)
+            elif fault == 'overdurable': proof['durable_revision'] = 4
+            elif fault == 'absent': proof['operation'] = None
+            elif fault == 'key': proof['key'] = [7] * 32
+            elif fault == 'namespace': proof['namespace'] = [7] * 16
+            elif fault == 'operation': proof['operation']['stream'] += 1
+            elif fault == 'nonterminal': proof['terminal'] = False
+            elif fault == 'summary_verdict': remote['remote_verdict'] = 'TargetReached'
+            elif fault == 'summary_reconciliation': remote['reconciled'] = False
+            else: args[3].pop('settlement')
+            rehash(args[0])
+            with self.subTest(fault=fault), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args, crashed=True, settled=True)
+
+    def test_known_task_also_requires_durable_matching_reconciliation(self):
+        for field, value in [('reconciled', False), ('durable_revision', 2),
+                             ('persistence_failed', True), ('phase', 'OutcomeUnknown')]:
+            args = self.settled_fixture()
+            args[3]['settlement'][field] = value
+            with self.subTest(field=field), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args, crashed=True, settled=True)
 
     def test_rehashed_wrong_debit_identity_publication_and_log_cannot_pass(self):
         for fault in ('debit', 'handle', 'binding', 'phase', 'closed', 'call_state',
