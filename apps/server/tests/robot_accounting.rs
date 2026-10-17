@@ -131,6 +131,7 @@ fn unknown_task_requires_durable_completed_reconciliation_and_exact_identity() {
         "key",
         "namespace",
         "operation",
+        "digest",
         "zero_revision",
     ] {
         let dir = tempfile::tempdir().unwrap();
@@ -141,8 +142,10 @@ fn unknown_task_requires_durable_completed_reconciliation_and_exact_identity() {
         let intent = store.robot_reserve(&a, "first", "digest", 101).unwrap();
         let mut accepted = snapshot(&intent, true);
         accepted.reconciled = false;
+        accepted.digest = Some([3; 32]);
         store.robot_snapshot(&a, "first", &accepted).unwrap();
         let mut completed = snapshot(&intent, true);
+        completed.digest = accepted.digest;
         match fault {
             "none" => (),
             "unknown_work" => completed.phase = "OutcomeUnknown".into(),
@@ -154,6 +157,7 @@ fn unknown_task_requires_durable_completed_reconciliation_and_exact_identity() {
             "key" => completed.key = [7; 32],
             "namespace" => completed.namespace = [7; 16],
             "operation" => completed.operation.as_mut().unwrap().stream += 1,
+            "digest" => completed.digest = Some([4; 32]),
             "zero_revision" => {
                 completed.revision = 0;
                 completed.durable_revision = 0;
@@ -163,7 +167,7 @@ fn unknown_task_requires_durable_completed_reconciliation_and_exact_identity() {
         let result = store.robot_snapshot(&a, "first", &completed);
         if matches!(
             fault,
-            "absent" | "key" | "namespace" | "operation" | "zero_revision"
+            "absent" | "key" | "namespace" | "operation" | "digest" | "zero_revision"
         ) {
             assert!(result.is_err(), "{fault}");
         } else {
