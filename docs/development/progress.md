@@ -1233,6 +1233,21 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Root verifies all ten retained log/receipt files and exact integrated source
   bytes. Corrected target setup/execution remains NOT_RUN.
 
+- Failure-only finalization01 passes its seven distinct guest steps without
+  another Prepare, Launch or Cancel. Both final exports pass the original
+  binding, resource, log and observer checks; A's corrected SQL/status validator
+  confirms four approved calls, four budget refusals, four closed tombstones
+  and four uncertain replies. B's unstarted path has no calls or output and
+  retains its actual cancelled outcome. Run10 remains FAILED.
+  Old-override restoration returns original unit/configuration/security
+  properties; all three services then stop, with no library users, task/cgroup/
+  broker directories or outstanding work. Root independently verifies all
+  91 files/858159 bytes, raw SQLite integrity and eleven exact histories per
+  store, both new attempts' evidence, all 22 run10 and 15 run09 records.
+  Evidence: `artifacts/server-a08-failure-finalization-{plan,run}01`, capture
+  SHA256 `3c0b3c594d2bd73b693a7dfce569b9138902ba7581013fabdd2b999523a17649`.
+  Corrected fixture execution, full A08 and physical acceptance remain unclaimed.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.

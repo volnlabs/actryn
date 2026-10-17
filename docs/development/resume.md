@@ -10,7 +10,7 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `343572e`. Remote `6eac6ab` was verified on 2026-10-17. CI for the new
+  `f963067`. Remote `6eac6ab` was verified on 2026-10-17. CI for the new
   checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -21,9 +21,10 @@ Earlier checkpoints and failed attempts remain preserved.
   Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
 - Fresh readback after pressure run10 retains eleven reaped attempts with zero
   open calls or Robot debits, no container tasks, child cgroups or broker
-  directories. The old test drop-in remains installed, but its library has only
-  a read-only mapping on a `noexec` mount and does not intercept directory calls.
-  No control or event files remain. Source, failed import, disks, seed and SSH trust
+  directories. Separate failure finalization verifies both final exports,
+  restores the original service configuration and stops all three services.
+  The old test library remains retained with no mapping users; no control or
+  event files remain. Source, failed import, disks, seed and SSH trust
   remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. Prior fixture processes did
@@ -177,16 +178,28 @@ Fix `343572e` places the test library in protected `/opt` storage while keeping
 controls under `/run`. Setup requires an executable mapping of the exact file,
 one launcher user and no legacy mapping. RED reproduces the false acceptance;
 58 host tests pass in `artifacts/server-a08-executable-shim-fix01`. No native
-code, mount or production policy changes. Target execution is NOT_RUN.
-Preserve these failures; first export/restore/capture the failed run, then use a
-separate reviewed setup. Do not repeat earlier attempts or delete old controls.
+code, mount or production policy changes. Corrected target execution is NOT_RUN.
+
+Separate failure finalization now passes all seven steps: read-only readiness,
+both final exports, old-override restoration, restored-state verification, one
+service stop, quiescence marker and capture. Final evidence confirms four
+approved calls, four budget refusals, four closed zero-reservation tombstones
+and four uncertain burst replies. The original failure remains FAILED. Host
+verification covers all 91 archive files (858159 bytes), both raw SQLite
+databases with eleven exact reaped rows each, no outstanding calls/debits, all
+22 run10 and 15 run09 records, both attempts' logs and observer trace/summary.
+Evidence: `artifacts/server-a08-failure-finalization-{plan,run}01`; capture
+SHA256 `3c0b3c594d2bd73b693a7dfce569b9138902ba7581013fabdd2b999523a17649`.
+Preserve the old control directory by a reviewed non-overwriting rename before
+the separately numbered corrected setup; do not delete or reuse its files.
 
 Current VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
 invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
 `3138459f-e5b3-411c-ab6a-932418cf2f0a`. Boot/readiness passes. Revalidate this
 lifetime before each guest action. Package update, quarantine, fresh import and
-service-UID checks pass. Services are active (observer PID1794, launcher PID2244,
-serverd PID2277); these observations require fresh verification. Run07 failed
+service-UID checks pass. All three services are now inactive/dead/PID0, with
+original properties restored and no library users; revalidate before acting.
+Run07 failed
 before mutation; run08 failed after instrumentation but before any attempt;
 run09 failed after one pressure attempt; run10 failed after an active attempt
 and unexpected successful preparation. All eleven retained attempts are reaped.
@@ -265,8 +278,8 @@ a new workload principal under the existing lifecycle03 issuer. The old principa
 is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
 
 Continue with this handoff and current ledgers, verifying branch/worktree state,
-resources and retained evidence. Preserve and restore failed run10 before
-correcting the test-library location. Run only a reviewed,
+resources and retained evidence. Failed run10 export/restoration/capture is
+verified; the corrected test-library setup remains pending. Run only a reviewed,
 numbered campaign with fresh identities and evidence paths. A16 has no allocated
 window. Authorized live-provider credentials, a release signing custodian and
 an independent developer remain external inputs. Final coherent qualification

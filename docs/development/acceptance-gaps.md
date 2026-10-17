@@ -48,8 +48,10 @@ on a `noexec` mount never intercepted directory calls; the earlier setup check
 was insufficient. Both new attempts are now reaped, with eleven histories per
 store and zero outstanding work. Run10 remains FAILED. Fixture fix `343572e`
 uses protected executable storage and exact executable-mapping checks; 58 host
-tests pass. Failed-run final evidence/restoration and corrected target execution
-remain pending. A16 diagnostic8 native
+tests pass. Separate failed-run finalization verifies both exports, restores
+original properties, stops the services and captures all eleven histories and
+both failed campaigns. The 91-file archive is independently hash-checked;
+run10 remains FAILED and corrected target execution is pending. A16 diagnostic8 native
 build01 passes; its single cold-case plan
 is root-reviewed, but the module was never loaded and target execution remains
 NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.
