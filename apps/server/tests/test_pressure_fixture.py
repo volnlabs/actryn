@@ -1,5 +1,8 @@
 import copy
 import json
+import os
+from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 import subprocess
@@ -95,13 +98,15 @@ class FixtureTests(unittest.TestCase):
                 'instrumented':{'properties':{'ExecStart':'fixed-override','MemoryMax':'134217728','ExecStartPre':'pinned','DeviceAllow':[['/dev/null','rw']]}},
                 'library_sha256':'1'*64,'manifest':'2'*64}
         now={'manifest':'2'*64,'properties':copy.deepcopy(record['instrumented']['properties']),
-             'library_sha256':'1'*64,'library_users':[42],
+             'library_sha256':'1'*64,'library_users':[42],'library_executable_users':[42],'legacy_library_users':[],
              'services':{'actryn-launcher':{'pid':42}}}
         fixture.validate_instrumentation(record,now)
-        for fault in ('extra-loader','different-loader','security','device-allow','preflight','command','library','manifest'):
+        for fault in ('extra-loader','different-loader','readonly-loader','legacy-loader','security','device-allow','preflight','command','library','manifest'):
             bad=copy.deepcopy(now)
             if fault=='extra-loader':bad['library_users'].append(43)
             elif fault=='different-loader':bad['library_users']=[43]
+            elif fault=='readonly-loader':bad['library_executable_users']=[]
+            elif fault=='legacy-loader':bad['legacy_library_users']=[42]
             elif fault=='security':bad['properties']['MemoryMax']='infinity'
             elif fault=='device-allow':bad['properties']['DeviceAllow'].append(['/dev/zero','r'])
             elif fault=='preflight':bad['properties']['ExecStartPre']=''
@@ -116,8 +121,49 @@ class FixtureTests(unittest.TestCase):
                 'instrumented':{'properties':{'ExecStart':'new','MemoryMax':'infinity'}},
                 'library_sha256':'1'*64,'manifest':'2'*64}
         now={'manifest':'2'*64,'properties':record['instrumented']['properties'],'library_sha256':'1'*64,
-             'library_users':[42],'services':{'actryn-launcher':{'pid':42}}}
+             'library_users':[42],'library_executable_users':[42],'legacy_library_users':[],
+             'services':{'actryn-launcher':{'pid':42}}}
         with self.assertRaises(AssertionError): fixture.validate_instrumentation(record,now)
+
+    def test_readonly_only_library_mapping_cannot_prove_instrumentation(self):
+        record={'original':{'properties':{'ExecStart':'old'}},
+                'instrumented':{'properties':{'ExecStart':'new'}},
+                'library_sha256':'1'*64,'manifest':'2'*64}
+        now={'manifest':'2'*64,'properties':{'ExecStart':'new'},'library_sha256':'1'*64,
+             'library_users':[42],'library_executable_users':[],'legacy_library_users':[],
+             'services':{'actryn-launcher':{'pid':42}}}
+        with self.assertRaises(AssertionError):fixture.validate_instrumentation(record,now)
+
+    def test_mapping_reader_requires_exact_executable_file_identity_and_tracks_legacy_leaks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);library=root/'fault.so';library.write_bytes(b'pinned bytes')
+            legacy=root/'legacy.so';proc=root/'proc';proc.mkdir();pid=proc/'42';pid.mkdir()
+            m=library.stat();device=f'{os.major(m.st_dev):02x}:{os.minor(m.st_dev):02x}'
+            def mapping(path=library,permissions='r-xp',inode=m.st_ino,dev=device):
+                return f'7f5977b4a000-7f5977b4f000 {permissions} 00000000 {dev} {inode} {path}\n'
+            cases=[(mapping(),[42],[]),
+                   (mapping(permissions='r--p'),[],[]),
+                   (mapping(path=legacy,permissions='r--p'),[],[42]),
+                   (mapping()+mapping(path=legacy,permissions='r--p'),[42],[42]),
+                   (mapping(path=str(library)+' (deleted)'),[],[]),
+                   (mapping(inode=m.st_ino+1),[],[]),
+                   (mapping(dev='00:00'),[],[])]
+            with patch.object(fixture,'LIBRARY',library),patch.object(fixture,'LEGACY_LIBRARY',legacy):
+                for raw,executable,old in cases:
+                    (pid/'maps').write_text(raw)
+                    with self.subTest(raw=raw):
+                        self.assertEqual(fixture.library_users(proc),{'library_users':[42],
+                            'library_executable_users':executable,'legacy_library_users':old})
+                (pid/'maps').write_text(mapping(path=str(library)+'-unrelated'))
+                self.assertEqual(fixture.library_users(proc),{'library_users':[],
+                    'library_executable_users':[],'legacy_library_users':[]})
+
+    def test_test_library_location_does_not_change_runtime_control_or_security_properties(self):
+        self.assertEqual(fixture.CONTROL,Path('/run/actryn/a08-pressure'))
+        self.assertEqual(fixture.LIBRARY,Path('/opt/actryn-a08-pressure/fault.so'))
+        self.assertIn(b'LD_PRELOAD=/opt/actryn-a08-pressure/fault.so ',fixture.OVERRIDE)
+        self.assertNotIn(b'LD_PRELOAD=/run/',fixture.OVERRIDE)
+        self.assertEqual(fixture.OVERRIDE.count(b'ExecStart'),2)
 
 
 if __name__=='__main__': unittest.main()
