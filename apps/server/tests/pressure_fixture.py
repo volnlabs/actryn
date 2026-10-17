@@ -46,7 +46,7 @@ def command(argv, timeout=15):
 
 def stable_commands(value):
     # systemctl show includes per-invocation observations in command descriptors.
-    return re.sub(r' ; (?:start_time|stop_time|pid|code|status)=[^;}]*', '', value)
+    return re.sub(r' ?; (?:start_time|stop_time|pid|code|status)=[^;}]*', '', value)
 
 
 def properties():

@@ -70,6 +70,26 @@ class FixtureTests(unittest.TestCase):
         self.assertNotEqual(fixture.stable_commands(old),fixture.stable_commands(old.replace('ignore_errors=no','ignore_errors=yes')))
         self.assertNotEqual(fixture.stable_commands(old),fixture.stable_commands(old.replace('actryn-launcher','arbitrary')))
 
+    def test_actual_retained_preflight_descriptors_differ_only_in_runtime_observations(self):
+        # Exact original/current ExecStartPre from the read-only run08 diagnosis.
+        prefix='{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B -E -s /opt/actryn/server/current/tools/release.py preflight --role server ; ignore_errors=no'
+        original=prefix+'; stop_time=[Sat 2026-10-17 08:04:08 UTC]; code=exited}'
+        current=prefix+'; stop_time=[Sat 2026-10-17 08:18:51 UTC]; code=exited}'
+        self.assertEqual(fixture.stable_commands(original),prefix+'}')
+        self.assertEqual(fixture.stable_commands(current),prefix+'}')
+
+    def test_all_adjacent_raw_descriptor_fields_are_removed_but_semantics_remain(self):
+        # Full raw ExecStartPre retained by the same diagnosis.
+        prefix='{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B -E -s /opt/actryn/server/current/tools/release.py preflight --role server ; ignore_errors=no'
+        raw=prefix+' ; start_time=[Sat 2026-10-17 08:18:51 UTC] ; stop_time=[Sat 2026-10-17 08:18:51 UTC] ; pid=2181 ; code=exited ; status=0 }'
+        expected=prefix+'}'
+        self.assertEqual(fixture.stable_commands(raw),expected)
+        for old,new in [('path=/usr/bin/python3','path=/different'),
+                        ('preflight --role server','preflight --role robot'),
+                        ('ignore_errors=no','ignore_errors=yes')]:
+            with self.subTest(changed=old):
+                self.assertNotEqual(fixture.stable_commands(raw.replace(old,new)),expected)
+
     def test_instrumentation_requires_only_launcher_mapping_and_unchanged_inherited_security(self):
         record={'original':{'properties':{'ExecStart':'original','MemoryMax':'134217728','ExecStartPre':'pinned','DeviceAllow':[['/dev/null','rw']]}},
                 'instrumented':{'properties':{'ExecStart':'fixed-override','MemoryMax':'134217728','ExecStartPre':'pinned','DeviceAllow':[['/dev/null','rw']]}},
