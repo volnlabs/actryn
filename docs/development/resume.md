@@ -10,14 +10,16 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `e356b9f`. Remote `e356b9f` was verified on 2026-10-17. CI for the new
+  `dcc52fe`. Remote `dcc52fe` was verified on 2026-10-17. CI for the new
   checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
 - Three bounded agent lanes resumed. Server importer07 is gracefully powered
   off after run11. A16 cold diagnostic case01 completed; its module is unloaded,
-  VM powered off and fixture shut down. No fixture process runs. The next
-  target window is the retained-debit Server/Robot campaign.
+  VM powered off and fixture shut down. The retained-debit window is now open:
+  Server08 and Robot debit01 are running, with the Robot fixture on retained
+  boot 2. Server services remain stopped; the exact Robot module and both
+  installed services are running, inhibited, with no authority or operation.
   `artifacts/server-a08-import-failure01/pause-result.json` verifies the original
   Server PID absent and its unit inactive/MainPID0 after one graceful poweroff.
   Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
@@ -324,7 +326,12 @@ new instrumentation or changed limits.
   all 28 allocated sections survive strip-debug unchanged. New CLI SHA256:
   `4102e793c48fc43767680ed3c9cf4ffd2f8512171271e3340ab2632090fd1fc5`.
   Its 136 versioned imports add only `fchmod@GLIBC_2.17`. Exact Debian ARM
-  provider ELF verification and installed-path validation remain pending.
+  provider ELF verification passes: all 136 versioned requirements match four
+  libraries collected once from the exact installed Robot boot. Capture SHA256:
+  `156af09f19eda3c92009f6e544981cbb79ca61e86c122858d03c3f8e806dead8`.
+  `artifacts/arm-cli-runtime-collection01` preserves the capture/static matcher
+  and a host reporting error after its successful run; no checker retry occurred.
+  Installed-path validation of the rebuilt ARM CLI remains pending.
   `artifacts/arm-cli-importer-build01` retains build/native/link receipts and
   both corrected metadata-analysis failures. No manager/module rebuild or
   candidate/cohort replacement occurred. Final source/evidence association
@@ -332,17 +339,56 @@ new instrumentation or changed limits.
 
 ## Remaining integration and external gates
 
-`artifacts/robot-retained-debit-plan02` remains prepared, NOT_RUN. Additive
-amendments04/05 bind the new Server manifest/CLI and actual run11 catalogs
-(fifteen launcher/fourteen broker IDs); seven and nine host checks pass.
-The draft still must not execute. Future execution needs fresh boot/process/controller identities and
-a new workload principal under the existing lifecycle03 issuer. The old principal
-is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
+The retained-debit campaign is still NOT_RUN. Server08 boot
+`0176eab8-e4f6-4b11-be44-8ca23b281f83`, QEMU PID 427873/start 6374139,
+invocation `4b55f2dafd6e466d8878452e73d1cf13`, preserves all 15 launcher/14 broker
+rows and raw databases. Robot boot `2336e319-bce7-4668-8b3f-20ac70f1946a`,
+QEMU PID 428542/start 6396065, invocation
+`15207c2c4088413cb2f4483949e11145`, matches candidate04/manager11/module16.
+The fixture is PID 428374/start 6390049, invocation
+`0d953d45e1094be8bf012a32ccd2bec4`, boot 2, inhibited/zero output.
+Use current lifetime readback before any further action; these are checkpoint
+identities, not substitutes for a fresh guard.
 
-Continue with this handoff and current ledgers, verifying branch/worktree state,
-resources and retained evidence. Run11 is verified and the Server window is
-closed. Run only a reviewed, numbered campaign with fresh identities and evidence
-paths. Retained-debit execution and exact ARM runtime ABI collection are next.
+Extended cold preflight02 preserves all 9 namespaces/16 full records and three
+old identity generations. Cold01 remains failed: it incorrectly required the
+revoked principal in raw policy.json; the service overlays durable revocation
+files. Diagnosis02 confirms the expected tombstone, and the amended collector
+checks the effective union. Diagnosis01's full-stat equality failure is retained;
+its exact atime cause was not captured. No service/module action preceded the
+successful extended history check.
+
+One exact module load and one installed manager/gateway start pass. Local clock
+and runtime are healthy and inhibited; expired test TLS remains disabled. Both
+old CA and leaf had expired, so the supported enrollment API creates exactly one
+new seven-day disposable test generation and one workload principal. All old
+identity generations, revocation files, raw database bytes and 9/16 full history
+rows remain unchanged. The policy adds one read/propose certificate and persists
+the preexisting effective revoked set. A pinned authenticated Describe/pair
+passes without issuing authority. Receipts:
+`artifacts/robot-retained-debit-{cold02,module01,start01,enrollment01}`.
+New generation `3de5e81b8a630567c2652760914e62ef`, principal
+`debit01-14987a9409d60281`, manager epoch
+`61b264ab1c044294123066d6e5259f75`. Private test keys remain local mode 0600
+inside a 0700 directory and are excluded from evidence hashes/inventories.
+
+Additive coordinator plan03 admits exactly the actual Server08 unit while
+retaining the original 03/reboot routes and all PID/start/invocation/pidfd/deadline
+checks; eleven existing and two focused host checks pass. Earlier plans remain
+unchanged. The new input draft binds 44 source files, current public identity and
+strict combined SSH trust. Its redundant CLI entry initially hit the public-data
+size bound; draft02 uses the existing separately bounded CLI pin and passes static
+validation. No target action followed that input failure. Server peer/credential
+publication and loaded-service checks remain pending before final root review.
+Six campaign preparations project 9 to 15 of 16 namespaces.
+
+A bounded D2 receipt audit also finds no positive actual OOM receipt and no
+existing-device denial test: the prior missing `/dev/mem` check proves namespace
+hiding. A test-only addition is being prepared in an isolated branch for one
+nonphysical device 1:7 refusal plus one 256 MiB cgroup OOM/export case; target
+execution remains pending after the retained-debit campaign. A16 production
+pilot qualification and the required comparison also remain pending.
+
 Authorized live-provider credentials, a release signing custodian and
 an independent developer remain external inputs. Final coherent qualification
 is unfinished. Live motion stays inhibited; no result is physical qualification.

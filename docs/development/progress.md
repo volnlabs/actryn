@@ -1296,6 +1296,37 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   production pilots and the required comparison remain open. Evidence:
   `artifacts/a16-hello8-case01`, `artifacts/a16-hello8-fixture-restore01`.
 
+- Exact ARM runtime collection/static matching passes for all 136 versioned imports
+  of CLI `4102e793…fd1fc5`, using four libraries from the newly observed installed
+  Robot boot. No CLI execution/install claim follows. Evidence:
+  `artifacts/arm-cli-runtime-collection01`; a host wrapper reporting error after
+  the successful matcher is retained without rerunning it.
+- The retained-debit Server08/Robot window is open. Server preserves all 15/14
+  historical rows and raw DBs with services still cold. Robot cold02 verifies
+  all 9 namespaces/16 records and three identity generations. Cold01's mistaken
+  raw-policy revocation requirement and diagnosis01's metadata-check failure are
+  preserved. The corrected collector matches the service's durable-revocation
+  overlay; module16 loads once and installed manager/gateway start once.
+- The old test CA/leaf expired. Supported enrollment installs one new seven-day
+  disposable generation and one fresh read/propose principal; pinned remote
+  Describe/pair passes. Every old generation/tombstone and all raw database/history
+  bytes remain unchanged. The sole policy delta adds that certificate and
+  persists the preexisting effective revocation union. No grant, preparation or
+  proposal occurs. Evidence: `artifacts/robot-retained-debit-enrollment01`;
+  private keys are excluded from evidence content/hashes.
+- Root source review finds the old coordinator's host-unit predicate excludes
+  actual Server08. Additive plan03 admits exactly 08 and rebinds its source paths;
+  eleven inherited and two focused host checks pass. Current input draft02 binds
+  all 44 sources/current public pins and passes local static validation; its
+  earlier redundant CLI/public-data entry failure is preserved. Server peer and
+  credential publication, service readiness and the actual campaign remain
+  pending. No crash, reboot or campaign attempt has run in this window.
+- D2 receipt audit finds 55 JSON and eight archived reports, all with
+  `oom_kill=0`; the `/dev/mem` ENOENT probe establishes hiding, not rejection of an
+  existing forbidden device. One bounded device 1:7/OOM diagnostic is being
+  prepared on an isolated test branch. These are existing contract obligations;
+  target execution remains pending.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
