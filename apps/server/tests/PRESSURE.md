@@ -15,8 +15,14 @@ The three results are separate:
    write and no retry. Four settled zero-token debits, a durable key cancellation
    and at least one exact call-budget refusal are required. EOF/reset after a
    complete burst write remains explicit uncertainty, never a denial inferred
-   from silence. All eight burst requests must be accounted for, with no extra
-   debit. This is finite concurrent call pressure, not an arrival-rate/WCET or
+   from silence. Every confirmed budget refusal must retain a closed cancellation
+   tombstone; an EOF key may have zero or one. These are request-key records,
+   not approved-call reservations. Read-only broker SQL is correlated with each
+   active/final inspection: exactly four digest-bearing settled base reservations,
+   and only burst tombstones with NULL digest/output and zero byte/token/deadline
+   reservations. Duplicate/unrelated rows and extra reservations fail. All eight
+   burst requests remain accounted for, with no extra debit. This is finite
+   concurrent call pressure, not an arrival-rate/WCET or
    proof that every request overlapped inside the broker.
 2. While A remains active, exactly one broker-directory `mkdir` for newly
    allocated B returns `ENOSPC`. The launcher has already retained its binding

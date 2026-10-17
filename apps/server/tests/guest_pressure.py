@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Opt-in, instrumented A08 server workload; no Robot or provider calls."""
 import argparse
+import contextlib
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import socket
+import sqlite3
+import stat
 import struct
 import subprocess
 import threading
@@ -82,7 +85,24 @@ class FaultControl:
         self.campaign.record('fault-events', {'mode':self.mode, 'attempt':attempt,
                              'raw':raw.decode('ascii'), 'sha256':hashlib.sha256(raw).hexdigest()})
 
-def validate_pressure(raw, inspection):
+def read_broker_accounting(attempt, path=Path('/var/lib/actryn-server/broker/state.sqlite')):
+    """Read existing rows only; the inspection API intentionally omits reservation metadata."""
+    require(re.fullmatch('[0-9a-f]{32}',attempt), 'accounting attempt identity')
+    require(stat.S_ISREG(path.lstat().st_mode), 'nonregular accounting database')
+    with contextlib.closing(sqlite3.connect(path.absolute().as_uri()+'?mode=ro',uri=True,timeout=1)) as db:
+        db.row_factory=sqlite3.Row
+        db.execute('PRAGMA query_only=ON')
+        deadline=time.monotonic()+1
+        db.set_progress_handler(lambda:time.monotonic()>=deadline,1000)
+        rows=[dict(row) for row in db.execute('''SELECT id,attempt_id,request_key,digest,state,
+            request_bytes,response_capacity,token_reserved,consumed_tokens,deadline_ms,
+            publication_closed,length(output) AS output_bytes FROM calls
+            WHERE attempt_id=? ORDER BY rowid LIMIT 13''',(attempt,))]
+    require(len(rows)<=12, 'unexpected accounting row capacity')
+    return rows
+
+
+def validate_pressure(raw, inspection, accounting):
     require = common.require
     require(len(raw) <= 32768 and raw.endswith(b'\n'), 'bounded complete pressure output')
     rows = [json.loads(v) for v in raw.splitlines()]
@@ -93,6 +113,7 @@ def validate_pressure(raw, inspection):
     expected = {f'base-{n}' for n in range(4)} | {f'burst-{n}' for n in range(8)}
     require({v['key'] for v in calls} == expected, 'missing or duplicated key')
     denied, unknown = 0, 0
+    denied_keys=set()
     for row in calls:
         key = row['key']
         if key.startswith('base-'):
@@ -108,6 +129,7 @@ def validate_pressure(raw, inspection):
             require(row.get('reply') == {'result':'error','reason':'attempt call budget exhausted'},
                     'burst success or unrelated failure')
             denied += 1
+            denied_keys.add(key)
     require(denied >= 1 and denied + unknown == 8, 'no actual approved-call budget refusal')
     require(cancels[0] == {'event':'pressure_cancel','key':'base-0','writes':1,
                           'reply':{'result':'ok','value':{'stage':'KEY_CANCELLED_DURABLE'}}}, 'reserved cancel unconfirmed')
@@ -115,12 +137,38 @@ def validate_pressure(raw, inspection):
             and not inspection['denials'] and inspection['denials_omitted'] == 0
             and not inspection['evidence_gaps'], 'unexpected Robot/policy/gap')
     stored = inspection['calls']
-    require(len(stored) == 4 and {v['request_key'] for v in stored} == {f'base-{n}' for n in range(4)},
-            'extra or missing broker debit')
-    require(all(v['state'] == 'settled' and v['consumed_tokens'] == 0 for v in stored), 'unsettled echo debit')
+    base_keys={f'base-{n}' for n in range(4)}
+    require(4<=len(stored)<=12 and len({v['request_key'] for v in stored})==len(stored)
+            and len({v['id'] for v in stored})==len(stored)
+            and base_keys <= {v['request_key'] for v in stored} <= expected, 'extra or missing broker key')
+    require(len(accounting)==len(stored) and len({v['request_key'] for v in accounting})==len(accounting),
+            'accounting row mismatch')
+    by_key={v['request_key']:v for v in accounting}
+    require(set(by_key)=={v['request_key'] for v in stored}, 'accounting key mismatch')
+    tombstones=set(by_key)-base_keys
+    require(denied_keys<=tombstones, 'confirmed budget denial missing durable tombstone')
+    for call in stored:
+        key=call['request_key']; row=by_key[key]
+        require(re.fullmatch('[0-9a-f]{32}',row['id']) and row['attempt_id']==inspection['attempt']['id']
+                and row['publication_closed'] in (0,1)
+                and all(row[field]==call[field] for field in ('id','state','consumed_tokens','deadline_ms'))
+                and bool(row['publication_closed']) is call['publication_closed'], 'accounting inspection mismatch')
+        if key in base_keys:
+            request=json.dumps({'method':'diagnostic.echo','input':{'index':int(key[-1])}},sort_keys=True,separators=(',',':')).encode()
+            require(row['digest']=='sha256:'+hashlib.sha256(request).hexdigest()
+                    and row['request_bytes']==len(request) and row['response_capacity']==65536
+                    and row['token_reserved']==1024 and row['state']=='settled'
+                    and row['consumed_tokens']==0 and row['deadline_ms']>0, 'unexpected approved call reservation')
+            require(row['output_bytes'] is None if row['publication_closed'] else
+                    type(row['output_bytes']) is int and 0<row['output_bytes']<=65536, 'approved call output accounting')
+        else:
+            require(row['digest'] is None and row['state']=='cancelled' and row['publication_closed']==1
+                    and row['output_bytes'] is None and all(row[field]==0 for field in
+                    ('request_bytes','response_capacity','token_reserved','consumed_tokens','deadline_ms')),
+                    'burst key is not a closed zero-reservation tombstone')
     require(next(v for v in stored if v['request_key'] == 'base-0')['publication_closed'] is True,
             'cancelled publication remains open')
-    return {'approved_calls':4,'burst_requests':8,'budget_refusals':denied,
+    return {'approved_calls':4,'burst_requests':8,'budget_refusals':denied,'closed_burst_tombstones':len(tombstones),
             'uncertain_replies_preserved':unknown,'reserved_cancel_durable':True}
 
 
@@ -198,7 +246,9 @@ class Campaign(common.Campaign):
         require(int(fields[19])==identity[2], 'active process replaced')
         raw=common.read_bounded(Path('/var/lib/actryn-server',identity[0],'stdout.log'),32768)
         require(raw==self.active_stdout.setdefault(identity[0],raw), 'active output changed')
-        report=validate_pressure(raw,inspection)
+        accounting=read_broker_accounting(identity[0])
+        self.record('pressure-accounting',{'attempt':identity[0],'rows':accounting})
+        report=validate_pressure(raw,inspection,accounting)
         self.record('active-stable',{'identity':identity,'pressure':report,'stdout_sha256':hashlib.sha256(raw).hexdigest()})
         return report
 
@@ -282,7 +332,9 @@ class Campaign(common.Campaign):
         self.record('reclaim-failure',self.results['reclaim_failure'])
         self.cancel(first); self.retired(first)
         def check_pressure(logs,inspection):
-            validate_pressure(logs['stdout'],inspection)
+            accounting=read_broker_accounting(first)
+            self.record('final-pressure-accounting',{'attempt':first,'rows':accounting})
+            validate_pressure(logs['stdout'],inspection,accounting)
             require(not logs['stderr'] and all(v['publication_closed'] is True for v in inspection['calls']),
                     'final pressure output/publication')
         for attempt in self.known:
