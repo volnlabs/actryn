@@ -5,8 +5,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; remote checkpoint `9db46cc` verified on
-  2026-10-17. Current implementation source is `f3953a0`; CI for the new
+- Integration branch: `feat/v0.0.1`; preceding remote checkpoint `874525f` verified on
+  2026-10-17. Current implementation source is `8d6e71d`; CI for the new
   checkpoint has not been checked, so no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
@@ -1326,6 +1326,60 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   existing forbidden device. One bounded device 1:7/OOM diagnostic is being
   prepared on an isolated test branch. These are existing contract obligations;
   target execution remains pending.
+
+- Retained-debit campaign01 actually runs two operations, one Server SIGKILL and
+  one reboot, then fails its coordinator readiness deadline. The SSH connect
+  timeout and outer probe deadline were both five seconds; the second probe
+  exceeded the outer cutoff. The coordinator closes the harness continuation,
+  which records EOF and one abort-revoke. No reboot or campaign retry occurs.
+  The original FAILED records remain unchanged under
+  `artifacts/robot-retained-debit-{run01,coordinator01}`. Earlier Server peer/key/
+  drop-in publication and all three service readiness checks passed.
+- Read-only inspection of the new, never-started Server boot verifies all 15/14
+  earlier full rows plus exactly two new attempts: 17 launcher/16 broker rows,
+  with both Robot charges still outstanding. All three services remain cold;
+  peer, credential and drop-in remain installed for future authenticated closure.
+  The cold archive is `0a644db3a830e70c9748c46c2a8ca3a25ecfed2bedf71830a2b3484d7eeab70e`.
+  Robot inspection retains 11 namespaces/18 records. Its original unfinished
+  namespace/record undergo the documented startup retirement/OutcomeUnknown
+  transition; all other old rows and immutable operation payloads are unchanged.
+  Evidence: `artifacts/robot-retained-debit-reboot-inspection01`.
+- The failed run exposes a product gap: historical `Completed` responses lose
+  reconciliation, and the Server treats an unknown task verdict as unresolved
+  work even when closure is proved. `3c8dae7` preserves durable legacy completion
+  proof and adds atomic, revision/operation-bound cancellation markers before
+  writer shutdown. It leaves unknown task verdicts and cancellation fences intact.
+  `c4acb14` permits Server settlement only with matching, durable, reconciled
+  completion; `8d6e71d` covers the actual historical service/closure-worker path.
+  Focused lane checks pass 47 Robot tests, 56 Server tests before the added
+  historical regression, 26 debit-harness tests, strict Clippy and formatting.
+  The added service regression and 11 accounting tests pass separately.
+  Root integration passes 135 tests across Robot intent/runtime, Server, manager
+  and CLI, with three target-only tests ignored, plus all 26 debit-harness checks.
+  Formatting passes. Receipts: `artifacts/reconciliation-integration-checks01`.
+  Target rebuilding and installed-path qualification remain pending.
+- Cleanup retains the second live reconciliation response before one explicit
+  recovery of its already-retired context. Both original Robot handles then
+  export successfully: 39 files/250084 bytes and 84 files/590166 bytes, with every
+  leaf hash verified. These are metadata captures with unknown volatile tails,
+  not execution-replay eligibility. The earlier mode-refusal and prepared-context
+  export failures remain preserved. Evidence:
+  `artifacts/robot-retained-debit-robot-export03`.
+- Both guests shut down gracefully once, and the exact fixture stops once.
+  Independent fixture status confirms disabled output and an empty queue before
+  and after module unload. The Robot database remains byte-identical at
+  `0a8d736fb748970af5078bbb7865fc8c83e8c2e37643695cb82dd29c1bc8bba3`;
+  the Server retains both charges and its published credentials. The initial
+  cleanup assertion requiring fixture state Inhibited was too strict: observed
+  READY already had disabled-zero output. That failed host assertion and the
+  unchanged observation are retained. All disks/journals remain intact in
+  `artifacts/robot-retained-debit-cleanup01`. No physical qualification follows.
+- `48ac40d` adds the actual existing-device 1:7 refusal and cgroup OOM diagnostic;
+  67 root integration host checks pass. Its target execution remains pending.
+  Continuation must use the two original debit handles and a separately numbered
+  qualification amendment after installing reviewed replacements. Blindly
+  repeating the six-preparation campaign would exceed the 16-namespace limit
+  from the current 11; only the four unrun preparations fit without deleting history.
 
 ## Decisions
 
