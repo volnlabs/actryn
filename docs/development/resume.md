@@ -10,7 +10,7 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `f3953a0`. Remote `9db46cc` was verified on 2026-10-17. CI for the new
+  `343572e`. Remote `6eac6ab` was verified on 2026-10-17. CI for the new
   checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -19,10 +19,11 @@ Earlier checkpoints and failed attempts remain preserved.
   `artifacts/server-a08-import-failure01/pause-result.json` verifies the original
   Server PID absent and its unit inactive/MainPID0 after one graceful poweroff.
   Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
-- Fresh readback after pressure run09 retains nine reaped attempts with zero
+- Fresh readback after pressure run10 retains eleven reaped attempts with zero
   open calls or Robot debits, no container tasks, child cgroups or broker
-  directories. The pinned launcher shim/drop-in remains installed; it has no
-  control or event files. Source, failed import, disks, seed and SSH trust
+  directories. The old test drop-in remains installed, but its library has only
+  a read-only mapping on a `noexec` mount and does not intercept directory calls.
+  No control or event files remain. Source, failed import, disks, seed and SSH trust
   remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. Prior fixture processes did
@@ -151,9 +152,34 @@ were not run. Run09 remains FAILED. Evidence:
 `artifacts/server-a08-call-accounting-diagnosis02` (capture SHA256
 `a9abf15dd6cc5557cf088b9b7f4504dd5715397fac474b20a91312c5b23c7c26`).
 The first read-only capture rejected the expected uppercase FAILED filename;
-that capture error is retained separately. The validator correction and a new
-campaign with the nine-row baseline are being prepared; do not repeat old
-attempts, setup or cancellation.
+that capture error is retained separately. Validator fix `6eac6ab` keeps the
+four admitted reservations distinct from zero-reservation tombstones, correlates
+status with read-only SQL and records accounting before validation. RED reproduces
+the mismatch; all 55 host tests pass. Logs:
+`artifacts/server-a08-pressure-accounting-fix01`.
+
+Run10 passes verification and the active approved-call checks, then fails because
+the allocation expected to return ENOSPC instead succeeds. Its active attempt
+`805a43bd1d63fcf9dc0abfa4a19080ea` is cancelled once by the harness. Unexpected
+preparation `a42015500419533e44ac1d10a5e29fde` later retires automatically;
+readback finds it reaped/cancelled and sends no additional Cancel. Both stores
+retain eleven rows, no outstanding work or tasks; the unexpected preparation's
+stdout/stderr are empty. Run10 remains FAILED and reclaim was not run.
+
+Read-only diagnosis shows `/run` and `/run/actryn` mounted `noexec` in the
+launcher namespace. The pinned library has no executable mapping; four bounded
+relocation-pointer reads resolve `mkdir`/`rmdir` to libc. Thus the earlier
+mapping-only setup check did not prove interposition. Evidence:
+`artifacts/server-a08-{allocation-diagnosis01,shim-visibility01,loader-diagnosis01}`
+and `server-a08-unexpected-preparation-cleanup01`. Loader capture SHA256:
+`944f7a08c98266e14a294f5eaba4b44fe8583fe4823b740e8bfdcbb553b3c672`.
+Fix `343572e` places the test library in protected `/opt` storage while keeping
+controls under `/run`. Setup requires an executable mapping of the exact file,
+one launcher user and no legacy mapping. RED reproduces the false acceptance;
+58 host tests pass in `artifacts/server-a08-executable-shim-fix01`. No native
+code, mount or production policy changes. Target execution is NOT_RUN.
+Preserve these failures; first export/restore/capture the failed run, then use a
+separate reviewed setup. Do not repeat earlier attempts or delete old controls.
 
 Current VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
 invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
@@ -162,7 +188,8 @@ lifetime before each guest action. Package update, quarantine, fresh import and
 service-UID checks pass. Services are active (observer PID1794, launcher PID2244,
 serverd PID2277); these observations require fresh verification. Run07 failed
 before mutation; run08 failed after instrumentation but before any attempt;
-run09 failed after one pressure attempt, which is now reaped.
+run09 failed after one pressure attempt; run10 failed after an active attempt
+and unexpected successful preparation. All eleven retained attempts are reaped.
 
 Historical run06: unit `actryn-server-a08-pressure06.service`, PID 226766,
 start ticks 686142, invocation `79c8a4c9216b49d698f50625a775b6d4`, guest boot
@@ -238,8 +265,8 @@ a new workload principal under the existing lifecycle03 issuer. The old principa
 is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
 
 Continue with this handoff and current ledgers, verifying branch/worktree state,
-resources and retained evidence. Verify the existing instrumentation under the
-corrected collector before the pressure campaign. Run only a reviewed,
+resources and retained evidence. Preserve and restore failed run10 before
+correcting the test-library location. Run only a reviewed,
 numbered campaign with fresh identities and evidence paths. A16 has no allocated
 window. Authorized live-provider credentials, a release signing custodian and
 an independent developer remain external inputs. Final coherent qualification

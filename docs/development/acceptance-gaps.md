@@ -2,7 +2,7 @@
 
 ## Current disposition
 
-Follow-up audit through integration source `f3953a0` supersedes the historical
+Follow-up audit through integration source `343572e` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
@@ -41,8 +41,15 @@ rejection tombstones as approved reservations. Raw accounting confirms four
 settled approved calls and four zero-reservation tombstones; four burst replies
 remain uncertain. Its one attempt is cancelled once and reaped in both stores,
 preserving all eight older rows. Run09 remains FAILED; allocation/reclaim phases
-were not run. A separate correction/campaign is being prepared against the
-nine-row baseline. A16 diagnostic8 native
+were not run. Correction `6eac6ab` passes 55 host tests. Run10 passes its active
+call-pressure check, then unexpectedly accepts the preparation intended to fail
+with ENOSPC. Actual namespace/mapping/relocation evidence shows the test library
+on a `noexec` mount never intercepted directory calls; the earlier setup check
+was insufficient. Both new attempts are now reaped, with eleven histories per
+store and zero outstanding work. Run10 remains FAILED. Fixture fix `343572e`
+uses protected executable storage and exact executable-mapping checks; 58 host
+tests pass. Failed-run final evidence/restoration and corrected target execution
+remain pending. A16 diagnostic8 native
 build01 passes; its single cold-case plan
 is root-reviewed, but the module was never loaded and target execution remains
 NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.

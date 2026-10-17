@@ -1204,6 +1204,35 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   The first read-only capture's uppercase-filename guard error is preserved.
   A narrow validator correction and separately numbered campaign are pending.
 
+- `6eac6ab` corrects the pressure validator and preserves read-only raw accounting
+  before validation. The four approved calls remain mandatory; only closed,
+  zero-reservation rejection tombstones are additionally accepted. RED reproduces
+  run09's mismatch and all 55 host tests pass. The exact tested source is integrated
+  and pushed; remote `6eac6ab` is verified. Run09 remains FAILED.
+- Run10's setup verification and active call-pressure checks pass. Its allocation
+  phase fails when the expected ENOSPC Prepare instead succeeds. The harness
+  cancels active attempt `805a43bd1d63fcf9dc0abfa4a19080ea` once; unexpected
+  preparation `a42015500419533e44ac1d10a5e29fde` later retires automatically.
+  Guarded readback sends no further Cancel and verifies eleven reaped rows in
+  each store, zero open calls/Robot debits, empty task/cgroup/broker directories
+  and empty logs for the unstarted preparation. Run10 stays FAILED; reclaim
+  was not run. Evidence: `artifacts/server-a08-allocation-diagnosis01` and
+  `server-a08-unexpected-preparation-cleanup01`.
+- The allocation-fault diagnosis finds `noexec` on `/run` and `/run/actryn` in
+  the launcher namespace, only a read-only library mapping, and libc targets
+  in all four inspected `mkdir`/`rmdir` relocation slots. The 32-byte read-only
+  process observation does not stop/attach to the launcher. The earlier
+  mapping-only preflight therefore falsely accepted an inactive fault hook.
+  No mount/security setting or native code changes. Evidence:
+  `artifacts/server-a08-loader-diagnosis01`, capture SHA256
+  `944f7a08c98266e14a294f5eaba4b44fe8583fe4823b740e8bfdcbb553b3c672`.
+  Failed-run export/restoration/capture is being prepared. Fix `343572e` keeps
+  controls under `/run`, places the test library in protected executable `/opt`
+  storage and requires exact path/device/inode executable mapping with no legacy
+  users. RED reproduces the false mapping acceptance; all 58 host checks pass.
+  Root verifies all ten retained log/receipt files and exact integrated source
+  bytes. Corrected target setup/execution remains NOT_RUN.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
