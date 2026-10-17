@@ -17,7 +17,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
 | A13/A14 | Pinned live-policy/missing-credential checks and operator-executed installation recipes. | Authorized live-provider credentials and an independent developer are still external inputs. |
-| A16 | `observer-installed-01` passes three readiness/death/loss cases and eight descriptive OFF/ON trials, preserving positive loss. Amendment7 source checks, exact ARM native build and hash freeze pass. Actual excluded kernel pilot07 retains nine passed trials and one initial-handshake failure, with complete loss-free capture for the recorded run. | Pilot07 is FAILED; the userspace pilot and comparison remain blocked. The exact rejected handshake predicate and cause of the long first UART call remain unproven. Standalone diagnostic timing is not whole-agent overhead or WCET. |
+| A16 | `observer-installed-01` passes three readiness/death/loss cases and eight descriptive OFF/ON trials, preserving positive loss. Amendment7 source/native build/hash freeze pass. Excluded kernel pilot07 retains nine passed trials and one initial-handshake failure. Diagnostic8 case01 accepts one cold handshake; independent raw review verifies two loss-free events and the matched reply. | Pilot07 remains FAILED; production pilot qualification and the comparison remain open. Diagnostic8 is an instrumented non-reproduction, not a fix or explanation of the original failure. Its 3.266542 ms sampled interval is not whole-agent overhead or WCET. |
 
 Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled
 the pressure inputs but stopped at artifact import: umask077 changed published
@@ -57,10 +57,12 @@ and autonomous cleanup. Its verified 213-file capture preserves all older rows,
 fifteen launcher/fourteen broker histories and zero outstanding work; original
 properties are restored and the VM is powered off. This instrumented result
 does not close all A08. The outstanding-debit/guest-restart campaign remains.
-A16 diagnostic8 native
-build01 passes; its single cold-case plan
-is root-reviewed, but the module was never loaded and target execution remains
-NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.
+A16 diagnostic8 native build01 and actual cold case01 pass. Its one RECOVER
+receives a matching ACK with no lost events; raw capture and teardown are
+verified. Both diagnostic VM and fixture are stopped. This non-reproduction
+does not repair or relabel pilot07, which remains FAILED; production pilot
+qualification and the required comparison remain open. The real unsigned
+candidate is still unqualified.
 The remaining target queue includes outstanding-debit/crash/pressure and the amended
 authority comparison, followed by final artifact, provenance and evidence mapping.
 The corrected ARM universal CLI is built, with all 28 allocated sections

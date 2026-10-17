@@ -10,13 +10,14 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `8cbfafa`. Remote `8cbfafa` was verified on 2026-10-17. CI for the new
+  `e356b9f`. Remote `e356b9f` was verified on 2026-10-17. CI for the new
   checkpoint has not been checked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
-- Three bounded agent lanes resumed. A16 native build01 finished and its VM is
-  off; Server importer07 has now been gracefully powered off after run11.
-  A16 cold-case host preflight is next. No fixture process runs.
+- Three bounded agent lanes resumed. Server importer07 is gracefully powered
+  off after run11. A16 cold diagnostic case01 completed; its module is unloaded,
+  VM powered off and fixture shut down. No fixture process runs. The next
+  target window is the retained-debit Server/Robot campaign.
   `artifacts/server-a08-import-failure01/pause-result.json` verifies the original
   Server PID absent and its unit inactive/MainPID0 after one graceful poweroff.
   Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
@@ -29,8 +30,9 @@ Earlier checkpoints and failed attempts remain preserved.
   Source, failed import, disks, seed and SSH trust
   remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
-- Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. Prior fixture processes did
-  not survive the host reboot and none was restarted. No physical device used.
+- Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The A16 fixture was restored
+  once using its retained journal, advancing boot35 to36, then shut down after
+  the diagnostic. No physical device used.
 - All linked worktrees were inspected. Existing Cargo.lock changes remain
   untouched in `.worktrees/{fixture,observer-install,robot,server,source-gap}`.
   `.worktrees/{artifact-modes,artifact-registry-mode}` are clean and integrated;
@@ -238,9 +240,9 @@ inode 27349874, size 2126446592, mtime_ns 1792174467145588725. Its contents chan
 through compiler installation and the failed import. The next boot's exact
 prelaunch disk SHA256 was
 `9fce904771986d618b52407bf4d6fb417d061a0207edd3e5494a5999651a7f91`;
-this is historical now that the guest is running.
+this predates subsequent guest writes.
 
-## A16: native diagnostic build passes; target diagnostic not run
+## A16: cold diagnostic accepted; production comparison remains open
 
 Excluded pilot07 remains FAILED: the first HELLO faults before grant/START/SAMPLE;
 nine other trials pass. Exact rejected predicate and cause remain unproven.
@@ -264,12 +266,33 @@ shut down cleanly. Module SHA256:
 `e701dcd825d8101eed58cb96bb87029d293ccdfa616ef13fcf0d3e5e68f6aede`.
 Root independently verifies 124 inventory entries, source/ELF/kernel input pins
 and the dead VM lifetime in `artifacts/a16-hello8-root-review01`.
-The module was not loaded and no client or fixture ran. The single cold-case
+That compile-only window loaded no module and ran no client or fixture. The single cold-case
 plan `artifacts/a16-hello8-case-plan01` is frozen and root-reviewed, with seven
 host checks and 21 independently verified inventory leaves. Inventory SHA256:
 `d2074d172179cf1d4da17d11561cf02f3e05a51ebbf28b17a2f91b5e9d2f6dd6`.
-It requires one retained-journal fixture startup, a fresh target boot and one
-observed attempt, preserving any failure. No target window is allocated yet.
+Its actual execution is now complete in `artifacts/a16-hello8-case01`.
+One fixture startup appends exactly boot36 to the same journal inode; one fresh
+ARM guest boot loads the selected diagnostic module with an empty snapshot.
+The sole cold RECOVER returns zero and receives ACCEPTED_ACK from the matching
+device, boot36/session1. Root independently checks all raw bytes, CRC/COBS,
+nonce/transaction, two contiguous loss-free events, five snapshot records and
+the unchanged predicate arithmetic: 3266542 ns from original send timestamp to
+processing. Capture SHA256:
+`9706979ad89dd3c6c8790ade52ad1670485533fa3f025489bcbfccc4b9c91f9e`.
+
+Guarded status/readback, normal unload, guest poweroff and supported fixture
+shutdown each run once. Both recorded process lifetimes are dead; the744-byte
+journal is unchanged after startup. Final case inventory (112 files) SHA256:
+`04f3a0b5243ca46ce72c2c4f88d1a8a9071268ecd1819a0a08229c51e908c3a4`;
+fixture restoration inventory (13 files) SHA256:
+`2f796193c349aed2aa4e5e402c7c0f6eba9ca2264ab2189eba1f90937b757e4c`.
+Host observation/display failures are retained and resolved by read-only checks;
+no target action was repeated. Final collected-unit resource counters are
+unavailable. This instrumented acceptance is a non-reproduction, not a production
+fix, benchmark result or attribution of pilot07. A16 still requires qualified
+production pilots and the frozen kernel/userspace comparison. A separately
+numbered production qualification attempt is being prepared without warm-up,
+new instrumentation or changed limits.
 
 ## Source, notices and unsigned candidates
 
@@ -319,6 +342,7 @@ is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
 Continue with this handoff and current ledgers, verifying branch/worktree state,
 resources and retained evidence. Run11 is verified and the Server window is
 closed. Run only a reviewed, numbered campaign with fresh identities and evidence
-paths. A16 cold-case preflight is next. Authorized live-provider credentials, a release signing custodian and
+paths. Retained-debit execution and exact ARM runtime ABI collection are next.
+Authorized live-provider credentials, a release signing custodian and
 an independent developer remain external inputs. Final coherent qualification
 is unfinished. Live motion stays inhibited; no result is physical qualification.

@@ -1281,6 +1281,21 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Fresh runtime/controller/principal/host-CLI inputs remain pending and the
   unchanged coordinator rejects the draft before I/O. No debit campaign ran.
 
+- Actual A16 diagnostic8 cold case01 accepts the sole RECOVER with a known zero
+  return, matching controller boot36/session1, two contiguous loss-free events
+  and five snapshot records. Independent raw review checks canonical intent,
+  cold header, CRC/COBS, nonce/transaction and unchanged predicate arithmetic:
+  3266542 ns from original HELLO send timestamp to processing. Capture SHA256
+  `9706979ad89dd3c6c8790ade52ad1670485533fa3f025489bcbfccc4b9c91f9e`.
+  The module unloads normally; one guest poweroff and one supported fixture
+  shutdown prove both recorded lifetimes dead. The retained journal advances
+  exactly once from boot35 to36 and then remains byte-identical. Final112-file
+  case and13-file fixture inventories retain all outputs and host observation/
+  display errors; no target action repeats. This distinct diagnostic is a
+  non-reproduction, not a production fix or benchmark. Pilot07 remains FAILED;
+  production pilots and the required comparison remain open. Evidence:
+  `artifacts/a16-hello8-case01`, `artifacts/a16-hello8-fixture-restore01`.
+
 ## Decisions
 
 - 2026-10-16: Preserve the original root before editing normative documents.
