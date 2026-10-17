@@ -50,9 +50,21 @@ def stable_commands(value):
 
 
 def properties():
-    raw=command(['systemctl','show','actryn-launcher','--property='+','.join(PROPERTIES)])
+    shown=tuple(name for name in PROPERTIES if name!='DeviceAllow')
+    raw=command(['systemctl','show','actryn-launcher','--property='+','.join(shown)])
     result=dict(line.split('=',1) for line in raw.splitlines())
-    require(set(result)==set(PROPERTIES),'incomplete inherited service properties')
+    require(set(result)==set(shown),'incomplete inherited service properties')
+    # systemctl omits an empty DeviceAllow and prints repeated keys for multiple
+    # entries. Read the typed array instead of losing either case in a dict.
+    allowed=json.loads(command(['/usr/bin/busctl','--system','--json=short','get-property',
+        'org.freedesktop.systemd1','/org/freedesktop/systemd1/unit/actryn_2dlauncher_2eservice',
+        'org.freedesktop.systemd1.Service','DeviceAllow']))
+    require(isinstance(allowed,dict) and set(allowed)=={'type','data'}
+            and allowed['type']=='a(ss)' and isinstance(allowed['data'],list)
+            and all(isinstance(entry,list) and len(entry)==2
+                    and all(isinstance(value,str) for value in entry) for entry in allowed['data']),
+            'invalid typed DeviceAllow property')
+    result['DeviceAllow']=allowed['data']
     for key in ('ExecStart','ExecStartPre','ExecStopPost'): result[key]=stable_commands(result[key])
     return result
 
