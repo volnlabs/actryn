@@ -21,7 +21,7 @@ Earlier checkpoints and failed attempts remain preserved.
   Receipt SHA256: `86e8eee0fe4d760c958627e8057c09d244f737acff51ea8507dc4b3d9451fe8d`.
 - Fresh Server readback retains eight reaped attempts with zero open calls or
   Robot debits. No container tasks, child cgroups, fault shim or drop-in exist.
-  The complete preflight is pending a harness path correction. Source, failed import, disks, seed
+  Corrected read-only preflight03 passes. Source, failed import, disks, seed
   and SSH trust remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. Prior fixture processes did
@@ -33,7 +33,7 @@ Earlier checkpoints and failed attempts remain preserved.
 - Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
   or provider/signing credentials changed. Account quota telemetry is unavailable.
 
-## Server pressure campaign: import defect fixed in source, not deployed
+## Server pressure campaign: importer deployed; same-OCI import pending
 
 `cd9d551` contains the pressure harness; 43 integration host checks passed.
 `1293676` corrects the installed command to `actryn server import`. Plans01–05
@@ -61,8 +61,8 @@ exclusively created descriptor after writing and before syncing. RED reproduced
 artifact verification and config-mode failures; all ten Server library tests,
 strict all-target Server Clippy and formatting pass. Subprocess regressions cover
 umasks 027/077 and retain existing-file/symlink rejection. Logs:
-`artifacts/artifact-modes01`. The installed importer remains unchanged. This fix
-neither repairs nor overwrites an existing invalid sealed slot.
+`artifacts/artifact-modes01`. This fix neither repairs nor overwrites an existing
+invalid sealed slot.
 
 `544c382` also fixes fresh registry creation under umasks 027/077, using descriptor
 permissions and parent fsync; existing registries must already be 0755 and remain
@@ -73,26 +73,44 @@ ELF-section equality after stripping and help smoke pass. New CLI SHA256:
 The incomplete unsigned bundle in `artifacts/server-importer-package01` builds
 and inspects; manifest SHA256 is
 `60e35e538562c610091f0d70d4873b433a5f61292c6c444035332caea791e535`.
-137 versioned imports match exact retained providers; target `libm` remains pending.
+All 138 versioned imports match the four exact captured target libraries,
+including `pow@GLIBC_2.29` from `libm`. This is static compatibility evidence.
 
 Read-only preflight02 confirms the unchanged eight-attempt stores, two charged
 registry entries and exact failed-slot files. It then fails because its harness
 expects `current` to target the release directory instead of its `payload`
 subdirectory. A separate guarded readback confirms the installed pointer matches
-the installer contract and two release slots remain. Correct the harness in a
-numbered amendment; preserve this failure in
-`artifacts/server-importer-preflight-execution01`.
+the installer contract and two release slots remain. Preflight03 corrects only
+that harness assumption and passes; all raw state/config/registry records equal
+the earlier readback. The failure remains in
+`artifacts/server-importer-preflight-execution01`; success and exact runtime
+libraries are in `artifacts/server-importer-preflight-execution02`.
 
-Next: read back the retained state and target libraries, review/update the test
-package and explicitly quarantine the failed slot within the same registry.
-Retain its bytes, inode and capacity charge; do not delete, chmod or silently
-retry it. Import the same OCI with the new CLI under 077, then check configuration
-as the service UID before the numbered pressure campaign. Preserve cohort01.
+The separate disposable test variant uses the existing Server03 test key/SPKI.
+Its explicit NOT-A-RELEASE assertion supplies synthetic installer-required
+qualification fields; actual qualification remains incomplete. The genuine
+unsigned reference is unchanged. Actual installed CLI inspect, stage, activate
+and resume all pass in `artifacts/server-importer-update-execution01`. Installed
+test manifest:
+`98a87977f05b0128023a7018650eb70cc1f6566d09d874e671117671e66b4ae6`.
+All three retained slots occupy 420,652,930 bytes. Old slots, raw databases,
+configuration and registry remain unchanged; services remain inactive and the
+installation gate is cleared. No agent attempt starts during this update.
+
+The guarded same-parent NOREPLACE rename also passes in
+`artifacts/server-importer-quarantine-execution01`: the failed slot is now
+`.quarantine-443737b73904317b1ca87741eee2582997dcd1ab9c9fef4f833de7a06b647110-import06`.
+All nine files, thirteen directories, invalid modes and inodes are preserved;
+only the moved-root ctime and registry-parent timestamps may change. The parent
+is synced and both entries remain charged. There is no repair, deletion or new
+approval. Next: import the same retained OCI with the new CLI under 077, verify
+configuration as the service UID, then run the reviewed pressure campaign.
 
 Current VM: unit `actryn-server-importer07.service`, PID 388472/start 5541602,
 invocation `821b6ac077fc4fb0932a5f482d2f43ae`, guest boot
 `3138459f-e5b3-411c-ab6a-932418cf2f0a`. Boot/readiness passes. Revalidate this
-lifetime before each guest action; no package update/import has run on it yet.
+lifetime before each guest action. Package update and quarantine have passed;
+the fresh import and pressure campaign remain NOT_RUN.
 
 Historical run06: unit `actryn-server-a08-pressure06.service`, PID 226766,
 start ticks 686142, invocation `79c8a4c9216b49d698f50625a775b6d4`, guest boot
@@ -128,8 +146,12 @@ shut down cleanly. Module SHA256:
 `e701dcd825d8101eed58cb96bb87029d293ccdfa616ef13fcf0d3e5e68f6aede`.
 Root independently verifies 124 inventory entries, source/ELF/kernel input pins
 and the dead VM lifetime in `artifacts/a16-hello8-root-review01`.
-The module was not loaded and no client or fixture ran. A fresh, single cold
-diagnostic plan is being prepared; no target window is allocated.
+The module was not loaded and no client or fixture ran. The single cold-case
+plan `artifacts/a16-hello8-case-plan01` is frozen and root-reviewed, with seven
+host checks and 21 independently verified inventory leaves. Inventory SHA256:
+`d2074d172179cf1d4da17d11561cf02f3e05a51ebbf28b17a2f91b5e9d2f6dd6`.
+It requires one retained-journal fixture startup, a fresh target boot and one
+observed attempt, preserving any failure. No target window is allocated yet.
 
 ## Source, notices and unsigned candidates
 
@@ -153,7 +175,7 @@ diagnostic plan is being prepared; no target window is allocated.
   Full GCC source and broader dependency/toolchain source closure remain explicit
   gaps; no hermetic-build or legal-completeness claim follows from these checks.
 - Replacement fixture ELF imports match the actual Server runtime libraries;
-  its installed Server execution is NOT_RUN. Installed binaries are unchanged.
+  it is installed by the new test package, but its Server execution is NOT_RUN.
 
 ## Remaining integration and external gates
 
@@ -164,8 +186,8 @@ a new workload principal under the existing lifecycle03 issuer. The old principa
 is revoked. Preserve namespaces/history; six preparations project 9 to 15 of 16.
 
 Continue with this handoff and current ledgers, verifying branch/worktree state,
-resources and retained evidence. Validate/deploy the importer and resolve its
-failed-slot recovery before another pressure campaign. Run only a reviewed,
+resources and retained evidence. Validate the corrected installed import before
+the pressure campaign. Run only a reviewed,
 numbered campaign with fresh identities and evidence paths. A16 has no allocated
 window. Authorized live-provider credentials, a release signing custodian and
 an independent developer remain external inputs. Final coherent qualification

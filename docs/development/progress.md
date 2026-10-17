@@ -1135,6 +1135,30 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   layout readback confirms that pointer and two retained release slots. The
   failed preflight remains in `artifacts/server-importer-preflight-execution01`;
   a numbered harness amendment is being prepared, with no product change.
+- Corrected preflight03 passes and preserves the prior state/config/registry
+  records exactly. It captures all four target runtime libraries. Static ELF
+  comparison then matches all 138 versioned CLI imports, including `libm`'s
+  `pow@GLIBC_2.29`; raw outputs and the earlier partial receipt are preserved.
+- The same-trust disposable package passes actual installed inspect, stage,
+  activate and resume on Server07. Manifest
+  `98a87977f05b0128023a7018650eb70cc1f6566d09d874e671117671e66b4ae6`
+  selects the new CLI; all 27 payload entries/modes and both old retained slots
+  verify. Three slots occupy 420,652,930 bytes. Configuration, raw databases,
+  registry and old histories remain unchanged, with services inactive. Evidence:
+  `artifacts/server-importer-update-execution01`. Its explicit NOT-A-RELEASE
+  assertion supplies synthetic installer qualification fields; the genuine
+  unsigned candidate remains unchanged and actual release qualification incomplete.
+- One guarded `renameat2(RENAME_NOREPLACE)` and parent fsync preserve the failed
+  import under its same-registry `.quarantine-…-import06` name. All nine files,
+  thirteen directories, invalid modes and inodes remain; moved-root ctime and
+  parent timestamps are recorded. Both entries stay charged, with config/raw
+  databases unchanged and no approval/import. Evidence:
+  `artifacts/server-importer-quarantine-execution01`. Fresh same-OCI import and
+  service-UID configuration validation are the next steps before pressure testing.
+- The A16 diagnostic8 cold-case plan passes seven host checks. Root reviews the
+  exact commands and independently verifies its 21-file inventory and four-file
+  frozen payload. No fixture startup, module load or target case has run; the
+  Server VM retains the sole execution window.
 
 ## Decisions
 

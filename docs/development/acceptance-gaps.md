@@ -23,11 +23,15 @@ Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled
 the pressure inputs but stopped at artifact import: umask077 changed published
 file modes. `ec2dfde` fixes file publication; `544c382` also fixes fresh registry
 directory modes and rejects unsafe existing registries without changing them.
-The focused tests and strict Clippy pass, and the CLI/new unsigned bundle are
-built. Installed import validation and the pressure campaign remain pending.
-The invalid sealed slot is preserved and unapproved. Review explicit recovery
-before another import. A16 diagnostic8 native build01 passes; the module was
-never loaded and its target diagnostic remains NOT_RUN. Pilot07 remains FAILED.
+The focused tests and strict Clippy pass; the CLI/new unsigned bundle are built
+and all 138 versioned imports match the captured target libraries. A separate
+same-trust disposable test package passes actual installed inspect/stage/activate/
+resume while preserving old slots/config/databases. The unapproved invalid slot
+is quarantined by one guarded same-parent rename; its evidence and capacity
+charge remain intact. Installed fresh-import validation and the pressure campaign
+remain pending. A16 diagnostic8 native build01 passes; its single cold-case plan
+is root-reviewed, but the module was never loaded and target execution remains
+NOT_RUN. Pilot07 remains FAILED. The real unsigned candidate is still unqualified.
 The remaining target queue includes outstanding-debit/crash/pressure and the amended
 authority comparison, followed by final artifact, provenance and evidence mapping.
 Release signing, live credentials and independent
