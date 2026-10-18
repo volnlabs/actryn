@@ -37,7 +37,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   campaign fails: the unapproved existing `/dev/full` opens successfully and
   the memory stage is NOT_RUN. Current Server counts are 23/22 with zero debits;
   a separate controlled stop now passes with all three Server services cold.
-  Normal finish/capture04 is NOT_RUN. Release qualification remains incomplete.
+  Normal finish/capture04 is NOT_RUN. Fixed-device-filter source correction
+  `2e93ccd` now passes host checks; corrected kernel/guest qualification is
+  NOT_RUN. Release qualification remains incomplete.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
@@ -211,6 +213,23 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Robot raw/history and carrier lifetimes remain unchanged. Run04 stays FAILED,
   OOM stays NOT_RUN and no new attempt/retry occurs. Receipt:
   `artifacts/server-d2-failure-stop01/result.json`.
+- Fixed-filter correction `2e93ccd` (immutable build source
+  `14afd962b9bea0986a4507230c2dd5710c52dca9`) is source-complete: an independently
+  authored Apache-2.0 four-character-device filter, owned direct/effective ID and
+  MULTI proof checks, and launcher `CAP_BPF`. Host checks pass: 66 Rust, 69 Server
+  Python, 25 release Python and 13 agent self-tests, plus Clippy/format; connected
+  review finds no material issue. No corrected kernel load or guest attempt has
+  run. The launcher-only build now passes: binary `17a0d392…96b24`, all 31
+  allocated sections preserved and 154 historical target imports matched. Fresh
+  target-provider verification remains required. Next: a new TEST cohort install
+  while cold with custody preserved, then a separately numbered D2 attempt using
+  the original 1:7 probe and already approved OCI `55967ce1…10d00`/agent `2ac58…`;
+  no repeat native-agent compile/import. Actual 23/22/0 cold state, run04 FAILED
+  and OOM NOT_RUN remain unchanged. Receipts:
+  `artifacts/server-device-policy-root-tests01/verification.json`,
+  `artifacts/server-device-policy-helper-tests01/receipt.json` and
+  `artifacts/server-device-policy-validator-tests01/verification.json`.
+  Build receipt: `artifacts/server-device-policy-build01/provenance.json`.
 - Separate Robot read-only package inspection matches nine of ten runtime pins;
   `libexpat1` is still `2.9.0-1~deb13u1`, not restored to pinned 2.8.3. Its kernel
   remains 111; no package action or RPC occurs. This does not establish drift

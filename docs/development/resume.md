@@ -49,6 +49,10 @@ Earlier checkpoints and failed attempts remain preserved.
   start, then fails on successful opening of unapproved `/dev/full`; OOM and
   normal finish/capture are NOT_RUN. Current counts are Server23/22, Robot16/21,
   zero debits; a separate controlled stop now passes with three services cold.
+  Source correction `2e93ccd` is host-verified; corrected kernel load/guest D2
+  qualification remains NOT_RUN. Launcher-only build/static checks pass; next is
+  fresh target-provider verification, preserved cold TEST cohort installation
+  and a new numbered original1:7 probe.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The A16 fixture was restored
   once using its retained journal, advancing boot35 to36, then shut down after
   the diagnostic. No physical device used.
@@ -56,7 +60,8 @@ Earlier checkpoints and failed attempts remain preserved.
   untouched in `.worktrees/{fixture,observer-install,robot,server,source-gap}`.
   `.worktrees/{artifact-modes,artifact-registry-mode}` are clean and integrated;
   detached `.worktrees/server-importer-build01` freezes source `544c382`.
-- Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
+- Original userspace and independent fixed device filter: Apache-2.0; authority
+  kernel and observer BPF: GPL-2.0-only. No global Git identity
   or provider/signing credentials changed. Account quota telemetry is unavailable.
 - The preceding pause's stopped disk, seed, SSH trust and fixture-journal identities/hashes are
   in `artifacts/reconciliation-pause01/result.json`. Server disk SHA256 is
@@ -383,6 +388,21 @@ Earlier checkpoints and failed attempts remain preserved.
   Robot raw/history and carrier lifetimes are unchanged. Run04 remains FAILED,
   OOM NOT_RUN, with no new attempt or retry. Receipt:
   `artifacts/server-d2-failure-stop01/result.json`.
+- Source fix `2e93ccd`, from immutable build source
+  `14afd962b9bea0986a4507230c2dd5710c52dca9`, adds the owned four-device filter,
+  direct/effective ID/MULTI proof checks and launcher `CAP_BPF`. Host checks pass
+  66 Rust/69 Server Python/25 release Python/13 agent self-tests and Clippy/format;
+  connected review has no material findings. Corrected kernel/guest qualification
+  is NOT_RUN. The launcher-only build passes with binary `17a0d392…96b24`, all
+  31 allocated sections preserved and 154 historical target imports matched;
+  fresh target-provider verification remains required. Install a new TEST
+  cohort while cold/preserving custody, then use a new numbered D2 attempt with
+  the original1:7 probe and already approved OCI `55967ce1…10d00`/agent `2ac58…`;
+  do not recompile/reimport that agent. No target attempt has run for the fix.
+  Receipts: `artifacts/server-device-policy-root-tests01/verification.json`,
+  `artifacts/server-device-policy-helper-tests01/receipt.json` and
+  `artifacts/server-device-policy-validator-tests01/verification.json`.
+  Build receipt: `artifacts/server-device-policy-build01/provenance.json`.
 - Robot's separate read-only inspection matches nine of ten runtime pins;
   Expat remains `2.9.0-1~deb13u1` instead of pinned 2.8.3 and is UNRESTORED.
   Running kernel111 is preserved, with no package action or RPC. This does not
