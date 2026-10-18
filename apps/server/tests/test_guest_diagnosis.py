@@ -104,6 +104,43 @@ class DiagnosisTests(unittest.TestCase):
             with self.subTest(length=len(bad)), self.assertRaises(AssertionError):
                 diagnosis.validate_trace(bad, 'b'*32, binding)
 
+    def test_trace_ignores_parent_tgid_thread_exits_around_agent_exec(self):
+        binding, rows = trace_fixture()
+        parent = binding['snapshot']['pid']
+        thread_exits = []
+        for offset in range(2, 8):
+            thread = copy.deepcopy(rows[-1])
+            thread['event']['tid'] = parent + offset
+            thread_exits.append(thread)
+        # The runtime can exec and retire its INIT threads before the agent's
+        # final exec; a later non-leader exit is not the agent leader's exit.
+        rows = [copy.deepcopy(rows[0]), *thread_exits[:5], rows[0],
+                thread_exits[5], *rows[1:]]
+        for sequence, row in enumerate(rows, 1):
+            row['event'].update(sequence=sequence, monotonic_ns=100 + sequence)
+        proof = diagnosis.validate_trace(rows, 'b'*32, binding, len(rows))
+        self.assertEqual(proof['child_host_pid'], parent + 1)
+        self.assertEqual(proof['results'], [3, -2, -1])
+
+    def test_trace_requires_parent_leader_exit_even_with_late_thread_exit(self):
+        binding, rows = trace_fixture()
+        rows[-1]['event']['tid'] = binding['snapshot']['pid'] + 2
+        with self.assertRaises(AssertionError):
+            diagnosis.validate_trace(rows, 'b'*32, binding)
+
+    def test_trace_requires_one_parent_leader_exit_after_exec_and_child(self):
+        binding, rows = trace_fixture()
+        cases = {'missing': rows[:-1],
+                 'duplicate': rows + [copy.deepcopy(rows[-1])],
+                 'before_exec': [rows[-1], *rows[:-1]],
+                 'before_child_exit': [*rows[:-2], rows[-1], rows[-2]]}
+        for label, events in cases.items():
+            events = copy.deepcopy(events)
+            for sequence, row in enumerate(events, 1):
+                row['event'].update(sequence=sequence, monotonic_ns=100 + sequence)
+            with self.subTest(label=label), self.assertRaises(AssertionError):
+                diagnosis.validate_trace(events, 'b'*32, binding)
+
     def test_old_rows_and_no_work_are_preserved_in_both_stores(self):
         old = {name: {table: [] for table in diagnosis.TABLES} for name in ('launcher', 'broker')}
         for name, tables in old.items():

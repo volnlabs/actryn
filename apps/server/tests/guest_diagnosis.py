@@ -84,9 +84,11 @@ def validate_trace(rows, attempt, binding, final_sequence=None):
             == ['observed', 'access_failed', 'access_failed'], 'control/ENOENT/EPERM not distinguished')
     exits = [e for e in observed if e['kind'] == 5]
     require(len(exits) == 1 and exits[0]['sequence'] > opens[-1]['sequence'], 'probe child did not exit')
-    parent_exits = [row['event'] for row in rows if row['event']['pid'] == parent and row['event']['kind'] == 5]
-    require(len(parent_exits) == 1 and parent_exits[0]['sequence'] > exits[0]['sequence'],
-            'natural parent exit not retained after child')
+    parent_exits = [row['event'] for row in rows if row['event']['pid'] == parent
+                    and row['event']['tid'] == parent and row['event']['kind'] == 5]
+    require(len(parent_exits) == 1 and parent_exits[0]['sequence'] > execs[-1]
+            and parent_exits[0]['sequence'] > exits[0]['sequence'],
+            'natural parent leader exit not retained after agent exec and child')
     return {'child_host_pid': child, 'results': results,
             'classification': 'access_failed_not_policy_origin_event'}
 
