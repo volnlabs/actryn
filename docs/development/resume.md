@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding pushed checkpoint is `a6c820c`; push10 records its verified
-  remote head and zero CI runs. The next push receipt is pending; no CI pass is
-  claimed (`artifacts/reconciliation-checkpoint-push10/result.json`).
+  The latest recorded pushed checkpoint is `6342019`; push11 verifies integration
+  and validator-fix branch heads and records zero CI runs. No CI pass is claimed
+  (`artifacts/reconciliation-checkpoint-push11/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -56,8 +56,9 @@ Earlier checkpoints and failed attempts remain preserved.
   Corrected-validator offline reanalysis now passes; normal capture05 is NOT_RUN.
   Separate failure custody and known stop pass: current counts Server 24/23,
   Robot 16/21, zero debits; three Server services cold, all old rows and 374 entries
-  retained. No whole D2 gate PASS. The next step is the remaining acceptance
-  disposition against immutable evidence, not an automatic new attempt.
+  retained. A separately reviewed composite passes the existing-device-denial
+  and cgroup-OOM cases only. Whole D2 remains open for final cohort reconciliation;
+  this is not authorization for an automatic new attempt.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The A16 fixture was restored
   once using its retained journal, advancing boot35 to36, then shut down after
   the diagnostic. No physical device used.
@@ -442,6 +443,16 @@ Earlier checkpoints and failed attempts remain preserved.
   `artifacts/server-device-policy-d2-failure-custody01/result.json` and
   `artifacts/server-device-policy-failure-stop-owner01/result.json`.
   These raw ignored artifacts are not backed up by a source push.
+- Actual cold-integrity01 passes all 27 payload files, public configuration/policy,
+  typed DeviceAllow/unit text, persistent-library/no-interposition checks and five
+  exact registry trees. Full 24/23 rows, Robot/374 custody and cold raw bookends
+  remain unchanged; both owner scopes are empty. The composite certificate passes
+  exactly two cases: existing char1:7 denial with allowed/absent controls and a
+  fresh 256MiB cgroup OOM with natural SIGKILL retirement. It preserves run05's
+  FAILED result and normal capture05 NOT_RUN; whole D2/final release qualification
+  remains open. No Robot shutdown is performed by this read-only integrity step.
+  Receipts: `artifacts/server-device-policy-cold-integrity-owner01/result.json`
+  and `artifacts/server-device-policy-composite-cases01/result.json`.
 - Fresh read-only Robot shutdown inspection preserves both original service
   lifetimes, all 16/21 history/raw files and the epoch. Describe is healthy and
   inhibited with no grant, operation, prepared work or pending recovery. Both

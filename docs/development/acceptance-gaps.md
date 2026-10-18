@@ -7,6 +7,10 @@ Follow-up audit through Server/Robot source `8d6e71d`, launcher correction `2e93
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
+Push11 records integration checkpoint `6342019` and its validator-fix branch,
+with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
+The latest composite passes the existing-device-denial and cgroup-OOM cases
+only; whole D2 remains open for final cohort reconciliation.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|
@@ -201,6 +205,18 @@ automatic retry, new export or whole-gate PASS follows. Evidence:
 `artifacts/server-device-policy-d2-owner02/campaign/result.json`,
 `artifacts/server-device-policy-d2-failure-custody01/result.json` and
 `artifacts/server-device-policy-failure-stop-owner01/result.json`.
+
+Actual cold-integrity01 then passes all 27 payload files, public configuration/
+policy, typed DeviceAllow, unit text, persistent-library/no-interposition checks
+and all five registry trees. Full 24/23 rows, Robot/374 custody and cold raw
+bookends remain equal; both owner scopes are empty. The hash-bound composite
+certificate passes **two concrete cases only**: existing char1:7 denial with
+allowed/absent controls, and fresh 256MiB cgroup OOM with natural SIGKILL
+retirement. Run05 remains FAILED and normal capture05 NOT_RUN. The whole D2 gate
+is `OPEN_FINAL_COHORT_RECONCILIATION_REQUIRED`; release/physical qualification is
+not established. Receipts:
+`artifacts/server-device-policy-cold-integrity-owner01/result.json` and
+`artifacts/server-device-policy-composite-cases01/result.json`.
 
 Robot's separate read-only inspection matches nine of ten runtime pins; Expat
 2.9.0 remains UNRESTORED against pinned 2.8.3, with running kernel111, zero

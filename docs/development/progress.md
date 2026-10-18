@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `a6c820c`.
+- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `6342019`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  its CI query returned zero runs (`artifacts/reconciliation-checkpoint-push10/result.json`).
-  The next push receipt is pending. No CI pass is claimed.
+  push11 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push11/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -45,7 +45,10 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   corrected-validator offline reanalysis now passes; normal capture05 is NOT_RUN.
   Separate failure custody and one known stop pass: current Server 24/23,
   Robot 16/21, zero debits, all 374 entries retained and three Server services cold.
-  No whole D2 gate or release qualification PASS is claimed.
+  A composite certificate now passes the two concrete existing-device-denial and
+  cgroup-OOM cases only, combining saved reanalysis with actual cold integrity
+  and custody. The whole D2 gate remains open for final cohort reconciliation;
+  no release qualification PASS is claimed.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
@@ -274,6 +277,15 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   `artifacts/server-device-policy-d2-failure-custody01/result.json` and
   `artifacts/server-device-policy-failure-stop-owner01/result.json`.
   Raw evidence is ignored local data; pushing this checkpoint does not back it up.
+- Cold integrity now passes all 27 payload files, public configuration/policy,
+  typed DeviceAllow, unit text, persistent-library/no-interposition checks and
+  all five registry trees. Full 24/23 rows, Robot/374 custody and cold raw
+  bookends remain equal, with empty owner scopes. The separately reviewed
+  composite passes only existing char1:7 denial with controls and fresh 256MiB
+  cgroup OOM/natural SIGKILL retirement. Run05 remains FAILED, normal capture05
+  remains NOT_RUN, and whole D2/final release qualification remains open.
+  Receipts: `artifacts/server-device-policy-cold-integrity-owner01/result.json`
+  and `artifacts/server-device-policy-composite-cases01/result.json`.
 - Fresh read-only Robot shutdown inspection preserves both original service
   lifetimes, all 16/21 history/raw files and the epoch. Describe is healthy and
   inhibited with no grant, operation, prepared work or pending recovery. Both
