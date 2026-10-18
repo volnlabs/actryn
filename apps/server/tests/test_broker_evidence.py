@@ -112,6 +112,20 @@ def evidence():
 
 
 class BrokerEvidenceTests(unittest.TestCase):
+    def test_reaped_launcher_cancel_view_cannot_replace_broker_status(self):
+        data = evidence()
+        launcher = copy.deepcopy(data['inspection'])
+        launcher.update(calls=[], denials=[])
+        # The two stores set Start deadlines independently; retain both values.
+        data['inspection']['attempt']['deadline_ms'] -= 52
+        with self.assertRaisesRegex(AssertionError, 'broker evidence incomplete or changed'):
+            proof.validate(**dict(data, inspection=launcher))
+        proof.validate(**data)
+        self.assertEqual(launcher['calls'], [])
+        self.assertEqual(launcher['denials'], [])
+        self.assertEqual(launcher['attempt']['deadline_ms'] -
+                         data['inspection']['attempt']['deadline_ms'], 52)
+
     def test_complete_source_denials_and_exit_only_seccomp_trace(self):
         result = proof.validate(**evidence())
         self.assertEqual(result['syscall_denials'], 10)

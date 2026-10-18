@@ -31,6 +31,13 @@ service or Robot action. It consumes retained public bytes:
 - `stdout`, `stderr`, six-artifact `bundle`, final reaped `inspection`, observer
   `summary` and raw JSONL `trace_raw` from the same attempt.
 
+Fetch the final Broker inspection with `server status` after known `server
+cancel`, even when Cancel already reports `reaped`. Cancel returns the Launcher
+inspection, whose calls and denials are empty. The stores set Start deadlines
+independently, so their `deadline_ms` values can differ. Retain both replies and
+their deadlines unchanged; compare the Broker inspection's accounting with the
+export while binding their shared attempt, artifact and runtime identities.
+
 The existing `guest_capacity.validate_export` still rejects any denial by
 default. Its explicit `expected_denials` option compares exact broker-export
 and inspection records/counts. This validator selects only
