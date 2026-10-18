@@ -5,8 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `27a3cd9`.
-  Current implementation source is `8d6e71d`. The remote head is verified;
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `7a22b52`.
+  Server/Robot implementation source remains `8d6e71d`; preview-agent diagnostic
+  fix `42537e2` is integrated but not installed. The preceding remote head is verified;
   its CI query returned zero runs. No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
@@ -19,12 +20,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 - User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
   fixture are running. All three Server services are active with recorded
   lifetimes. The new Robot manager,
-  unchanged gateway and module are running without a grant or operation.
+  unchanged gateway and module are running with authority inhibited and no operation.
+  The failed fifth preparation is retired and awaiting explicit recovery.
   The tracker still exposes its previous paused status without a resume API;
   explicit user continuation authorizes this work against the full saved goal.
   The [handoff](resume.md) records the current lifetimes, preserved histories,
   installed Server/Robot test packages and next qualification steps.
-  Both original Robot charges remain outstanding; release qualification is incomplete.
+  Four Robot charges remain outstanding, including both originals; release qualification is incomplete.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
@@ -62,8 +64,35 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Fresh custody preserves all 374 old file/metadata records and 11/18 Robot rows;
   only the expected crash reap, log-uncertainty, publication close/output removal
   and retained cancellation change in the 17/16 Server rows. The two charges
-  remain. The next numbered phase must execute only the four unrun preparations,
-  with all-active continuous monitors and no service start or old abort resend.
+  remain. The separately numbered residual phase below supersedes that next step.
+- Residual-run01 passes same-instance both-monitor/recorder/SDK readiness in
+  0.128521 seconds, creates pressure-c/d once and retains four exact Robot debits.
+  Its fifth attempt is admitted to an ordinary broker call, exits naturally with
+  status1 and leaves no Robot request. The strict capacity-diagnostic assertion
+  fails: the static agent replaces the broker's specific reason with generic
+  `broker rejected proposal`. The new distinct abort Revoke has a known reply;
+  it is consumed. Both monitors exit normally and the owner scope is empty.
+  `artifacts/robot-retained-debit-residual-{run01,owner01}` remain FAILED.
+- Fresh read-only inspection02 captures stable Server raw files, host-only SQL
+  copies, Robot history, logs and full service/fixture lifetimes. All old Server
+  rows, 11/18 old Robot rows and 374 preserved public/metadata records are equal.
+  Current counts are Server20/19 and Robot14/20, with four charged requests,
+  no tasks/cgroups/shims, zero output and no operation. The fifth preparation is
+  retired/ready with stopped writers; it has not been recovered. The old agent's
+  specific rejection reason is unavailable, not a measured capacity diagnosis.
+  Receipt: `artifacts/robot-retained-debit-residual-inspection02/interpretation.json`.
+  Inspection01 failed on a host import-name collision before any target call;
+  its failure is retained separately.
+- `42537e2` preserves nonempty, control-free broker reasons up to1024 UTF-8 bytes
+  as errors, retaining generic rejection for malformed reasons/results. It also
+  saves fifth-attempt raw logs before asserting. The regression fails before
+  the fix; root independently passes five Rust tests, 28 Python checks and fmt.
+  No Server/Robot binary, bound, authority rule or retry policy changes.
+  The next numbered sequence requires one corrected OCI, offline import with
+  full-row custody, and a closed gate before one deliberate Server startup.
+  A fresh capacity-diagnostic attempt and one restored-capacity attempt fit
+  exactly at16 Robot namespaces/21 records and Server22/21; no old proposal,
+  crash, pressure case or consumed abort may repeat. None of that sequence has run.
 
 ## Component evidence (not release acceptance)
 

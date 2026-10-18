@@ -11,8 +11,9 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Repository and execution state
 
-- Integration branch: `feat/v0.0.1`; implementation source remains
-  `8d6e71d`, with preceding pushed checkpoint `27a3cd9`. Its remote head is
+- Integration branch: `feat/v0.0.1`; Server/Robot implementation source remains
+  `8d6e71d`, with preview-agent diagnostic fix `42537e2` integrated but not installed.
+  The preceding pushed checkpoint is `7a22b52`. Its remote head is
   verified and its CI query returned zero runs. No CI pass is claimed.
   The user authorized pushing this branch to
   `origin`. Every task commit carries
@@ -29,11 +30,11 @@ Earlier checkpoints and failed attempts remain preserved.
   resumed interval, only the Server booted for its package update. It has now
   powered off gracefully once; all three packaged services stayed cold and both
   charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
-- The Server stores retain 17 launcher/16 broker rows and exactly two outstanding
+- The Server stores retain 20 launcher/19 broker rows and exactly four outstanding
   Robot charges. All three services are active at their recorded lifetimes.
   Supported startup recovery has reaped the crashed attempt with outcome unknown;
   its publication is closed and output removed. Peer/key/drop-in
-  stay installed. The Robot retains 11 namespaces/18 records and every old
+  stay installed. The Robot retains 14 namespaces/20 records and every old
   identity generation/tombstone. Disks, seed and SSH trust remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The A16 fixture was restored
@@ -205,9 +206,42 @@ Earlier checkpoints and failed attempts remain preserved.
   added launcher log-gap, publication close/output removal and retained request
   cancellation change. Receipt:
   `artifacts/robot-retained-debit-active-custody01/result.json`.
-  Continue only the four unrun preparations in a separately numbered residual
-  phase with all-active monitors; preserve startup/drain as historical evidence.
-  Do not start/restart services, repeat original proposals or resend the old abort.
+  The subsequent residual phase below supersedes the then-planned four preparations.
+- Residual-run01 passes fresh both-monitor readiness in0.128521 seconds and
+  executes pressure-c/d once, including cancel/retire/recover. Four exact Robot
+  requests remain charged. The fifth setup, grant, activation and agent launch
+  have known replies, but its strict diagnostic assertion fails. The old static
+  agent emits generic `broker rejected proposal`, discarding the broker reason.
+  No fifth cancel/retire/recover or settlement query runs. Its distinct one-shot
+  abort Revoke is acknowledged, and MUST NOT be resent; both monitors exit0.
+  The owner is reaped with an empty scope. Evidence:
+  `artifacts/robot-retained-debit-residual-{run01,owner01}` remains FAILED.
+- Root read-only inspection02 independently verifies Server20/19, Robot14/20,
+  exactly four charges, all previous Server/Robot full rows and374 preserved
+  file/metadata records. All tasks/cgroups/shims/broker directories are empty.
+  Fifth stdout is empty; stderr is the structured generic preview error; its
+  ordinary call is cancelled/publication-closed/outputNULL, with no Robot row.
+  The Robot has no operation/output/effective grant, but its fifth preparation
+  remains retired/retirement-ready with stopped writers. Fixture boot3/session7
+  has disabled-zero output and an empty queue. No target mutation or original
+  Server SQLite connection occurs. See
+  `artifacts/robot-retained-debit-residual-inspection02/interpretation.json`.
+  Inspection01's host import-name failure occurs before any target call and is
+  preserved; neither target capture nor mutation was repeated on that account.
+- Diagnostic fix `42537e2` retains only bounded, control-free structured broker
+  reasons as errors and saves capacity-test raw logs before assertion. Root
+  independently passes five Rust tests, 28 Python tests and formatting. The
+  actual specific fifth rejection reason was not retained by the old agent;
+  it cannot be recovered from these rows or relabelled as a measured branch.
+  The corrected agent is not installed. Its OCI requires an offline import:
+  capture all four debits and full rows, stop three Server services once,
+  import without deleting retained artifacts/history or changing capacity,
+  then use a fresh closed gate before one deliberate startup. New actual
+  service lifetimes and blocked closure-drain evidence are mandatory.
+  Only a fresh capacity-diagnostic attempt and one restored-capacity attempt
+  may follow, with explicit inhibited Robot recovery and exact read-only
+  settlement of the four original handles. Expected final counts are Server22/21,
+  Robot16 namespaces/21 records and zero debits. This new sequence has not run.
 - Separate source-only preparations are ready for the post-settlement Server
   device/OOM diagnosis (seven host checks) and matching A16 userspace09 pilot
   (six checks). They require actual predecessor receipts and close no target gate.
@@ -642,23 +676,22 @@ The original stopped disk hashes and identities are in
 Server peer/key/drop-in MUST remain while its two charges are unresolved. No
 record, identity generation, revocation tombstone or fixture journal was deleted.
 
-The current resumed window has completed both package updates, history checks
-and one start of each service. Continuation-run02 preserves the actual two-worker
-startup drain with zero forwarded bytes and both charges retained. That historical
-startup experiment must not be repeated. The next residual phase must validate
-the current active lifetimes, unchanged catalogs/debits and both-monitor readiness,
-then execute only the four unrun preparations. Preserve unknown task verdicts
-while settling only durably proved completion. Use the current window's actual
-receipts above; frozen plan01 null inputs are not executable bindings.
+The current resumed window has completed both package updates and one start of
+each service. Continuation-run02's two-worker drain stays historical. Residual01
+has now consumed pressure-c/d and the failed fifth attempt; do not repeat them.
+The new diagnostic agent needs an offline import and separately reviewed startup
+with all four existing charges withheld, before exactly two new attempts. Preserve
+unknown task verdicts while settling only durably proved completion. Use the
+current window's actual receipts above; frozen null inputs are not executable bindings.
 The test generation `3de5e81b8a630567c2652760914e62ef` and principal
 `debit01-14987a9409d60281` remain installed; test private keys stay local mode 0600
 inside a 0700 directory and outside evidence hashes/inventories.
 
 Use a separately numbered continuation amendment and the two original handles;
 do not replay their proposals or crash the Server again merely to rerun setup.
-The original six-preparation campaign would take 11 retained namespaces to 17,
-exceeding 16. Its four unrun preparations fit at 15 if explicitly planned against
-the upgraded products. Readiness probes need an SSH timeout shorter than their
+The original six-preparation campaign would take 11 retained namespaces to17,
+exceeding16. Current14 namespaces permit exactly two additional preparations,
+reaching16 without deleting history. Readiness probes need an SSH timeout shorter than their
 outer deadline and narrowly typed timeout handling within the original overall
 budget; identity/output failures remain fatal, and reboot is never retried.
 

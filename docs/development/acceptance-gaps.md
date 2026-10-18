@@ -2,7 +2,7 @@
 
 ## Current disposition
 
-Follow-up audit through integration source `8d6e71d` supersedes the historical
+Follow-up audit through Server/Robot source `8d6e71d` and diagnostic fix `42537e2` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
@@ -11,7 +11,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 |---|---|---|
 | A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
-| A04/A05/A08 | Existing daemon-death/accounting tests, one settled combined Robot debit, installed capacity01, Robot freeze/crash01 and Server pressure11 retain their separate evidence. Historical reconciliation/accounting fixes pass 135 root Rust tests. Continuation-run02 starts the two untouched services, drains two old closure connections with zero forwarded bytes and passes both-monitor readiness. It stops at a Python checker error before any new preparation. The correction passes 28 tests and offline saved-export reanalysis. Fresh custody preserves 17/16 Server histories, both charges, all 11/18 old Robot rows and 374 retained file/metadata records. | All failed campaigns remain FAILED. Authenticated settlement and the four unrun preparations remain pending. A numbered residual phase must keep all active service lifetimes and never resend the consumed abort. New continuous-monitor readiness is required before that phase's recovery/preparations. The uncommitted tail remains unknown. |
+| A04/A05/A08 | Existing daemon-death/accounting, installed capacity, freeze/crash and Server pressure results remain separate. Historical fixes pass135 root Rust tests; crash-export correction passes28 tests and offline saved-bundle reanalysis. Residual01 creates pressure-c/d once and preserves four exact charges, but its fifth strict diagnostic check fails because the old agent discards the broker reason. Fresh read-only custody verifies Server20/19, Robot14/20, all old full rows and374 retained public/metadata records, no tasks or fifth Robot row, and zero fixture output. Diagnostic fix42537e2 passes5 Rust and28 Python tests; it is not installed. | Every failed run remains FAILED; the old specific rejection cause is unavailable. One corrected OCI needs offline import and a separately owned closed-gate startup preserving all four charges. Then exactly one fresh capacity-diagnostic attempt, four matched read-only settlements and one restored-capacity attempt remain. Final expected counts22/21 Server and16 namespaces/21 records; never delete history or replay old proposals/consumed aborts. New continuous readiness, full-row custody and final evidence are required. Uncommitted tails stay unknown. |
 | D2 isolation | Existing sandbox bindings verify configured cgroup/device limits; missing `/dev/mem` returns ENOENT. A bounded receipt audit finds 55 JSON and eight archived reports with `oom_kill=0`. | Actual memory-budget kill/export and refusal opening an existing nonphysical forbidden device remain unproven. A one-attempt test-only harness is being prepared; no target run yet. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
@@ -70,7 +70,7 @@ The corrected ARM universal CLI is built, with all 28 allocated sections
 preserved after stripping; all 136 versioned requirements match four libraries
 collected from the exact installed Robot. Its packaged Describe and Recover
 paths now execute during the reviewed update; full CLI acceptance remains open.
-Latest Server/Robot cold readbacks preserve all 17/16 Server rows and
+Earlier Server/Robot cold readbacks preserve all 17/16 Server rows and
 11/18 Robot histories. The supported fresh test enrollment and pinned pairing
 passed after old certificates expired, preserving all old generations and
 revocations. Retained-debit campaign01 remains FAILED after its readiness cutoff;
@@ -81,8 +81,13 @@ existing-service verification pass, preserving all old history; the failed
 freshness and capability-parser phases remain recorded. The module is unchanged.
 Retained-debit continuation-run02 passes startup/drain and both-sentinel readiness,
 then fails a checker before any new preparation; it remains FAILED. The checker
-fix passes offline reanalysis without repeating the export. Further execution
-requires a numbered residual phase and fresh continuous readiness. The separately reviewed Robot-only guard/recorder/SDK
+fix passes offline reanalysis without repeating the export. Subsequent residual01
+performs two pressure operations and the failed fifth attempt; fresh read-only
+inspection verifies20/19 Server rows,14/20 Robot history and four charges. Its
+distinct abort Revoke is consumed. Fix42537e2 restores the missing agent diagnostic
+with bounded reasons; the old failure remains FAILED. Further execution requires
+a corrected OCI, reviewed offline import/startup and exactly two new preparations,
+with fresh continuous readiness. The separately reviewed Robot-only guard/recorder/SDK
 sample passes in 0.118052 seconds, with known cleanup and no preparation; this
 does not close campaign acceptance. Release signing, live credentials and independent
 installation remain separate external gates. No software result qualifies motion.
