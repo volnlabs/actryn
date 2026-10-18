@@ -72,7 +72,7 @@ def verify_device_policy(binding):
 
 
 def validate_export(bundle, attempt, artifact, binding, inspection, logs, summary, trace_bytes, started,
-                    agent_check=None, expected_outcome='cancelled'):
+                    agent_check=None, expected_outcome='cancelled', expected_denials=None):
     """Correlate exported descriptors with retained identities and independent raw files."""
     require(bundle.get('schema') == 'actryn.server.evidence.v1'
             and bundle.get('attempt_id') == attempt
@@ -136,10 +136,11 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
                 and descriptor['tail_encoding'] == 'hex' and descriptor['tail'] == raw[-2048:].hex()
                 and descriptor['tail_omitted_bytes'] == max(0, len(raw) - 2048), 'raw log integrity')
     broker = contents['broker']
+    denials = [] if expected_denials is None else expected_denials
     require(broker['classification'] == 'broker_application_policy_and_delegated_accounting'
             and broker['attempt_state'] == 'reaped' and broker['attempt_outcome'] == expected_outcome
-            and broker['evidence_gaps'] == [] and broker['policy_denials'] == []
-            and broker['policy_denials_retained'] == 0 and inspection['denials'] == []
+            and broker['evidence_gaps'] == [] and broker['policy_denials'] == denials
+            and broker['policy_denials_retained'] == len(denials) and inspection['denials'] == denials
             and inspection['denials_omitted'] == 0 and broker['calls'] == inspection['calls'],
             'broker evidence incomplete or changed')
     calls = broker['calls']

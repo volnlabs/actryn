@@ -81,6 +81,19 @@ def rehash(bundle):
 
 
 class CapacityCampaignTests(unittest.TestCase):
+    def test_expected_denial_is_opt_in_exact_and_default_stays_empty(self):
+        args = list(complete_export())
+        denied = {'request_key': 'denied-1', 'method': 'admin.grant', 'reason': 'method_not_allowed'}
+        broker = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'broker')
+        broker.update(policy_denials=[denied], policy_denials_retained=1)
+        args[4]['denials'] = [denied]
+        rehash(args[0])
+        with self.assertRaises(AssertionError): campaign.validate_export(*args)
+        campaign.validate_export(*args, expected_denials=[denied])
+        for wrong in ([], [{'request_key': 'other', 'method': 'admin.grant'}], [denied, denied]):
+            with self.subTest(wrong=wrong), self.assertRaises(AssertionError):
+                campaign.validate_export(*args, expected_denials=wrong)
+
     def test_fixed_device_proof_is_required_even_when_runtime_binding_hashes_agree(self):
         for fault in ('missing', 'hash', 'id_bool', 'id_overflow', 'direct_missing',
                       'effective_missing', 'flags_zero', 'flags_override', 'flags_bool',
