@@ -28,6 +28,14 @@ to promote or copy back. No production test RPC, mock runtime or injected policy
 API is added.
 
 Stage `guest_launcher.py`, `guest_artifact.py` and `launcher_agent.c` together.
+An optional final argument selects a Root-bound, already approved fixture digest.
+It requires the sole exact fixture configuration and reuses its verified registry
+tree. This mode skips compilation, configuration writes and import, and prints a
+retained-artifact marker. Root must bind its original source/build/import evidence;
+the new run is not a fresh agent build. This avoids consuming another registry
+slot when numbered source paths change C assertion strings. Capacity and retained
+trees must not be changed to make a regression fit.
+
 The existing invocation is:
 
 ```
