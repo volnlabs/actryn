@@ -7,10 +7,17 @@ Follow-up audit through Server/Robot source `8d6e71d`, launcher correction `2e93
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
-Push11 records integration checkpoint `6342019` and its validator-fix branch,
+Push12 records integration checkpoint `b85e1bf` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The latest composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
+Post-run05 shutdown now preserves all histories/accounting and leaves both VMs
+and the fixture off, with stopped public-byte custody recorded in
+`artifacts/reconciliation-post-run05-stopped-custody01/closed.json`. The fixture's
+safe Faulted transport-loss state is retained; its rejected first stop precheck
+sent no Stop. This cleanup closes no additional acceptance row. A16's common
+four-mask source amendment has eight passing host checks, but its complete
+package/provider baseline remains unbound and target execution is NOT_RUN.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|

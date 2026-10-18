@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The latest recorded pushed checkpoint is `6342019`; push11 verifies integration
+  The latest recorded pushed checkpoint is `b85e1bf`; push12 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push11/result.json`).
+  (`artifacts/reconciliation-checkpoint-push12/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -104,7 +104,7 @@ Earlier checkpoints and failed attempts remain preserved.
   invocation `84ce333a54094e16bd001b636b3ad85b`. Fixture PID2765125/start12910540
   retains the same journal inode/device and appends exactly boot2 to boot3.
   Independent status shows disabled-zero output and an empty queue. The new
-  manager, unchanged gateway and authority module are now running;
+  manager, unchanged gateway and authority module started in that interval;
   no grant or operation was issued during maintenance.
 - Robot cold01 passes the metadata-first catalog and private-copy history check:
   the original SQLite SHA256 remains `0a8d736f…bba3`, with 11 retired namespaces
@@ -464,6 +464,34 @@ Earlier checkpoints and failed attempts remain preserved.
   Running kernel111 is preserved, with no package action or RPC. This does not
   establish package drift on the dedicated A16 disk:
   `artifacts/robot-qualification-package-inspection01/capture.json`.
+- Post-run05 Robot stop/unload now passes once, preserving all 16/21 full history,
+  raw files and 371 Robot custody entries plus unchanged Server24/23/zero debits.
+  Both guests then acknowledge one normal poweroff; their original pidfds die
+  and their newly appended serial logs record normal powerdown. Exact QEMU exit
+  codes are unavailable after transient-unit collection, not asserted exited0.
+  The fixture subsequently reports Faulted after transport loss while remaining
+  disabled-zero/empty, boot3/session10 and journal84 unchanged. Stop-plan01 fails
+  its Inhibited-only precheck before any Stop; numbered plan02 accepts the safe
+  Faulted state and stops the exact fixture once, without reset or restart.
+  All five current/historical VM/fixture units are inactive/PID0 with empty
+  cgroups. Stopped Server disk SHA256 is
+  `7bad116d7c7fce006137cfbe7571a6436affa2d4765394fe3370944fbe8697c4`;
+  Robot is `4dc0c78bc9463c030702622267e4f98e4a8ed2771cfa106c50df4387eb392366`;
+  dedicated A16 is `810d161f7656f7b1382d84aae10ea8be6fda1a9150a7115325fed3e3a8e7510e`.
+  Seeds, SSH trust, metadata-only keys and both fixture journals are retained.
+  Receipts: `artifacts/reconciliation-post-run05-robot-stop-owner01/result.json`,
+  `artifacts/reconciliation-post-run05-poweroff-owner01/shutdown-review.json`,
+  `artifacts/reconciliation-post-run05-fixture-stop-plan02/result.json` and
+  `artifacts/reconciliation-post-run05-stopped-custody01/{result.json,closed.json}`.
+- A16 common-quiescence amendment01 prepares identical four-mask boot vectors
+  across both arms and six future cold boots; eight host checks pass. Source09
+  originals, binaries, HELLO10ms and supervision/trial bounds remain frozen.
+  Historical package names/versions do not supply complete status/architecture
+  or runtime-provider bytes. Its baseline remains unbound; Root must observe,
+  review and explicitly bind the new cohort before the first timed runner.
+  No A16 boot or pilot has run under this amendment. Read
+  `artifacts/a16-common-quiescence-plan01/{PLAN.md,BINDINGS.md}` and retain the
+  one-shot kernel-first pilot gate before the userspace pilot/comparison.
 
 ## Server pressure: instrumented campaign verified, VM off
 

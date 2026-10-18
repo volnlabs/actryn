@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `6342019`.
+- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `b85e1bf`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push11 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push11/result.json`). No CI pass is claimed.
+  push12 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push12/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -27,7 +27,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   or replay. The original finalization remains FAILED on its recorder-inclusive
   guard; its consumed, unknown abort must never be resent. Server cold-stop02
   then passes with all three services inactive and all rows preserved. The
-  Robot guest and non-actuating fixture remain running at the saved lifetimes.
+  Robot guest and non-actuating fixture have now stopped at the saved lifetimes;
+  both VMs are off, with stopped disk/seed/trust custody retained below.
   The tracker still exposes its previous paused status without a resume API;
   explicit user continuation authorizes this work against the full saved goal.
   The [handoff](resume.md) records the current lifetimes, preserved histories,
@@ -49,6 +50,24 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   cgroup-OOM cases only, combining saved reanalysis with actual cold integrity
   and custody. The whole D2 gate remains open for final cohort reconciliation;
   no release qualification PASS is claimed.
+- Post-run05 shutdown preserves all 24/23 Server rows, 16/21 Robot history,
+  zero debits and all 374 custody entries. Both Robot services stop once and
+  the authority module unloads once. Each guest acknowledges one normal
+  poweroff; new serial shutdown markers and the original pidfds confirm carrier
+  death. Collected transient units do not retain exact QEMU exit codes.
+  The fixture's transport-loss transition to Faulted rejects the first stop
+  precheck before any Stop. A numbered check accepts Faulted only with disabled
+  zero output, empty queue and unchanged boot3/session10/journal, then stops the
+  original fixture once. No reset, restart or operation replay occurs.
+  Receipts: `artifacts/reconciliation-post-run05-{robot-stop-owner01,poweroff-owner01,fixture-stop-plan01,fixture-stop-plan02}`
+  and `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`.
+- A16 common-quiescence amendment01 is source preparation only: eight host
+  checks pass and the same four APT boot masks apply to both arms/all six planned
+  boots. It changes no binaries, HELLO10ms deadline or trial denominator.
+  Older inventories contain package names/versions, but lack full status,
+  architecture and runtime-provider byte bindings. Those baseline fields remain
+  unbound pending explicit review of a new observation; no A16 pilot has run.
+  Receipt: `artifacts/a16-common-quiescence-plan01/verification.json`.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
