@@ -4,6 +4,21 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 
 ## Current state
 
+- **Diagnostic9 boot01 stopped before execution; cleanup and stopped custody pass.**
+  The read-only ELF guard expected mode `0755`; the unchanged 74704-byte
+  diagnostic has mode `0700` and the expected SHA045d9bcd…a612. No diagnostic,
+  gateway or authority action ran. Saved package/provider observation passes
+  the original baseline check. Normal VM poweroff and fixture shutdown complete;
+  the first local poweroff invocation failed on a relative input path before
+  any guest dispatch, and its failure remains recorded separately.
+  Current custody verifies 69 prior units inactive and its own owner closed.
+  Fixture boot145/2924 bytes adds one restart and zero diagnostic appends;
+  the other eight public files, private clone and key metadata are unchanged.
+  Current A16 disk SHA is
+  `d1b38a1be163be7fb19cee0db238732bece31d51baad23767b698d99bf446691`.
+  [Exact failed-boot and cleanup receipts](release-cohort.md#diagnostic9-boot01-mode-guard-and-cleanup)
+  preserve the failed run. A separately numbered source correction is in progress;
+  workload observation remains NOT_RUN and original A16 remains FAILED79/80.
 - **Network namespace case passes; final Server package assembled.**
   One exact111/f32 private-clone attempt `496415bbfd8adab8f4b2c830b6c61509`
   stays CREATED while a trusted verifier joins only its network namespace.
@@ -12,7 +27,7 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   One known Stop reaps the attempt; cold34/24 has zero debit and preserves every
   previous seven-table row/log, registry and configuration. Normal shutdown
   confirms original QEMU pidfd death and fresh serial markers; no retry occurs.
-  Final custody checks 64 host units inactive/PID0/empty cgroups/no restarts,
+  That network checkpoint checks 64 host units inactive/PID0/empty cgroups/no restarts,
   with its own custody owner separately closed. The original nine public files,
   key metadata and both fixture journals are unchanged; private clone SHA is
   `ea94d7f0ed2ba9cc1fcddffcec83d187904b8edc03ae244bbccf5ebdb23cf278`.
@@ -25,14 +40,14 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   A13/A14, signing and A16 remain open. Diagnostic9 observation and unused-boot
   cleanup sources are reviewed; no diagnostic9 workload has run.
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `f8f18a9`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `7f1c760`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   now built from `e6c3fd6` (integrated as `e6120d3`), with fixture corrections
   `71696f2`/`ecc5a8b`; preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push24 verifies integration and namespace-proof branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push24/result.json`). No CI pass is claimed.
+  push25 verifies the integration branch head, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push25/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -121,8 +136,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   pass the executed build guards. No workload, gateway or module is executed;
   no fixture starts. One normal poweroff and final custody pass with 46 units
   inactive, both fixture journals and the other eight public records unchanged.
-  Current A16 disk is `9378b3ad80830908450f1b8a0dc135a933e6292f2aa42395576cf4637c5649e4`.
-  The candidate is unapproved for observation; original A16 remains FAILED79/80.
+  At the build checkpoint, A16 disk was `9378b3ad80830908450f1b8a0dc135a933e6292f2aa42395576cf4637c5649e4`.
+  The build alone does not approve observation; original A16 remains FAILED79/80.
   [Build receipts and boundaries](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
   distinguish this compile from a comparison or physical qualification.
 - **D2 source association identifies remaining implementation/contract work.**

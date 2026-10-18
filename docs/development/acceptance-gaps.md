@@ -12,7 +12,7 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push24 records preceding integration checkpoint `f8f18a9` and its namespace-proof branch,
+Push25 records preceding integration checkpoint `7f1c760`,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The existing device/OOM composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -40,7 +40,11 @@ A separately numbered diagnostic9 now has an actual native guest GCC14.2.0
 build (ELF045d9bcd…a612, 74704 bytes) and known normal shutdown/46-unit stopped
 custody. The null controller backend starts no fixture, gateway, module or
 workload; both fixture journals and the other eight public records are unchanged.
-New diagnostic execution remains NOT_RUN/unapproved; A16 remains FAILED79/80.
+New diagnostic execution remains NOT_RUN; A16 remains FAILED79/80.
+The later [boot01 mode-guard failure and cleanup](release-cohort.md#diagnostic9-boot01-mode-guard-and-cleanup)
+preserve that boundary: actual ELF bytes match, but mode0700 differs from the
+guard's assumed0755. No workload was dispatched. Normal cleanup and current
+69-unit stopped custody pass, with fixture boot145 and zero diagnostic appends.
 Under the original baseline, D2-01/02 source association exposes literal
 pre-Create ordering and pre-Start cleanup gaps: runtime Create gates application
 entry, but broker socket/live filter binding is later, and old observer/socket

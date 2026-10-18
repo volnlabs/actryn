@@ -716,3 +716,46 @@ adapter separately passes ten pure checks.
 | [Independent actual network audit](../../artifacts/server-network-proof-actual-peer01/review.json) | `072e20f30af40928c56165273313a6deaf5633d476074cb0218afe263e3b1658` |
 | [Final stopped custody](../../artifacts/server-network-proof-stopped-custody01/result.json) | `a1b6f4f25e7a0649e9ea012e719bac2256c40eb88d8c9c4de3fc99bdb44d401a` |
 | [Custody owner closure](../../artifacts/server-network-proof-root-review01/custody-owner-closure.json) | `24e6ae891374d08a7e749a4150823df773b71af3cc511e36a100c102679488f0` |
+
+## Diagnostic9 boot01 mode guard and cleanup
+
+Boot `5b244b89-d042-48f9-bc45-0d1af3324078` fails the read-only diagnostic
+file guard before any workload, gateway or authority action. The guard assumes
+`0755`; separate read-only metadata and hash collection finds root-owned mode
+`0700`, 74704 bytes and exact SHA045d9bcd…a612. No permissions or binary bytes
+were changed. Offline validation of the saved package/provider observation
+passes the original baseline; it gives no workload credit.
+
+Unused cleanup completes with one acknowledged normal poweroff, original QEMU
+pidfd death, fresh serial shutdown markers and one supported fixture shutdown.
+The first local poweroff owner exits1 on a relative input path before input
+admission or guest dispatch. Its record remains unchanged; the separately
+numbered owner with an absolute path exits0 and closes its scope.
+
+Current stopped custody streams all nine public files and the private clone
+with metadata/no-holder bookends, checks key metadata without reading keys,
+and verifies 69 prior units inactive/PID0/empty cgroups/no restarts. Its own
+owner subsequently exits0 and closes. The A16 disk is now
+`d1b38a1be163be7fb19cee0db238732bece31d51baad23767b698d99bf446691`.
+The other eight public files and private clone remain unchanged. Fixture
+boot145/2924 bytes preserves the boot144 prefix plus one 20-byte restart;
+there are zero diagnostic appends. Server26/24, Robot16/21, zero debits and all
+374 preservation entries remain carried by unchanged disks. Historical64-unit
+network custody and build disk9378 are prior checkpoints.
+
+A separately numbered source amendment is being prepared for strict0700
+validation. Diagnostic9 execution remains NOT_RUN. The frozen A16 comparison
+remains FAILED79/80; no retry, pooling or physical qualification is claimed.
+
+| Receipt | SHA-256 |
+| --- | --- |
+| [Failed boot](../../artifacts/a16-bind9-boot01/result.json) | `ae121de6c61a75ad1ded02387dd6a33ec0714027380f74f65c20d13f6fe2fe13` |
+| [Read-only ELF metadata](../../artifacts/a16-bind9-unused-root-review01/metadata-readonly-once.stdout) | `f001e144a76cfbe2c7a383fefc76830025cd5a0635675e29f695b36f6e43b065` |
+| [Saved original-baseline check](../../artifacts/a16-bind9-final-stopped-custody-root-review01/saved-baseline-check.json) | `2c03b166e8197f350cc00943ae2cfc0777cb5f99579304fe09bbd0def11f2f2c` |
+| [Normal unused VM poweroff](../../artifacts/a16-bind9-unused-poweroff01/result.json) | `84a92c7eea5695874d8d399879162f532dcf5be17ef73def2e19e39f3b3387c7` |
+| [Fixture shutdown](../../artifacts/a16-bind9-unused-fixture-shutdown01/result.json) | `a1a62022b849c53bde03ecfce72aff4807727a6585923712a817fd9bb44c39a1` |
+| [Local input-path failure correction](../../artifacts/a16-bind9-unused-root-review01/local-path-correction.json) | `d3c16c2d2a5c2b73d503c9f0f90e019db5992bc7c5d3eb8d6492ea787e3af043` |
+| [Current stopped custody](../../artifacts/a16-bind9-final-stopped-custody01/result.json) | `9f98faf6a94416fc048ddb2fe35fa745577cf61d6f836fbedfef18d46710cb24` |
+| [Current public byte custody](../../artifacts/a16-bind9-final-stopped-custody01/public-custody.json) | `b4a2d74ef1233d79364481d0c3dc3ad724e7309de40b8cb9a19e0bcbd0ccc1ae` |
+| [Known custody owner exit](../../artifacts/a16-bind9-final-stopped-custody-root-review01/custody-owner-once-result.json) | `b6905b668ea636575ac17e64926903119c18fdb9522afdfd1290de2ca8ee7fa4` |
+| [Custody owner closure](../../artifacts/a16-bind9-final-stopped-custody-root-review01/custody-owner-closure.json) | `17cc9fc4815b507b3948cf4641b26b453c8cec3636ada393ef0b620dbe0027b5` |
