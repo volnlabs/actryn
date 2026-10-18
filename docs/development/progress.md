@@ -5,7 +5,7 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `934b173`.
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `27a3cd9`.
   Current implementation source is `8d6e71d`. The remote head is verified;
   its CI query returned zero runs. No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
@@ -17,12 +17,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
 - User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
-  fixture are running. Server services remain cold. The new Robot manager,
+  fixture are running. The Server Observer is active; Launcher and Server daemon
+  have never started in this boot. The new Robot manager,
   unchanged gateway and module are running without a grant or operation.
   The tracker still exposes its previous paused status without a resume API;
   explicit user continuation authorizes this work against the full saved goal.
   The [handoff](resume.md) records the current lifetimes, preserved histories,
-  installed Server test package, staged Robot candidate and next maintenance steps.
+  installed Server/Robot test packages and next qualification steps.
   Both original Robot charges remain outstanding; release qualification is incomplete.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
@@ -39,6 +40,17 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   0.118052-second Robot-only monitor/recorder/SDK readiness sample with known
   cleanup. The same-instance and both-sentinel measurements remain mandatory
   before the remaining campaign; controller and operation deadlines are unchanged.
+- Continuation-run01 then passes its same-instance Robot readiness in 0.127229
+  seconds, arms the gate and starts Observer once. The immediate executable
+  identity check fails before either other Server service, recovery or preparation.
+  The gate forwards zero bytes and the owned monitor exits with status zero.
+  The failed campaign stays FAILED. Readback pins the running Observer at
+  PID991/start492854, with the expected binary and zero restarts; both other units
+  still have zero start timestamps. A transient before exec is plausible for its
+  `Type=simple` unit, but the rejected operands were not recorded.
+  Separate read-only custody verifies unchanged original database/WAL/SHM bytes,
+  all 17/16 historical Server rows, two retained charges and inhibited Robot state.
+  A numbered amendment must keep Observer991 and start only the two unattempted units.
 
 ## Component evidence (not release acceptance)
 

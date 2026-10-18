@@ -12,7 +12,7 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation source remains
-  `8d6e71d`, with preceding pushed checkpoint `934b173`. Its remote head is
+  `8d6e71d`, with preceding pushed checkpoint `27a3cd9`. Its remote head is
   verified and its CI query returned zero runs. No CI pass is claimed.
   The user authorized pushing this branch to
   `origin`. Every task commit carries
@@ -30,7 +30,8 @@ Earlier checkpoints and failed attempts remain preserved.
   powered off gracefully once; all three packaged services stayed cold and both
   charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
 - The Server stores retain 17 launcher/16 broker rows and exactly two outstanding
-  Robot charges. Its services never started after the crash; the crashed attempt
+  Robot charges. Launcher and Server daemon have never started in the current
+  boot; Observer is running as recorded below. The crashed attempt
   is still `running/pending` on disk pending supported recovery. Peer/key/drop-in
   stay installed. The Robot retains 11 namespaces/18 records and every old
   identity generation/tombstone. Disks, seed and SSH trust remain preserved. Raw artifacts
@@ -58,8 +59,9 @@ Earlier checkpoints and failed attempts remain preserved.
   untouched. Account quota and working-set tooling remain unavailable.
 - Server boot03 passes once with guest boot
   `1bd4d671-2965-4d1b-8061-1de29459eb4f`, host PID2764219/start12891931 and
-  invocation `414d22890d624c56a6fca7475c6a316f`. All three services remain
-  disabled/inactive with zero start timestamps. Current test manifest is
+  invocation `414d22890d624c56a6fca7475c6a316f`. Initially all three services were
+  disabled/inactive with zero start timestamps. Observer subsequently started
+  once; Launcher and Server daemon remain untouched. Current test manifest is
   `b119afd529f320a97243bea4b6d0f00919cc3be19cb6b9dfcc3fc923fbdd7e65`.
   Cold04 verifies all 27 payload entries, old slots/archive, configuration,
   credentials metadata and unchanged raw history. Both charges remain outstanding.
@@ -128,7 +130,7 @@ Earlier checkpoints and failed attempts remain preserved.
   Its Robot SSH read takes 1.473 seconds. This failure is preserved under
   `artifacts/robot-retained-debit-root-runtime01/observer-records`; the harness
   needs a separately reviewed timing/integration amendment before campaign use.
-  Neither continuation campaign has executed.
+  The later attempted continuation is recorded below.
   Robot history collector/comparator has eight SQLite-copy checks; final target
   history remains pending. These source preparations close no acceptance row.
 - The reviewed fast-guard amendment holds guest service pidfds through one fixed
@@ -145,15 +147,39 @@ Earlier checkpoints and failed attempts remain preserved.
   Linux/manager remain assumptions. Source:
   `artifacts/robot-retained-debit-fast-guard-plan01`.
 - Server cold05 reuses the unchanged read-only collector and returns a
-  byte-identical complete cold04 receipt, SHA256 `cc80dbae…902a4`; all three services
-  remain cold and both charges remain. Integration03 makes the exact internally
+  byte-identical complete cold04 receipt, SHA256 `cc80dbae…902a4`; at that point all
+  three services were cold and both charges remained. Integration03 makes the exact internally
   constructed gate available to the one startup callback; 30 focused checks pass.
   Custody03 preserves 374 old public-file/metadata records and has 11 focused
-  checks. The concrete root runner is still under final review; neither gate nor
-  new preparation has been admitted.
+  checks. The concrete root runner passes four wiring and two supervision checks;
+  a peer review verifies all 71 public input pins and private-key metadata only.
+- Actual continuation-run01 passes Robot readiness in 0.127229 seconds, arms its
+  closed gate and invokes Observer start once. The post-start executable path/
+  metadata assertion fails before Launcher, Server daemon, Recover or any new
+  preparation. The gate sees zero connections/bytes and closes; its owned Robot
+  monitor exits normally. Both campaign/root results remain FAILED:
+  `artifacts/robot-retained-debit-continuation-{run01,owner01}`.
+  Read-only inspection establishes Observer PID991/start492854/invocation
+  `970928f256244cb5bdcfb70830dfa3ec`, expected `bf2b4d22…37a7c` executable and
+  metadata, zero restarts; Launcher/Server daemon still have PID0 and zero start
+  timestamps. The unit is `Type=simple`; a pre-exec transition is a plausible
+  explanation, not a captured cause. No observer restart or original proposal
+  replay is authorized by this failure. Next use a numbered partial-start
+  amendment that pins this existing Observer and starts only the two untouched
+  notify services behind a new closed gate.
+  Separate raw/private-copy custody verifies the original DB/WAL/SHM bytes and
+  all 17/16 rows unchanged, both charges retained, no tasks/cgroups/shims, and
+  no Robot grant/prepared work/output. Receipt:
+  `artifacts/robot-retained-debit-partial-start-custody-completion01/result.json`.
+  The first host analysis used a flattened cold-inventory key; its correction
+  uses saved raw bytes and the nested inventory without repeating target capture.
 - Separate source-only preparations are ready for the post-settlement Server
-  device/OOM diagnosis (five host checks) and matching A16 userspace09 pilot
+  device/OOM diagnosis (seven host checks) and matching A16 userspace09 pilot
   (six checks). They require actual predecessor receipts and close no target gate.
+  Diagnosis plan02 binds the accepted full-row custody snapshot, preventing a
+  same-count row change from becoming its baseline. A16 owner bounds have ten
+  host checks; pilot cutoffs remain 180 seconds, each comparison block is bounded
+  at 660 seconds, with separate known-cleanup requirements.
 
 ## Server pressure: instrumented campaign verified, VM off
 
