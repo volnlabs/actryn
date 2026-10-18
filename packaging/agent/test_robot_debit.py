@@ -31,7 +31,7 @@ def fixture(*, active=False, crashed=False):
         'broker': {'attempt_state': state, 'attempt_outcome': outcome,
                    'calls': [{'request_key': 'preview-1', 'state': 'settled', 'consumed_tokens': 0,
                               'publication_closed': not active}], 'policy_denials': [],
-                   'policy_denials_retained': 0, 'evidence_gaps': ['log_incomplete'] if crashed else []},
+                   'policy_denials_retained': 0, 'evidence_gaps': []},
         'robot': {'classification': 'trusted_peer_delegation_metadata', 'binding': binding,
                   'outstanding_debits': 1, 'requests_retained': 1,
                   'requests': [{**{key: intent[key] for key in ('request_key', 'handle', 'robot_epoch',
@@ -97,6 +97,28 @@ def echo_server():
 
 
 class PartialEvidenceTests(unittest.TestCase):
+    def test_launcher_crash_omissions_do_not_require_a_copied_broker_gap(self):
+        # Launcher recovery owns log completeness. Broker startup can reap the
+        # same attempt before tick has mirrored that separate store's gap.
+        for gaps in ([], ['log_incomplete']):
+            args = list(fixture(crashed=True))
+            values = {v['name']: v['content'] for v in args[0]['artifacts']}
+            values['broker']['evidence_gaps'] = gaps
+            rehash(args[0])
+            before = copy.deepcopy(args)
+            with self.subTest(gaps=gaps):
+                campaign.verify_partial(*args, crashed=True)
+                self.assertEqual(args, before)
+
+    def test_noncrash_cannot_claim_a_broker_log_gap(self):
+        for active in (False, True):
+            args = list(fixture(active=active))
+            broker = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'broker')
+            broker['evidence_gaps'] = ['log_incomplete']
+            rehash(args[0])
+            with self.subTest(active=active), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args, active=active)
+
     def test_actual_partial_shapes_preserve_distinct_states(self):
         for active, crashed in ((False, False), (True, False), (False, True)):
             campaign.verify_partial(*fixture(active=active, crashed=crashed), active=active, crashed=crashed)
@@ -179,15 +201,22 @@ class PartialEvidenceTests(unittest.TestCase):
                 campaign.verify_partial(*args)
 
     def test_crash_uncertainty_cannot_disappear_or_be_called_complete(self):
-        for fault in ('omission', 'complete', 'gap', 'invented_gap'):
-            args = list(fixture(crashed=True)); values = {v['name']: v['content'] for v in args[0]['artifacts']}
-            if fault == 'omission': args[0]['omissions'].pop()
-            elif fault == 'complete': values['stdout']['file_complete'] = True
-            elif fault == 'gap': values['broker']['evidence_gaps'] = []
-            else: args[0]['omissions'].append({'artifact': 'robot', 'reason': 'arbitrary', 'omitted_records': 1})
-            rehash(args[0])
-            with self.subTest(fault=fault), self.assertRaises(AssertionError):
-                campaign.verify_partial(*args, crashed=True)
+        for gaps in ([], ['log_incomplete']):
+            for fault in ('omission', 'resources_omission', 'complete', 'gap',
+                          'duplicate_gap', 'invented_gap', 'outcome', 'debit'):
+                args = list(fixture(crashed=True)); values = {v['name']: v['content'] for v in args[0]['artifacts']}
+                values['broker']['evidence_gaps'] = gaps
+                if fault == 'omission': args[0]['omissions'].pop()
+                elif fault == 'resources_omission': args[0]['omissions'].pop(0)
+                elif fault == 'complete': values['stdout']['file_complete'] = True
+                elif fault == 'gap': values['broker']['evidence_gaps'] = ['observer_unavailable']
+                elif fault == 'duplicate_gap': values['broker']['evidence_gaps'] = ['log_incomplete', 'log_incomplete']
+                elif fault == 'outcome': values['attempt']['outcome'] = values['broker']['attempt_outcome'] = 'cancelled'
+                elif fault == 'debit': values['robot']['outstanding_debits'] = 0
+                else: args[0]['omissions'].append({'artifact': 'robot', 'reason': 'arbitrary', 'omitted_records': 1})
+                rehash(args[0])
+                with self.subTest(gaps=gaps, fault=fault), self.assertRaises(AssertionError):
+                    campaign.verify_partial(*args, crashed=True)
 
     def test_missing_postcrash_log_requires_independent_absence_and_omission(self):
         args = list(fixture(crashed=True))

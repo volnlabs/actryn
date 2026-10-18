@@ -128,8 +128,10 @@ def verify_partial(bundle, attempt, binding, intent, logs, *, crashed=False, act
             and broker['policy_denials'] == [] and broker['policy_denials_retained'] == 0,
             'offline settlement/publication differs from Robot debit')
     require(content['runtime_binding'] == intent['runtime_binding'], 'sandbox binding changed')
-    expected_gaps = ['log_incomplete'] if crashed else []
-    require(broker['evidence_gaps'] == expected_gaps, 'crash uncertainty missing or unexpected gap')
+    # Launcher omissions own log completeness; broker startup can reap before
+    # tick mirrors that separate store's gap. Do not require duplicate evidence.
+    allowed_gaps = ([], ['log_incomplete']) if crashed else ([],)
+    require(broker['evidence_gaps'] in allowed_gaps, 'unexpected broker evidence gap')
     if crashed:
         require(any(v['artifact'] == 'runtime_facts' and v['reason'] == 'log_incomplete'
                     for v in omissions), 'crash log uncertainty hidden')
