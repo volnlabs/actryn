@@ -133,8 +133,10 @@ def main():
                 assert not os.path.lexists(observer) and same_socket(hidden)==original
                 failed=rejected_start(active)
                 assert failed['state']=='retiring' and failed['binding'] is not None,('failed observer must retain cleanup charge',failed)
-                assert pathlib.Path('/sys/fs/cgroup/actryn',active).is_dir(), 'unconfirmed observer closure freed cgroup identity'
                 wait_for(lambda:select.select([taskfd],[],[],0)[0])
+                retained=rpc({'op':'inspect','attempt_id':active});assert retained['result']=='ok',retained
+                current=retained['inspection']['attempt']
+                assert current['id']==active and current['state']=='retiring' and current['binding']==failed['binding'] and current['outcome']=='cancelled',('unconfirmed observer closure lost durable cleanup charge',current)
                 empty_output(active)
             finally:
                 # Restore only the same original socket, never overwrite a replacement.

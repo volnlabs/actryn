@@ -5,8 +5,11 @@ healthy Prepare/Start/Stop control. The old-f32 missing-broker case produced the
 expected RED: Start rejected while the attempt remained prepared. Its known
 fixture Stop reaped the attempt without output; the observer and positive cases
 were unstarted. The frozen RED source and raw failure remain preserved. The
-fixed-binary GREEN is **NOT_RUN** until Root executes this extended source on a
-separately bound disposable guest.
+fixed-binary GREEN02 passed the missing-broker case, then failed an overstrict
+physical-cgroup-path assertion in the observer case. Its exact socket restoration
+and known Stop reaped the attempt; the healthy/admission cases were unstarted.
+That failure stays preserved. This corrected fixture is **NOT_RUN** until Root
+executes it on a separately bound disposable guest.
 
 **Never run this harness on the retained qualification Server, Robot, A16 VM,
 or an operator workstation.** Use a fresh scratch Server VM or a guarded clone
@@ -46,7 +49,7 @@ The failures target these real behaviors:
 | Case | Required observation | Break caught |
 |---|---|---|
 | Missing broker listener | Prepare succeeds; Start returns error; retained inspection becomes retiring/reaped, the original task pidfd becomes dead, cgroup/broker directory disappear and stdout/stderr stay empty. Starting the failed ID again is rejected. | Safety error returns while the task stays prepared until its default 60-second expiry. |
-| Unreachable observer | After fresh Prepare and a broker listener, temporarily rename the protected observer socket. Start must reject and cancel; the non-reaped retiring row/binding and cgroup keep the cleanup identity charged while observer unregister is unavailable. Task pidfd must die without output. Restore the exact socket, then wait for reap/removal and reject the old ID. | Health failure returns without cancellation/cleanup. |
+| Unreachable observer | After fresh Prepare and a broker listener, temporarily rename the protected observer socket. Start must reject and cancel. After task pidfd death, a fresh inspection must retain the exact ID/binding, retiring state and cancelled outcome while unregister is unavailable; output stays empty. Restore the exact socket, then wait for reap/removal and reject the old ID. | Health failure returns without cancellation/cleanup or releases durable cleanup accounting before observer closure. |
 | Healthy positive | A third fresh Prepare runs the unchanged agent marker/fork fixture, then Stop reaps descendants and rejects replay. | Failure cleanup poisons subsequent healthy preparation or permits repeated execution. |
 | Admission preservation | While the positive task runs, duplicate Start is rejected without changing it. A fourth fresh Prepare has a real broker listener; active-capacity Start refusal preserves its exact preparation and empty output. Stop reaps only the staged task while the first task's pidfd stays alive. | Verification cleanup wrongly cancels an admission refusal or duplicate running Start. |
 
@@ -57,6 +60,10 @@ Rename necessarily changes socket ctime; unchanged ctime is not claimed. No
 observer stop/restart/kill or synthetic response is used. The retiring state is
 a charged live registration under `Store::prepare`'s non-reaped accounting;
 this test does not claim a separate global-capacity exhaustion result.
+The durable non-reaped row and binding retain that admission charge, independently
+of the physical cgroup directory. Runtime task deletion may remove an empty
+cgroup before observer unregister succeeds; directory presence is not the charge
+predicate. GREEN02 observed an absent path, but did not trace its removal actor.
 
 The first missing-broker case should produce RED promptly on the unchanged old
 launcher: its printed `prestart-rejected` inspection stays `prepared`, so the
@@ -82,4 +89,7 @@ The actual old-f32 RED is bound by
 `artifacts/server-prestart-cleanup-root-review01/old-red-classification.json`;
 its original source is retained under
 `artifacts/server-start-cleanup-regression-source-custody01`. These scratch tests
-do not establish whole D2 acceptance or physical qualification.
+do not establish whole D2 acceptance or physical qualification. The separate
+GREEN02 classification is retained at
+`artifacts/server-prestart-cleanup-green-root-review02/green02-classification.json`;
+its original failed program is not relabelled by this fixture correction.
