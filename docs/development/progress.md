@@ -32,8 +32,12 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   installed Server/Robot test packages and next qualification steps.
   D2 plan03 stages its sources successfully, then fails preflight before any
   compile, import or new attempt because two package pins drifted under unattended
-  updates. A narrow controlled APT restoration is pending Root execution; no
-  restoration or D2 pass is claimed. Release qualification remains incomplete.
+  updates. Separate controlled two-package restoration now passes, preserving
+  all rows and custody. D2 run04 passes preflight/build/import/start, then its
+  campaign fails: the unapproved existing `/dev/full` opens successfully and
+  the memory stage is NOT_RUN. Current Server counts are 23/22 with zero debits;
+  a separate controlled stop now passes with all three Server services cold.
+  Normal finish/capture04 is NOT_RUN. Release qualification remains incomplete.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
@@ -165,12 +169,53 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 - D2 plan03 source staging passes; exact-package preflight then fails before
   baseline save, compiler invocation, import or new agent attempt. Saved package
   evidence identifies `libexpat1` 2.8.3→2.9.0 and `linux-libc-dev` 111→113 as the
-  two frozen-pin mismatches following unattended updates. Controlled restoration
-  of those two pins is pending Root; installed image/meta 113 are retained and
+  two frozen-pin mismatches following unattended updates. Separate owner05
+  restoration now passes; installed image/meta 113 are retained and
   the running kernel remains `6.12.111+deb13-amd64`. This drift does not establish
   the cause of the earlier recorder cutoff or erase the observed cleanup/custody.
   Evidence: `artifacts/server-diagnosis-root-run03/{stage-sources,preflight}` and
   `artifacts/server-diagnosis-package-drift-review02/review.json`.
+- Controlled Server restoration owner05 passes with the same 364 package names:
+  only `libexpat1` returns to `2.8.3-1~deb13u1` and `linux-libc-dev` to
+  `6.12.111-1`. All 14 runtime and 35 tool pins match again; the running kernel
+  remains 111 in the same boot, with image111 and image/meta113 retained. Three
+  services remain cold; 22/21 Server rows, 16/21 Robot history, zero debits, all
+  374 preservation entries and raw DB/sidecar bytes remain unchanged. No compiler
+  or new agent runs. The four transient APT masks and failed/non-active timer
+  diagnostic states remain: mask03 and stop04 each succeeded once; owner05 adopts
+  that state read-only without repeating or resetting either action. Earlier
+  checker failures and D2 plan03's preflight FAILED remain preserved. This
+  restoration remains PASS independently of the later D2 failure. Receipts:
+  `artifacts/server-qualification-package-restore-owner05/{actual-review.json,restore/result.json}`.
+- D2 run04 passes preflight, native build, import and service start, then fails
+  attempt `958787b26f3546d03c6ca58736042d2c`. Its sole agent child PID8777 has
+  ordered kernel openat results 3, -2, 3: the existing unapproved character
+  device `/dev/full` (1:7) opens successfully. The parent exits naturally105;
+  both stores reap it without Cancel. Observer sequences1..177 have zero loss;
+  initial/final OOM counters remain0 and no `memory_begin` occurs, so OOM is
+  NOT_RUN. All old seven-table rows remain unchanged; new counts are 23 launcher/
+  22 broker, zero debits and no new calls or Robot rows. The source requests
+  deny-all then only1:3/5/8/9; upstream runc1.1.15's appended virtual-device
+  defaults offer a strong source explanation, but exact Debian BPF program827
+  instructions were not dumped. This is not proof of a generic sandbox escape,
+  all device policy being disabled, physical risk or D2 acceptance. Normal04
+  finish/capture is NOT_RUN; the separate controlled stop below passes. No new
+  attempt or replay occurs. The selected fix adds a launcher-owned fixed device
+  filter before Prepared and verifies its identity before Start; a new qualification
+  requires the corrected cohort. Saved capture and 26-check independent
+  review: `artifacts/server-diagnosis-failure-inspection01/capture-once.stdout`
+  and `artifacts/server-diagnosis-failure-review01/review.json`.
+- Separate post-failure Server stop passes once with counts23/22/16/21/0,
+  all 374 preservation entries and all seven-table rows unchanged. All three
+  Server services are cold, with no tasks/shims/cgroups/broker directories;
+  Robot raw/history and carrier lifetimes remain unchanged. Run04 stays FAILED,
+  OOM stays NOT_RUN and no new attempt/retry occurs. Receipt:
+  `artifacts/server-d2-failure-stop01/result.json`.
+- Separate Robot read-only package inspection matches nine of ten runtime pins;
+  `libexpat1` is still `2.9.0-1~deb13u1`, not restored to pinned 2.8.3. Its kernel
+  remains 111; no package action or RPC occurs. This does not establish drift
+  in the separate dedicated A16 disk. Receipt:
+  `artifacts/robot-qualification-package-inspection01/capture.json`.
 
 ## Component evidence (not release acceptance)
 

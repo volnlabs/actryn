@@ -12,7 +12,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 | A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
 | A04/A05/A08 | Existing daemon-death/accounting, installed capacity, freeze/crash and pressure evidence remains separate. Diagnostic fix `42537e2` passes 5 Rust/28 Python checks and its corrected OCI reports the exact retained-capacity error. Closed-gate startup drains four retained streams with zero forwarded bytes. Four matched historical queries settle all four old debits while preserving OutcomeUnknown. After the new operation's cancellation, separate existing-handle cleanup passes one Recover and matching historical settlement. Final custody verifies 22 launcher/21 broker rows, 16 namespaces/21 Robot records, zero debits, 374 preserved entries, no tasks and inhibited disabled-zero output. Server cold-stop02 then passes with all three services inactive and full rows unchanged. | Finalize-run01 remains FAILED: identity checks passed in 29 ms, then recorder-inclusive guard exceeded 1.5 s at 3.736 s before the next result request. Its consumed abort remains unknown; never resend or replay an operation. Separate cleanup does not relabel that failure or manufacture task success. Recorder fsync versus scheduling cause is unresolved; uncommitted tails remain unknown. Final artifact reconciliation remains. |
-| D2 isolation | Existing sandbox bindings verify configured cgroup/device limits; missing `/dev/mem` returns ENOENT. A bounded receipt audit finds 55 JSON and eight archived reports with `oom_kill=0`. Plan03 source staging passes; exact-package preflight then fails on two unattended-update pin mismatches before compile, import or a new attempt. | Actual memory-budget kill/export and refusal opening an existing nonphysical forbidden device remain unproven; no D2 campaign PASS. Controlled APT restoration of `libexpat1` and `linux-libc-dev` pins is pending Root execution. Installed image/meta 113 remain retained; running kernel is 111. |
+| D2 isolation | Existing sandbox bindings verify configured cgroup/device limits; missing `/dev/mem` returns ENOENT. Separate owner05 restoration passes all 14 runtime/35 tool pins. Run04 preflight/build/import/start pass, but its campaign fails: existing unapproved `/dev/full`1:7 opens successfully in child8777, traced results3,-2,3, sequences1..177/lost0. Attempt958787b26f3546d03c6ca58736042d2c naturally exits105 and is reaped without Cancel; old full seven-table rows stay unchanged, Server23/22, zero debits/no Robot calls. Separate post-failure stop passes with all three Server services cold and custody unchanged. | No D2 PASS. Memory stage never begins and OOM counters remain0: OOM NOT_RUN. Source deny-all plus1:3/5/8/9 conflicts with observed1:7 success; upstream runc1.1.15 appended virtual defaults offer a strong source explanation, but exact Debian BPF827 is undumped. No generic escape/all-policy-off/physical-risk inference. Normal finish/capture04 NOT_RUN; launcher-owned fixed-filter correction selected, new qualification waits for its corrected cohort, no retry. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
@@ -120,13 +120,53 @@ D2 plan03 source staging passes, but preflight stops before baseline save,
 compiler invocation, import or new attempt. Saved unattended-update evidence
 identifies `libexpat1` `2.8.3-1~deb13u1`→`2.9.0-1~deb13u1` and `linux-libc-dev`
 `6.12.111-1`→`6.12.113-1` as the two frozen-pin mismatches. Narrow controlled
-APT restoration is pending Root; no restoration or D2 PASS is claimed. Newer
+APT restoration subsequently passes under separate owner05; no D2 PASS is claimed. Newer
 image/meta 113 remain installed, while the running kernel is
 `6.12.111+deb13-amd64`. This later package transaction does not explain the
 earlier recorder cutoff or erase the observed cleanup/custody; those observations
 are not complete proof of the original package cohort throughout the later
 interval. Evidence: `artifacts/server-diagnosis-root-run03/{stage-sources,preflight}`
 and `artifacts/server-diagnosis-package-drift-review02/review.json`.
+Owner05 restores exactly Expat to `2.8.3-1~deb13u1` and `linux-libc-dev` to
+`6.12.111-1`, with the same 364 package names and all 14 runtime/35 tool pins
+matching. Image111 and image/meta113 are retained in the same running111 boot.
+All three services stay cold; Server 22/21, Robot 16/21, zero debits, all 374
+preservation entries and raw DB/sidecar bytes remain unchanged. No compile or
+new agent runs. Mask03 and stop04 each succeeded once; owner05 read-only
+quiescence adopts that known state, retaining four transient APT masks and the
+failed/non-active timer diagnostic states, without repeat/reset. Earlier checker
+failures stay FAILED; restoration05 remains PASS independently of the later D2
+failure. Receipts:
+`artifacts/server-qualification-package-restore-owner05/{actual-review.json,restore/result.json}`.
+
+D2 run04 then passes preflight/build/import/start, but its one campaign fails
+attempt `958787b26f3546d03c6ca58736042d2c`. Child8777's ordered kernel openat
+results3,-2,3 show the unapproved existing `/dev/full` character1:7 opening
+successfully. The parent exits naturally105 and both stores reap it, with no
+Cancel. Retained observer sequence1..177 has zero loss. Initial/final OOM
+counters remain0 and no `memory_begin` occurs: OOM is NOT_RUN. All old full
+seven-table rows are unchanged; current Server23/22, zero debits, no new calls
+or Robot rows. Requested source policy denies all then permits only1:3/5/8/9;
+upstream runc1.1.15 appends virtual-device defaults, a strong source explanation,
+but the exact compiled Debian BPF program827 was not dumped. This does not
+establish generic sandbox escape, all policy disabled, physical risk or D2 PASS.
+Normal04 finish/capture is NOT_RUN; the separate controlled stop now passes.
+The selected fix adds a launcher-owned fixed device filter before Prepared and
+verifies its identity before Start; a new qualification requires the corrected
+cohort. No new attempt/replay occurs here. Saved capture and 26-check independent review:
+`artifacts/server-diagnosis-failure-inspection01/capture-once.stdout` and
+`artifacts/server-diagnosis-failure-review01/review.json`.
+The post-failure stop preserves all 374 entries and full seven-table rows,
+Server23/22, Robot16/21 and zero debits. Three Server services are cold, with no
+tasks/shims/cgroups/broker directories, unchanged Robot raw/history and the same
+carriers. Run04 remains FAILED and OOM NOT_RUN; there is no new attempt or retry.
+Receipt: `artifacts/server-d2-failure-stop01/result.json`.
+
+Robot's separate read-only inspection matches nine of ten runtime pins; Expat
+2.9.0 remains UNRESTORED against pinned 2.8.3, with running kernel111, zero
+package actions and zero RPCs. This limits exact installed-Robot package cohort
+equality; it does not establish drift in the separate A16 disk. Receipt:
+`artifacts/robot-qualification-package-inspection01/capture.json`.
 Raw captures stay local and the pushed source is not their backup.
 
 ## Historical audit

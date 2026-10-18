@@ -31,8 +31,8 @@ Earlier checkpoints and failed attempts remain preserved.
   resumed interval, only the Server booted for its package update. It has now
   powered off gracefully once; all three packaged services stayed cold and both
   charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
-- The Server stores retain 22 launcher/21 broker rows and zero outstanding Robot
-  charges after separate existing-handle cleanup passes. Server cold-stop02 then
+- Separate existing-handle cleanup passes with 22 launcher/21 broker rows and
+  zero outstanding Robot charges. Server cold-stop02 then
   stops all three services once, preserving all full rows and 374 custody entries.
   The original finalization remains FAILED on its recorder-inclusive guard;
   its consumed, unknown abort must never be resent. Cleanup adds no proposal or
@@ -43,9 +43,12 @@ Earlier checkpoints and failed attempts remain preserved.
   identity generation/tombstone. Disks, seed and SSH trust remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
   D2 plan03 source staging passes, but preflight fails before compile/import/new
-  attempt on two unattended-update package-pin changes. A narrow controlled APT
-  restoration is pending Root; installed image/meta 113 remain retained while
-  the running kernel is `6.12.111+deb13-amd64`. No restoration or D2 PASS is claimed.
+  attempt on two unattended-update package-pin changes. Separate owner05
+  restoration now passes; installed image/meta 113 remain retained while the
+  running kernel is `6.12.111+deb13-amd64`. D2 run04 passes preflight/build/import/
+  start, then fails on successful opening of unapproved `/dev/full`; OOM and
+  normal finish/capture are NOT_RUN. Current counts are Server23/22, Robot16/21,
+  zero debits; a separate controlled stop now passes with three services cold.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The A16 fixture was restored
   once using its retained journal, advancing boot35 to36, then shut down after
   the diagnostic. No physical device used.
@@ -339,12 +342,52 @@ Earlier checkpoints and failed attempts remain preserved.
   before baseline save, compiler invocation, import or new attempt. Saved
   unattended-update evidence shows `libexpat1` changed from `2.8.3-1~deb13u1`
   to `2.9.0-1~deb13u1` and `linux-libc-dev` from `6.12.111-1` to `6.12.113-1`.
-  Narrow controlled APT restoration of those two pins is pending Root; it has
-  not run. Image `6.12.113` and its meta package remain installed alongside 111;
+  Separate owner05 restoration of those two pins now passes. Image `6.12.113`
+  and its meta package remain installed alongside 111;
   the running kernel remains `6.12.111+deb13-amd64`. No D2 PASS or explanation
   of the earlier recorder delay follows from this later package transaction.
   Evidence: `artifacts/server-diagnosis-root-run03/{stage-sources,preflight}` and
   `artifacts/server-diagnosis-package-drift-review02/review.json`.
+- Controlled restoration owner05 preserves all 364 package names and changes
+  only Expat back to `2.8.3-1~deb13u1` and `linux-libc-dev` to `6.12.111-1`.
+  All 14 runtime/35 tool pins match again, in the same boot/running kernel111;
+  image111 and image/meta113 remain installed. Three Server services stay cold;
+  full 22/21 Server rows, Robot 16/21, zero debits, all 374 preservation entries
+  and raw DB/sidecars remain unchanged, with no compiler or new agent execution.
+  Four transient APT masks and failed/non-active timer diagnostic states are
+  retained. Mask03 and stop04 each succeeded once; owner05 quiescence only reads
+  and adopts that known state, without reset or repeat. Earlier checker failures
+  remain FAILED. Restoration05 remains PASS independently of the later D2
+  failure. Receipts:
+  `artifacts/server-qualification-package-restore-owner05/{actual-review.json,restore/result.json}`.
+- D2 run04 passes preflight/build/import/start, then attempt
+  `958787b26f3546d03c6ca58736042d2c` fails and naturally exits105; it is reaped
+  in both stores with no Cancel. Child8777's ordered openat results are3,-2,3:
+  existing unapproved `/dev/full` character1:7 opens successfully. The complete
+  retained observer sequence1..177 loses0 events. Initial/final OOM counters
+  stay0 and `memory_begin` is absent; OOM is NOT_RUN. All old full seven-table
+  rows remain unchanged, with current Server23/22, zero debits and no new calls
+  or Robot rows. Requested policy is deny-all plus1:3/5/8/9; upstream runc1.1.15
+  appends virtual-device defaults, a strong source explanation, but exact Debian
+  BPF827 instructions remain undumped. Do not infer generic sandbox escape,
+  all policy disabled, physical risk or D2 PASS. Normal finish/capture04 is
+  NOT_RUN; the separate controlled stop below passes. The selected fix adds a
+  launcher-owned fixed device filter before Prepared and verifies its identity
+  before Start; a new qualification requires the corrected cohort. No new attempt
+  or replay occurs here. Saved evidence and 26-check independent review:
+  `artifacts/server-diagnosis-failure-inspection01/capture-once.stdout` and
+  `artifacts/server-diagnosis-failure-review01/review.json`.
+- Separate post-failure Server stop passes once: Server23/22, Robot16/21,
+  zero debits, all 374 preservation entries and full seven-table rows unchanged.
+  Three services are cold and tasks/shims/cgroups/broker directories absent;
+  Robot raw/history and carrier lifetimes are unchanged. Run04 remains FAILED,
+  OOM NOT_RUN, with no new attempt or retry. Receipt:
+  `artifacts/server-d2-failure-stop01/result.json`.
+- Robot's separate read-only inspection matches nine of ten runtime pins;
+  Expat remains `2.9.0-1~deb13u1` instead of pinned 2.8.3 and is UNRESTORED.
+  Running kernel111 is preserved, with no package action or RPC. This does not
+  establish package drift on the dedicated A16 disk:
+  `artifacts/robot-qualification-package-inspection01/capture.json`.
 
 ## Server pressure: instrumented campaign verified, VM off
 
