@@ -1,7 +1,9 @@
 # Existing-device refusal and actual cgroup OOM
 
-Target acceptance is **NOT_RUN** until the integration owner schedules a separately
-numbered disposable installed Server campaign. Host tests validate the harness;
+Run04 failed because the existing 1:7 node opened successfully; its parent exited
+105 before the memory stage. That failure remains preserved. Target acceptance
+of the corrected fixed-filter cohort is **NOT_RUN** until the integration owner
+schedules a separately numbered disposable installed Server campaign. Host tests validate the harness;
 compiling the workload does not establish either target result. Do not execute
 `diagnosis_agent` on the host.
 
@@ -26,8 +28,12 @@ All proc-root/device/PID FDs close before Start.
 
 This is a test-only addition to the existing mounted `/dev` tmpfs, **not an extra
 bind mount**. The production OCI/device policy, signed rootfs, units, capabilities,
-limits and startup checks remain unchanged. The device allowlist permits char
-1:3/5/8/9 and excludes 1:7; seccomp permits `openat`. An extra mount would be
+limits and startup checks remain unchanged during the campaign. OCI rules request
+char 1:3/5/8/9 only, but runc adds virtual-device defaults. The corrected launcher
+also installs its own fixed filter, which permits only those four devices for
+read/write and denies 1:7. Acceptance requires its pinned instruction hash and
+program ID in both the direct and effective inventories, with `ALLOW_MULTI`.
+Seccomp permits `openat`. An extra mount would be
 rejected by the ordinary Start verifier and is not a fallback. If the prepared
 namespace cannot be inspected or the control open fails, stop and preserve that
 failure rather than changing the sandbox.

@@ -25,6 +25,7 @@ REQUIRED_COVERAGE = ('process.lifecycle', 'syscall.openat', 'syscall.connect', '
                      'syscall.perf_event_open', 'syscall.mount', 'syscall.unshare', 'syscall.setns')
 RESOURCE_COUNTERS = ('memory.current', 'memory.peak', 'memory.events', 'cpu.stat', 'io.stat',
                      'pids.current', 'pids.peak', 'pids.events')
+DEVICE_POLICY_SHA256 = 'c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05'
 
 
 def compact(value, sort=True):
@@ -88,6 +89,24 @@ def verify_bundle(bundle, attempt):
     return names
 
 
+def verify_device_policy(binding):
+    snapshot = binding['snapshot']
+    proof = binding.get('device_policy')
+    require(isinstance(proof, dict) and type(proof.get('program_id')) is int
+            and 0 < proof['program_id'] <= 0xffffffff
+            and proof.get('instruction_sha256') == DEVICE_POLICY_SHA256,
+            'fixed owned device policy proof missing or changed')
+    effective, direct = snapshot.get('device_programs'), snapshot.get('device_programs_direct')
+    for values in (effective, direct):
+        require(isinstance(values, list) and 0 < len(values) <= 64
+                and all(type(value) is int and 0 < value <= 0xffffffff for value in values)
+                and values == sorted(set(values)), 'invalid device program inventory')
+    require(set(direct) <= set(effective) and proof['program_id'] in direct
+            and proof['program_id'] in effective
+            and type(snapshot.get('device_attach_flags')) is int and snapshot['device_attach_flags'] == 2,
+            'owned device policy membership or MULTI attachment missing')
+
+
 def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifact_digest, io_device):
     required = {'attempt', 'runtime_binding', 'runtime_facts', 'stdout', 'stderr', 'broker', 'robot'}
     require(verify_bundle(bundle, attempt) == required and bundle['omissions'] == [], 'final artifacts incomplete')
@@ -101,6 +120,7 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
             and runtime['snapshot']['pid'] > 0 and runtime['snapshot']['start_ticks'] > 0,
             'runtime lifetime binding')
     snapshot = runtime['snapshot']
+    verify_device_policy(runtime)
     require(snapshot['uid'] == snapshot['gid'] == 65532 and snapshot['capabilities'] == 0
             and snapshot['no_new_privileges'] is True and snapshot['seccomp_mode'] == 2,
             'runtime process restrictions missing')
@@ -114,9 +134,6 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
             and len(io_lines[0]) == 5 and io_lines[0][0] == io_device
             and set(io_lines[0][1:]) == {'rbps=1048576', 'wbps=1048576', 'riops=128', 'wiops=128'},
             'runtime I/O limits differ from configured device/policy')
-    require(isinstance(snapshot['device_programs'], list) and snapshot['device_programs']
-            and all(type(value) is int and value > 0 for value in snapshot['device_programs']),
-            'runtime device enforcement missing')
     facts = artifacts['runtime_facts']
     require(facts['observer_health_unavailable'] is False and facts['observer'] is not None, 'cleanup observer unavailable')
     first, final = runtime['observer'], facts['observer']
@@ -660,6 +677,14 @@ def main():
 
 
 class VerificationTests(unittest.TestCase):
+    def test_fixed_instruction_hash_matches_authored_source(self):
+        import ast
+        source = ROOT / 'apps/server/bpf/device_policy.insns'
+        rows = ast.literal_eval(re.sub(r'//[^\n]*', '', source.read_text()))
+        self.assertTrue(rows and all(len(row) == 8 for row in rows))
+        self.assertEqual(hashlib.sha256(bytes(value for row in rows for value in row)).hexdigest(),
+                         DEVICE_POLICY_SHA256)
+
     def test_natural_reconciliation_preserves_grant_but_requires_zero_output(self):
         operation = {'device': [1]*16, 'boot': 1, 'session': 2, 'runtime_nonce': [3]*16,
                      'grant': 4, 'instance': 5, 'operation': 6, 'stream': 7}
@@ -735,12 +760,15 @@ class VerificationTests(unittest.TestCase):
         content = {
             'attempt': {'id': attempt, 'state': 'reaped', 'artifact_digest': 'sha256:' + '1' * 64},
             'runtime_binding': {'boot_id': 'boot-1', 'cgroup_id': 42, 'ambiguous_create': False,
-                                'observer': observer, 'snapshot': {'cgroup': '/actryn/' + attempt, 'pid': 2, 'start_ticks': 3,
+                                'observer': observer, 'device_policy': {'program_id': 42,
+                                'instruction_sha256': 'c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05'},
+                                'snapshot': {'cgroup': '/actryn/' + attempt, 'pid': 2, 'start_ticks': 3,
                                 'uid': 65532, 'gid': 65532, 'capabilities': 0, 'no_new_privileges': True,
                                 'seccomp_mode': 2, 'private_namespaces': True, 'network_routes': 0,
                                 'memory_max': 268435456, 'pids_max': 64, 'cpu_max': '50000 100000\n',
                                 'io_max': '254:0 rbps=1048576 wbps=1048576 riops=128 wiops=128\n',
-                                'device_programs': [42], 'root_readonly': True, 'unexpected_mounts': []}},
+                                'device_programs': [42], 'device_programs_direct': [42], 'device_attach_flags': 2,
+                                'root_readonly': True, 'unexpected_mounts': []}},
             'runtime_facts': {'observer_health_unavailable': False, 'observer': dict(observer, sequence=12),
                               'resources': {'classification': 'observed_cgroup_v2_counters', 'captured_boottime_ms': 123,
                                             'stage': 'after_descendants_empty_before_runtime_delete',
@@ -763,6 +791,25 @@ class VerificationTests(unittest.TestCase):
                     'bytes': len(compact(value)), 'sha256': digest(value)} for name, value in values.items()]}
         check = lambda value: verify_final_bundle(value, attempt, binding, completed, logs, 'boot-1', 'sha256:' + '1' * 64, '254:0')
         check(bundle(content))
+        for fault in ('missing_proof', 'wrong_hash', 'bool_id', 'overflow_id', 'missing_direct',
+                      'missing_effective', 'flags0', 'flags1', 'bool_flags', 'duplicate',
+                      'nonpositive', 'overflow', 'unsorted', 'not_subset'):
+            changed = copy.deepcopy(content); runtime = changed['runtime_binding']; snapshot = runtime['snapshot']
+            if fault == 'missing_proof': del runtime['device_policy']
+            elif fault == 'wrong_hash': runtime['device_policy']['instruction_sha256'] = 'sha256:' + '0' * 64
+            elif fault == 'bool_id': runtime['device_policy']['program_id'] = True
+            elif fault == 'overflow_id': runtime['device_policy']['program_id'] = 2**32
+            elif fault == 'missing_direct': del snapshot['device_programs_direct']
+            elif fault == 'missing_effective': snapshot['device_programs'] = [43]
+            elif fault == 'flags0': snapshot['device_attach_flags'] = 0
+            elif fault == 'flags1': snapshot['device_attach_flags'] = 1
+            elif fault == 'bool_flags': snapshot['device_attach_flags'] = True
+            elif fault == 'duplicate': snapshot['device_programs_direct'] = [42, 42]
+            elif fault == 'nonpositive': snapshot['device_programs'] = [0, 42]
+            elif fault == 'overflow': snapshot['device_programs'] = list(range(1, 66))
+            elif fault == 'unsorted': snapshot['device_programs'] = [43, 42]
+            else: snapshot['device_programs_direct'] = [42, 43]
+            with self.subTest(device_proof=fault), self.assertRaises(AssertionError): check(bundle(changed))
         for field, value in [('uid', 0), ('gid', 0), ('capabilities', 1), ('no_new_privileges', False),
                              ('seccomp_mode', 0), ('private_namespaces', False), ('network_routes', 1),
                              ('memory_max', 0), ('pids_max', 0), ('cpu_max', 'max 100000'), ('io_max', ''),

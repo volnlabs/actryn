@@ -85,7 +85,17 @@ artifact, guest boot, cgroup lifetime, Robot binding, original handle/observatio
 lineage and settled debit. The recorded runtime snapshot must independently show
 UID/GID 65532, no capabilities, no-new-privileges, seccomp mode 2, private namespaces,
 no network routes, a read-only root and no unexpected mounts. It must retain the
-fixed memory/PID/CPU limits, an installed device enforcement program, and the fixed
+fixed memory/PID/CPU limits and the owned fixed device filter: the outer
+`runtime_binding.device_policy` must contain a positive u32 `program_id` and
+`instruction_sha256` equal to
+`c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05`
+(plain lowercase hex, no prefix). This pins the independently authored 160-byte
+instruction array, not the requested OCI allowlist. The owned ID must occur in
+both snapshot `device_programs_direct` and effective `device_programs`; each
+inventory is sorted, unique, at most 64 positive u32 IDs, direct is a subset of
+effective, and `device_attach_flags` is exactly 2 (`BPF_F_ALLOW_MULTI`). Legacy
+program-presence-only captures cannot satisfy this new fixed-profile campaign.
+It must also retain the fixed
 I/O rates on the device read from installed configuration during preflight.
 Cleanup must retain a ready observer with zero loss,
 required probe coverage, the same collector epoch and monotone sequence, plus all

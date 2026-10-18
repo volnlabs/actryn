@@ -51,6 +51,8 @@ fn snapshot() -> Snapshot {
         cpu_max: "50000 100000".into(),
         io_max: "8:0 rbps=1048576 wbps=1048576 riops=128 wiops=128".into(),
         device_programs: vec![7],
+        device_programs_direct: vec![7],
+        device_attach_flags: 2,
         unexpected_mounts: vec![],
         root_readonly: true,
     }
@@ -86,6 +88,22 @@ fn verification_rejects_missing_controls_or_wrong_lifetime() {
         },
         Snapshot {
             device_programs: vec![],
+            ..snapshot()
+        },
+        Snapshot {
+            device_programs_direct: vec![],
+            ..snapshot()
+        },
+        Snapshot {
+            device_attach_flags: 0,
+            ..snapshot()
+        },
+        Snapshot {
+            device_attach_flags: 1,
+            ..snapshot()
+        },
+        Snapshot {
+            device_programs: vec![0],
             ..snapshot()
         },
         Snapshot {

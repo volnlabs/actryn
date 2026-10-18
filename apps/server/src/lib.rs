@@ -2,6 +2,7 @@
 pub mod store;
 pub use store::{Attempt, Inspection, Limits, Publication, Reservation, Store};
 pub mod broker;
+pub mod device_policy;
 pub mod evidence;
 pub mod launcher;
 pub mod model;

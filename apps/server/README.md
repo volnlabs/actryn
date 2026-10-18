@@ -62,9 +62,13 @@ bytes, one request per connection. Operator and launcher requests are:
 
 Responses are `{"result":"ok","inspection":...}` or
 `{"result":"error","message":"..."}`. Preparation creates a real stopped
-containerd task, verifies process/cgroup/namespaces/mounts/device policy and
-observer coverage, then retains its PID lifetime and cgroup inode. Start rechecks
-that binding. There is no user-supplied OCI spec, path, hook, command, ID allocation
+containerd task and attaches the launcher's fixed device filter before verifying
+process/cgroup/namespaces/mounts and observer coverage. The filter permits only
+read/write access to character devices 1:3/5/8/9, including when runc adds virtual
+device defaults. Preparation retains the program ID and instruction hash alongside
+the PID lifetime, cgroup inode and direct/effective program inventories. Start
+rechecks that binding; missing or changed enforcement cancels and cleans up the
+prepared attempt. There is no user-supplied OCI spec, path, hook, command, ID allocation
 or runtime option. A failed/ambiguous task create remains charged until verified
 cleanup. This implementation uses containerd-client 0.9.0's distinct task
 Create/Get/Start calls, not `ctr tasks start`.
@@ -243,9 +247,15 @@ guest harness migrates only that fixture's known, inactive accounting files whil
 holding both lifetime locks; it never renames or reuses an unrelated account.
 `actryn-launcher` starts containerd and the observer dependencies, retains only its
 listed capabilities, and cannot open network address families. Linux 6.12's
-[device-program query](https://github.com/torvalds/linux/blob/v6.12/kernel/bpf/syscall.c#L3943)
-requires `CAP_NET_ADMIN` through `bpf_net_capable()`; the helper retains that
-capability to verify installed enforcement before start. `actryn-serverd`
+[device-program load/attach/query](https://github.com/torvalds/linux/blob/v6.12/kernel/bpf/syscall.c)
+requires `CAP_BPF` and `CAP_NET_ADMIN`. The launcher attaches with `ALLOW_MULTI`
+after trusted runtime setup, while the task is paused; runc's filter remains
+attached and a denial from either filter blocks access. The cgroup retains the
+fixed program after its load FD closes and releases it during ordinary cleanup.
+This assumes trusted Linux and a trusted launcher; it does not protect against
+privileged host removal or task migration. The independently authored, helper-free
+fixed bytecode and loader are Apache-2.0; observer BPF remains GPL-2.0-only.
+`actryn-serverd`
 has no capabilities, cannot access the engine socket, and its broker selects only
 the installed Robot peer and named HTTPS model provider. Both use `Restart=on-failure`.
 Their fixed `--recover-only` stop hooks also retire work after normal stops and

@@ -18,6 +18,7 @@ COVERAGE = {'process.lifecycle', 'syscall.openat', 'syscall.connect', 'syscall.b
             'syscall.perf_event_open', 'syscall.mount', 'syscall.unshare', 'syscall.setns'}
 COUNTERS = {'cpu.stat', 'io.stat', 'memory.current', 'memory.events', 'memory.peak',
             'pids.current', 'pids.events', 'pids.peak'}
+DEVICE_POLICY_SHA256 = 'c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05'
 
 
 def require(value, reason):
@@ -50,6 +51,24 @@ def observer_health(health, initial):
             and health['collector_epoch'] == initial['collector_epoch']
             and type(health['sequence']) is int and health['sequence'] >= initial['sequence']
             and COVERAGE <= set(health['coverage']), 'observer loss, coverage or epoch changed')
+
+
+def verify_device_policy(binding):
+    snapshot = binding['snapshot']
+    proof = binding.get('device_policy')
+    require(isinstance(proof, dict) and type(proof.get('program_id')) is int
+            and 0 < proof['program_id'] <= 0xffffffff
+            and proof.get('instruction_sha256') == DEVICE_POLICY_SHA256,
+            'fixed owned device policy proof missing or changed')
+    effective, direct = snapshot.get('device_programs'), snapshot.get('device_programs_direct')
+    for values in (effective, direct):
+        require(isinstance(values, list) and 0 < len(values) <= 64
+                and all(type(value) is int and 0 < value <= 0xffffffff for value in values)
+                and values == sorted(set(values)), 'invalid device program inventory')
+    require(set(direct) <= set(effective) and proof['program_id'] in direct
+            and proof['program_id'] in effective
+            and type(snapshot.get('device_attach_flags')) is int and snapshot['device_attach_flags'] == 2,
+            'owned device policy membership or MULTI attachment missing')
 
 
 def validate_export(bundle, attempt, artifact, binding, inspection, logs, summary, trace_bytes, started,
@@ -85,6 +104,7 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
     require(str(uuid.UUID(initial['collector_epoch'])) == initial['collector_epoch'], 'observer epoch syntax')
     observer_health(initial, initial)
     snapshot = binding['snapshot']
+    verify_device_policy(binding)
     require(snapshot['pid'] > 1 and snapshot['start_ticks'] > 0
             and snapshot['cgroup'] == '/actryn/' + attempt
             and snapshot['uid'] == snapshot['gid'] == 65532 and snapshot['capabilities'] == 0
