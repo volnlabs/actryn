@@ -1,8 +1,10 @@
 # Implementation checkpoint — 2026-10-18
 
-The user explicitly requested **stop for now** on 2026-10-18. Work is paused;
-the full v0.0.1 release is incomplete. The goal tracker is `paused`. No active
-agent build, test guest or fixture remains. Resume only after user instruction.
+The user explicitly resumed work on 2026-10-18 after the pause checkpoint
+`167ebcc`. Implementation and qualification work are in progress; the full
+v0.0.1 release is incomplete. The goal tracker still reports its previous
+`paused` state and exposes no resume API; the explicit user instruction revokes
+the pause. The saved full-release objective continues to guide the work.
 The approved scope remains [the full plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md).
 [Progress](progress.md) and [acceptance gaps](acceptance-gaps.md) retain the evidence.
 Earlier checkpoints and failed attempts remain preserved.
@@ -10,11 +12,13 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation source remains
-  `8d6e71d`, with preceding pushed checkpoint `bdf60b4`. The earlier `44320fc` CI
-  query returned no runs; newer CI is unchecked. The user authorized pushing this branch to
+  `8d6e71d`, with preceding pushed checkpoint `167ebcc`. Its remote head is
+  verified and GitHub reports zero CI runs. No CI pass is claimed. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
-- All test guests and fixtures are now off. Retained-debit campaign01 performed
+- At pause checkpoint `167ebcc`, all test guests and fixtures were off.
+  The current resumed window below records their new lifetimes.
+  Retained-debit campaign01 performed
   one crash and reboot, then failed its coordinator readiness deadline. Both
   original FAILED records, the abort-revoke and pre/post-crash evidence remain.
   Robot cleanup recovered its already-retired context once, exported both original
@@ -24,7 +28,7 @@ Earlier checkpoints and failed attempts remain preserved.
   resumed interval, only the Server booted for its package update. It has now
   powered off gracefully once; all three packaged services stayed cold and both
   charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
-- The stopped Server retains 17 launcher/16 broker rows and exactly two outstanding
+- The Server stores retain 17 launcher/16 broker rows and exactly two outstanding
   Robot charges. Its services never started after the crash; the crashed attempt
   is still `running/pending` on disk pending supported recovery. Peer/key/drop-in
   stay installed. The Robot retains 11 namespaces/18 records and every old
@@ -39,12 +43,60 @@ Earlier checkpoints and failed attempts remain preserved.
   detached `.worktrees/server-importer-build01` freezes source `544c382`.
 - Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
   or provider/signing credentials changed. Account quota telemetry is unavailable.
-- Latest stopped disk, seed, SSH trust and fixture-journal identities/hashes are
+- The preceding pause's stopped disk, seed, SSH trust and fixture-journal identities/hashes are
   in `artifacts/reconciliation-pause01/result.json`. Server disk SHA256 is
   `c3e525ab70c853061c7360911d60e15554daf519ee05bd0283a754c988550149`.
   Robot disk, seeds/trust and its 64-byte boot2 fixture journal are unchanged.
-  No repository QEMU or controller-fixture process remains. No Robot boot,
-  module load, service start or new operation occurred in this resumed interval.
+  At that pause no repository QEMU or controller-fixture process remained.
+  That preceding interval had no Robot boot, module load, service start or new operation.
+
+## Current resumed window
+
+- `artifacts/reconciliation-resume04` verifies all seven stopped-state hashes and
+  identities, the remote head and zero CI runs. Linked-worktree changes remain
+  untouched. Account quota and working-set tooling remain unavailable.
+- Server boot03 passes once with guest boot
+  `1bd4d671-2965-4d1b-8061-1de29459eb4f`, host PID2764219/start12891931 and
+  invocation `414d22890d624c56a6fca7475c6a316f`. All three services remain
+  disabled/inactive with zero start timestamps. Current test manifest is
+  `b119afd529f320a97243bea4b6d0f00919cc3be19cb6b9dfcc3fc923fbdd7e65`.
+  Cold04 verifies all 27 payload entries, old slots/archive, configuration,
+  credentials metadata and unchanged raw history. Both charges remain outstanding.
+  A private host SQLite copy retains full rows in all seven Server tables at
+  17 launcher/16 broker attempts; no original database connection was opened.
+- Server boot02's helper failed before any VM launch when it tried to resolve
+  the protected user-systemd executable. Plan04 scopes the scan to repository
+  command lines first; ten host checks pass. A separate readiness amendment
+  rejects authentication, trust and unknown SSH errors immediately. No VM launch
+  was repeated. Host readback corrections for integer manifest modes and the
+  broker-only request table are retained alongside the successful collections.
+- Robot boot02 passes once with guest boot
+  `0c7bd1e7-1acd-4c04-bada-df64b766b109`, host PID2765131/start12910553 and
+  invocation `84ce333a54094e16bd001b636b3ad85b`. Fixture PID2765125/start12910540
+  retains the same journal inode/device and appends exactly boot2 to boot3.
+  Independent status shows disabled-zero output and an empty queue. Both Robot
+  services remain disabled/inactive; no authority module has been loaded.
+- Robot cold01 passes the metadata-first catalog and private-copy history check:
+  the original SQLite SHA256 remains `0a8d736f…bba3`, with 11 retired namespaces
+  and 18 terminal records. All four identity keys are metadata-only. The actual
+  installer catalog has exactly four expected files. Archive01 moves only
+  `ffd2dd3e…` outside the managed slots once, preserving current `f4c6bb7e…`,
+  previous `dec2aa32…`, every runtime/configuration byte and the original quota.
+  The source-defined archive PASS is retained; an incorrect host status-label
+  assertion was corrected from saved output without repeating the operation.
+- All five public Robot test-bundle files are staged once in
+  `/root/actryn-reconciliation-robot-update01/bundle`; no private key transferred.
+  The candidate is still uninstalled. Next: one old-manager recovery proof,
+  activation, stopped-history review, module unload and explicit resume; then
+  separately validate candidate startup/recovery. No Grant/Prepare/Propose/Rearm
+  occurs during maintenance. Source preparation:
+  `artifacts/reconciliation-robot-update-plan01` (16 host checks).
+- Retained-debit continuation plan02 adds lifetime continuity, original
+  OutcomeUnknown preservation and final-custody guards; 29 fake checks pass.
+  Its read-only observer has ten fake checks. Runtime callbacks/pins and measured
+  observer/Client readiness remain pending. Neither campaign has executed.
+  Robot history collector/comparator has eight SQLite-copy checks; final target
+  history remains pending. These source preparations close no acceptance row.
 
 ## Server pressure: instrumented campaign verified, VM off
 
@@ -472,12 +524,12 @@ The original stopped disk hashes and identities are in
 Server peer/key/drop-in MUST remain while its two charges are unresolved. No
 record, identity generation, revocation tombstone or fixture journal was deleted.
 
-After explicit resume: revalidate stopped state, boot the retained Server with
-services cold, then amend the Robot boot plan's sibling lifetime and fresh output
-paths. Inspect the retained Robot before selecting its inactive release slot;
-archive reversibly with all history/identity files preserved and the quota
-unchanged. Install its reviewed test candidate through supported inhibited
-maintenance. Do not issue Grant, Prepare or Propose during that maintenance.
+The current resumed window has completed stopped-state validation, both boots,
+Robot cold history review, inactive-slot archival and public candidate staging.
+Next: establish the old manager's explicit recovery proof and install the reviewed
+Robot candidate through supported inhibited maintenance. Reuse the recorded
+current lifetimes and custody inputs above. Do not issue Grant, Prepare or Propose
+during that maintenance.
 Then qualify settlement of the original two handles through authenticated RPC.
 `artifacts/robot-retained-debit-continuation-plan01` has 18 passing host checks,
 but runtime inputs are null and the draft has no execution entrypoint. Root review

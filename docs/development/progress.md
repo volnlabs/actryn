@@ -5,9 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `bdf60b4`.
-  Current implementation source is `8d6e71d`. The earlier `44320fc` CI query
-  returned no runs; newer CI is unchecked and no CI pass is claimed.
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `167ebcc`.
+  Current implementation source is `8d6e71d`. The remote head is verified and
+  GitHub reports zero CI runs; no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -16,13 +16,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
-- User requested a fresh pause on 2026-10-18. All agent lanes and owned builds
-  are stopped; all test guests and fixtures are off. The goal is `paused` and
-  the release remains incomplete. The [handoff](resume.md) records next actions,
-  reviewed native/ARM builds and both unsigned candidates, the installed Server
-  test update with services still cold, and the pending Robot update. Latest
-  shutdown/state receipt: `artifacts/reconciliation-pause01/result.json`.
-  Both original Robot charges and all retained history remain intact.
+- User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
+  fixture are running; packaged services remain cold and the module absent.
+  The tracker still exposes its previous paused status without a resume API;
+  explicit user continuation authorizes this work against the full saved goal.
+  The [handoff](resume.md) records the current lifetimes, preserved histories,
+  installed Server test package, staged Robot candidate and next maintenance steps.
+  Both original Robot charges remain outstanding; release qualification is incomplete.
 
 ## Component evidence (not release acceptance)
 
@@ -1411,6 +1411,27 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   hashes and absence of owned test processes are verified in
   `artifacts/reconciliation-pause01/result.json`. Product source is unchanged;
   no new release acceptance, CI or physical qualification is claimed.
+
+### Resumed retained-state maintenance — 2026-10-18
+
+- Resume04 verifies all seven stopped-state hashes, remote167ebcc and zero CI runs.
+  Server boot03 and Robot/fixture boot02 pass once. All packaged services remain
+  cold; fixture boot2→3 is append-only, disabled-zero and queue-empty. No new
+  operation or authority module load has occurred.
+- Server cold04 verifies all 27 installed payload entries and all retained slots,
+  archive, configuration and raw histories. Private-copy SQL captures every old
+  logical row across seven tables in each store:17 launcher/16 broker,2 charges.
+  Robot cold01 verifies identical original DB,11 retired namespaces/18 terminal
+  records, four metadata-only identity keys and exact installer catalog.
+- Robot archive01 retains the sole inactiveffd2 release outside the managed
+  directory, preserving currentf4c6/previousdec2 and every runtime/configuration
+  byte. All five public candidate files are staged once; activation remains pending.
+  Original helper/preflight and host reporting failures remain preserved, with
+  no repeated VM launch, collection or archival operation.
+- Continuation plan02 passes29 fake checks; its observer passes10. Robot history
+  collection/comparison passes8 SQLite-copy checks. These are source preparation,
+  not target acceptance. Old-manager maintenance proof and candidate installation
+  precede authenticated retained-charge settlement and the four unrun preparations.
 
 ## Decisions
 
