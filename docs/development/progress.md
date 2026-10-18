@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `b85e1bf`.
+- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `f9b987d`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push12 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push12/result.json`). No CI pass is claimed.
+  push13 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push13/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -68,6 +68,33 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   architecture and runtime-provider byte bindings. Those baseline fields remain
   unbound pending explicit review of a new observation; no A16 pilot has run.
   Receipt: `artifacts/a16-common-quiescence-plan01/verification.json`.
+- The selected unsigned Robot candidate is now `da6b6862…cc5a9`, payload
+  `1e71fe91…066bb`. Actual build/inspect and independent saved-byte review pass:
+  only INSTALL.md and notices02 change; the other 15 entries and all modes/licenses
+  match dadd. Installed d77 is unchanged. Qualification remains incomplete,
+  custodian null and promotion disabled. Receipts:
+  `artifacts/robot-final-cohort-package-{plan01/result.json,review01/review.json}`.
+- A16 boot09 launches once but never invokes a pilot. The fixture starts once;
+  its initial host readiness check fails with an unlocated PermissionError.
+  Separate read-only custody verifies the actual service and boot36→37 append.
+  The first prelaunch expires without a VM launch. A fresh prelaunch preserves
+  the same fixture; a missing-template host failure also precedes VM dispatch.
+  The corrected owner launches one VM, but rejects the standard SSH banner-timeout
+  pair before qualification and its original 120s window expires. All failures
+  remain preserved; there is no VM or fixture start retry.
+- Before poweroff, diagnostic09 confirms all 375 packages are `ii ` and every
+  name/version matches the old A16 inventory. The post-shutdown catalog remains
+  unobserved until a fresh boot. Strict quiescence rejects the
+  `unattended-upgrade-shutdown --wait-for-signal` process. Its actual helper/unit
+  source is retained for review; full provider baseline remains unbound. No
+  package unit is stopped and no fifth mask is added. One normal unused-boot
+  poweroff completes within the original 490s handling window, then one supported
+  fixture shutdown preserves its 764-byte journal and removes its owned sockets.
+  All test carriers are off. New A16 disk SHA256 is
+  `26acddea9024652365b8d4844c29d49ab18857cce520bb2ca8163bdc5474a4d1`;
+  Server/Robot disks, seeds, SSH trust and metadata-only keys remain unchanged.
+  Receipts: `artifacts/a16-kernel09-{post-failed-boot-diagnostic01,unused-boot-poweroff02,fixture-shutdown01,final-stopped-custody01}`.
+  Pilot09 is NOT_RUN; pilot07 stays FAILED and A16 qualification remains open.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes

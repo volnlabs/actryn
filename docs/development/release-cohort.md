@@ -50,19 +50,19 @@ and build inputs `60ec99a5d032831a94c36036555a2c9b1b969fa3f2e9436293d521459f0e18
 The Robot DTB is `b7a13e2f87dccf996274d65e91603b988b4d170bfa3ca9f2610f173d0dcc2011`.
 These identities do not establish current package/provider equality on every test disk.
 
-**Final Robot package: UNSELECTED.** Installed d77/dadd retains INSTALL.md
-`a0a5e4ee942146bfa60e7274a324ed26b7284c7defd12e1597e0ec6ef2fcc153`
-and notices `d651b22f850ba8c1c40390a407835838cdf4aff50e5d56e7bfac0b0a32bd89b9`.
-The separately reviewed alternatives are INSTALL.md
-`c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add`
-and notices02 `98ec4b48f120976337d35ff57ea16e4b56b18c9c10406a237206c401d410a985`.
-`c8b5…` is a document hash, not a package manifest. Before selecting a final
-Robot candidate, merge those two selected assets with the dadd runtime deliberately,
-verify all 17 entries/modes/licenses and the remaining 15 entries byte-identical,
-and record the new manifest/payload and source-material references. This merge
-has not been performed here. The older `878732d8…` unsigned cohort has older
-runtime binaries and cannot stand in for that selection. Neither TEST signature
-nor a notices-text check supplies release qualification or custodian approval.
+**Final Robot package: selected unsigned candidate, pending qualification.**
+Manifest `da6b6862768071ae839c64d73be56f63e23d852ab99e0b7d12f1541f987cc5a9`
+has payload `1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb`.
+The [actual assembly](../../artifacts/robot-final-cohort-package-plan01/result.json)
+and [independent saved-byte review](../../artifacts/robot-final-cohort-package-review01/review.json)
+verify all17 entries: INSTALL.md selects `c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add`,
+notices02 selects `98ec4b48f120976337d35ff57ea16e4b56b18c9c10406a237206c401d410a985`,
+and the other15 entries remain byte-identical to dadd with every mode/license unchanged.
+The [component/evidence mapping](../../artifacts/robot-final-cohort-package-plan01/component-map.json)
+retains mixed build origins. This host assembly did not install or change d77;
+the older `878732d8…` cohort is not selected. The candidate remains unsigned,
+nonpromotable, qualification incomplete and custodian null; document selection
+does not supply target qualification or release approval.
 
 ## Source-impact boundaries
 
@@ -97,7 +97,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | A06/A07/A15 | Unchanged module16 aggregate: 16 actual ARM cases and 17 cases each in plain/lockdep/KASAN/KCSAN, including retained FD, leader exit, genuine PID reuse and concurrent closure. | Reuse exact module/source/config receipt; no blanket diagnostic rebuild. Mocked serdev byte offsets and PM/shutdown callbacks do not prove physical UART or real-platform suspend/poweroff behavior. |
 | A10 | Traffic03 corrected unchanged-capture analysis; lifetime09 gateway replacement/retained-FD, local offline recovery and export. | Preserve earlier failures, uncertain negative reply and the capture-prefix boundary. Zero SAMPLE records are not applied-motion proof. Bind manager11→e36 delta. |
 | A11 | Actual source80→82 gap and hot-journal committed-prefix recovery. | Preserve raw remnant/unknown tail and read/queued/durable distinctions. Metadata-only capture intentionally remains execution-replay-ineligible. |
-| A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. | Final Robot 17-entry merge and final manifest selection remain open. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
+| A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
 | A13/A14/A16 | Live-policy/missing-credential controls; observer overhead/loss evidence; failed production pilot07 and accepted diagnostic8 retained independently. | Authorized live-provider run, independent developer installation, production authority pilots and frozen comparison remain open. Diagnostic8 is an instrumented non-reproduction, not a fix, comparison or WCET proof. |
 
 The latest Server case leaves 24/23 Server rows,16/21 Robot records and zero
@@ -105,31 +105,53 @@ debits; separate failure custody, cold stop and cold integrity preserve all old
 rows and 374 entries. Do not substitute the earlier cleanup's 22/21 counts for
 this later state. All failed records and unperformed stages retain their status.
 
+The [additive enforcement review](../../artifacts/server-final-d2-predicate-map01/enforcement-followup01.md)
+resolves the running-device-filter lifetime question under the stated trusted
+Linux/administrator assumptions: the cgroup owns the attached program reference
+through loader/reader exit. This is an invariant disposition, not a periodic
+monitor or hostile-root claim. Production Prepare and cleanup after fixed-policy
+installation failure still lack an actual exercise. A proposed one-Prepare,
+no-Start capability-denial case remains NOT_RUN; the existing value/verifier
+checks do not establish that error path.
+
 ## ARM CLI coverage to bind
 
 The selected `4102…` CLI has actual installed `robot describe` and `robot recover`
 execution in the d77 startup/update receipts, plus the static ABI result above.
 The startup capability-parser failure is preserved; its retained known Recover
-reply and ready proof are not another startup invocation. Earlier CLI doctor and
-manager11 lifecycle use older binaries: the lifecycle harness calls CLI `pair`,
-`handle`, `cancel`, `query` and `export`, while most authority commands use direct
-RPC/SDK. API behavior is therefore not automatically proof of every CLI route.
+reply and ready proof are not another startup invocation. Manager11 lifecycle03
+calls `pair`, `handle`, `cancel`, `query` and `export` using the **host**
+`target/debug/actryn`, SHA `76264fae868e823b2010204001b8e7444311e8259a6da2c8a946b41b1f430daf`.
+Its exact build-origin receipt is not identified in the inspected chain. Those
+calls are not execution of the installed ARM2e65 binary.
 
-No selected-4102 target acceptance receipt is bound here for the following routes:
+The additive [saved-source proof](../../artifacts/arm-cli-coverage-source01/result.json),
+hash `e8cbec1e75f312601cdf428a3868897551026234629510e6562d3cacce5a2a66`, compares
+selected544 with old ARM2ec9: all CLI, RPC/authority-client and schema production
+sources match. Across 36 compared production/build/schema files, only the Server
+artifact importer differs; 259 conservative locked dependency records match.
+The sole workspace lockfile change is outside that closure. This supports
+front-end reuse, not native binary equivalence or e36 manager qualification.
+Enrollment01 supplies actual old-ARM `enroll-request`, `enroll-install` and
+`install-principal` results; its pairing uses same-source544 **native** CLI f584.
+The [proof notes](../../artifacts/arm-cli-coverage-source01/README.md) retain exact
+invocation, provenance and historical-catalog boundaries.
 
-- `robot prepare`, `grant`, `rearm`, `activate`, `observe`, `propose`, `reconcile`,
-  `revoke`, `retire` — the central CLI-only operation lifecycle remains uncovered.
-- `robot pair`, `handle`, `query`, `cancel`, `export`, `doctor`/`status` — retain
-  older CLI evidence, then establish exact command/RPC dependency source equality
-  or add only the missing selected-binary checks.
-- `robot enroll-request`, `enroll-install`, `install-principal`, `revoke-principal`
-  — older installed enrollment/RPC receipts are not selected-CLI evidence.
-
-This is an explicit coverage gap in this map, not an assertion that every command
-has failed or that no other saved receipt exists. Resolve it by attaching exact
-receipt/binary bindings or a source-equality review first; only genuinely uncovered
-routes need new execution. [CLI dispatch](../../apps/cli/src/command.rs) defines
-these names; there is no separate `robot execute` or `authorise` command to invent.
+Actual CLI execution of `prepare`, `grant`, `rearm`, `activate`, `observe`,
+`propose`, `reconcile`, `revoke` and `retire` is not established by this chain:
+the lifecycle exercises these through RPC/SDK. Selected-ARM `doctor`/`status`
+and `revoke-principal` also remain unbound here. This describes coverage, not a
+new requirement for a second, CLI-only target campaign. The approved spec requires
+the operator CLI and shared API; A12 concerns installation/tuple/update behavior,
+and A14 requires independent developer use. Neither demands every subcommand run
+on the target separately. Bind source/host command-dispatch, RPC/handle and ABI
+proof to the real SDK workflow; review missing positive front-end checks before
+deciding whether any new target execution is necessary. Do not promote generic
+RPC tests to positive tests of every command. Any genuinely needed fresh target
+flow must preserve the full old history and use a future fresh-data VM/candidate,
+without old Cancel/Recover replay or capacity widening.
+[CLI dispatch](../../apps/cli/src/command.rs) defines the names; there is no separate
+`robot execute` or `authorise` command to invent. All original failures remain.
 
 ## Hash-bound receipt index
 

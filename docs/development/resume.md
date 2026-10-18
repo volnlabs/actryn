@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The latest recorded pushed checkpoint is `b85e1bf`; push12 verifies integration
+  The latest recorded pushed checkpoint is `f9b987d`; push13 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push12/result.json`).
+  (`artifacts/reconciliation-checkpoint-push13/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,6 +78,37 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
+- Latest state: all VMs and fixtures are off after one unused A16 boot09.
+  Pilot09 never runs. The fixture starts once at PID2930053/invocation
+  `ecd48e9e4c354906ad1cc89c153e39cc`, appending boot37 to the retained journal;
+  an initial host PermissionError is separately resolved by read-only custody.
+  Old prelaunch expiry and the later missing-template failure both precede any
+  VM dispatch. The sole VM boot `db538419-928a-4174-b565-6df5e34d9e7a` is pinned
+  to the old machine/kernel/binaries, but readiness rejects two standard SSH
+  banner-timeout lines and its 120s qualification window expires. Original
+  failures are not relabelled. Diagnostic-only collection verifies 375 clean
+  installed packages with no historical name/version differences before poweroff;
+  the post-shutdown catalog is unobserved until a fresh boot. It rejects
+  the waiting unattended-upgrade shutdown helper, whose source is retained.
+  Full package/provider approval remains unbound. One guest poweroff completes
+  within the unchanged 490s window, followed by supported fixture shutdown.
+  Current A16 disk is
+  `26acddea9024652365b8d4844c29d49ab18857cce520bb2ca8163bdc5474a4d1`;
+  journal is 764 bytes/boot37 with the original 744-byte prefix unchanged.
+  All other stopped disks/seeds/trust and private-key metadata remain exact.
+  Authoritative receipt:
+  `artifacts/a16-kernel09-final-stopped-custody01/result.json`.
+  New source preparation must account for the observed startup/helper cases
+  before another fresh execution window; no pilot or baseline is approved here.
+- Unsigned Robot selection now has manifest
+  `da6b6862768071ae839c64d73be56f63e23d852ab99e0b7d12f1541f987cc5a9`, payload
+  `1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb`.
+  It merges the reviewed INSTALL.md/notices02 with the same 15 dadd runtime/other
+  payload entries, preserving every mode/license. Actual build/inspect and
+  independent saved-byte review pass; it is unsigned, uninstalled and unqualified.
+  Receipts: `artifacts/robot-final-cohort-package-plan01/result.json` and
+  `artifacts/robot-final-cohort-package-review01/review.json`. See the
+  [cohort map](release-cohort.md) for case-level and CLI source boundaries.
 - `artifacts/reconciliation-resume04` verifies all seven stopped-state hashes and
   identities, the remote head and zero CI runs. Linked-worktree changes remain
   untouched. Account quota and working-set tooling remain unavailable.

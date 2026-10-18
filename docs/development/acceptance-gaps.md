@@ -8,9 +8,11 @@ NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
 The additive [release cohort map](release-cohort.md) binds selected mixed-origin
-artifacts to case evidence, identifies source-impact and CLI coverage boundaries,
-and leaves the final Robot package unselected. It closes no acceptance row.
-Push12 records integration checkpoint `b85e1bf` and its validator-fix branch,
+artifacts to case evidence and identifies source-impact and CLI coverage boundaries.
+Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
+and independent 17-entry review; installed d77 and qualification are unchanged.
+The map closes no acceptance row.
+Push13 records integration checkpoint `f9b987d` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The latest composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -19,8 +21,12 @@ and the fixture off, with stopped public-byte custody recorded in
 `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`. The fixture's
 safe Faulted transport-loss state is retained; its rejected first stop precheck
 sent no Stop. This cleanup closes no additional acceptance row. A16's common
-four-mask source amendment has eight passing host checks, but its complete
-package/provider baseline remains unbound and target execution is NOT_RUN.
+four-mask source amendment has eight passing host checks. Its sole boot09 fails
+readiness before a pilot; all carriers then stop with known custody. A diagnostic
+matches all 375 clean installed package versions before poweroff but rejects the
+waiting shutdown helper. The post-shutdown catalog is not yet observed. Complete provider approval remains unbound, pilot09 is NOT_RUN and A16
+remains open. Latest stopped state is
+`artifacts/a16-kernel09-final-stopped-custody01/result.json`.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|
