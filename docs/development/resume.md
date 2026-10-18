@@ -12,8 +12,9 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation source remains
-  `8d6e71d`, with preceding pushed checkpoint `167ebcc`. Its remote head is
-  verified and GitHub reports zero CI runs. No CI pass is claimed. The user authorized pushing this branch to
+  `8d6e71d`, with preceding pushed checkpoint `49428f1`. Its remote head is
+  verified. The earlier `167ebcc` CI query returned zero runs; newer CI is
+  unverified. No CI pass is claimed. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
 - At pause checkpoint `167ebcc`, all test guests and fixtures were off.
@@ -74,8 +75,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `0c7bd1e7-1acd-4c04-bada-df64b766b109`, host PID2765131/start12910553 and
   invocation `84ce333a54094e16bd001b636b3ad85b`. Fixture PID2765125/start12910540
   retains the same journal inode/device and appends exactly boot2 to boot3.
-  Independent status shows disabled-zero output and an empty queue. Both Robot
-  services remain disabled/inactive; no authority module has been loaded.
+  Independent status shows disabled-zero output and an empty queue. The new
+  manager, unchanged gateway and authority module are now running;
+  no grant or operation was issued during maintenance.
 - Robot cold01 passes the metadata-first catalog and private-copy history check:
   the original SQLite SHA256 remains `0a8d736f…bba3`, with 11 retired namespaces
   and 18 terminal records. All four identity keys are metadata-only. The actual
@@ -86,15 +88,47 @@ Earlier checkpoints and failed attempts remain preserved.
   assertion was corrected from saved output without repeating the operation.
 - All five public Robot test-bundle files are staged once in
   `/root/actryn-reconciliation-robot-update01/bundle`; no private key transferred.
-  The candidate is still uninstalled. Next: one old-manager recovery proof,
-  activation, stopped-history review, module unload and explicit resume; then
-  separately validate candidate startup/recovery. No Grant/Prepare/Propose/Rearm
-  occurs during maintenance. Source preparation:
-  `artifacts/reconciliation-robot-update-plan01` (16 host checks).
+  Old recovery passed once, but activation01
+  stopped before invoking the installer: the fresh Describe was 102.422 seconds
+  after the successful recovery proof, beyond the runtime's 60-second clock
+  mapping limit. Its consumed phase contains only two service reads and Describe.
+  Readback confirms the same old manager lifetime, old current pointer, two
+  managed slots, no installer gate and disabled-zero/empty fixture state.
+  Evidence: `artifacts/reconciliation-robot-activation-inspection01/review.json`.
+  The failed phase remains preserved. Amendment04 refreshes inhibited recovery
+  once immediately before inherited activation; nine checks pass. Actual
+  activation02 installs test candidate `d77a2698…`, unloads normally and resumes
+  explicitly with both services stopped. Result SHA256: `dcd720eb…0330`.
+  Root's private-copy review verifies all five preserved roots and all 11/18
+  historical rows; the raw registry remains byte-identical. Evidence:
+  `artifacts/reconciliation-robot-post-stop-history01/review.json`.
+- Startup01 loads the unchanged module, starts the candidate manager once,
+  completes one inhibited recovery exchange and starts the unchanged gateway
+  once. It then fails a verifier parser: raw `/proc/status` capability fields
+  contain leading tabs rejected by its untrimmed hex regex. Readback shows
+  manager PID1428/start195232/invocation `9f7e58e4…`, gateway
+  PID1481/start197752/invocation `12a75d3e…`, zero restarts and all five gateway
+  capability masks zero under UID987. Its failure and 106 phase files remain
+  preserved; startup and recovery are not repeated. A separate read-only verifier
+  passes 14 host checks and actual existing-service verification with result
+  SHA256 `35915056…885a`; it normalizes only surrounding capability-field
+  whitespace. Evidence: `artifacts/reconciliation-robot-startup-verification01`.
+  It reports current mapping freshness separately from the historical recovery
+  proof. New-manager history collection independently passes all
+  11 old namespaces/18 records with stable raw files:
+  `artifacts/reconciliation-robot-live-history01/review.json`.
+  No Grant/Prepare/Propose/Rearm occurs during maintenance; freshness and
+  capacity limits remain unchanged.
 - Retained-debit continuation plan02 adds lifetime continuity, original
   OutcomeUnknown preservation and final-custody guards; 29 fake checks pass.
   Its read-only observer has ten fake checks. Runtime callbacks/pins and measured
-  observer/Client readiness remain pending. Neither campaign has executed.
+  observer/Client readiness remain pending. Initial live public-hash observation
+  passes in 4.158 seconds. The first steady observation stops at 1.501 seconds
+  against its 1.5-second harness bound, before Client construction or any Prepare.
+  Its Robot SSH read takes 1.473 seconds. This failure is preserved under
+  `artifacts/robot-retained-debit-root-runtime01/observer-records`; the harness
+  needs a separately reviewed timing/integration amendment before campaign use.
+  Neither continuation campaign has executed.
   Robot history collector/comparator has eight SQLite-copy checks; final target
   history remains pending. These source preparations close no acceptance row.
 

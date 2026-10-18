@@ -5,9 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `167ebcc`.
-  Current implementation source is `8d6e71d`. The remote head is verified and
-  GitHub reports zero CI runs; no CI pass is claimed.
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `49428f1`.
+  Current implementation source is `8d6e71d`. The remote head is verified;
+  the earlier `167ebcc` CI query returned zero runs. Newer CI is unverified.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -17,12 +17,26 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
 - User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
-  fixture are running; packaged services remain cold and the module absent.
+  fixture are running. Server services remain cold. The new Robot manager,
+  unchanged gateway and module are running without a grant or operation.
   The tracker still exposes its previous paused status without a resume API;
   explicit user continuation authorizes this work against the full saved goal.
   The [handoff](resume.md) records the current lifetimes, preserved histories,
   installed Server test package, staged Robot candidate and next maintenance steps.
   Both original Robot charges remain outstanding; release qualification is incomplete.
+- Robot maintenance activation01 stopped before the installer because its
+  recovery proof had exceeded the unchanged 60-second mapping lifetime. The
+  consumed failure and readback are preserved. Reviewed activation02 refreshes
+  inhibited recovery once and installs the candidate; stopped/private-copy and
+  live/new-manager checks preserve all 11/18 historical rows. Startup then stops
+  on a capability-field whitespace parser error after both services start.
+  Actual readback confirms UID987 and zero gateway capabilities; no startup or
+  recovery is repeated. The separate read-only verifier passes 14 host checks
+  and actual existing-service verification (`35915056…885a`).
+- The first steady lifetime observer misses its 1.5-second harness bound at
+  1.501 seconds, before Client construction or any Prepare. Initial public hashes
+  pass. A reviewed harness integration amendment is required before the remaining
+  retained-debit campaign; controller and operation deadlines are unchanged.
 
 ## Component evidence (not release acceptance)
 
