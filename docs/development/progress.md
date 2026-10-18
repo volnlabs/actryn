@@ -5,9 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding remote checkpoint `db0fcbb` verified on
-  2026-10-17. Current implementation source is `8d6e71d`; CI for the new
-  checkpoint has not been checked, so no CI pass is claimed.
+- Integration branch: `feat/v0.0.1`; preceding remote checkpoint `44320fc` verified on
+  2026-10-18. Current implementation source is `8d6e71d`. The branch CI query
+  returned no runs; no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -16,11 +16,12 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
-- User requested a fresh pause on 2026-10-17. All agent lanes and owned builds
+- User requested a fresh pause on 2026-10-18. All agent lanes and owned builds
   are stopped; all test guests and fixtures are off. The goal is `paused` and
   the release remains incomplete. The [handoff](resume.md) records next actions,
-  the completed native Server build, the ARM preparation failure before Cargo,
-  and the unverified archival draft. No target update or archival was performed.
+  the reviewed native Server build and unsigned candidate, successful ARM build
+  with unfinished native/link receipts, and host-tested archival plan02 awaiting
+  root review. No target update or archival was performed.
 
 ## Component evidence (not release acceptance)
 

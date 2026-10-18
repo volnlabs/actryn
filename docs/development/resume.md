@@ -1,6 +1,6 @@
-# Implementation checkpoint — 2026-10-17
+# Implementation checkpoint — 2026-10-18
 
-The user explicitly requested **stop for now** on 2026-10-17. Work is paused;
+The user explicitly requested **stop for now** on 2026-10-18. Work is paused;
 the full v0.0.1 release is incomplete. The goal tracker is `paused`. No active
 agent build, test guest or fixture remains. Resume only after user instruction.
 The approved scope remains [the full plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md).
@@ -10,8 +10,8 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `8d6e71d`. Remote checkpoint `db0fcbb` was verified on 2026-10-17. CI for the new
-  checkpoint has not been checked. The user authorized pushing this branch to
+  `8d6e71d`. Remote checkpoint `44320fc` was verified on 2026-10-18. The branch CI
+  query returned no runs; no CI pass is claimed. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
 - All test guests and fixtures are now off. Retained-debit campaign01 performed
@@ -36,6 +36,10 @@ Earlier checkpoints and failed attempts remain preserved.
   detached `.worktrees/server-importer-build01` freezes source `544c382`.
 - Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
   or provider/signing credentials changed. Account quota telemetry is unavailable.
+- The 2026-10-18 readback revalidates stopped disk, seed and SSH trust identities
+  and hashes, with all three retained guest/fixture units inactive and no repository
+  QEMU process. Receipts: `artifacts/continue-resume-state02/{local-state,remote-ci}.json`.
+  No guest or fixture was started during this resumed interval.
 
 ## Server pressure: instrumented campaign verified, VM off
 
@@ -334,24 +338,44 @@ new instrumentation or changed limits.
 
 ## Remaining integration and external gates
 
-Pause checkpoint: native Server daemon build and static checks completed before
-the stop request, with no candidate execution. Lane receipt:
+Native Server daemon build and static checks completed, with no candidate
+execution. Lane receipt:
 `artifacts/server-reconciliation-build01/provenance.json`; binary SHA256
 `afef317ba581fe2feedf24bd46c244c17fdbd5aacf4b75dd62058a64a93ada5b`.
-The lane reports 31 allocated sections unchanged and 176 exact target-library
-imports matched. Root confirmed the build receipt and absence of owned build
-processes; independent review of its full inventory remains pending.
+Root independently verifies all 31 inventory files, the frozen Git source archive,
+31 unchanged allocated sections, 22 native inputs and 176 exact target-library
+imports. Receipt: `artifacts/server-reconciliation-root-review01/result.json`.
 
-ARM build preparation stopped before Cargo: its recorder attempted to create
-`build-intent.json` twice. Preserve
+The Server lane completes unsigned packaging and inspection in
+`artifacts/server-reconciliation-package01`: only `bin/actryn-serverd` changes;
+26 other entries retain their bytes, modes and licenses. The manifest is
+`e06c12d63958e6c2296c2afc0f87cec3279ed2664d51d888bcada40189baa50d`.
+The component map records mixed source origins and current build/test receipts.
+Qualification remains incomplete, signing custodian null and `promotable=false`.
+Root review of this package remains pending; no candidate was installed or run.
+
+ARM build01 preparation failed before Cargo because its recorder attempted to
+create `build-intent.json` twice. Preserve
 `artifacts/robot-reconciliation-build01/{failure.json,driver.stderr}` and the
-source/tool/preflight records. Compiler attempt count is zero; a separately
-numbered recorder correction is required before the first ARM build. No retry
-was run. `artifacts/retained-release-archive-plan01/archive.py` is only an
-unverified draft: no syntax checks, tests, source pins or root review exist.
-Do not execute it. All three lanes report no owned child remains; root's process
-readback found no repository build or QEMU process. No packaging, signing,
-archival, guest boot or target installation followed the stop request.
+source/tool/preflight records. Its compiler attempt count remains zero. Separately
+numbered build02 changes only the generic intent filename, after a mock check
+reproduces the collision and proves exactly one dispatch with the correction.
+One ARM64 manager build at `8d6e71d` passes in 38.55 seconds; the lane verifies
+all 28 allocated sections unchanged and all 147 exact target-library imports.
+Binary SHA256: `e36d5b2857bfa85b9042d529246b0b173c9cc4cac8c7686c3a6bf047a2ce372a`.
+All 54 build01 files remain unchanged. Build02's metadata analysis then fails:
+an inherited 128-entry guard rejects 272 link-map LOAD entries, including 258
+temporary Rust objects. Preserve `analysis-failure.json` and partial receipts.
+No metadata amendment was executed. Native/link receipt completion, final aggregate
+inventory and root review remain pending; do not rebuild the successful binary.
+
+Archival plan01 remains an unverified, unchanged draft. Separately numbered
+`artifacts/retained-release-archive-plan02` has 12 passing focused host tests,
+retained failures and pinned source hashes. No target input or eligible slot has
+been selected. Root source review and fresh target readback remain required before
+any reversible move under the existing installer lock. Do not execute either
+plan against a guest now. All three lanes report no owned subprocess remains.
+No signing, archival, guest boot or target installation occurred in this interval.
 
 Retained-debit campaign01 is **FAILED**, not NOT_RUN or passed. Publication01
 installs the exact peer/key/drop-in and starts the three packaged Server services
@@ -408,9 +432,10 @@ Stopped disk hashes and identities are in
 Server peer/key/drop-in MUST remain while its two charges are unresolved. No
 record, identity generation, revocation tombstone or fixture journal was deleted.
 
-Next: rebuild the changed Server daemon and Robot manager with exact source/native
-receipts, prepare new immutable candidates, and qualify retained-history settlement
-through the authenticated installed path. Both installations already have three
+Next: finish and review ARM build02 metadata receipts without rebuilding; review
+the unsigned Server candidate and prepare its Robot counterpart. Then review
+archival plan02 and qualify retained-history settlement through the authenticated
+installed path. Both installations already have three
 release slots; resolve supported reversible archival of an inactive slot before
 staging another, preserving every byte and the current pointer. Do not raise the
 slot quota. New Robot startup must use the supported inhibited maintenance path.
