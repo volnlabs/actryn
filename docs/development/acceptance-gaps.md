@@ -11,7 +11,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 |---|---|---|
 | A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
-| A04/A05/A08 | Existing daemon-death/accounting, installed capacity, freeze/crash and Server pressure results remain separate. Historical fixes pass 135 root Rust tests; crash-export correction passes 28 tests and offline saved-bundle reanalysis. Residual01 creates pressure-c/d once and preserves four exact charges, but its fifth strict diagnostic check fails because the old agent discards the broker reason. Fresh read-only custody verifies Server 20/19, Robot 14/20, all old full rows and 374 retained public/metadata records, no tasks or fifth Robot row, and zero fixture output. Diagnostic fix `42537e2` passes 5 Rust and 28 Python tests; its OCI is imported but unexecuted, preserving all four charges and old registry entries. | Every failed run remains FAILED; the old specific rejection cause is unavailable. The imported corrected OCI needs a separately owned closed-gate startup preserving all four charges. Then exactly one fresh capacity-diagnostic attempt, four matched read-only settlements and one restored-capacity attempt remain. Final expected counts22/21 Server and16 namespaces/21 records; never delete history or replay old proposals/consumed aborts. New continuous readiness, full-row custody and final evidence are required. Uncommitted tails stay unknown. |
+| A04/A05/A08 | Existing daemon-death/accounting, installed capacity, freeze/crash and pressure evidence remains separate. Diagnostic fix `42537e2` passes 5 Rust/28 Python checks and its corrected OCI reports the exact retained-capacity error. Closed-gate startup drains four retained streams with zero forwarded bytes. Four matched historical queries settle all four old debits while preserving OutcomeUnknown. A new operation is then admitted; its Server cancellation returns and both stores reap it. Fresh inspection verifies 22/21 Server rows, 16/21 Robot history, 374 preserved records, no tasks and disabled-zero fixture output. | Finalize-run01 remains FAILED: identity checks passed in 29 ms, then recorder-inclusive guard exceeded 1.5 s at 3.736 s before the next result request. Its consumed abort remains unknown; never resend or replay an operation. The new operation is durably terminal and already retired/ready, but one debit remains. One explicit Recover, matching query/settlement and final custody remain. Recorder fsync versus scheduling cause is unresolved; uncommitted tails remain unknown. |
 | D2 isolation | Existing sandbox bindings verify configured cgroup/device limits; missing `/dev/mem` returns ENOENT. A bounded receipt audit finds 55 JSON and eight archived reports with `oom_kill=0`. | Actual memory-budget kill/export and refusal opening an existing nonphysical forbidden device remain unproven. A one-attempt test-only harness is being prepared; no target run yet. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
@@ -85,22 +85,27 @@ fix passes offline reanalysis without repeating the export. Subsequent residual0
 performs two pressure operations and the failed fifth attempt; fresh read-only
 inspection verifies20/19 Server rows,14/20 Robot history and four charges. Its
 distinct abort Revoke is consumed. Fix `42537e2` restores the missing agent diagnostic
-with bounded reasons; the old failure remains FAILED. Further execution requires
-a corrected OCI, reviewed offline import/startup and exactly two new preparations,
-with fresh continuous readiness. The separately reviewed Robot-only guard/recorder/SDK
+with bounded reasons; the old failure remains FAILED. The corrected OCI import/startup and exactly two new preparations are now
+recorded below; no further preparation or proposal may be added to this campaign. The separately reviewed Robot-only guard/recorder/SDK
 sample passes in 0.118052 seconds, with known cleanup and no preparation; this
 does not close campaign acceptance. Release signing, live credentials and independent
 installation remain separate external gates. No software result qualifies motion.
 
-Diagnostic source `42537e2` now has one successful static build/OCI assembly and
-independent root payload checks. Public staging and one additive import pass;
-the candidate remains unexecuted.
-The deliberate Server stop passes once, preserving every 20/19 row, all four
-charges and peer/key metadata; all three services are currently cold. Import
-preserves all old registry entries and adds exactly one approval, under the same
-capacity 8. Closed-gate startup, two new attempts and final settlement remain
-pending. All 68 host checks pass; raw captures stay local and the pushed source
-is not their backup.
+Diagnostic source `42537e2` has one successful static build/OCI assembly and
+independent root payload checks. Public staging, one additive import and the
+subsequent closed-gate startup pass, preserving all older registry entries and
+four then-outstanding charges under capacity 8. The new capacity diagnostic and
+four historical settlements pass. Finalize-run01 then fails the local recorder
+cutoff during the restored operation's cancellation checks; the following result
+request was never sent. Read-only inspection verifies the terminal, retired/ready
+operation, one remaining debit and zero output. All failed runs remain FAILED.
+The custody checker also had an independent historical transport-flag error:
+existing Server code and regression coverage intentionally retain
+`remote_unavailable=true` with a positive historical settlement. Numbered
+custody-plan02 corrects only that check; its meaningful RED and 23 passing host
+checks preserve all exact durable identity, raw-record and reconciliation proof
+requirements. This is not a production change or a final campaign pass.
+Raw captures stay local and the pushed source is not their backup.
 
 ## Historical audit
 

@@ -5,9 +5,10 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `968c625`.
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `e89dffd`.
   Server/Robot implementation source remains `8d6e71d`; preview-agent diagnostic
-  fix `42537e2` is integrated and its OCI imported, with execution pending. The preceding remote head is verified;
+  fix `42537e2` is integrated; its imported OCI has executed the exact capacity
+  diagnostic. The preceding remote head is verified;
   its CI query returned zero runs. No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
@@ -18,16 +19,19 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
 - User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
-  fixture are running. All three Server services have stopped once for the
-  corrected OCI's completed offline import; all four charges and 20/19 rows are preserved.
-  The new Robot manager,
-  unchanged gateway and module are running with authority inhibited and no operation.
-  The failed fifth preparation is retired and awaiting explicit recovery.
+  fixture are running. All three Server services restarted deliberately once
+  after the corrected OCI import, with zero automatic restarts. Four historical
+  debits have settled without replay. Current counts are Server 22/21 and
+  Robot 16 namespaces/21 records, with one new debit outstanding. The finalization
+  run failed its recorder-inclusive guard deadline after the restored operation's
+  Server cancellation; its FAILED record remains. Fresh read-only inspection
+  proves the operation durably terminal and its context retired/ready, with
+  stopped writers, no effective grant, and disabled-zero fixture output.
   The tracker still exposes its previous paused status without a resume API;
   explicit user continuation authorizes this work against the full saved goal.
   The [handoff](resume.md) records the current lifetimes, preserved histories,
   installed Server/Robot test packages and next qualification steps.
-  Four Robot charges remain outstanding, including both originals; release qualification is incomplete.
+  One explicit recovery and matching settlement remain; release qualification is incomplete.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
@@ -89,12 +93,11 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   saves fifth-attempt raw logs before asserting. The regression fails before
   the fix; root independently passes five Rust tests, 28 Python checks and fmt.
   No Server/Robot binary, bound, authority rule or retry policy changes.
-  The next numbered sequence requires a closed gate before one deliberate Server
+  The next numbered sequence required a closed gate before one deliberate Server
   startup after the completed offline import with full-row custody.
   A fresh capacity-diagnostic attempt and one restored-capacity attempt fit
-  exactly at 16 Robot namespaces/21 records and Server22/21; no old proposal,
-  crash, pressure case or consumed abort may repeat. Startup and those two new
-  attempts have not run.
+  exactly at 16 Robot namespaces/21 records and Server 22/21; no old proposal,
+  crash, pressure case or consumed abort may repeat. Their actual results follow below.
 - One locked/offline static-glibc amd64 build of diagnostic source `42537e2` passes;
   agent SHA256 is `d0e6de54…ee01`, OCI `sha256:cccdc80b…cc22`. Root independently
   verifies the ELF, all five OCI files and exact unchanged input/schema payloads.
@@ -113,11 +116,40 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   entries and full 20/19 rows/four charges are preserved; only the new artifact
   approval is added. The sealed tree and modes match the built OCI. Root
   independently checks the actual import report, configuration/tree transition
-  and cold rows; all three owner scopes are reaped. Services remain cold and the
-  candidate remains unexecuted. Evidence:
+  and cold rows; all three owner scopes are reaped. At this import checkpoint,
+  services remained cold and the candidate was unexecuted. Evidence:
   `artifacts/preview-agent-diagnostic-import01/root-review.json`.
   Finalization, monitors, import and stronger raw-marker custody pass 68 root
   host checks; these do not qualify the remaining target execution.
+- Startup01 succeeds with one combined three-service job behind a fresh closed
+  gate. Four retained TLS streams drain: 992 bytes blocked, zero forwarded.
+  Full 20/19 rows and all four charges remain equal. New service identities are
+  Observer 2556, Launcher 2584 and Serverd 2611; all restarts 0.
+  The whole owner exits0 in 14.654 s with known empty scope. Independent saved
+  review passes 106 checks; this is finite source-bound observation, not a
+  universal claim about future workers. Evidence:
+  `artifacts/preview-agent-diagnostic-start-actual-review01/review.json`.
+- Finalize-run01 passes both-monitor readiness in 0.138480 s and issues its single
+  initial Recover. The corrected OCI reports the exact retained-capacity error,
+  with four unchanged debits and no new Robot request. All four historical
+  read-only settlements and exports then pass, preserving original OutcomeUnknown.
+  One new old-artifact operation is admitted after capacity release. Its Server
+  cancellation returns and both stores reap it; the next result read is not sent
+  because the fast guard's recorder-inclusive 1.5 s deadline fails at 3.735591 s.
+  Identity checks had passed in 0.029079 s. The saved file timing localizes the
+  delay to recorder execution/descheduling, without proving a particular fsync
+  or scheduling cause. Both monitors exit 0 and the owner scope is empty. The
+  distinct failure closure is consumed with unknown outcome and must not repeat.
+  The whole 55.873 s run remains FAILED. Evidence:
+  `artifacts/robot-retained-debit-finalize-failure-review01/review.json` and
+  `artifacts/robot-retained-debit-recorder-failure-review01/review.json`.
+- Read-only inspection01 verifies 22/21 Server rows, 16/21 Robot history, all 374
+  preserved public/metadata records, no tasks/cgroups/shims, and four settled
+  historical requests plus exactly one outstanding restored-operation request.
+  The latter is Completed/TargetReached, durable/reconciled revision 3, with
+  retired/ready context and stopped writers; actual fixture output is disabled,
+  duties 0/0 and queue 0. This is software-fixture evidence only. Receipt:
+  `artifacts/robot-retained-debit-finalize-inspection01/interpretation.json`.
 
 ## Component evidence (not release acceptance)
 
