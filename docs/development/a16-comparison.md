@@ -119,3 +119,15 @@ binds the remaining output/approval/custody inputs. The primary analyzer and out
 owner return 0 and the owner is inactive with an empty cgroup; that establishes
 known report completion, while the workload result remains FAILED. A16 and whole
 release qualification remain open for an explicit failure disposition.
+
+## Separate diagnostic9 observation, 2026-10-19
+
+[Observation02](release-cohort.md#diagnostic9-observation02-ten-trials) executes
+one separately instrumented userspace diagnostic and passes10/10 under the
+original kernel111 cohort and timing limits. It records no BIND failures; the
+original trial6 role/errno/cause remains unobserved. Its ten trials are excluded
+from this frozen80-trial comparison and the two prior pilots. The eight
+comparison rows remain unchanged; the aggregate comparison and acceptance
+remain FAILED.
+Normal shutdown and stopped custody complete; this gives no physical or UART
+trace qualification and does not establish that the earlier failure is fixed.

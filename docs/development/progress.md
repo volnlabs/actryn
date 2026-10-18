@@ -4,6 +4,30 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 
 ## Current state
 
+- **Final qualification packet assembled, still incomplete.**
+  The tracked [qualification packet](final-qualification.json) binds the selected
+  unsigned Server9f/Robotda6, all44 payload entries,17 D2 predicates and16
+  acceptance rows. Static review verifies107 small public references and exact
+  manifest/component projections. It preserves OPEN final-cohort associations,
+  FAILED A16 and external A13/A14/signing inputs; no manifest or payload changes.
+  Packet SHA256 is `b82dd3d118f039da366e885eaa2b56854f0e42605dda77bcc1ead8204144a727`.
+  Raw receipts remain local. Next: resolve the listed source/cohort associations,
+  original A16 disposition and missing external owners before qualification.
+- **Diagnostic9 observation02 passes all ten trials; original A16 failure remains.**
+  Fresh kernel111 boot `99c9462f-8c29-4227-aec2-78874fdc25c5` executes the
+  unchanged ELF045d once after correcting the read-only guard to exact0700.
+  Ten trials begin/end/pass, with no BIND failures; normal, cancellation,
+  delayed-applied and owner-exit scenarios retain the original limits.
+  Original package/provider pairs match; workload/gateway retirement, normal
+  VM poweroff and fixture shutdown pass within the original490-second window.
+  Current custody verifies 74 prior units inactive and its own owner closed;
+  journal boot156/3144 bytes preserves boot145 plus one start and ten trial
+  appends. Other eight public files, private clone and key metadata are unchanged.
+  Current A16 disk is
+  `cf7b67ab25401a6cb9afeb604d582f5b52d098e37f44b26796b643afd5f987de`.
+  [Diagnostic results and receipts](release-cohort.md#diagnostic9-observation02-ten-trials)
+  remain separate from the frozen FAILED79/80 comparison: the earlier BIND
+  role/errno/cause remain unobserved. No pooling or physical qualification.
 - **Diagnostic9 boot01 stopped before execution; cleanup and stopped custody pass.**
   The read-only ELF guard expected mode `0755`; the unchanged 74704-byte
   diagnostic has mode `0700` and the expected SHA045d9bcd…a612. No diagnostic,
@@ -11,14 +35,14 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   the original baseline check. Normal VM poweroff and fixture shutdown complete;
   the first local poweroff invocation failed on a relative input path before
   any guest dispatch, and its failure remains recorded separately.
-  Current custody verifies 69 prior units inactive and its own owner closed.
+  That boot01 checkpoint verifies 69 prior units inactive and its own owner closed.
   Fixture boot145/2924 bytes adds one restart and zero diagnostic appends;
   the other eight public files, private clone and key metadata are unchanged.
-  Current A16 disk SHA is
+  At that checkpoint, A16 disk SHA was
   `d1b38a1be163be7fb19cee0db238732bece31d51baad23767b698d99bf446691`.
   [Exact failed-boot and cleanup receipts](release-cohort.md#diagnostic9-boot01-mode-guard-and-cleanup)
-  preserve the failed run. A separately numbered source correction is in progress;
-  workload observation remains NOT_RUN and original A16 remains FAILED79/80.
+  preserve the failed run. The separately numbered observation02 above supplies
+  later diagnostic evidence; original A16 remains FAILED79/80.
 - **Network namespace case passes; final Server package assembled.**
   One exact111/f32 private-clone attempt `496415bbfd8adab8f4b2c830b6c61509`
   stays CREATED while a trusted verifier joins only its network namespace.
@@ -37,17 +61,17 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Verifier source `723ec39` is integrated as `f8f18a9`; 96 maintained Server
   Python checks pass. Selected unsigned Server manifest9f749ca3 contains
   launcher3ead and 26 unchanged payload entries. Exact bundle qualification,
-  A13/A14, signing and A16 remain open. Diagnostic9 observation and unused-boot
-  cleanup sources are reviewed; no diagnostic9 workload has run.
+  A13/A14, signing and A16 remain open. The later diagnostic02 evidence above
+  supplies a separate observation without repairing the original comparison.
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `7f1c760`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `117cc93`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   now built from `e6c3fd6` (integrated as `e6120d3`), with fixture corrections
   `71696f2`/`ecc5a8b`; preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push25 verifies the integration branch head, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push25/result.json`). No CI pass is claimed.
+  push26 verifies the integration branch head, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push26/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -127,7 +151,7 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   The user approves proposal `4f7e377`; exact cherry-pick `025e36e` changes only
   the platform contract. The original byte-identical snapshot remains available
   for frozen maps. This approval closes no whole D2 or release qualification.
-- **Diagnostic9 build checkpoint: ARM compile PASS; workload observation NOT_RUN.**
+- **Historical diagnostic9 build checkpoint: ARM compile PASS; observation was NOT_RUN.**
   One null-controller kernel111 boot `b0e13f6b-b80b-4dcb-ba56-ab08c56cb7ca`
   builds the separately numbered BIND diagnostic with native guest GCC14.2.0.
   ELF SHA256 `045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612`

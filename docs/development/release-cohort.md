@@ -1,7 +1,7 @@
 # Release cohort and case evidence
 
 Source/evidence reconciliation, 2026-10-19; preceding verified push
-`f8f18a9` ([push24](../../artifacts/reconciliation-checkpoint-push24/result.json), zero CI runs; no CI pass).
+`117cc93` ([push26](../../artifacts/reconciliation-checkpoint-push26/result.json), zero CI runs; no CI pass).
 This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
@@ -9,6 +9,26 @@ The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptanc
 [platform profile rules](../architecture/platform-release-contract.md) remain authoritative.
 All hashes below are SHA-256. Artifact links refer to retained, ignored local
 evidence; pushing this document does not back up those files.
+
+## Incomplete qualification packet
+
+The tracked [qualification packet](final-qualification.json), SHA256
+`b82dd3d118f039da366e885eaa2b56854f0e42605dda77bcc1ead8204144a727`, binds
+Server9f/Robotda6,44 payload entries,17 D2 predicates and A01–A16. Static checks
+verify107 small public receipt hashes, both manifest projections and all44
+component-record pointers;12 entries carry explicit build-revision pointers.
+Four larger source inputs and the two payload archives retain their previously
+selected evidence pins and were not reread during this assembly.
+
+The existing release format requires a named qualification-bundle hash and
+role-scoped custodian attestation but defines no inner acceptance schema. This
+packet is an incomplete review input: all final-cohort associations remain OPEN,
+A16 remains FAILED and A13/A14/custodian inputs remain external. No manifest is
+changed or signed; adding approved qualification metadata later changes its
+identity. The tracked packet preserves the map, not its ignored local receipts.
+[Static validation](../../artifacts/final-cohort-qualification-packet01/validation.json)
+and [Root binding review](../../artifacts/final-cohort-qualification-packet-root-review01/result.json)
+record checks only, with no new build, target action or functional test.
 
 ## Selected artifacts, not a homogeneous build
 
@@ -289,7 +309,7 @@ ABBA boots/eight runs are complete and FAILED: 79/80, with all 80 begun/ended an
 B3 evidence trial 6's BIND abort retained. Six original-K11 cohort pairs and four
 78/78 trace correlations pass; these do not repair workload acceptance. See the
 [actual eight-run report and exact receipts](a16-comparison.md), including final
-independent audit `4257e045…ef0865`. Latest A16 stopped custody is B4: 24 inactive
+independent audit `4257e045…ef0865`. At that comparison checkpoint, A16 stopped custody is B4: 24 inactive
 empty units and journal 144/2904 bytes, with unchanged other public/key-metadata
 records. Pilot07/boot09/10 failures remain unchanged; local raw copies are not
 Git backups. No equal-work, significance, superiority, physical or WCET claim follows.
@@ -732,10 +752,10 @@ The first local poweroff owner exits1 on a relative input path before input
 admission or guest dispatch. Its record remains unchanged; the separately
 numbered owner with an absolute path exits0 and closes its scope.
 
-Current stopped custody streams all nine public files and the private clone
+Boot01 stopped custody streams all nine public files and the private clone
 with metadata/no-holder bookends, checks key metadata without reading keys,
 and verifies 69 prior units inactive/PID0/empty cgroups/no restarts. Its own
-owner subsequently exits0 and closes. The A16 disk is now
+owner subsequently exits0 and closes. At that checkpoint, the A16 disk is
 `d1b38a1be163be7fb19cee0db238732bece31d51baad23767b698d99bf446691`.
 The other eight public files and private clone remain unchanged. Fixture
 boot145/2924 bytes preserves the boot144 prefix plus one 20-byte restart;
@@ -743,8 +763,8 @@ there are zero diagnostic appends. Server26/24, Robot16/21, zero debits and all
 374 preservation entries remain carried by unchanged disks. Historical64-unit
 network custody and build disk9378 are prior checkpoints.
 
-A separately numbered source amendment is being prepared for strict0700
-validation. Diagnostic9 execution remains NOT_RUN. The frozen A16 comparison
+The later separately numbered observation02 below uses strict0700 validation.
+At boot01, diagnostic execution remained NOT_RUN. The frozen A16 comparison
 remains FAILED79/80; no retry, pooling or physical qualification is claimed.
 
 | Receipt | SHA-256 |
@@ -755,7 +775,56 @@ remains FAILED79/80; no retry, pooling or physical qualification is claimed.
 | [Normal unused VM poweroff](../../artifacts/a16-bind9-unused-poweroff01/result.json) | `84a92c7eea5695874d8d399879162f532dcf5be17ef73def2e19e39f3b3387c7` |
 | [Fixture shutdown](../../artifacts/a16-bind9-unused-fixture-shutdown01/result.json) | `a1a62022b849c53bde03ecfce72aff4807727a6585923712a817fd9bb44c39a1` |
 | [Local input-path failure correction](../../artifacts/a16-bind9-unused-root-review01/local-path-correction.json) | `d3c16c2d2a5c2b73d503c9f0f90e019db5992bc7c5d3eb8d6492ea787e3af043` |
-| [Current stopped custody](../../artifacts/a16-bind9-final-stopped-custody01/result.json) | `9f98faf6a94416fc048ddb2fe35fa745577cf61d6f836fbedfef18d46710cb24` |
-| [Current public byte custody](../../artifacts/a16-bind9-final-stopped-custody01/public-custody.json) | `b4a2d74ef1233d79364481d0c3dc3ad724e7309de40b8cb9a19e0bcbd0ccc1ae` |
+| [Boot01 stopped custody](../../artifacts/a16-bind9-final-stopped-custody01/result.json) | `9f98faf6a94416fc048ddb2fe35fa745577cf61d6f836fbedfef18d46710cb24` |
+| [Boot01 public byte custody](../../artifacts/a16-bind9-final-stopped-custody01/public-custody.json) | `b4a2d74ef1233d79364481d0c3dc3ad724e7309de40b8cb9a19e0bcbd0ccc1ae` |
 | [Known custody owner exit](../../artifacts/a16-bind9-final-stopped-custody-root-review01/custody-owner-once-result.json) | `b6905b668ea636575ac17e64926903119c18fdb9522afdfd1290de2ca8ee7fa4` |
 | [Custody owner closure](../../artifacts/a16-bind9-final-stopped-custody-root-review01/custody-owner-closure.json) | `17cc9fc4815b507b3948cf4641b26b453c8cec3636ada393ef0b620dbe0027b5` |
+
+## Diagnostic9 observation02: ten trials
+
+One separately numbered evidence-only userspace diagnostic executes on boot
+`99c9462f-8c29-4227-aec2-78874fdc25c5`, exact kernel111 and the original approved
+catalog/providers/four-artifact baseline. ELF045d9bcd…a612 is unchanged. The
+shared read-only guard now requires exact0700, matching its original native
+build under umask077. The old guard fails the new regression; twelve amended
+offline checks pass. Boot02 and unused fallback sources pass eight and five
+checks respectively; frozen01 sources/failure records remain unchanged.
+
+All ten trials begin, end and pass: normal, cancel, delayed-applied and owner-exit
+scenarios use unchanged55/60-second workload bounds and the original490-second
+whole window. There are no BIND-failure records. The summary retains62 samples,
+60 timely applied and two intentional no-timely-applied outcomes, with zero new
+recorded event loss. The784 raw event rows are copied byte-identically to the
+Root evidence folder. This diagnostic executes no authority module and collects
+no UART dispatch trace; it is not kernel or physical qualification.
+
+Original before/after cohort comparison passes. Both retirement fences close,
+workload/gateway/relevant descriptors are absent, one normal poweroff confirms
+original QEMU pidfd death and fresh serial markers, and the original fixture
+then accepts one supported shutdown. Owner exits and empty scopes are recorded.
+Final custody streams all nine public records and the private clone with
+metadata/no-holder bookends, checks only private-key metadata, and verifies74
+prior units inactive. Its own owner also exits0 and closes. A16 disk is now
+`cf7b67ab25401a6cb9afeb604d582f5b52d098e37f44b26796b643afd5f987de`.
+Journal boot156/3144 bytes preserves boot145 plus one fixture start and ten
+diagnostic appends. The other eight records, clone and keys' metadata are
+unchanged; original Server26/24, Robot16/21, zero debits/all374 remain preserved.
+
+The original comparison remains FAILED79/80. No failure reproduced here, so
+its historical BIND role, errno and cause remain unobserved. These ten trials
+are excluded from that comparison and its two prior pilots. Neither a whole
+A16 acceptance pass nor a superiority, WCET or physical claim follows.
+
+| Receipt | SHA-256 |
+| --- | --- |
+| [Corrected guard checks](../../artifacts/a16-bind9-observation-plan02/verification.json) | `5e18582d98617b1bc966f25cb53f91f4567075518f8c8b8b72084eed1564818c` |
+| [Boot02](../../artifacts/a16-bind9-boot02/result.json) | `4f24c1d7398eadc4b085acbc092c27875d483c8d764a92d7ca41879801914ded` |
+| [Diagnostic result](../../artifacts/a16-bind9-observation02/result.json) | `aba80814cd38be13edd99b03f18c5cdfe6f1dd91b3bccb69f2f77d4b5d0a7436` |
+| [Ten-trial progress](../../artifacts/a16-bind9-observation02/diagnostic-progress.json) | `b6dd8974ddbb35ac987b2a1dcd32b8751ae4434a2fef12f4bd55998b06a35d3c` |
+| [Cohort pair](../../artifacts/a16-bind9-observation02/pair-validation.json) | `f93195375e6b2ffe8ce025516ff7d233d588e7e48abc822ca21643b4c1e4f241` |
+| [Root classification and raw copy](../../artifacts/a16-bind9-observation-root-review02/classification.json) | `1b3e91a57d3c07502475366a14ad743b5dcd64f5c81a1ee587d867a1b7e73b2f` |
+| [Fixture shutdown](../../artifacts/a16-bind9-fixture-shutdown02/result.json) | `e27bb1e582443962113acb7fb4a759f47d9d5aa95e827da8602b4b888ba5c87f` |
+| [Final stopped custody](../../artifacts/a16-bind9-final-stopped-custody02/result.json) | `4154a0ac5cbda23f3655a12312df156bf502913802d29edfd1ae5e272864ae31` |
+| [Public byte custody](../../artifacts/a16-bind9-final-stopped-custody02/public-custody.json) | `76c58de821699c3d8856a4ec6bbbdc6fc5678f455cc1e984560cd7f7253d9857` |
+| [Custody owner closure](../../artifacts/a16-bind9-final-stopped-custody-root-review02/custody-owner-closure.json) | `f9742c1bede4e9ce9421f44297ebc0320e96db78b3cf6ec37203b36fa2d78106` |
+| [Independent saved-evidence audit](../../artifacts/a16-bind9-observation-actual-peer02/review.json) | `827e3cf3dcbf3c27150e6e42cfb4527a4d3f60d1f8fa91fd627a2c3eb62b4ab1` |

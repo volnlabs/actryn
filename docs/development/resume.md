@@ -16,9 +16,9 @@ Earlier checkpoints and failed attempts remain preserved.
   with fixture corrections integrated as `71696f2` and `ecc5a8b`,
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding verified push is `7f1c760`; push25 verifies the integration
+  The preceding verified push is `117cc93`; push26 verifies the integration
   branch head and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push25/result.json`).
+  (`artifacts/reconciliation-checkpoint-push26/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -79,6 +79,30 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
+- **Final qualification packet assembled, still incomplete.**
+  The tracked [qualification packet](final-qualification.json) binds the selected
+  unsigned Server9f/Robotda6, all44 payload entries,17 D2 predicates and16
+  acceptance rows. Static review verifies107 small public references and exact
+  manifest/component projections. It preserves OPEN final-cohort associations,
+  FAILED A16 and external A13/A14/signing inputs; no manifest or payload changes.
+  Packet SHA256 is `b82dd3d118f039da366e885eaa2b56854f0e42605dda77bcc1ead8204144a727`.
+  Raw receipts remain local. Next: resolve the listed source/cohort associations,
+  original A16 disposition and missing external owners before qualification.
+- **Diagnostic9 observation02 passes all ten trials; original A16 failure remains.**
+  Fresh kernel111 boot `99c9462f-8c29-4227-aec2-78874fdc25c5` executes the
+  unchanged ELF045d once after correcting the read-only guard to exact0700.
+  Ten trials begin/end/pass, with no BIND failures; normal, cancellation,
+  delayed-applied and owner-exit scenarios retain the original limits.
+  Original package/provider pairs match; workload/gateway retirement, normal
+  VM poweroff and fixture shutdown pass within the original490-second window.
+  Current custody verifies 74 prior units inactive and its own owner closed;
+  journal boot156/3144 bytes preserves boot145 plus one start and ten trial
+  appends. Other eight public files, private clone and key metadata are unchanged.
+  Current A16 disk is
+  `cf7b67ab25401a6cb9afeb604d582f5b52d098e37f44b26796b643afd5f987de`.
+  [Diagnostic results and receipts](release-cohort.md#diagnostic9-observation02-ten-trials)
+  remain separate from the frozen FAILED79/80 comparison: the earlier BIND
+  role/errno/cause remain unobserved. No pooling or physical qualification.
 - **Diagnostic9 boot01 stopped before execution; cleanup and stopped custody pass.**
   The read-only ELF guard expected mode `0755`; the unchanged 74704-byte
   diagnostic has mode `0700` and the expected SHA045d9bcd…a612. No diagnostic,
@@ -86,14 +110,14 @@ Earlier checkpoints and failed attempts remain preserved.
   the original baseline check. Normal VM poweroff and fixture shutdown complete;
   the first local poweroff invocation failed on a relative input path before
   any guest dispatch, and its failure remains recorded separately.
-  Current custody verifies 69 prior units inactive and its own owner closed.
+  That boot01 checkpoint verifies 69 prior units inactive and its own owner closed.
   Fixture boot145/2924 bytes adds one restart and zero diagnostic appends;
   the other eight public files, private clone and key metadata are unchanged.
-  Current A16 disk SHA is
+  At that checkpoint, A16 disk SHA was
   `d1b38a1be163be7fb19cee0db238732bece31d51baad23767b698d99bf446691`.
   [Exact failed-boot and cleanup receipts](release-cohort.md#diagnostic9-boot01-mode-guard-and-cleanup)
-  preserve the failed run. A separately numbered source correction is in progress;
-  workload observation remains NOT_RUN and original A16 remains FAILED79/80.
+  preserve the failed run. The separately numbered observation02 above supplies
+  later diagnostic evidence; original A16 remains FAILED79/80.
 - **Network namespace case passes; final Server package assembled.**
   One exact111/f32 private-clone attempt `496415bbfd8adab8f4b2c830b6c61509`
   stays CREATED while a trusted verifier joins only its network namespace.
@@ -112,8 +136,8 @@ Earlier checkpoints and failed attempts remain preserved.
   Verifier source `723ec39` is integrated as `f8f18a9`; 96 maintained Server
   Python checks pass. Selected unsigned Server manifest9f749ca3 contains
   launcher3ead and 26 unchanged payload entries. Exact bundle qualification,
-  A13/A14, signing and A16 remain open. Diagnostic9 observation and unused-boot
-  cleanup sources are reviewed; no diagnostic9 workload has run.
+  A13/A14, signing and A16 remain open. The later diagnostic02 evidence above
+  supplies a separate observation without repairing the original comparison.
 - **Preceding Server cleanup regression: full GREEN04 and stopped custody.**
   Exact111/f32 scratch boot `4c6f6cde-cc4e-46d0-9976-700859d0d858` executes
   launcher3ead/sourcee6 and fixture8fae, reusing approved50a without another
@@ -160,7 +184,7 @@ Earlier checkpoints and failed attempts remain preserved.
   The later GREEN04 above completes the corrected fixture while preserving
   every failed predecessor. Do not repeat old RED
   or run destructive fixtures on the retained master.
-- **Diagnostic9 build checkpoint: compiled once; observation remains NOT_RUN.**
+- **Historical diagnostic9 build checkpoint: compiled once; observation was NOT_RUN.**
   Actual build boot `b0e13f6b-b80b-4dcb-ba56-ab08c56cb7ca` uses the protected DTB
   and null controller backend. Native guest GCC14.2.0 produces the 74704-byte ELF
   `045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612`, build ID
@@ -203,8 +227,9 @@ Earlier checkpoints and failed attempts remain preserved.
   [Native evidence](release-cohort.md#server111-native-sandbox-and-broker-evidence)
   records the exact bindings. Map03 retains all 17 D2 predicates; the separate
   Root decision accepts preview case composition, while literal negative-connect
-  evidence (D2-05), exact single-batch execution and final-cohort review remain
-  open/NOT_RUN. Whole D2 and A16 remain open/failed respectively;
+  evidence (D2-05) was still open in frozen map03. The later namespace
+  association supplies scoped coverage; exact single-batch execution and
+  final-cohort review remain open/NOT_RUN. Whole D2 and A16 remain open/failed respectively;
   installer, signing custodian and live-model credential provisioning are still
   unconfirmed. Raw artifacts remain local ignored material.
 - **Preceding Server111 capability-denial window: original negative FAILED; separate cleanup and normal poweroff PASS.**
