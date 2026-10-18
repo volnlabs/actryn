@@ -114,6 +114,15 @@ installation failure still lack an actual exercise. A proposed one-Prepare,
 no-Start capability-denial case remains NOT_RUN; the existing value/verifier
 checks do not establish that error path.
 
+The [sandbox/method-policy follow-up](../../artifacts/server-final-d2-predicate-map01/sandbox-method-followup01/result.json),
+SHA `e1b774964b38b707b6b60ce3772200c65a4f09fac11fb1f685352208ac229f19`,
+binds the older installed offline positive to its exact manifest/service/agent
+identities and settled call. The selected source comparison retains unchanged
+fixture, harness and policy rules. The early native sandbox summary still lacks
+individual negative records and executed-agent attribution; no negative-case
+credit transfers to f32 from that summary. The proposed installation-failure
+case has eight passing host checks but remains NOT_RUN on the target.
+
 ## ARM CLI coverage to bind
 
 The selected `4102…` CLI has actual installed `robot describe` and `robot recover`

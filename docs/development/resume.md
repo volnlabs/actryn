@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The latest recorded pushed checkpoint is `f9b987d`; push13 verifies integration
+  The latest recorded pushed checkpoint is `98e3fed`; push14 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push13/result.json`).
+  (`artifacts/reconciliation-checkpoint-push14/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,6 +78,21 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
+- **Current stopped state supersedes the older boot09 state below.** Boot10
+  launches one fixture/VM but rejects the primary helper's known SSH reset pair;
+  original120 expires before any observer baseline or pilot. The cleanup-only
+  identity read is not qualification. Normal VM poweroff02 and supported fixture
+  shutdown02 both succeed within original490; all eight carrier/owner units are
+  inactive/PID0/empty cgroups/NRestarts0, with no repository actors. Current A16
+  disk is `bb641a84c54d232228b92c082df8c171fcec10442b4ca2568dd24abe8f84a2ca`.
+  Journal784 bytes/boot38 preserves old764 prefix; owned endpoints are absent.
+  Other public files and private-key metadata remain unchanged. Authoritative
+  receipt: `artifacts/a16-kernel10-final-stopped-custody01/result.json`; complete
+  public custody: its `public-custody.json`. Boot10 FAILED/pilot10 NOT_RUN remain.
+  Common03/boot11 sources are being prepared with the primary helper's complete
+  transport classification and actual retained bindings left NULL. Root must
+  review all sources, current stopped proof and new inputs before a new window.
+  Do not invoke consumed boot10 or the uninvoked but now historical pilot10 owner.
 - Latest state: all VMs and fixtures are off after one unused A16 boot09.
   Pilot09 never runs. The fixture starts once at PID2930053/invocation
   `ecd48e9e4c354906ad1cc89c153e39cc`, appending boot37 to the retained journal;

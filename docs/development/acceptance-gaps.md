@@ -12,7 +12,7 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push13 records integration checkpoint `f9b987d` and its validator-fix branch,
+Push14 records integration checkpoint `98e3fed` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The latest composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -27,6 +27,13 @@ matches all 375 clean installed package versions before poweroff but rejects the
 waiting shutdown helper. The post-shutdown catalog is not yet observed. Complete provider approval remains unbound, pilot09 is NOT_RUN and A16
 remains open. Latest stopped state is
 `artifacts/a16-kernel09-final-stopped-custody01/result.json`.
+
+Boot10 also stops before any pilot: it rejects a known primary-helper SSH reset
+pair and original120 expires. Cleanup-only identity, normal VM poweroff and
+supported fixture shutdown succeed; all carriers are off with boot38/784-byte
+journal and new disk custody in
+`artifacts/a16-kernel10-final-stopped-custody01/result.json`. No package/provider
+baseline or A16 qualification follows. Common03/boot11 remain source preparation.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|

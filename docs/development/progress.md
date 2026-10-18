@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `f9b987d`.
+- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `98e3fed`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push13 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push13/result.json`). No CI pass is claimed.
+  push14 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push14/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -95,6 +95,36 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Server/Robot disks, seeds, SSH trust and metadata-only keys remain unchanged.
   Receipts: `artifacts/a16-kernel09-{post-failed-boot-diagnostic01,unused-boot-poweroff02,fixture-shutdown01,final-stopped-custody01}`.
   Pilot09 is NOT_RUN; pilot07 stays FAILED and A16 qualification remains open.
+- Boot10 starts one fixture and one VM, but its tenth read-only SSH probe
+  rejects a connection-reset pair already allowed by the primary boot helper.
+  The original 120s readiness window expires; no package/provider observation,
+  baseline approval, pilot or authority operation occurs. A separately guarded
+  cleanup-only identity read supplies guest boot `6cd18fa4…8fd52`; it gives no
+  qualification credit. One normal VM poweroff and one supported fixture shutdown
+  complete within original490. All eight carrier/owner units are inactive, with
+  MainPID0/empty cgroups/NRestarts0. The retained journal is784 bytes/boot38,
+  preserving its old764-byte prefix; canonical endpoints are removed by fixture
+  Drop. New A16 disk SHA256 is
+  `bb641a84c54d232228b92c082df8c171fcec10442b4ca2568dd24abe8f84a2ca`.
+  All other stopped public bytes and metadata-only keys remain unchanged.
+  Receipt: `artifacts/a16-kernel10-final-stopped-custody01/result.json`.
+  Original boot10 FAILED and pilot10 NOT_RUN remain preserved. Host assertion
+  failures before owner dispatch also remain separate from actual starts.
+- Source-only Common02/boot10/pilot10 checks pass13/14/8 cases respectively.
+  Review corrects the pilot owner for ten intentional controller journal appends
+  and a single180+10 runner/reap allowance. The pilot owner and pilot remain
+  uninvoked after boot10's failed readiness. The unused-boot shutdown/fixture-last source
+  checks pass3/7 cases and their actual normal cleanup succeeds. Common03/boot11
+  preparation adopts the primary readiness protocol; no new boot or baseline is
+  approved by that preparation. No production binary or fifth mask is added.
+- D2 source review prepares one CAP_BPF-negative, no-Start Prepare case with
+  eight passing host checks; target execution remains NOT_RUN. It must preserve
+  original24/23 rows and leave25/23/zero debit after known cleanup and restoration.
+  A separate32-reference review binds the older installed offline positive and
+  unchanged policy sources, but cannot recover individual native-sandbox negative
+  records or their executed-agent attribution. Whole D2 remains open. Receipts:
+  `artifacts/server-enforcement-negative-plan01/verification.json` and
+  `artifacts/server-final-d2-predicate-map01/sandbox-method-followup01/result.json`.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
