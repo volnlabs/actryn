@@ -12,7 +12,7 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push22 records preceding integration checkpoint `d2be824` and its validator-fix branch,
+Push24 records preceding integration checkpoint `f8f18a9` and its namespace-proof branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The existing device/OOM composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -52,14 +52,15 @@ The isolated cleanup fix passes 66 Server package tests and one host build/stati
 check (ELF3ead4e49…afe30). Separately numbered GREEN04 now passes missing-broker
 cleanup, observer-unreachable retirement/recovery, healthy/duplicate Start and
 capacity preservation. Its cold33/24 stores preserve every old row/log and have
-zero Robot debit. Normal poweroff and latest59-unit stopped custody preserve
+zero Robot debit. Normal poweroff and that checkpoint's 59-unit stopped custody preserve
 all original public records, key metadata, fixtures and original26/24Server,
 16/21Robot/all374. Earlier setup/fixture/read-only failures stay failed; exact
 reconciliation and two consumed same-inode stale-socket unlinks precede the new
 execution, without database/ownership/retained-artifact/capacity changes.
-The fix and test corrections are integrated as `e6120d3`/`71696f2`/`ecc5a8b`;
-85 maintained Server Python tests pass. Final Server candidate packaging and
-whole-cohort qualification remain open; installed f32 is unchanged.
+The fix and test corrections are integrated as `e6120d3`/`71696f2`/`ecc5a8b`.
+The later namespace verifier raises the maintained Server Python suite to 96 passing
+checks. Final unsigned Server9f749ca3 is assembled and independently byte-reviewed;
+whole-cohort qualification remains open and installed f32 is unchanged.
 [Current approval and regression receipts](release-cohort.md#approved-ordering-and-actual-pre-start-regression)
 close no whole acceptance row.
 [Exact build and source evidence](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
@@ -81,8 +82,12 @@ replace the earlier missing per-case native records only; they do not close whol
 D2 or transfer unsupported network, physical or policy-origin claims. The additive
 [17-predicate association](../../artifacts/server-final-d2-predicate-map03/association.json)
 and separate composition decision accept preview case coverage while retaining
-the literal D2-05 negative-connect gap and final-cohort review; the exact single
-multimodal-batch story is NOT_RUN.
+the historical literal D2-05 gap in frozen map03. The new
+[namespace association](release-cohort.md#created-task-network-namespace-proof)
+supplies scoped preview network coverage through a separate trusted ENETUNREACH
+probe, composed with agent socket-denial/no-inherited-socket evidence. The agent
+itself does not issue an external connect. Final-cohort review remains open; the
+exact single multimodal-batch story is NOT_RUN.
 
 The preceding D2 capability-denial window binds boot `62353823-df1e-4515-a744-3d767565835e`,
 kernel `6.12.111+deb13-amd64` and unchanged TEST f32. The wrong pre-Stop raw

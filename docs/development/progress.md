@@ -4,15 +4,35 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 
 ## Current state
 
+- **Network namespace case passes; final Server package assembled.**
+  One exact111/f32 private-clone attempt `496415bbfd8adab8f4b2c830b6c61509`
+  stays CREATED while a trusted verifier joins only its network namespace.
+  Complete before/after route inventories contain loopback only; a valid TCP
+  socket receives ENETUNREACH for 203.0.113.1:443. No agent Start occurs.
+  One known Stop reaps the attempt; cold34/24 has zero debit and preserves every
+  previous seven-table row/log, registry and configuration. Normal shutdown
+  confirms original QEMU pidfd death and fresh serial markers; no retry occurs.
+  Final custody checks 64 host units inactive/PID0/empty cgroups/no restarts,
+  with its own custody owner separately closed. The original nine public files,
+  key metadata and both fixture journals are unchanged; private clone SHA is
+  `ea94d7f0ed2ba9cc1fcddffcec83d187904b8edc03ae244bbccf5ebdb23cf278`.
+  [Scoped network association](release-cohort.md#created-task-network-namespace-proof)
+  composes this trusted test with earlier agent socket-denial/inherited-FD
+  evidence; it does not claim an agent-origin external connect or whole D2.
+  Verifier source `723ec39` is integrated as `f8f18a9`; 96 maintained Server
+  Python checks pass. Selected unsigned Server manifest9f749ca3 contains
+  launcher3ead and 26 unchanged payload entries. Exact bundle qualification,
+  A13/A14, signing and A16 remain open. Diagnostic9 observation and unused-boot
+  cleanup sources are reviewed; no diagnostic9 workload has run.
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `d2be824`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `f8f18a9`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   now built from `e6c3fd6` (integrated as `e6120d3`), with fixture corrections
   `71696f2`/`ecc5a8b`; preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push22 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push22/result.json`). No CI pass is claimed.
+  push24 verifies integration and namespace-proof branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push24/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -80,12 +100,12 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Separately numbered GREEN04 now passes all four cases, including exact durable
   observer retirement and duplicate/admission preservation. Cold33/24 adds only
   four Launcher attempt/runtime rows, preserves every old row/log and has zero
-  Robot debit. One normal poweroff and latest59-unit stopped custody pass; all
+  Robot debit. One normal poweroff and that checkpoint's 59-unit stopped custody pass; all
   original nine public records, keys' metadata, fixtures and original26/24Server,
   16/21Robot/all374 remain unchanged. Clone SHAfa9fd3f4…6ee89d is separate.
   Source integration `e6120d3`/`71696f2`/`ecc5a8b` preserves tested bytes; 85
-  maintained Server Python tests pass. Installed f32 is unchanged; final package
-  assembly/qualification and whole D2 remain open.
+  maintained Server Python tests passed at that checkpoint. Installed f32 is unchanged;
+  the later unsigned assembly is complete, with qualification and whole D2 open.
   [Actual RED and approval receipts](release-cohort.md#approved-ordering-and-actual-pre-start-regression)
   retain the failed test, known cleanup and later unstarted cases separately.
 - **Before-Start contract ordering approved and integrated.**
@@ -114,7 +134,7 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   The separate pre-Start cleanup error is reproduced above on a private clone;
   the fixed binary passes the complete corrected GREEN04 fixture. The failed
   predecessors stay preserved. This closes the cleanup source gap only.
-  Whole D2 stays open, including literal D2-05.
+  Whole D2 stays open; the later namespace association supplies scoped D2-05 coverage.
 - **Server111 native proof checkpoint: saved evidence PASS; original runner FAILED.**
   Fresh boot `364d9871-2a69-475d-8d6a-0db37b4275f8`, exact kernel111 and TEST f32
   pass cold preflight. One supported import and one native sandbox attempt

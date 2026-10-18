@@ -1,7 +1,7 @@
 # Release cohort and case evidence
 
-Source/evidence reconciliation, 2026-10-18; preceding verified push
-`d2be824` ([push22](../../artifacts/reconciliation-checkpoint-push22/result.json), zero CI runs; no CI pass).
+Source/evidence reconciliation, 2026-10-19; preceding verified push
+`f8f18a9` ([push24](../../artifacts/reconciliation-checkpoint-push24/result.json), zero CI runs; no CI pass).
 This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
@@ -37,7 +37,20 @@ The new cleanup launcher candidate is
 from `e6c3fd6` and integrated as `e6120d3`. Its actual corrected GREEN04 fixture
 passes below. It ran directly on the private regression clone; no installed
 Server payload or signed release package was replaced. Final Server candidate
-assembly and applicable cohort qualification remain open.
+assembly is complete as the unsigned selection below; applicable cohort qualification remains open.
+
+**Final Server package: selected unsigned candidate, pending qualification.**
+Manifest `9f749ca31d975e870c2a358762fd01c6c04ebf1e170ca569fe0ea1aa8563a90f`
+has payload `7b596c872290039cee2491595cc23515cc8a0eb559f0da3fcba619455518fe71`
+(70666240 bytes). The [assembly](../../artifacts/server-final-cohort-package01/result.json)
+and [independent byte review](../../artifacts/server-final-cohort-package-root-review02/result.json)
+verify all 27 entries: only launcher3ead replaces launcher17a0; the other 26
+entries, modes and licenses are unchanged. The [component map](../../artifacts/server-final-cohort-package01/component-map.json)
+retains mixed build origins. Source e6/integration e612 and assembly b89 remain
+distinct. Build/inspect both return zero; this assembly performs no compilation,
+installation or signing. The exact bundle is uninstalled, unsigned, nonpromotable
+and qualification incomplete, with no custodian attestation. Installed f32 stays
+unchanged; GREEN04 and the namespace case qualify their stated component scopes.
 
 The installed Robot is disposable TEST manifest
 `d77a269823b55ba8fe2541be15b3202651489fdd3c784cab69cd242821a2f012`, with payload
@@ -419,10 +432,12 @@ retains both hashes. The review copy is not claimed byte-identical to dispatch.
 The additive [D2 predicate association03](../../artifacts/server-final-d2-predicate-map03/association.json)
 SHA256 `fcebbe2d6a1d752f276d96659eea3e5783f7aac88aa47241f94676f95ec72853`
 retains all 17 original predicate IDs and their remaining source/cohort scope.
-D2-05's literal negative-connect test stays **OPEN**: the fixed profile denies
+At frozen map03, D2-05's literal negative-connect test stays **OPEN**: the fixed profile denies
 AF_INET socket creation, the prebroker scan finds no inherited socket and topology
 has no route, but no external/controller connect syscall is observed. The supported
 prevention invariant is recorded without waiving that test or relaxing the profile.
+The later [namespace association](#created-task-network-namespace-proof) adds a
+separately attributed functional negative; this frozen map remains unchanged.
 Root's [separate composition decision02](../../artifacts/server-final-d2-predicate-map03/root-composition-decision02.json)
 SHA256 `0ebd4ac246d2931988b177d15fdb5123a216f38c4404195a6a022b949bfe2644`
 accepts the existing device/OOM and native access/Broker/export/cleanup cases as
@@ -639,7 +654,7 @@ The three exact signed-off source commits integrate as `e6120d3`, `71696f2` and
 `ecc5a8b`. All85 maintained Server Python tests pass; the source-bound66 Rust tests,
 formatting and actual target-provider checks remain separately recorded. This
 closes the pre-Start cleanup regression only. Installed f32 remains unchanged;
-final Server package assembly, whole D2/final-cohort qualification, A13/A14,
+at that checkpoint final Server package assembly, whole D2/final-cohort qualification, A13/A14,
 genuine release signing and the failed A16 comparison remain open. Physical qualification remains
 outside this software preview.
 
@@ -654,3 +669,50 @@ outside this software preview.
 | [Independent shutdown/custody audit](../../artifacts/server-prestart-cleanup-green04-stopped-actual-peer01/review.json) | `3de0d536b2d6c5f9bc704686979de8d60230d2c161ceeda7a9148383622d9603` |
 | [Exact signed-off integration](../../artifacts/server-start-cleanup-integration01/result.json) | `cbb3921d5f5b90c969467a8437a0eb5eb24b9b234bf8cb7196ed83687f0786bc` |
 | [85 maintained Python tests](../../artifacts/server-start-cleanup-integrated-python85/result.json) | `17385566bea57423e5169e922c2e00774858de63f7c2809894a8ee0d0b8e17c2` |
+
+## CREATED-task network namespace proof
+
+Fresh exact111/f32 scratch boot `9691950c-6f38-4062-9fc7-1ded8c4db2e1`
+executes staged launcher3ead with the already approved50a artifact. One Prepare
+allocates `496415bbfd8adab8f4b2c830b6c61509`; no Start is sent. The trusted verifier
+holds the task pidfd and network-namespace FD, checks identical CREATED/PID/start/
+cgroup/namespace/empty-output bookends, joins only that network namespace, then
+creates a valid AF_INET TCP socket. Its single connect to 203.0.113.1:443 returns
+ENETUNREACH (101). Complete link/address/all-table IPv4/IPv6 inventories are
+unchanged and contain loopback only. The verifier keeps its own cgroup and six
+other namespaces; the agent profile and installed payload are unchanged.
+
+One known Stop cancels/reaps the task with empty logs and no remaining task,
+attempt cgroup or broker directory. Cold-copy comparison against GREEN04 proves
+all prior seven-table rows and logs unchanged, adding one Launcher attempt/runtime
+row only:34/24, all reaped, zero outstanding debit. Registry/configuration checks
+also pass. The staged launcher exits on its known SIGTERM, the owned observer
+stops and the existing containerd lifetime is preserved. Guest and host owners
+exit zero with inactive/PID0/empty scopes. One acknowledged normal poweroff,
+original QEMU pidfd death and fresh serial shutdown markers are verified.
+Final stopped custody verifies all 64 target/prior-owner units inactive with
+PID0, empty cgroups and no restarts; the custody owner separately exits zero and
+closes its scope. All nine original public files, three metadata-only keys and
+both fixture journals remain unchanged. Private clone SHA256 is
+`ea94d7f0ed2ba9cc1fcddffcec83d187904b8edc03ae244bbccf5ebdb23cf278`;
+original Server26/24, Robot16/21, zero debits and all374 remain preserved.
+
+Association05 accepts scoped preview network coverage by composing this trusted
+namespace negative with the earlier actual agent AF_INET denial, no inherited
+sockets and permitted AF_UNIX Broker traffic. These are separate attempts and
+launcher versions. No agent-origin external connect, whole D2, final-package
+qualification or physical proof is claimed. Frozen map03 and the original failed
+native owner remain unchanged. Verifier source723ec39 is integrated as f8f18a9;
+11 focused and 96 complete maintained Server Python checks pass. The execution
+adapter separately passes ten pure checks.
+
+| Receipt | SHA-256 |
+|---|---|
+| [Root namespace classification](../../artifacts/server-network-proof-root-review01/execution-classification.json) | `2de60ece0168e341cb14be6e5bad3d5468daab01632d9b5779ebac4cc2fe4db3` |
+| [Additive D2-05 association](../../artifacts/server-final-d2-network-association05/association.json) | `4605532a43b465b2169cfdfa22f3f544de872a8c6c47b3a13f2b159d348a908b` |
+| [Known normal poweroff](../../artifacts/server-network-proof-poweroff01/result.json) | `4811df32bb2e333aeea0f154ffb7a98ae8b585c170cc721ecdfe3407568ff336` |
+| [Poweroff owner closure](../../artifacts/server-network-proof-root-review01/poweroff-owner-closure.json) | `5cdd3addd2f7c670d461066d25a05a0796a2f22d0a20c895c208f0e2e395f908` |
+| [96 maintained Python checks](../../artifacts/server-network-namespace-fix-validation01/result.json) | `b38aee249d155f62082d4887a76097bfd2658dd5b36a11d444c35b3eb73b56ca` |
+| [Independent actual network audit](../../artifacts/server-network-proof-actual-peer01/review.json) | `072e20f30af40928c56165273313a6deaf5633d476074cb0218afe263e3b1658` |
+| [Final stopped custody](../../artifacts/server-network-proof-stopped-custody01/result.json) | `a1b6f4f25e7a0649e9ea012e719bac2256c40eb88d8c9c4de3fc99bdb44d401a` |
+| [Custody owner closure](../../artifacts/server-network-proof-root-review01/custody-owner-closure.json) | `24e6ae891374d08a7e749a4150823df773b71af3cc511e36a100c102679488f0` |

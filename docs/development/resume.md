@@ -1,6 +1,6 @@
-# Implementation checkpoint — 2026-10-18
+# Implementation checkpoint — 2026-10-19
 
-The user explicitly resumed work on 2026-10-18 after the pause checkpoint
+The user explicitly resumed work on 2026-10-19 after the pause checkpoint
 `167ebcc`. Implementation and qualification work are in progress; the full
 v0.0.1 release is incomplete. The goal tracker still reports its previous
 `paused` state and exposes no resume API; the explicit user instruction revokes
@@ -16,9 +16,9 @@ Earlier checkpoints and failed attempts remain preserved.
   with fixture corrections integrated as `71696f2` and `ecc5a8b`,
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding verified push is `d2be824`; push22 verifies integration
-  and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push22/result.json`).
+  The preceding verified push is `f8f18a9`; push24 verifies integration
+  and namespace-proof branch heads and records zero CI runs. No CI pass is claimed
+  (`artifacts/reconciliation-checkpoint-push24/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -79,15 +79,35 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
-- **Latest Server cleanup regression: full GREEN04; all VMs/fixtures off.**
+- **Network namespace case passes; final Server package assembled.**
+  One exact111/f32 private-clone attempt `496415bbfd8adab8f4b2c830b6c61509`
+  stays CREATED while a trusted verifier joins only its network namespace.
+  Complete before/after route inventories contain loopback only; a valid TCP
+  socket receives ENETUNREACH for 203.0.113.1:443. No agent Start occurs.
+  One known Stop reaps the attempt; cold34/24 has zero debit and preserves every
+  previous seven-table row/log, registry and configuration. Normal shutdown
+  confirms original QEMU pidfd death and fresh serial markers; no retry occurs.
+  Final custody checks 64 host units inactive/PID0/empty cgroups/no restarts,
+  with its own custody owner separately closed. The original nine public files,
+  key metadata and both fixture journals are unchanged; private clone SHA is
+  `ea94d7f0ed2ba9cc1fcddffcec83d187904b8edc03ae244bbccf5ebdb23cf278`.
+  [Scoped network association](release-cohort.md#created-task-network-namespace-proof)
+  composes this trusted test with earlier agent socket-denial/inherited-FD
+  evidence; it does not claim an agent-origin external connect or whole D2.
+  Verifier source `723ec39` is integrated as `f8f18a9`; 96 maintained Server
+  Python checks pass. Selected unsigned Server manifest9f749ca3 contains
+  launcher3ead and 26 unchanged payload entries. Exact bundle qualification,
+  A13/A14, signing and A16 remain open. Diagnostic9 observation and unused-boot
+  cleanup sources are reviewed; no diagnostic9 workload has run.
+- **Preceding Server cleanup regression: full GREEN04 and stopped custody.**
   Exact111/f32 scratch boot `4c6f6cde-cc4e-46d0-9976-700859d0d858` executes
   launcher3ead/sourcee6 and fixture8fae, reusing approved50a without another
   compile/import or capacity change. All four cases pass: missing broker,
   unreachable observer with retained durable accounting, healthy/duplicate Start,
   and active-capacity refusal preserving the preparation and running task.
   Cold33/24 preserves every old full row/log, adds only four Launcher attempt/
-  runtime rows and has zero outstanding Robot debit. Normal poweroff and latest
-  custody verify 59 checked host units inactive/PID0/empty cgroups/NRestarts0,
+  runtime rows and has zero outstanding Robot debit. Normal poweroff and that
+  checkpoint's custody verify 59 checked host units inactive/PID0/empty cgroups/NRestarts0,
   unchanged original nine public records, key metadata and fixture journals.
   Private clone SHA256 is
   `fa9fd3f4e00e00ce9ed95697f377b5b74d5be0fa1ed18734819529aa346ee89d`;
@@ -145,8 +165,8 @@ Earlier checkpoints and failed attempts remain preserved.
   their evidence. The missing-broker cleanup regression now has actual RED,
   independent review and known shutdown above. Preserve ordinary capacity
   refusal as prepared, duplicate running Start as running, and retained charges
-  on unconfirmed cleanup. D2-05's
-  literal negative-connect predicate and whole D2 also remain open. The retained
+  on unconfirmed cleanup. The new namespace association supplies scoped D2-05
+  preview coverage; whole D2 and final-cohort qualification remain open. The retained
   Robot already has all 16 namespace slots: no new preparation, deletion or
   quota widening on that retained installation.
 - **Historical native-proof stopped checkpoint:** all Server/Robot/A16 guests and
