@@ -5,11 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `e89dffd`.
-  Server/Robot implementation source remains `8d6e71d`; preview-agent diagnostic
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `a6c820c`.
+  Server/Robot implementation source remains `8d6e71d`, except the new launcher
+  built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  its CI query returned zero runs. No CI pass is claimed.
+  its CI query returned zero runs (`artifacts/reconciliation-checkpoint-push10/result.json`).
+  The next push receipt is pending. No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -35,11 +37,15 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   updates. Separate controlled two-package restoration now passes, preserving
   all rows and custody. D2 run04 passes preflight/build/import/start, then its
   campaign fails: the unapproved existing `/dev/full` opens successfully and
-  the memory stage is NOT_RUN. Current Server counts are 23/22 with zero debits;
-  a separate controlled stop now passes with all three Server services cold.
-  Normal finish/capture04 is NOT_RUN. Fixed-device-filter source correction
-  `2e93ccd` now passes host checks; corrected kernel/guest qualification is
-  NOT_RUN. Release qualification remains incomplete.
+  the memory stage is NOT_RUN for run04. The corrected launcher is now installed
+  in disposable TEST cohort `f32f1c85…54ad`. Run05 source staging/preflight pass,
+  but its campaign remains FAILED: the trace checker counts five pre-exec thread
+  exits along with the actual parent-leader exit at sequence 177. Independent
+  saved evidence verifies denied 1:7 access, a fresh cgroup OOM kill and natural 137;
+  corrected-validator offline reanalysis now passes; normal capture05 is NOT_RUN.
+  Separate failure custody and one known stop pass: current Server 24/23,
+  Robot 16/21, zero debits, all 374 entries retained and three Server services cold.
+  No whole D2 gate or release qualification PASS is claimed.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
@@ -230,6 +236,50 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   `artifacts/server-device-policy-helper-tests01/receipt.json` and
   `artifacts/server-device-policy-validator-tests01/verification.json`.
   Build receipt: `artifacts/server-device-policy-build01/provenance.json`.
+- Latest device-policy checkpoint: fresh read-only verification matches all four
+  target providers. One same-filesystem, no-replace archive preserves old slot
+  `0f2ea983…f4bc`; the cold installer then selects TEST manifest
+  `f32f1c85ff58095034d7b82f80e59454fac826b83760f7013a585a27025c54ad`
+  with launcher `17a0d392…96b24`. Four historical slots remain, five total
+  (three managed/two archived). Disposable test signing is not release signing;
+  actual qualification remains false. Configuration, credentials metadata,
+  Robot history and all 374 custody entries are preserved. Receipts:
+  `artifacts/server-device-policy-{cold-inspection01,archive-owner01,install-owner01}/result.json`
+  and `artifacts/server-device-policy-testvariant01/result.json`.
+- Startup01 fails its cold gate before consuming Start: installed units have
+  `Restart=on-failure`, not the qualification setting. Raw rows/custody remain
+  unchanged. Three explicit runtime `Restart=no` drop-ins and one combined
+  startup02 then pass; the packaged Restart policy is unchanged. Run05 source staging
+  and preflight pass, but its campaign fails the parent-exit checker. The 32-check
+  independent review finds five pre-agent-exec TGID thread exits at 163–167,
+  agent exec 168, child exit 176 and actual leader exit 177. The saved 177 records
+  have zero source/local loss; open results 3,-2,-1, `memory_begin`, final
+  memory.events max=18/oom=1/oom_kill=1 and natural `exited:137` establish those
+  software observations. Trace arguments are absent, so device attribution uses
+  the fixed probe and node/control evidence. Validator fix `66f559b` (source
+  `5dea0f4`) passes 12 diagnosis/72 Server Python tests and offline maintained
+  export/trace/device/OOM/full-old-row checks. The campaign FAILED record and its
+  owner's null attempt count stay unchanged; normal capture05 is NOT_RUN and no
+  whole D2 PASS follows. Receipts:
+  `artifacts/server-device-policy-startup-{inspection01,owner02}/result.json`,
+  `artifacts/server-device-policy-d2-owner02/campaign/result.json` and
+  `artifacts/server-diagnosis-failure-review02/review.json` and
+  `artifacts/server-diagnosis-thread-exits-regression01/{review.json,offline.stdout}`.
+- Separate read-only failure custody identifies exactly one new reaped 137 attempt
+  `1f5cfda02c51a3b354e46d27e75924e6`, yielding Server 24/23, Robot 16/21 and zero
+  debits with old full rows/logs and all 374 entries intact. One separately gated
+  stop passes, all three Server services are cold and both owner scopes are empty;
+  Robot raw/history and carrier lifetimes remain unchanged. D2 stays FAILED,
+  with no repeat attempt or export. Receipts:
+  `artifacts/server-device-policy-d2-failure-custody01/result.json` and
+  `artifacts/server-device-policy-failure-stop-owner01/result.json`.
+  Raw evidence is ignored local data; pushing this checkpoint does not back it up.
+- Fresh read-only Robot shutdown inspection preserves both original service
+  lifetimes, all 16/21 history/raw files and the epoch. Describe is healthy and
+  inhibited with no grant, operation, prepared work or pending recovery. Both
+  services remain active with `Restart=on-failure`, `NRestarts=0`; the module
+  remains loaded. No authority or service action was sent. Receipt:
+  `artifacts/reconciliation-post-run05-robot-inspection01/result.json`.
 - Separate Robot read-only package inspection matches nine of ten runtime pins;
   `libexpat1` is still `2.9.0-1~deb13u1`, not restored to pinned 2.8.3. Its kernel
   remains 111; no package action or RPC occurs. This does not establish drift

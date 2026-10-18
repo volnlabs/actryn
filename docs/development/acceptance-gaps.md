@@ -2,7 +2,8 @@
 
 ## Current disposition
 
-Follow-up audit through Server/Robot source `8d6e71d` and diagnostic fix `42537e2` supersedes the historical
+Follow-up audit through Server/Robot source `8d6e71d`, launcher correction `2e93ccd`
+(build source `14afd962`) and diagnostic fix `42537e2` supersedes the historical
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
@@ -12,7 +13,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 | A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
 | A04/A05/A08 | Existing daemon-death/accounting, installed capacity, freeze/crash and pressure evidence remains separate. Diagnostic fix `42537e2` passes 5 Rust/28 Python checks and its corrected OCI reports the exact retained-capacity error. Closed-gate startup drains four retained streams with zero forwarded bytes. Four matched historical queries settle all four old debits while preserving OutcomeUnknown. After the new operation's cancellation, separate existing-handle cleanup passes one Recover and matching historical settlement. Final custody verifies 22 launcher/21 broker rows, 16 namespaces/21 Robot records, zero debits, 374 preserved entries, no tasks and inhibited disabled-zero output. Server cold-stop02 then passes with all three services inactive and full rows unchanged. | Finalize-run01 remains FAILED: identity checks passed in 29 ms, then recorder-inclusive guard exceeded 1.5 s at 3.736 s before the next result request. Its consumed abort remains unknown; never resend or replay an operation. Separate cleanup does not relabel that failure or manufacture task success. Recorder fsync versus scheduling cause is unresolved; uncommitted tails remain unknown. Final artifact reconciliation remains. |
-| D2 isolation | Existing sandbox bindings verify configured cgroup/device limits; missing `/dev/mem` returns ENOENT. Separate owner05 restoration passes all 14 runtime/35 tool pins. Run04 preflight/build/import/start pass, but its campaign fails: existing unapproved `/dev/full`1:7 opens successfully in child8777, traced results3,-2,3, sequences1..177/lost0. Attempt958787b26f3546d03c6ca58736042d2c naturally exits105 and is reaped without Cancel; old full seven-table rows stay unchanged, Server23/22, zero debits/no Robot calls. Separate post-failure stop passes with all three Server services cold and custody unchanged. Fixed-filter source correction `2e93ccd` passes host tests/review. | No D2 PASS. Memory stage never begins and OOM counters remain0: OOM NOT_RUN. Source deny-all plus1:3/5/8/9 conflicts with observed1:7 success; upstream runc1.1.15 appended virtual defaults offer a strong source explanation, but exact Debian BPF827 is undumped. No generic escape/all-policy-off/physical-risk inference. Normal finish/capture04 NOT_RUN. Corrected kernel load/guest qualification is NOT_RUN; launcher build/static checks pass. Fresh provider verification, preserved cold TEST installation and a new numbered original1:7 probe remain. |
+| D2 isolation | Run04's 1:7 success and absent OOM remain FAILED. Corrected TEST cohort f32/launcher17a0 installs after fresh four-provider checks; startup02 passes. Run05 staging/preflight pass; independent 32-check saved review verifies open results 3,-2,-1, 177 complete records/loss0, max18/oom1/oom_kill1 and natural137. Its checker overcounts five pre-exec TGID thread exits despite actual leader exit177. Fix `66f559b` passes 12 diagnosis/72 Server Python tests and corrected maintained offline export/trace/device/OOM/full-old-row checks. Separate custody identifies one reaped attempt1f5cfda02c51a3b354e46d27e75924e6; known stop passes, Server24/23, Robot16/21, zero debits, all374/old rows retained and three Server services cold. | Run05 campaign remains FAILED and its owner's null attempt count is preserved. Normal capture05 NOT_RUN; no whole D2 PASS. Path attribution combines the fixed probe/node/control with trace results; it is not an explicit policy-origin event. Disposable TEST signing is not release qualification. No physical or generic sandbox claim follows. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
@@ -175,6 +176,31 @@ and the original1:7 probe; no repeated agent compile/import. Receipts:
 `artifacts/server-device-policy-helper-tests01/receipt.json` and
 `artifacts/server-device-policy-validator-tests01/verification.json`.
 Build receipt: `artifacts/server-device-policy-build01/provenance.json`.
+
+Latest follow-up: fresh four-provider verification and a same-filesystem
+no-replace archive of `0f2ea983…f4bc` precede cold installation of TEST manifest
+`f32f1c85ff58095034d7b82f80e59454fac826b83760f7013a585a27025c54ad`, launcher
+`17a0d392…96b24`. Four historical slots are retained, five total/three managed;
+current f32 supersedes historical b119. Actual qualification remains false despite
+disposable test signing. Startup01 fails before Start on `Restart=on-failure`,
+preserving raw history; three runtime-only `Restart=no` drop-ins and startup02
+then pass. Run05's campaign is still FAILED on its TGID thread-exit overcount,
+although independent 32-check review verifies the actual leader exit 177 and
+positive device/OOM observations. Validator fix `66f559b` (source `5dea0f4`) passes
+12 diagnosis/72 Server Python tests and corrected maintained offline
+export/trace/device/OOM/full-old-row reanalysis. Normal capture05 is NOT_RUN;
+this does not close the whole D2 gate. Separate custody and known-stop receipts
+prove counts 24/23/16/21/0, full old rows/logs/374 entries, unchanged credentials
+metadata/Robot raw/history, cold Server services and empty owned scopes. No
+automatic retry, new export or whole-gate PASS follows. Evidence:
+`artifacts/server-device-policy-{cold-inspection01,archive-owner01,install-owner01}/result.json`,
+`artifacts/server-device-policy-testvariant01/result.json`,
+`artifacts/server-device-policy-startup-{inspection01,owner02}/result.json`,
+`artifacts/server-diagnosis-failure-review02/review.json`,
+`artifacts/server-diagnosis-thread-exits-regression01/{review.json,offline.stdout}`,
+`artifacts/server-device-policy-d2-owner02/campaign/result.json`,
+`artifacts/server-device-policy-d2-failure-custody01/result.json` and
+`artifacts/server-device-policy-failure-stop-owner01/result.json`.
 
 Robot's separate read-only inspection matches nine of ten runtime pins; Expat
 2.9.0 remains UNRESTORED against pinned 2.8.3, with running kernel111, zero

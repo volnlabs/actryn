@@ -12,10 +12,12 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; Server/Robot implementation source remains
-  `8d6e71d`, with preview-agent diagnostic fix `42537e2` integrated and its imported
+  `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
+  with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding pushed checkpoint is `e89dffd`. Its remote head is
-  verified and its CI query returned zero runs. No CI pass is claimed.
+  The preceding pushed checkpoint is `a6c820c`; push10 records its verified
+  remote head and zero CI runs. The next push receipt is pending; no CI pass is
+  claimed (`artifacts/reconciliation-checkpoint-push10/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -47,12 +49,15 @@ Earlier checkpoints and failed attempts remain preserved.
   restoration now passes; installed image/meta 113 remain retained while the
   running kernel is `6.12.111+deb13-amd64`. D2 run04 passes preflight/build/import/
   start, then fails on successful opening of unapproved `/dev/full`; OOM and
-  normal finish/capture are NOT_RUN. Current counts are Server23/22, Robot16/21,
-  zero debits; a separate controlled stop now passes with three services cold.
-  Source correction `2e93ccd` is host-verified; corrected kernel load/guest D2
-  qualification remains NOT_RUN. Launcher-only build/static checks pass; next is
-  fresh target-provider verification, preserved cold TEST cohort installation
-  and a new numbered original1:7 probe.
+  normal finish/capture are NOT_RUN for run04. Corrected TEST cohort `f32f1c85…54ad`
+  is now installed. Run05 staging/preflight pass; campaign FAILED remains because
+  its trace checker overcounts pre-exec TGID thread exits. Saved evidence verifies
+  the actual leader exit 177, denied 1:7 access and a fresh OOM kill/natural 137.
+  Corrected-validator offline reanalysis now passes; normal capture05 is NOT_RUN.
+  Separate failure custody and known stop pass: current counts Server 24/23,
+  Robot 16/21, zero debits; three Server services cold, all old rows and 374 entries
+  retained. No whole D2 gate PASS. The next step is the remaining acceptance
+  disposition against immutable evidence, not an automatic new attempt.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The A16 fixture was restored
   once using its retained journal, advancing boot35 to36, then shut down after
   the diagnostic. No physical device used.
@@ -79,8 +84,10 @@ Earlier checkpoints and failed attempts remain preserved.
   `1bd4d671-2965-4d1b-8061-1de29459eb4f`, host PID2764219/start12891931 and
   invocation `414d22890d624c56a6fca7475c6a316f`. Initially all three services were
   disabled/inactive with zero start timestamps. Initial starts and the later
-  deliberate maintenance restart are recorded below. Current test manifest is
-  `b119afd529f320a97243bea4b6d0f00919cc3be19cb6b9dfcc3fc923fbdd7e65`.
+  deliberate maintenance restart are recorded below. At this historical boot the
+  test manifest was `b119afd529f320a97243bea4b6d0f00919cc3be19cb6b9dfcc3fc923fbdd7e65`;
+  current is `f32f1c85ff58095034d7b82f80e59454fac826b83760f7013a585a27025c54ad`,
+  installed at the latest device-policy checkpoint below.
   Cold04 verifies all 27 payload entries, old slots/archive, configuration,
   credentials metadata and unchanged raw history. Both charges remain outstanding.
   A private host SQLite copy retains full rows in all seven Server tables at
@@ -403,6 +410,44 @@ Earlier checkpoints and failed attempts remain preserved.
   `artifacts/server-device-policy-helper-tests01/receipt.json` and
   `artifacts/server-device-policy-validator-tests01/verification.json`.
   Build receipt: `artifacts/server-device-policy-build01/provenance.json`.
+- Latest device-policy installation/startup: fresh four-provider verification
+  passes; old `0f2ea983…f4bc` moves once by same-filesystem no-replace archive.
+  Cold stage/activate/resume installs TEST `f32f1c85…54ad`/launcher
+  `17a0d392…96b24`, preserving four historical slots (five total, three managed),
+  configuration, credentials metadata, Robot and 374 entries. Signing is explicitly
+  disposable TEST-only; actual release qualification is false. Startup01 fails
+  before its consumed marker/Start because the installed units use
+  `Restart=on-failure`; raw history is unchanged. Three runtime-only `Restart=no`
+  qualification drop-ins precede the single successful startup02.
+  Receipts: `artifacts/server-device-policy-{cold-inspection01,archive-owner01,install-owner01}/result.json`,
+  `artifacts/server-device-policy-testvariant01/result.json` and
+  `artifacts/server-device-policy-startup-{inspection01,owner02}/result.json`.
+- D2 run05 source staging/preflight pass, campaign FAILED: its checker counts
+  five pre-exec TGID thread exits 163–167 plus the actual parent leader exit 177.
+  Independent 32-check review confirms agent exec 168, child exit 176, complete 177
+  records with loss 0, open results 3,-2,-1, memory.events max=18/oom=1/oom_kill=1 and
+  natural 137. The fixed probe/node/control supplies path attribution absent from
+  trace arguments. Preserve the original FAILED campaign and owner's null new
+  attempt count. Fix `66f559b` (source `5dea0f4`) passes 12 diagnosis/72 Server
+  Python tests; corrected maintained export/trace/device/OOM/full-old-row offline
+  checks pass. Normal capture05 is NOT_RUN and no whole D2 PASS is claimed.
+  Separate failure custody
+  establishes one new reaped 137 attempt `1f5cfda02c51a3b354e46d27e75924e6` and
+  counts 24/23/16/21/0, unchanged old full rows/logs/374 entries. One known stop
+  then passes with three Server services cold, host/guest owner scopes empty,
+  unchanged Robot raw/history and carriers. No new attempt/export or replay.
+  Receipts: `artifacts/server-diagnosis-failure-review02/review.json`,
+  `artifacts/server-diagnosis-thread-exits-regression01/{review.json,offline.stdout}`,
+  `artifacts/server-device-policy-d2-owner02/campaign/result.json`,
+  `artifacts/server-device-policy-d2-failure-custody01/result.json` and
+  `artifacts/server-device-policy-failure-stop-owner01/result.json`.
+  These raw ignored artifacts are not backed up by a source push.
+- Fresh read-only Robot shutdown inspection preserves both original service
+  lifetimes, all 16/21 history/raw files and the epoch. Describe is healthy and
+  inhibited with no grant, operation, prepared work or pending recovery. Both
+  services remain active with `Restart=on-failure`, `NRestarts=0`; the module
+  remains loaded. No authority or service action was sent. Receipt:
+  `artifacts/reconciliation-post-run05-robot-inspection01/result.json`.
 - Robot's separate read-only inspection matches nine of ten runtime pins;
   Expat remains `2.9.0-1~deb13u1` instead of pinned 2.8.3 and is UNRESTORED.
   Running kernel111 is preserved, with no package action or RPC. This does not
