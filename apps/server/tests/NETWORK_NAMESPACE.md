@@ -36,6 +36,14 @@ Failures are preserved, never retried automatically. A failure/timeout authorize
 no Launch or repeated Prepare; Root separately reviews cleanup. This module
 performs no SQL, credential access, Robot RPC, service action or cancellation.
 
+After the task pidfd is opened, failures raise `ProofFailure`; the owner must
+persist its JSON-compatible `evidence` before cleanup. It retains the partial
+report and captured worker return code, stdout and stderr (hex, byte count,
+SHA256 and explicit omitted-byte count). Retained stdout is capped at512KiB and
+stderr at64KiB; a timeout has no known return code. These are post-capture limits,
+so the finite enclosing memory limit is still required. Earlier admission
+failures raise their original exception and have dispatched no worker.
+
 `ip_pin` is mandatory; there is no default or configured pin. It has exactly:
 
 ```
