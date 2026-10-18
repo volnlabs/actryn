@@ -78,6 +78,13 @@ struct Target {
 pub fn decode_reply(input: &Input, bytes: &[u8]) -> Result<Value> {
     ensure!(bytes.len() <= 65536, "broker response exceeds bound");
     let response: Value = serde_json::from_slice(bytes)?;
+    if response["result"] == "error" {
+        if let Some(reason) = response["reason"].as_str().filter(|reason| {
+            !reason.is_empty() && reason.len() <= 1024 && !reason.chars().any(char::is_control)
+        }) {
+            anyhow::bail!("broker rejected proposal: {reason}");
+        }
+    }
     ensure!(response["result"] == "ok", "broker rejected proposal");
     let value = &response["value"];
     ensure!(
@@ -155,6 +162,63 @@ pub fn run() -> Result<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn broker_denial_preserves_bounded_reason_as_an_error() {
+        let input: Input = serde_json::from_str(
+            r#"{"schema":1,"goal":"one index","observation_id":"reference","request_key":"preview-1"}"#,
+        )
+        .unwrap();
+        for reason in [
+            "robot retained-key/outstanding capacity exhausted".to_owned(),
+            "x".repeat(1024),
+            "é".repeat(512),
+        ] {
+            let reply = serde_json::to_vec(&json!({"result":"error","reason":reason})).unwrap();
+            assert_eq!(
+                decode_reply(&input, &reply).unwrap_err().to_string(),
+                format!("broker rejected proposal: {reason}")
+            );
+        }
+    }
+
+    #[test]
+    fn malformed_or_unsafe_broker_denials_remain_generic_errors() {
+        let input: Input = serde_json::from_str(
+            r#"{"schema":1,"goal":"one index","observation_id":"reference","request_key":"preview-1"}"#,
+        )
+        .unwrap();
+        let mut replies = vec![
+            json!({"result":"error"}),
+            json!({"result":"unknown","reason":"not an error result"}),
+            json!({"reason":"missing result"}),
+            json!({"result":false,"reason":"wrong result type"}),
+        ];
+        for reason in [
+            json!(null),
+            json!(1),
+            json!([]),
+            json!({"text":"not a string"}),
+            json!(""),
+            json!("x".repeat(1025)),
+            json!("é".repeat(513)),
+            json!("line\nbreak"),
+            json!("nul\0byte"),
+            json!("delete\u{7f}"),
+            json!("control\u{85}"),
+        ] {
+            replies.push(json!({"result":"error","reason":reason}));
+        }
+        for reply in replies {
+            assert_eq!(
+                decode_reply(&input, &serde_json::to_vec(&reply).unwrap())
+                    .unwrap_err()
+                    .to_string(),
+                "broker rejected proposal",
+                "{reply}"
+            );
+        }
+    }
+
     #[test]
     fn input_is_typed_bounded_and_reply_must_be_same_broker_call() {
         let input:Input=serde_json::from_str(r#"{"schema":1,"goal":"one restrained index","observation_id":"offline-reference","request_key":"preview-1"}"#).unwrap();

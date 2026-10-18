@@ -482,6 +482,7 @@ print(json.dumps(result))'''
             self.pre_send_ready(self.local('describe'), fifth)
             self.server_mutation('fifth-launch', 'launch', '--attempt', fifth['attempt'])
             logs = self.poll(lambda: self.raw_logs(fifth['attempt']), lambda v: bool(v['stderr.log']))
+            self.save('fifth-refusal-raw-logs.json', logs)
             require(not logs['stdout.log'] and 'robot retained-key/outstanding capacity exhausted'
                     in logs['stderr.log'], 'fifth rejected for wrong cause')
             snap = self.snapshot(fifth['attempt'])
