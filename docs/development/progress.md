@@ -18,20 +18,22 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   containerd/ctr/runc and protobuf compiler present. Host is not the supported
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
-- User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
-  fixture are running. All three Server services restarted deliberately once
-  after the corrected OCI import, with zero automatic restarts. Four historical
-  debits have settled without replay. Current counts are Server 22/21 and
-  Robot 16 namespaces/21 records, with one new debit outstanding. The finalization
-  run failed its recorder-inclusive guard deadline after the restored operation's
-  Server cancellation; its FAILED record remains. Fresh read-only inspection
-  proves the operation durably terminal and its context retired/ready, with
-  stopped writers, no effective grant, and disabled-zero fixture output.
+- User resumed on 2026-10-18. Separate existing-handle cleanup now passes:
+  Server 22 launcher/21 broker rows, Robot 16 namespaces/21 records and zero
+  outstanding debits, with all 374 preservation entries retained. One explicit
+  Recover and matching historical settlement completed without a new proposal
+  or replay. The original finalization remains FAILED on its recorder-inclusive
+  guard; its consumed, unknown abort must never be resent. Server cold-stop02
+  then passes with all three services inactive and all rows preserved. The
+  Robot guest and non-actuating fixture remain running at the saved lifetimes.
   The tracker still exposes its previous paused status without a resume API;
   explicit user continuation authorizes this work against the full saved goal.
   The [handoff](resume.md) records the current lifetimes, preserved histories,
   installed Server/Robot test packages and next qualification steps.
-  One explicit recovery and matching settlement remain; release qualification is incomplete.
+  D2 plan03 stages its sources successfully, then fails preflight before any
+  compile, import or new attempt because two package pins drifted under unattended
+  updates. A narrow controlled APT restoration is pending Root execution; no
+  restoration or D2 pass is claimed. Release qualification remains incomplete.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes
@@ -150,6 +152,25 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   retired/ready context and stopped writers; actual fixture output is disabled,
   duties 0/0 and queue 0. This is software-fixture evidence only. Receipt:
   `artifacts/robot-retained-debit-finalize-inspection01/interpretation.json`.
+- Separate cleanup passes with one Recover, matching existing-handle query and
+  one new settled export; four old exports are copied byte-identically, not
+  re-exported. All 21 raw Robot operation rows and 374 preservation entries are
+  unchanged; the only Server row change clears the last matching debit.
+  Both owned monitors exit zero and the owner scope is empty. Original task
+  uncertainty and every FAILED campaign remain preserved. Evidence:
+  `artifacts/robot-retained-debit-finalize-cleanup-actual-review01/review.json`.
+- Server cold-stop02 passes once: 22/21 full rows, zero debits, peer/key/drop-in
+  preservation and unchanged Robot/carrier lifetimes. All three Server services
+  are inactive/PID0. Evidence: `artifacts/server-diagnosis-cold02/result.json`.
+- D2 plan03 source staging passes; exact-package preflight then fails before
+  baseline save, compiler invocation, import or new agent attempt. Saved package
+  evidence identifies `libexpat1` 2.8.3→2.9.0 and `linux-libc-dev` 111→113 as the
+  two frozen-pin mismatches following unattended updates. Controlled restoration
+  of those two pins is pending Root; installed image/meta 113 are retained and
+  the running kernel remains `6.12.111+deb13-amd64`. This drift does not establish
+  the cause of the earlier recorder cutoff or erase the observed cleanup/custody.
+  Evidence: `artifacts/server-diagnosis-root-run03/{stage-sources,preflight}` and
+  `artifacts/server-diagnosis-package-drift-review02/review.json`.
 
 ## Component evidence (not release acceptance)
 

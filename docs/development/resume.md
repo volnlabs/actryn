@@ -31,16 +31,21 @@ Earlier checkpoints and failed attempts remain preserved.
   resumed interval, only the Server booted for its package update. It has now
   powered off gracefully once; all three packaged services stayed cold and both
   charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
-- The Server stores retain 22 launcher/21 broker rows and exactly one outstanding
-  Robot charge. All three services deliberately restarted once after the corrected
-  OCI import, with zero automatic restarts. Four historical charges settled
-  without replay; the finalization run failed during the new operation's
-  cancellation checks and remains FAILED.
+- The Server stores retain 22 launcher/21 broker rows and zero outstanding Robot
+  charges after separate existing-handle cleanup passes. Server cold-stop02 then
+  stops all three services once, preserving all full rows and 374 custody entries.
+  The original finalization remains FAILED on its recorder-inclusive guard;
+  its consumed, unknown abort must never be resent. Cleanup adds no proposal or
+  replay and does not change the original task uncertainty.
   Supported startup recovery has reaped the crashed attempt with outcome unknown;
   its publication is closed and output removed. Peer/key/drop-in
   stay installed. The Robot retains 16 namespaces/21 records and every old
   identity generation/tombstone. Disks, seed and SSH trust remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
+  D2 plan03 source staging passes, but preflight fails before compile/import/new
+  attempt on two unattended-update package-pin changes. A narrow controlled APT
+  restoration is pending Root; installed image/meta 113 remain retained while
+  the running kernel is `6.12.111+deb13-amd64`. No restoration or D2 PASS is claimed.
 - Host boot: `7f875223-b4cf-421e-b04d-81e3c1f19460`. The A16 fixture was restored
   once using its retained journal, advancing boot35 to36, then shut down after
   the diagnostic. No physical device used.
@@ -307,18 +312,39 @@ Earlier checkpoints and failed attempts remain preserved.
   revision 3 with the exact saved full identity; its context is already retired,
   retirement-ready and writer-stopped. Effective grant is false, actual fixture
   duties0/0, disabled and queue0; fixture boot 3/session 9/encoders 47/47. The
-  remaining action is one separately reviewed explicit Recover, then matching
-  query/settlement and one new settled export. Do not Prepare, Grant, replay the
-  operation, resend Cancel/Retire/Revoke, restart services or repeat any abort.
+  then-pending action was one separately reviewed explicit Recover, matching
+  query/settlement and one new settled export; the separate cleanup below now
+  completes it. No Prepare, Grant, proposal replay or repeated abort occurs.
   `artifacts/robot-retained-debit-finalize-inspection01/interpretation.json`;
   public inventory SHA256 `d396895d…bf8`.
 - Separate source-only preparations are ready for the post-settlement Server
   device/OOM diagnosis (seven host checks) and matching A16 userspace09 pilot
   (six checks). They require actual predecessor receipts and close no target gate.
-  Diagnosis plan02 binds the accepted full-row custody snapshot, preventing a
+  Diagnosis plan03 binds the accepted full-row custody snapshot, preventing a
   same-count row change from becoming its baseline. A16 owner bounds have ten
   host checks; pilot cutoffs remain 180 seconds, each comparison block is bounded
   at 660 seconds, with separate known-cleanup requirements.
+- Separate existing-handle cleanup passes with one explicit Recover and matching
+  historical settlement, leaving Server 22/21, Robot 16/21 and zero debits. All
+  21 raw operation rows and 374 preservation entries remain equal; four old
+  settled exports are copied byte-identically and only the last handle is newly
+  exported. Historical OutcomeUnknown remains uncertainty, not task success.
+  Both monitors exit zero and the owner scope is empty. Evidence:
+  `artifacts/robot-retained-debit-finalize-cleanup-actual-review01/review.json`.
+  Original finalization FAILED and its consumed unknown abort stay preserved.
+- Server cold-stop02 passes once with all three services inactive/PID0, no
+  outstanding debit, unchanged full rows, peer/key/drop-in and Robot/carrier
+  lifetimes: `artifacts/server-diagnosis-cold02/result.json`.
+- D2 plan03 source staging passes, then its exact 49-package preflight fails
+  before baseline save, compiler invocation, import or new attempt. Saved
+  unattended-update evidence shows `libexpat1` changed from `2.8.3-1~deb13u1`
+  to `2.9.0-1~deb13u1` and `linux-libc-dev` from `6.12.111-1` to `6.12.113-1`.
+  Narrow controlled APT restoration of those two pins is pending Root; it has
+  not run. Image `6.12.113` and its meta package remain installed alongside 111;
+  the running kernel remains `6.12.111+deb13-amd64`. No D2 PASS or explanation
+  of the earlier recorder delay follows from this later package transaction.
+  Evidence: `artifacts/server-diagnosis-root-run03/{stage-sources,preflight}` and
+  `artifacts/server-diagnosis-package-drift-review02/review.json`.
 
 ## Server pressure: instrumented campaign verified, VM off
 
