@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `79910ea`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `92955af`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push17 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push17/result.json`). No CI pass is claimed.
+  push18 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push18/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -61,6 +61,28 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   original fixture once. No reset, restart or operation replay occurs.
   Receipts: `artifacts/reconciliation-post-run05-{robot-stop-owner01,poweroff-owner01,fixture-stop-plan01,fixture-stop-plan02}`
   and `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`.
+- **Latest Server111 window: failed negative preserved; separate cleanup and poweroff PASS.**
+  Guest boot `62353823-df1e-4515-a744-3d767565835e` runs exact kernel
+  `6.12.111+deb13-amd64` and unchanged TEST f32. Cold prerequisite01 fails on a
+  wrongly selected pre-Stop raw baseline; saved-only amendment `44fc914b…05f9`
+  proves the actual raw bytes/metadata/absences match the prior acknowledged cold
+  poweroff. The first separate integrity invocation checks 27 payload files,
+  five registry trees and four providers (`5c4968d5…4808`). One Prepare creates
+  `aa4055e973266e3b6fda034d3597b2ea` and reports device-policy load EPERM. The
+  original owner stays FAILED: its two-key reply predicate rejects the actual
+  six-field `server_error` response with `outcome_unknown=true`; that flag is retained.
+  Read-only rows show the new attempt reaped/cancelled, null snapshot/device
+  proof, unchanged Broker and no debit. Separate cleanup validates 157 contiguous
+  trace records with no loss, exec or output before one three-service Stop and
+  exact restoration of four runtime policy files. Cold custody is 25/23 Server,
+  16/21 Robot, zero debits and all 374 preserved; no Prepare or operation is replayed.
+  One normal poweroff then confirms original VM pidfd death and fresh serial
+  shutdown markers. Final custody passes all 35 inactive units with empty cgroups
+  and NRestarts0, no repository actors, QSD/FUSE mounts, image holders or selected
+  listeners; other eight public records and
+  three metadata-only keys remain unchanged. Receipts and hashes are in the
+  [Server111 table](release-cohort.md#server111-capability-denial-cleanup-evidence).
+  Whole D2 and final-cohort reconciliation remain open; no physical claim follows.
 - **Latest A16 result: completed comparison FAILED, 79/80; all carriers stopped.**
   All four frozen ABBA boots/eight runs began and ended all 80 planned trials.
   B1/B2/B4 pass 20/20; B3 evidence passes 9/10 and trace 10/10. Evidence trial 6
@@ -77,15 +99,15 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   `b039bcc9b842e66d89b81f52af0d9969fd693f4ffc3600543dd764e656621772`.
   Other eight public records and three private-key metadata records are unchanged.
   No equal-work inference from the failed run, superiority, physical or WCET
-  claim follows. D2's CAP_BPF-negative execution remains NOT_RUN. Read-only
+  claim follows. The later Server111 negative/cleanup is recorded above. Read-only
   extraction01's GPT-predicate failure and known cleanup remain preserved.
   Separate numbered extraction02 (source03) now extracts exact kernel111 and a
   newly observed initrd, with both read-only QSD exports normally closed and no
   VM boot, Prepare or filesystem replay. Full post-extraction custody passes:
   27 units cold, all nine public byte/metadata records and key metadata unchanged,
   no QSD/FUSE mounts. Independent saved-evidence review passes (`49cb6ef8…48f4`);
-  fresh Server boot remains
-  NOT_RUN. Whole D2 is open.
+  the subsequent exact111 Server boot and failed-negative cleanup do not close
+  whole D2.
 - **Kernel11 checkpoint: excluded pilot PASS, then stopped custody PASS.**
   All ten trials pass, including cold trial 0, with zero recorded loss and 78/78
   eligible dispatch correlations. Before the pilot, Root approves a new full
@@ -162,8 +184,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   preparation adopted the primary readiness protocol; its later actual approval,
   pilot and stopped custody are recorded above. No production binary or fifth
   mask is added.
-- D2 source review prepares one CAP_BPF-negative, no-Start Prepare case with
-  eight passing host checks; target execution remains NOT_RUN. It must preserve
+- At the earlier D2 source-review checkpoint, one CAP_BPF-negative, no-Start Prepare case had
+  eight passing host checks; target execution was then NOT_RUN. It must preserve
   original24/23 rows and leave25/23/zero debit after known cleanup and restoration.
   A separate32-reference review binds the older installed offline positive and
   unchanged policy sources, but cannot recover individual native-sandbox negative
@@ -172,7 +194,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   `artifacts/server-final-d2-predicate-map01/sandbox-method-followup01/result.json`.
   The finite negative owner now has nine passing host checks at
   `artifacts/server-enforcement-negative-owner-plan01/verification.json`; it
-  remains source-only, with no target Prepare or Start.
+  is source-only at that checkpoint. The later one-Prepare result and separate
+  cleanup are recorded above; the original failed owner is not relabelled.
 - Robot maintenance activation01 stopped before the installer because its
   recovery proof had exceeded the unchanged 60-second mapping lifetime. The
   consumed failure and readback are preserved. Reviewed activation02 refreshes

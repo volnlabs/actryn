@@ -1,7 +1,7 @@
 # Release cohort and case evidence
 
 Read-only source/evidence reconciliation, 2026-10-18; preceding verified push
-`79910ea` ([push17](../../artifacts/reconciliation-checkpoint-push17/result.json), zero CI runs; no CI pass).
+`92955af` ([push18](../../artifacts/reconciliation-checkpoint-push18/result.json), zero CI runs; no CI pass).
 This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
@@ -91,6 +91,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | Required scope | Evidence that can be mapped | Boundary still requiring an explicit disposition |
 |---|---|---|
 | D2 existing-device denial and memory pressure | **Two-case composite only:** f32/launcher17a0, existing char1:7 with allowed/absent controls, open results3,-2,-1, 177 loss-free records, fresh max18/oom1/oom_kill1 and natural137; all 27 cold payload/policy files subsequently verified. | Original run05 is FAILED; normal capture05 NOT_RUN. The corrected offline validator and separate custody establish these cases without a new attempt. Trace attribution combines fixed probe/node/control evidence, not a device-policy-origin event. |
+| D2 fixed-policy installation failure | One Server111 Prepare without CAP_BPF reports load EPERM; durable rows retain one reaped/cancelled attempt with null snapshot/device proof, unchanged Broker and no debit. Separate cleanup validates 157 contiguous trace records with no loss, exec or output, then stops once/restores four policy files exactly. Final 25/23 Server, 16/21 Robot, zero debits/all 374 and normal poweroff custody pass. | Original owner remains FAILED on its two-key reply predicate; actual six-field `server_error` keeps `outcome_unknown=true`. Current durable cleanup proof does not relabel that reply or case. No replay, agent Start or whole-D2 PASS. |
 | Other D2 isolation, attribution, method policy, cleanup/export | Historical `server-services-guest05.log`/`-unknown.log`, installed Server receipts, `server-a08-pressure-run11`, and `observer-installed-01` supply separate scopes. Selected observer/BPF and serverd retain their own origins. | Map every [profile rule](../architecture/platform-release-contract.md) to actual controls, prepared snapshots and negative/cleanup evidence. Check the launcher/dependency delta above; do not transfer all older claims solely because package filenames match. Whole D2 remains `OPEN_FINAL_COHORT_RECONCILIATION_REQUIRED`. |
 | A01/A03 | Manager11 lifecycle03: two natural completions under one grant, reconciliation before reuse; module16 stale/replay cases. | Older manager execution is not execution of e36. Bind the reviewed reconciliation delta and its tests/actual settlement separately; no combined-two-operation claim from the one-operation combined demo. |
 | A02/A09 | Replyloss02: initial reply withheld and durable cancellation; contention04: allocated closure during 611 ms SQLite lock, zero STARTs; registry race tests remain separate. | Manager10/module16 evidence. SQLite contention is not fsync-stall, EIO or media-power-loss proof. Current command/front-end coverage is separate below. |
@@ -101,19 +102,22 @@ readback before installation. These are static/build facts, not behavioral tests
 | A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
 | A13/A14/A16 | Live-policy/missing-credential controls and observer evidence remain separate. Both excluded pilots pass. The [completed A16 comparison](a16-comparison.md) retains all 80 trials: 79 PASS/1 B3 evidence BIND failure; six cohort pairs and four 78/78 diagnostic correlations pass, with independent audit and stopped custody. | A16 workload acceptance remains FAILED; bind role/errno/cause unobserved. Live-provider provisioning, independent installer, signing custodian and release identity remain unconfirmed. Historical failures/diagnostic8 retain their boundaries; no equal-work, physical, WCET or superiority claim follows. |
 
-The latest Server case leaves 24/23 Server rows,16/21 Robot records and zero
-debits; separate failure custody, cold stop and cold integrity preserve all old
-rows and 374 entries. Do not substitute the earlier cleanup's 22/21 counts for
-this later state. All failed records and unperformed stages retain their status.
+The latest Server case leaves 25/23 Server rows, 16/21 Robot records and zero
+debits. Separate durable-state cleanup, cold stop, exact policy restoration and
+normal poweroff preserve all old rows and 374 entries. Earlier run05 leaves 24/23;
+the still earlier retained-debit cleanup leaves 22/21. All original failed records
+and uncertain replies retain their status.
 
 The [additive enforcement review](../../artifacts/server-final-d2-predicate-map01/enforcement-followup01.md)
 resolves the running-device-filter lifetime question under the stated trusted
 Linux/administrator assumptions: the cgroup owns the attached program reference
 through loader/reader exit. This is an invariant disposition, not a periodic
-monitor or hostile-root claim. Production Prepare and cleanup after fixed-policy
-installation failure still lack an actual exercise. A proposed one-Prepare,
-no-Start capability-denial case remains NOT_RUN; the existing value/verifier
-checks do not establish that error path.
+monitor or hostile-root claim. The later one-Prepare/no-Start capability-denial
+case and separate cleanup are recorded below. The original owner remains FAILED;
+the durable current-state proof is distinct from its uncertain CLI reply.
+The [additive D2-12 association](../../artifacts/server-final-d2-predicate-map02/association.json)
+binds that evidence to the selected launcher without changing the original map.
+Attributed sandbox negatives and forbidden broker-method evidence remain open.
 
 The [sandbox/method-policy follow-up](../../artifacts/server-final-d2-predicate-map01/sandbox-method-followup01/result.json),
 SHA `e1b774964b38b707b6b60ce3772200c65a4f09fac11fb1f685352208ac229f19`,
@@ -124,8 +128,54 @@ individual negative records and executed-agent attribution; no negative-case
 credit transfers to f32 from that summary. The proposed installation-failure
 case has eight passing host checks. Its separately frozen finite owner has nine
 passing host checks at
-`artifacts/server-enforcement-negative-owner-plan01/verification.json`; target
-Prepare/Start remain NOT_RUN.
+`artifacts/server-enforcement-negative-owner-plan01/verification.json`; those
+source-only records precede the later single Prepare and failed owner below.
+
+## Server111 capability-denial cleanup evidence
+
+Guest boot `62353823-df1e-4515-a744-3d767565835e` binds exact kernel
+`6.12.111+deb13-amd64` and the installed f32 cohort above. Cold prerequisite01
+remains FAILED on selection of pre-Stop raw baseline `42d99…`. Saved-only amendment02
+proves exact raw bytes/metadata/absences against last cold capture `ca68bcd1…01c9`
+and the acknowledged prior normal poweroff; it does not rerun collection.
+The first separate cold integrity invocation uses the unchanged 55-second guest
+scope/65-second transport and verifies 27 payload files, five registry trees,
+persistent policy/configuration and four exact providers.
+
+The sole Prepare is `aa4055e973266e3b6fda034d3597b2ea`. Its fixed-policy load
+EPERM reply has six fields and retains `outcome_unknown=true`. The two-key
+validator fails; the original owner and markers remain FAILED. Read-only 25/23
+rows resolve current terminal state only: reaped/cancelled, null snapshot/device
+proof, unchanged Broker, no debit and empty runtime. Separate cleanup validates
+all 157 contiguous trace records with no loss, exec or stdout/stderr before one
+three-service Stop and exact four-file policy restoration. It creates no new
+Prepare or agent Start. Normal poweroff then confirms the original VM pidfd dead
+and fresh serial shutdown markers, with known owner exit0/empty scope.
+The hashed guest's capset check executes before the persistent Prepare intent:
+exact `0x8100b`, with CAP_BPF and CAP_SYS_ADMIN absent. No separate raw
+`/proc/<pid>/status` dump is retained; this is source-path proof, not an independent dump.
+
+Final custody records all 35 host units inactive with empty cgroups and NRestarts0,
+and no repository VM, fixture, QSD, FUSE mount, image holder or selected listener.
+Counts are 25/23 Server, 16/21 Robot, zero debits/all 374 retained. Server disk SHA256 is
+`6ffb2dad642c3d84d0ce3d1fce0d68099d58eb2964b041bc7e6410f5dc79def3`;
+other eight public byte/metadata records, three metadata-only keys, both fixture
+journals and extracted boot files are unchanged. Whole D2/final-cohort mapping
+remain open; A16 stays FAILED 79/80 and no physical qualification follows.
+
+| Current Server111 receipt | SHA-256 |
+|---|---|
+| [Original cold prerequisite FAILED](../../artifacts/server-kernel111-cold-readonly01/result.json) | `5d8ff9c76ec0a2c6acced080fed82e6886769db4c3fdda1f46348e18414160e7` |
+| [Saved-only cold-baseline amendment](../../artifacts/server-kernel111-cold-readonly-root-review01/cold-receipt-amendment02.json) | `44fc914b4971e5a11ca1ac615fdf7441189f2d342ad2fdd918104a24b94905f9` |
+| [First cold integrity](../../artifacts/server-kernel111-cold-integrity01/integrity.json) | `5c4968d527905bcee992367937afd366267f63a789e3940e9759c7db5fe24808` |
+| [Original negative owner FAILED](../../artifacts/server-enforcement-negative-owner01/result.json) | `e20d3373bb7793a5b21e3f2195ff6065684272e028b773c34c8435d2e4cbebbf` |
+| [Independent read-only state review](../../artifacts/server-enforcement-negative-readback-actual-review01/review.json) | `1aa7a93b39e864e2fe41240dfb5ca2916724a84d9de83e9a6eac3adb22c19076` |
+| [Retained 157-record trace summary](../../artifacts/server-enforcement-negative-cleanup01/retained-summary) | `20a2a73b3ee49013b2e878e6e0198fed12f180df984584996754b05688d4ef55` |
+| [Separate durable-state cleanup](../../artifacts/server-enforcement-negative-cleanup01/result.json) | `ad81ee302af77fb5e8bbde651be5324573eb6b2d135e39691a19dada0634ed46` |
+| [One normal Server111 poweroff](../../artifacts/server-kernel111-normal-poweroff01/result.json) | `ded572661a5c4630be0375374d96df051b6b3f9815494cea683af659ea15ad84` |
+| [Independent cleanup/poweroff review: 57 saved files](../../artifacts/server-enforcement-negative-final-actual-review01/review.json) | `2e52eb289a4e7af8061ee6e7667584ea3e62713a9152c8bc994a5ca814573344` |
+| [Final stopped custody](../../artifacts/server-enforcement-negative-final-stopped-custody01/result.json) | `48f938cea1a2980d46304005423f6cb0e05b36a776a17d01908f34a45ca31e55` |
+| [Additive D2-12 evidence association](../../artifacts/server-final-d2-predicate-map02/association.json) | `68db7b6aa9fbd146adfbd5c8b9bd2a9d075034bf775987453902a8ff4bddf36e` |
 
 ## A16 kernel11 excluded-pilot evidence
 
@@ -222,18 +272,10 @@ empty units and journal 144/2904 bytes, with unchanged other public/key-metadata
 records. Pilot07/boot09/10 failures remain unchanged; local raw copies are not
 Git backups. No equal-work, significance, superiority, physical or WCET claim follows.
 
-D2 remains open. CAP_BPF-negative execution is NOT_RUN; read-only Server
-extraction01 fails its GPT type predicate with known normal QSD/unmount cleanup
-and no VM boot, Prepare or boot-file extraction in that attempt. Separate
-[numbered extraction02](../../artifacts/server-kernel111-readonly-extraction02/result.json)
-now passes with exact kernel111/newly observed initrd and both read-only QSD
-exports normally closed; no filesystem replay occurs. Full
-[post-extraction custody](../../artifacts/server-kernel111-readonly-extraction02-final-stopped-custody01/result.json)
-passes: 27 cold units, all nine public byte/metadata and key-metadata records unchanged,
-no QSD/FUSE mounts. [Independent saved review](../../artifacts/server-kernel111-extraction02-actual-review01/review.json)
-passes (SHA256 `49cb6ef80a35ceda00752b241bef8fd439017af0334af98f4169792539d148f4`).
-Fresh Server boot and negative
-execution remain NOT_RUN; extraction does not qualify D2. No independent installer, signing
+D2 remains open. Prior read-only extraction failures remain preserved; the
+separate extraction02, exact111 boot, cold integrity, one failed negative and
+durable cleanup/poweroff are recorded above. They do not close the final-cohort
+map or relabel the original failed owner. No independent installer, signing
 custodian or release signing identity is confirmed. The documented broker route
 is `/etc/actryn/credentials/openai-api-key` via `LoadCredential`; actual provisioning
 remains unconfirmed for the user to check.

@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding verified push is `79910ea`; push17 verifies integration
+  The preceding verified push is `92955af`; push18 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push17/result.json`).
+  (`artifacts/reconciliation-checkpoint-push18/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,6 +78,33 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
+- **Latest Server111 window: original negative FAILED; separate cleanup and normal poweroff PASS.**
+  Exact kernel `6.12.111+deb13-amd64`, TEST f32 and guest boot
+  `62353823-df1e-4515-a744-3d767565835e` are bound. Cold prerequisite01 uses the
+  wrong pre-Stop raw baseline and remains FAILED; saved amendment `44fc914b…05f9`
+  instead proves exact last-cold bytes/metadata/absences against the prior
+  acknowledged poweroff, without collecting again. The first integrity-only
+  invocation checks 27 payload files, five registry trees and four providers.
+  One Prepare (`aa4055e973266e3b6fda034d3597b2ea`) returns fixed-policy load EPERM;
+  the owner fails its two-key predicate on the actual six-field `server_error`
+  reply. Its `outcome_unknown=true` and all failed markers remain unchanged.
+  Durable readback resolves only current cleanup state: 25/23, new attempt
+  reaped/cancelled with null snapshot/device proof, Broker unchanged and no
+  debit. Separate cleanup validates 157 contiguous trace records with no loss,
+  exec or output, stops the three existing service lifetimes once,
+  restores exactly four runtime files, and retains all 374 entries with
+  25/23 Server, 16/21 Robot and zero debits. No Prepare or operation is replayed.
+  One normal poweroff confirms original pidfd death/fresh serial shutdown
+  markers. Final stopped custody passes all 35 inactive units with empty cgroups
+  and NRestarts0, no repository actors, QSD/FUSE mounts, image holders or selected
+  listeners and unchanged other eight public records/three
+  metadata-only keys. Server disk SHA256 is
+  `6ffb2dad642c3d84d0ce3d1fce0d68099d58eb2964b041bc7e6410f5dc79def3`.
+  [Exact receipts](release-cohort.md#server111-capability-denial-cleanup-evidence)
+  include final custody `48f938ce…31e55`. Whole D2/final-cohort mapping stay open.
+  The next local software task is attributable sandbox/broker negatives, isolated
+  on `test/server-negative-proof` in `.worktrees/server-negative-proof`. Test-source
+  work is in progress; no new guest execution or changed installed binary is implied.
 - **Current A16 checkpoint: completed comparison FAILED, 79/80.** All 80 trials
   began and ended, with no unstarted rows; both 10-trial pilots remain excluded.
   B1/B2/B4 each pass 20/20. B3 evidence trial 6 aborts during BIND before RECOVER;
@@ -112,9 +139,8 @@ Earlier checkpoints and failed attempts remain preserved.
   has SHA256 `d736959b56bc0fb32bc0207544128b466466301acf17a04dec53c01921e862f2`.
   Independent review passes: `artifacts/server-kernel111-extraction02-actual-review01/review.json`,
   SHA256 `49cb6ef80a35ceda00752b241bef8fd439017af0334af98f4169792539d148f4`.
-  The fresh exact111 Server boot and CAP_BPF-negative
-  execution remain NOT_RUN;
-  cold-integrity source preparation and extraction do not close whole D2.
+  The subsequent exact111 Server boot and one failed negative are recorded above;
+  extraction, cold integrity and separate cleanup do not close whole D2.
   No independent installer, signing custodian or release signing identity has
   been confirmed. The documented broker path is `/etc/actryn/credentials/openai-api-key`
   via `LoadCredential`; actual provisioning remains unconfirmed for the user to

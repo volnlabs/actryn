@@ -12,7 +12,7 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push17 records preceding integration checkpoint `79910ea` and its validator-fix branch,
+Push18 records preceding integration checkpoint `92955af` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The latest composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -36,15 +36,24 @@ independent final audit `4257e045…ef0865`. No pooling, significance, superiori
 equal-work inference from B3's failed run, physical measurement or WCET claim follows.
 Historical pilot07 and boot09/10 failures stay unchanged.
 
-D2's CAP_BPF-negative owner remains source-only/NOT_RUN. The subsequent Server
-read-only extraction01 fails its GPT type predicate with known normal QSD/unmount
-cleanup and unchanged stopped custody; that failure stays FAILED. Separate
-numbered extraction02 now passes for exact111 kernel and newly observed initrd,
-with both read-only QSD exports normally closed and no filesystem replay. Full
-post-extraction custody passes: 27 cold units, all nine public byte/metadata and
-key-metadata records unchanged, no QSD/FUSE mounts. Independent saved review passes
-(`49cb6ef8…48f4`);
-fresh Server boot and CAP_BPF-negative execution remain NOT_RUN. Whole D2 stays open.
+D2's subsequent Server111 window binds boot `62353823-df1e-4515-a744-3d767565835e`,
+kernel `6.12.111+deb13-amd64` and unchanged TEST f32. The wrong pre-Stop raw
+baseline leaves cold prerequisite01 FAILED; saved amendment `44fc914b…05f9`
+proves exact prior cold/poweroff bytes without a collection retry. First cold
+integrity checks all 27 payload files, five registry trees and four providers.
+One Prepare (`aa4055e973266e3b6fda034d3597b2ea`) reports fixed-policy load EPERM,
+but the original owner stays FAILED because its two-key predicate rejects the
+actual six-field `server_error` reply; `outcome_unknown=true` stays intact.
+Durable readback and 157 contiguous trace records with no loss, exec or output
+resolve only the current cleanup state. Separate cleanup stops the original
+three services once, restores four policy files exactly, and preserves old
+rows/logs/Broker plus all 374 entries at 25/23 Server, 16/21 Robot and zero debits.
+Normal poweroff and final stopped custody then pass: all 35 host units inactive
+with empty cgroups and NRestarts0, no repository actors, QSD/FUSE mounts, image
+holders or selected listeners; other eight public records and three
+metadata-only keys unchanged. [Exact receipts](release-cohort.md#server111-capability-denial-cleanup-evidence)
+preserve the original failures and unknown reply; no Prepare/operation is replayed.
+Prior extraction failures remain preserved. Whole D2/final-cohort mapping stay open.
 No independent installer,
 signing custodian or release signing identity is confirmed. The documented hosted-model
 broker credential route is `/etc/actryn/credentials/openai-api-key` through
