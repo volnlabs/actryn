@@ -17,8 +17,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
 - User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
-  fixture are running. The Server Observer is active; Launcher and Server daemon
-  have never started in this boot. The new Robot manager,
+  fixture are running. All three Server services are active with recorded
+  lifetimes. The new Robot manager,
   unchanged gateway and module are running without a grant or operation.
   The tracker still exposes its previous paused status without a resume API;
   explicit user continuation authorizes this work against the full saved goal.
@@ -50,7 +50,20 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   `Type=simple` unit, but the rejected operands were not recorded.
   Separate read-only custody verifies unchanged original database/WAL/SHM bytes,
   all 17/16 historical Server rows, two retained charges and inhibited Robot state.
-  A numbered amendment must keep Observer991 and start only the two unattempted units.
+  A numbered amendment then keeps Observer991 and starts only the two untouched units.
+- Continuation-run02 starts Launcher/Server once and passes both-monitor readiness
+  in 0.129957 seconds. Exactly two original closure connections drain with 496
+  blocked bytes and zero forwarded bytes; both charges remain. One inhibited
+  Recover and one known abort Revoke occur, with no new preparation/proposal.
+  The run stops at an overconstrained evidence check requiring a launcher-owned
+  log gap in the separate broker record. Commit `15a9180` corrects only the checker
+  and its tests: 28 focused tests and offline reanalysis of both saved exports,
+  paired with independently captured raw logs, pass. Both campaigns remain FAILED.
+  Fresh custody preserves all 374 old file/metadata records and 11/18 Robot rows;
+  only the expected crash reap, log-uncertainty, publication close/output removal
+  and retained cancellation change in the 17/16 Server rows. The two charges
+  remain. The next numbered phase must execute only the four unrun preparations,
+  with all-active continuous monitors and no service start or old abort resend.
 
 ## Component evidence (not release acceptance)
 

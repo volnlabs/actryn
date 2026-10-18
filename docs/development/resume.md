@@ -30,9 +30,9 @@ Earlier checkpoints and failed attempts remain preserved.
   powered off gracefully once; all three packaged services stayed cold and both
   charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
 - The Server stores retain 17 launcher/16 broker rows and exactly two outstanding
-  Robot charges. Launcher and Server daemon have never started in the current
-  boot; Observer is running as recorded below. The crashed attempt
-  is still `running/pending` on disk pending supported recovery. Peer/key/drop-in
+  Robot charges. All three services are active at their recorded lifetimes.
+  Supported startup recovery has reaped the crashed attempt with outcome unknown;
+  its publication is closed and output removed. Peer/key/drop-in
   stay installed. The Robot retains 11 namespaces/18 records and every old
   identity generation/tombstone. Disks, seed and SSH trust remain preserved. Raw artifacts
   and VM state are ignored local files; a Git push does not back them up.
@@ -60,8 +60,8 @@ Earlier checkpoints and failed attempts remain preserved.
 - Server boot03 passes once with guest boot
   `1bd4d671-2965-4d1b-8061-1de29459eb4f`, host PID2764219/start12891931 and
   invocation `414d22890d624c56a6fca7475c6a316f`. Initially all three services were
-  disabled/inactive with zero start timestamps. Observer subsequently started
-  once; Launcher and Server daemon remain untouched. Current test manifest is
+  disabled/inactive with zero start timestamps. Each service subsequently started
+  exactly once as recorded below. Current test manifest is
   `b119afd529f320a97243bea4b6d0f00919cc3be19cb6b9dfcc3fc923fbdd7e65`.
   Cold04 verifies all 27 payload entries, old slots/archive, configuration,
   credentials metadata and unchanged raw history. Both charges remain outstanding.
@@ -173,6 +173,41 @@ Earlier checkpoints and failed attempts remain preserved.
   `artifacts/robot-retained-debit-partial-start-custody-completion01/result.json`.
   The first host analysis used a flattened cold-inventory key; its correction
   uses saved raw bytes and the nested inventory without repeating target capture.
+- Partial-start integration04 and observer/runtime/guard02 pass 56 root host
+  checks. Their fresh partial snapshot matches Observer991 and the two cold units.
+  Root owner02 pins 122 public inputs, uses unchanged private-key metadata and
+  passes six wiring/supervision checks. Actual run02 starts Launcher PID1173/
+  start556433/invocation `bc95733dddf04002aba72fe510d55270` and Server daemon
+  PID1215/start556511/invocation `81727cae087642b28800805a42a10c8c`, preserving
+  Observer991. Both sentinels/recorder/SDK measure 0.129957 seconds before recovery.
+  Its gate drains exactly two original connections, 496 blocked bytes and zero
+  forwarded bytes. Both old requests remain charged/unavailable; no local work
+  repeats. One inhibited preflight Recover returns Pending then reaches readiness.
+  The cancel unresolved export passes; the crash unresolved checker then fails.
+  No new Prepare/Propose/namespace runs. One planned abort Revoke has a known reply;
+  this intent is consumed and MUST NOT be resent. Both owned monitors exit zero.
+  The campaign and owner remain FAILED:
+  `artifacts/robot-retained-debit-continuation-{run02,owner02}`.
+- Source investigation identifies a checker error: Launcher owns durable
+  `log_incomplete` and exports incomplete logs plus explicit omissions; Broker's
+  separate gap list can legitimately be empty after startup reaps the attempt.
+  `15a9180` changes only the shared Python checker and tests, preserving required
+  omissions, incomplete/hash-bound raw logs, unknown outcome and exact debit proof.
+  All 28 focused tests pass, including a regression that failed before the fix.
+  Offline reanalysis of both saved bundles against independently captured raw logs
+  passes without another target export:
+  `artifacts/robot-retained-debit-export-reanalysis01/result.json`.
+  This does not relabel either failed campaign.
+- Fresh active custody preserves all 374 old file/metadata records and all 11/18
+  Robot rows, with no tasks/cgroups/shims or Robot grant/prepared work/output.
+  Full Server raw/private-copy capture confirms 17/16 rows and both charges;
+  unrelated full rows remain equal. Only the source-defined crash reap/unknown,
+  added launcher log-gap, publication close/output removal and retained request
+  cancellation change. Receipt:
+  `artifacts/robot-retained-debit-active-custody01/result.json`.
+  Continue only the four unrun preparations in a separately numbered residual
+  phase with all-active monitors; preserve startup/drain as historical evidence.
+  Do not start/restart services, repeat original proposals or resend the old abort.
 - Separate source-only preparations are ready for the post-settlement Server
   device/OOM diagnosis (seven host checks) and matching A16 userspace09 pilot
   (six checks). They require actual predecessor receipts and close no target gate.
@@ -587,8 +622,8 @@ retention until worker exit. The phase and closure protocol remain unchanged.
 Focused lane tests and strict Clippy pass. Root integration passes 135 Rust tests
 with three target-only tests ignored, all 26 debit-harness checks and formatting;
 receipts are under `artifacts/reconciliation-integration-checks01`. The Server
-replacement is installed with services still cold; Robot replacement installation
-and authenticated settlement qualification remain pending.
+and Robot replacements are installed; the current window above records their
+exact lifetimes. Authenticated settlement qualification remains pending.
 
 Cleanup uses one explicit Recover because the second context was already retired
 with stopped writers. Both original captures then export, with every leaf hash
@@ -607,20 +642,14 @@ The original stopped disk hashes and identities are in
 Server peer/key/drop-in MUST remain while its two charges are unresolved. No
 record, identity generation, revocation tombstone or fixture journal was deleted.
 
-The current resumed window has completed stopped-state validation, both boots,
-Robot cold history review, inactive-slot archival and public candidate staging.
-Next: establish the old manager's explicit recovery proof and install the reviewed
-Robot candidate through supported inhibited maintenance. Reuse the recorded
-current lifetimes and custody inputs above. Do not issue Grant, Prepare or Propose
-during that maintenance.
-Then qualify settlement of the original two handles through authenticated RPC.
-`artifacts/robot-retained-debit-continuation-plan01` has 18 passing host checks,
-but runtime inputs are null and the draft has no execution entrypoint. Root review
-and current lifetime/certificate bindings remain required. Arm the connection
-gate before the first new Server service startup; observe and drain both original
-blocked closure workers with zero forwarded bytes and charges retained before
-opening future connections. Preserve unknown task verdicts while settling only
-durably proved completion.
+The current resumed window has completed both package updates, history checks
+and one start of each service. Continuation-run02 preserves the actual two-worker
+startup drain with zero forwarded bytes and both charges retained. That historical
+startup experiment must not be repeated. The next residual phase must validate
+the current active lifetimes, unchanged catalogs/debits and both-monitor readiness,
+then execute only the four unrun preparations. Preserve unknown task verdicts
+while settling only durably proved completion. Use the current window's actual
+receipts above; frozen plan01 null inputs are not executable bindings.
 The test generation `3de5e81b8a630567c2652760914e62ef` and principal
 `debit01-14987a9409d60281` remain installed; test private keys stay local mode 0600
 inside a 0700 directory and outside evidence hashes/inventories.
