@@ -7,6 +7,9 @@ Follow-up audit through Server/Robot source `8d6e71d`, launcher correction `2e93
 NOT_RUN entries below where actual evidence now exists. It closes no whole
 release row; the final source/configuration/binary cohort still needs an explicit
 evidence map. See [progress](progress.md) for the individual results and failures.
+The additive [release cohort map](release-cohort.md) binds selected mixed-origin
+artifacts to case evidence, identifies source-impact and CLI coverage boundaries,
+and leaves the final Robot package unselected. It closes no acceptance row.
 Push12 records integration checkpoint `b85e1bf` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The latest composite passes the existing-device-denial and cgroup-OOM cases
