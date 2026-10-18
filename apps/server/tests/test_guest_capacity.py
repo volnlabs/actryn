@@ -23,11 +23,14 @@ def complete_export(started=True):
                              'syscall.unshare', 'syscall.setns']}
     binding = {'ambiguous_create': False, 'boot_id': 'a917164d-7c9a-4f72-a38c-4c68ce1ffad5',
                'cgroup_id': 6653, 'observer': observer,
+               'device_policy': {'program_id': 244, 'instruction_sha256':
+                                 'c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05'},
                'snapshot': {'pid': 2245, 'start_ticks': 46207, 'cgroup': '/actryn/' + attempt,
                             'uid': 65532, 'gid': 65532, 'capabilities': 0,
                             'no_new_privileges': True, 'seccomp_mode': 2,
                             'private_namespaces': True, 'root_readonly': True, 'network_routes': 0,
                             'unexpected_mounts': [], 'device_programs': [244],
+                            'device_programs_direct': [244], 'device_attach_flags': 2,
                             'memory_max': 268435456, 'pids_max': 64,
                             'cpu_max': '50000 100000\n',
                             'io_max': '254:0 rbps=1048576 wbps=1048576 riops=128 wiops=128\n'}}
@@ -78,6 +81,42 @@ def rehash(bundle):
 
 
 class CapacityCampaignTests(unittest.TestCase):
+    def test_fixed_device_proof_is_required_even_when_runtime_binding_hashes_agree(self):
+        for fault in ('missing', 'hash', 'id_bool', 'id_overflow', 'direct_missing',
+                      'effective_missing', 'flags_zero', 'flags_override', 'flags_bool',
+                      'duplicate', 'nonpositive', 'overflow', 'unsorted', 'not_subset'):
+            args = list(complete_export())
+            binding = args[3]
+            snapshot = binding['snapshot']
+            if fault == 'missing': del binding['device_policy']
+            elif fault == 'hash': binding['device_policy']['instruction_sha256'] = '0' * 64
+            elif fault == 'id_bool': binding['device_policy']['program_id'] = True
+            elif fault == 'id_overflow': binding['device_policy']['program_id'] = 2**32
+            elif fault == 'direct_missing': del snapshot['device_programs_direct']
+            elif fault == 'effective_missing': snapshot['device_programs'] = [245]
+            elif fault == 'flags_zero': snapshot['device_attach_flags'] = 0
+            elif fault == 'flags_override': snapshot['device_attach_flags'] = 1
+            elif fault == 'flags_bool': snapshot['device_attach_flags'] = True
+            elif fault == 'duplicate': snapshot['device_programs_direct'] = [244, 244]
+            elif fault == 'nonpositive': snapshot['device_programs'] = [0, 244]
+            elif fault == 'overflow': snapshot['device_programs'] = list(range(1, 66))
+            elif fault == 'unsorted': snapshot['device_programs'] = [245, 244]
+            else: snapshot['device_programs_direct'] = [244, 245]
+            args[4]['attempt']['binding'] = json.dumps(binding)
+            next(item for item in args[0]['artifacts'] if item['name'] == 'runtime_binding')['content'] = binding
+            rehash(args[0])
+            with self.subTest(fault=fault), self.assertRaises(AssertionError):
+                campaign.validate_export(*args)
+
+    def test_fixed_instruction_hash_matches_authored_source(self):
+        import ast
+        import re
+        source = Path(__file__).parents[1] / 'bpf/device_policy.insns'
+        rows = ast.literal_eval(re.sub(r'//[^\n]*', '', source.read_text()))
+        self.assertTrue(rows and all(len(row) == 8 for row in rows))
+        self.assertEqual(hashlib.sha256(bytes(value for row in rows for value in row)).hexdigest(),
+                         campaign.DEVICE_POLICY_SHA256)
+
     def test_complete_started_and_cancelled_prepared_exports_pass(self):
         for started in (False, True):
             campaign.validate_export(*complete_export(started))
