@@ -470,7 +470,7 @@ impl Launcher {
             .insert(id.into(), unsafe { OwnedFd::from_raw_fd(pidfd as i32) });
         self.store
             .record_binding(id, &serde_json::to_string(&binding)?)?;
-        // runc's setup needs mknod; constrain the completed, still-paused task before admission.
+        // runc's setup needs mknod; constrain the completed, still-created task before admission.
         binding.device_policy = Some(crate::device_policy::install(&cg, cgroup_id)?);
         self.store
             .record_binding(id, &serde_json::to_string(&binding)?)?;
@@ -503,55 +503,54 @@ impl Launcher {
     }
     async fn start(&mut self, id: &str) -> Result<()> {
         let a = self.store.inspect(id)?.attempt;
-        let artifact = self
-            .config
-            .artifacts
-            .get(&a.artifact_digest)
-            .context("artifact approval missing")?;
-        crate::artifact::validate_approved(&a.artifact_digest, artifact)?;
         ensure!(a.state == "prepared", "attempt is not prepared");
-        let verified: Result<Binding> = (|| {
+        let launcher = &mut *self;
+        let verified: Result<()> = async move {
+            let artifact = launcher
+                .config
+                .artifacts
+                .get(&a.artifact_digest)
+                .context("artifact approval missing")?;
+            crate::artifact::validate_approved(&a.artifact_digest, artifact)?;
             let binding: Binding =
                 serde_json::from_str(a.binding.as_deref().context("missing binding")?)?;
             let expected = binding.snapshot.as_ref().context("unverified task")?;
             let current = policy::snapshot(expected.pid, &cgroup_path(id), &cgroup_dir(id))?;
             binding.verify(
                 &current,
-                &self.boot_id,
+                &launcher.boot_id,
                 fs::metadata(cgroup_dir(id))?.ino(),
                 &cgroup_path(id),
-                &self.config.io_device,
+                &launcher.config.io_device,
             )?;
-            Ok(binding)
-        })();
-        let binding = match verified {
-            Ok(binding) => binding,
-            Err(error) => {
-                self.store.cancel(id)?;
-                if let Err(cleanup) = self.cleanup(id).await {
-                    eprintln!("retained failed start {id}: {cleanup:#}");
-                }
-                return Err(error).context(format!("start verification failed; attempt {id}"));
+            let health = observer::exchange(
+                Path::new(OBSERVER_SOCKET),
+                &launcher.observer_request("health", id, binding.cgroup_id),
+            )
+            .await?;
+            health.check(Some(
+                &binding
+                    .observer
+                    .as_ref()
+                    .context("observer was not verified")?
+                    .collector_epoch,
+            ))?;
+            let socket = Path::new(BROKER_ROOT).join(id).join("broker.sock");
+            use std::os::unix::fs::FileTypeExt;
+            ensure!(
+                fs::symlink_metadata(socket)?.file_type().is_socket(),
+                "per-attempt broker not ready"
+            );
+            Ok(())
+        }
+        .await;
+        if let Err(error) = verified {
+            self.store.cancel(id)?;
+            if let Err(cleanup) = self.cleanup(id).await {
+                eprintln!("retained failed start {id}: {cleanup:#}");
             }
-        };
-        let health = observer::exchange(
-            Path::new(OBSERVER_SOCKET),
-            &self.observer_request("health", id, binding.cgroup_id),
-        )
-        .await?;
-        health.check(Some(
-            &binding
-                .observer
-                .as_ref()
-                .context("observer was not verified")?
-                .collector_epoch,
-        ))?;
-        let socket = Path::new(BROKER_ROOT).join(id).join("broker.sock");
-        use std::os::unix::fs::FileTypeExt;
-        ensure!(
-            fs::symlink_metadata(socket)?.file_type().is_socket(),
-            "per-attempt broker not ready"
-        );
+            return Err(error).context(format!("start verification failed; attempt {id}"));
+        }
         self.store.start(id, now_ms()?)?;
         if let Err(error) = self
             .tasks
