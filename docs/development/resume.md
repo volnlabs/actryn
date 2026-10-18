@@ -12,8 +12,8 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; Server/Robot implementation source remains
-  `8d6e71d`, with preview-agent diagnostic fix `42537e2` integrated but not installed.
-  The preceding pushed checkpoint is `7a22b52`. Its remote head is
+  `8d6e71d`, with preview-agent diagnostic fix `42537e2` integrated and its OCI imported; execution is pending.
+  The preceding pushed checkpoint is `968c625`. Its remote head is
   verified and its CI query returned zero runs. No CI pass is claimed.
   The user authorized pushing this branch to
   `origin`. Every task commit carries
@@ -31,7 +31,8 @@ Earlier checkpoints and failed attempts remain preserved.
   powered off gracefully once; all three packaged services stayed cold and both
   charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
 - The Server stores retain 20 launcher/19 broker rows and exactly four outstanding
-  Robot charges. All three services are active at their recorded lifetimes.
+  Robot charges. All three services have stopped once for the corrected OCI's
+  completed offline import, preserving all full rows and all four charges.
   Supported startup recovery has reaped the crashed attempt with outcome unknown;
   its publication is closed and output removed. Peer/key/drop-in
   stay installed. The Robot retains 14 namespaces/20 records and every old
@@ -207,7 +208,7 @@ Earlier checkpoints and failed attempts remain preserved.
   cancellation change. Receipt:
   `artifacts/robot-retained-debit-active-custody01/result.json`.
   The subsequent residual phase below supersedes the then-planned four preparations.
-- Residual-run01 passes fresh both-monitor readiness in0.128521 seconds and
+- Residual-run01 passes fresh both-monitor readiness in 0.128521 seconds and
   executes pressure-c/d once, including cancel/retire/recover. Four exact Robot
   requests remain charged. The fifth setup, grant, activation and agent launch
   have known replies, but its strict diagnostic assertion fails. The old static
@@ -216,8 +217,8 @@ Earlier checkpoints and failed attempts remain preserved.
   abort Revoke is acknowledged, and MUST NOT be resent; both monitors exit0.
   The owner is reaped with an empty scope. Evidence:
   `artifacts/robot-retained-debit-residual-{run01,owner01}` remains FAILED.
-- Root read-only inspection02 independently verifies Server20/19, Robot14/20,
-  exactly four charges, all previous Server/Robot full rows and374 preserved
+- Root read-only inspection02 independently verifies Server 20/19, Robot 14/20,
+  exactly four charges, all previous Server/Robot full rows and 374 preserved
   file/metadata records. All tasks/cgroups/shims/broker directories are empty.
   Fifth stdout is empty; stderr is the structured generic preview error; its
   ordinary call is cancelled/publication-closed/outputNULL, with no Robot row.
@@ -233,15 +234,41 @@ Earlier checkpoints and failed attempts remain preserved.
   independently passes five Rust tests, 28 Python tests and formatting. The
   actual specific fifth rejection reason was not retained by the old agent;
   it cannot be recovered from these rows or relabelled as a measured branch.
-  The corrected agent is not installed. Its OCI requires an offline import:
-  capture all four debits and full rows, stop three Server services once,
-  import without deleting retained artifacts/history or changing capacity,
-  then use a fresh closed gate before one deliberate startup. New actual
+  The corrected agent's OCI has now been imported offline after the following
+  one-shot stop, preserving all four debits, full rows and retained artifacts.
+  Use a fresh closed gate before one deliberate startup. New actual
   service lifetimes and blocked closure-drain evidence are mandatory.
   Only a fresh capacity-diagnostic attempt and one restored-capacity attempt
   may follow, with explicit inhibited Robot recovery and exact read-only
   settlement of the four original handles. Expected final counts are Server22/21,
-  Robot16 namespaces/21 records and zero debits. This new sequence has not run.
+  Robot 16 namespaces/21 records and zero debits. Startup and the two new attempts
+  have not run. Only the diagnostic attempt selects the new OCI;
+  the restored operation and all old case exports retain the original artifact.
+- Static diagnostic build01 passes once without running the agent. Source is
+  `42537e2`; binary SHA256 `d0e6de54…ee01`, 1,469,200 bytes; OCI manifest
+  `sha256:cccdc80b…cc22`. Root independently verifies static amd64 ELF and all
+  five OCI payload files. Native metadata records 36 retained inputs and five
+  deleted compiler temporaries, without claiming hermeticity. No dependency or
+  toolchain changes occur. Receipts:
+  `artifacts/preview-agent-diagnostic-build01/{result.json,inventory-final.json}`.
+- Root's reviewed stop01 succeeds in 8.876 s; the whole bounded owner exits0.
+  All three services become inactive with known pidfd exits, no active listeners
+  and no tasks/cgroups/shims. Cold host-private SQL captures are exactly equal
+  to all 20/19 pre-stop rows and all four retained charges. Peer/drop-in/key
+  metadata and the Robot/three carrier lifetimes remain unchanged. No import,
+  service startup or Robot mutation runs in this phase. Receipt:
+  `artifacts/preview-agent-diagnostic-stop01/result.json`.
+- Staging the five public files passes in 4.773 s, then one installed additive
+  import passes in 5.011 s. All three old registry directories remain unchanged;
+  occupancy is now4/8 and the approval map3 entries. The new sealed tree and its
+  exact modes/content match OCI `sha256:cccdc80b…cc22`. All20/19 rows and four
+  charges, peer/drop-in/key metadata, Robot/carrier lifetimes remain preserved.
+  Services remain cold; no agent has executed. Root independently validates
+  the actual importer report and complete configuration/tree/row transition,
+  with all stop/stage/import owner scopes absent. Evidence:
+  `artifacts/preview-agent-diagnostic-import01/root-review.json`.
+  Actual import PASS SHA256 is `7f95065c…37c48`; post-import rows SHA256
+  `98753aed…860a`. All 68 root finalization/monitor/import/custody host checks pass.
 - Separate source-only preparations are ready for the post-settlement Server
   device/OOM diagnosis (seven host checks) and matching A16 userspace09 pilot
   (six checks). They require actual predecessor receipts and close no target gate.
@@ -676,8 +703,9 @@ The original stopped disk hashes and identities are in
 Server peer/key/drop-in MUST remain while its two charges are unresolved. No
 record, identity generation, revocation tombstone or fixture journal was deleted.
 
-The current resumed window has completed both package updates and one start of
-each service. Continuation-run02's two-worker drain stays historical. Residual01
+The current resumed window has completed both package updates, one start of
+each service, the later deliberate Server stop and one additive offline import.
+Continuation-run02's two-worker drain stays historical. Residual01
 has now consumed pressure-c/d and the failed fifth attempt; do not repeat them.
 The new diagnostic agent needs an offline import and separately reviewed startup
 with all four existing charges withheld, before exactly two new attempts. Preserve
@@ -690,8 +718,8 @@ inside a 0700 directory and outside evidence hashes/inventories.
 Use a separately numbered continuation amendment and the two original handles;
 do not replay their proposals or crash the Server again merely to rerun setup.
 The original six-preparation campaign would take 11 retained namespaces to17,
-exceeding16. Current14 namespaces permit exactly two additional preparations,
-reaching16 without deleting history. Readiness probes need an SSH timeout shorter than their
+exceeding16. Current 14 namespaces permit exactly two additional preparations,
+reaching 16 without deleting history. Readiness probes need an SSH timeout shorter than their
 outer deadline and narrowly typed timeout handling within the original overall
 budget; identity/output failures remain fatal, and reboot is never retried.
 

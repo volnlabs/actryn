@@ -5,9 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `7a22b52`.
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `968c625`.
   Server/Robot implementation source remains `8d6e71d`; preview-agent diagnostic
-  fix `42537e2` is integrated but not installed. The preceding remote head is verified;
+  fix `42537e2` is integrated and its OCI imported, with execution pending. The preceding remote head is verified;
   its CI query returned zero runs. No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
@@ -18,8 +18,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Debian release tuple. No host kernel module or physical device will be used.
 - Account quota telemetry unavailable; no quota percentage inferred.
 - User resumed on 2026-10-18. The Server and Robot test guests and one non-actuating
-  fixture are running. All three Server services are active with recorded
-  lifetimes. The new Robot manager,
+  fixture are running. All three Server services have stopped once for the
+  corrected OCI's completed offline import; all four charges and 20/19 rows are preserved.
+  The new Robot manager,
   unchanged gateway and module are running with authority inhibited and no operation.
   The failed fifth preparation is retired and awaiting explicit recovery.
   The tracker still exposes its previous paused status without a resume API;
@@ -76,7 +77,7 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 - Fresh read-only inspection02 captures stable Server raw files, host-only SQL
   copies, Robot history, logs and full service/fixture lifetimes. All old Server
   rows, 11/18 old Robot rows and 374 preserved public/metadata records are equal.
-  Current counts are Server20/19 and Robot14/20, with four charged requests,
+  Current counts are Server 20/19 and Robot 14/20, with four charged requests,
   no tasks/cgroups/shims, zero output and no operation. The fifth preparation is
   retired/ready with stopped writers; it has not been recovered. The old agent's
   specific rejection reason is unavailable, not a measured capacity diagnosis.
@@ -88,11 +89,35 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   saves fifth-attempt raw logs before asserting. The regression fails before
   the fix; root independently passes five Rust tests, 28 Python checks and fmt.
   No Server/Robot binary, bound, authority rule or retry policy changes.
-  The next numbered sequence requires one corrected OCI, offline import with
-  full-row custody, and a closed gate before one deliberate Server startup.
+  The next numbered sequence requires a closed gate before one deliberate Server
+  startup after the completed offline import with full-row custody.
   A fresh capacity-diagnostic attempt and one restored-capacity attempt fit
-  exactly at16 Robot namespaces/21 records and Server22/21; no old proposal,
-  crash, pressure case or consumed abort may repeat. None of that sequence has run.
+  exactly at 16 Robot namespaces/21 records and Server22/21; no old proposal,
+  crash, pressure case or consumed abort may repeat. Startup and those two new
+  attempts have not run.
+- One locked/offline static-glibc amd64 build of diagnostic source `42537e2` passes;
+  agent SHA256 is `d0e6de54…ee01`, OCI `sha256:cccdc80b…cc22`. Root independently
+  verifies the ELF, all five OCI files and exact unchanged input/schema payloads.
+  Metadata retains 36 native inputs and explicitly identifies five deleted compiler
+  temporaries; this is not a hermetic build claim. No candidate execution or
+  dependency/toolchain change occurs. Evidence:
+  `artifacts/preview-agent-diagnostic-build01/{result.json,inventory-final.json}`.
+- The reviewed one-shot stop passes under an owned finite systemd scope in 8.876 s.
+  Full raw/private-copy captures before/after retain all 20/19 Server rows and four
+  debits, peer/drop-in/key metadata, and no tasks/cgroups/shims. All three service
+  pidfds show exit; all units are inactive and their listeners absent. Robot and
+  all carrier lifetimes remain unchanged. Whole helper exits0; no import or
+  startup runs. Evidence: `artifacts/preview-agent-diagnostic-stop01/result.json`.
+- Public staging and one additive import then pass in 4.773 s and5.011s. Registry
+  occupancy grows3→4 and approvals2→3 under the unchanged capacity 8. All old
+  entries and full 20/19 rows/four charges are preserved; only the new artifact
+  approval is added. The sealed tree and modes match the built OCI. Root
+  independently checks the actual import report, configuration/tree transition
+  and cold rows; all three owner scopes are reaped. Services remain cold and the
+  candidate remains unexecuted. Evidence:
+  `artifacts/preview-agent-diagnostic-import01/root-review.json`.
+  Finalization, monitors, import and stronger raw-marker custody pass 68 root
+  host checks; these do not qualify the remaining target execution.
 
 ## Component evidence (not release acceptance)
 
