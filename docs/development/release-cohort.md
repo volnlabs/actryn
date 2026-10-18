@@ -98,7 +98,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | A10 | Traffic03 corrected unchanged-capture analysis; lifetime09 gateway replacement/retained-FD, local offline recovery and export. | Preserve earlier failures, uncertain negative reply and the capture-prefix boundary. Zero SAMPLE records are not applied-motion proof. Bind manager11→e36 delta. |
 | A11 | Actual source80→82 gap and hot-journal committed-prefix recovery. | Preserve raw remnant/unknown tail and read/queued/durable distinctions. Metadata-only capture intentionally remains execution-replay-ineligible. |
 | A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
-| A13/A14/A16 | Live-policy/missing-credential controls; observer overhead/loss evidence; failed production pilot07 and accepted diagnostic8 retained independently. | Authorized live-provider run, independent developer installation, production authority pilots and frozen comparison remain open. Diagnostic8 is an instrumented non-reproduction, not a fix, comparison or WCET proof. |
+| A13/A14/A16 | Live-policy/missing-credential controls; observer overhead/loss evidence; excluded kernel11 passes 10/10 including cold trial 0, zero loss and 78/78 correlations under its approved full cohort. Independent review and stopped custody pass; exact bindings below. | Authorized live-provider run, independent developer installation, userspace11 and four frozen ABBA boots/eight comparison runs remain open. Pilot07 stays FAILED at 9/10; boot09/10 readiness failures and their NOT_RUN pilots remain. Diagnostic8 is a separate instrumented non-reproduction; none establishes an original cause-fix, physical, WCET or superiority claim. |
 
 The latest Server case leaves 24/23 Server rows,16/21 Robot records and zero
 debits; separate failure custody, cold stop and cold integrity preserve all old
@@ -121,7 +121,61 @@ identities and settled call. The selected source comparison retains unchanged
 fixture, harness and policy rules. The early native sandbox summary still lacks
 individual negative records and executed-agent attribution; no negative-case
 credit transfers to f32 from that summary. The proposed installation-failure
-case has eight passing host checks but remains NOT_RUN on the target.
+case has eight passing host checks. Its separately frozen finite owner has nine
+passing host checks at
+`artifacts/server-enforcement-negative-owner-plan01/verification.json`; target
+Prepare/Start remain NOT_RUN.
+
+## A16 kernel11 excluded-pilot evidence
+
+One kernel11 invocation passes all 10 trials, including cold trial 0, with zero
+recorded loss and all 78 eligible dispatches correlated from 98 capture records.
+This is the excluded kernel correctness/instrumentation pilot, not a comparison
+result. Guest boot is `6c464096-b1a9-4403-bf5b-cfc8da9dabd4`. Before execution,
+Root approved a new full 375-record catalog (all `ii `, architectures all/arm64),
+two resolved `libc6:arm64 2.41-12+deb13u4` provider files and the four frozen
+artifact hashes below. Historical names/versions match; the old full provider
+byte baseline was unavailable and is not inferred. Exact canonical catalog,
+providers and artifacts fields match before/after; the two observation files
+are also byte-identical. C03 retains the common four masks, qualified passive
+shutdown-helper checks and original binaries, 10 ms HELLO limit and denominator.
+
+One normal VM poweroff and one supported fixture shutdown complete within the
+original 490-second window. Original process pidfds confirm death; exact exit
+codes are unavailable after transient-unit collection. The full stopped receipt
+records all 12 carrier/owner units inactive/MainPID0/empty cgroups/NRestarts0 and
+no repository VM/fixture processes. Fixture boot 39→49 adds 200 bytes, leaving a
+1004-byte journal with the old 804-byte prefix unchanged. Other stopped public
+files and metadata-only private keys remain unchanged. The saved A16 disk hash
+is `3b53d71caab1a38eec3a4dedb29594df8812131abf61889f8cf069d4911cf00e`;
+no disk or private-key hash was collected for this documentation update.
+
+| Kernel11 input or receipt | SHA-256 |
+|---|---|
+| [C03 frozen runner](../../artifacts/a16-common-quiescence-plan03/source/kernel/tests/a16/campaign.py) | `21f93e10d4a1a8883bd6c85ad70adefcc30bb19a3fc53ed3f788790072a61ae2` |
+| [C03 frozen campaign manifest](../../artifacts/a16-common-quiescence-plan03/source/kernel/tests/a16/campaign.toml) | `28e0038947adc3c3d491af65040befca6170be59a05fa55a079d0dd5187d8d9c` |
+| Selected amendment7 workload, as bound by independent review | `40f75fe9d898bcd2320f97e70257426f3ca71cdddffe562a25f7581ccba42398` |
+| Selected amendment7 gateway, as bound by independent review | `305f5e1d15df9d2037b7ecc8246825a791a18d92c5f1408fed8de5b1062c9720` |
+| Selected production module16 | `a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112` |
+| Selected ABI7 capture module | `fae8eccb64cbe586f55a5c92c4b0521173dc2c4308fd5fa60f0c6cb3f646b403` |
+| [Pre-pilot cohort approval](../../artifacts/a16-kernel11-cohort-approval01/approval.json) | `6a65f6fac9c05d4d412a2332602a6dfbb009bbb29eb26db0bda245a430036bec` |
+| [Approved catalog/provider/artifact baseline](../../artifacts/a16-kernel11-cohort-approval01/baseline.json) | `a9a58ed7f1183db55f87c4b70210d0a85487895d5045fb33ce88202c75ff5f86` |
+| [Before observation](../../artifacts/a16-kernel11-boot-observation01/boot/package-provider-observation.stdout) and [identical after observation](../../artifacts/a16-kernel11-pilot-owner01/after-observation.stdout) | `862e26f063de85b455f0503952a07891a338379981c8a3a73a36152d49bdc0b8` |
+| [Three-field equality validation](../../artifacts/a16-kernel11-pilot-owner01/pair-validation.json) | `093ee4d3f5b58537930d2be06fc37318ad084f20c80a4bf1b0f31abd0302d394` |
+| [Pilot and known poweroff](../../artifacts/a16-kernel11-pilot-owner01/result.json) | `852d2137807445b01ebc143c939be6f7740707321e4765083b1a28c71197e28f` |
+| [Supported fixture shutdown](../../artifacts/a16-kernel11-fixture-shutdown01/result.json) | `08b2d2caa343552f591b76ab88dcd742341cae6a7f643007b0d0190adeb09ad9` |
+| [Independent saved-evidence review](../../artifacts/a16-kernel11-actual-review01/review.json) | `bbf9691a540e8508fc67b9b67ffc3afdf0019451ef471d489e79bd1db6c1a4af` |
+| [Final stopped custody](../../artifacts/a16-kernel11-final-stopped-custody01/result.json) | `3c0af6209cc09236c9fa623fb78ee860a97cc9c4d45dfd803da6285cab339046` |
+| [Stopped public-byte custody](../../artifacts/a16-kernel11-final-stopped-custody01/public-custody.json) | `a450475c1c8e68d4b38abacbf3fab8e43ca566f9f097751cfbc33b640d4e1c85` |
+| [Local byte-identical raw copy: 44 files/728235 bytes](../../artifacts/a16-kernel11-raw-preservation02/inventory.json) | `ed60356cc63c6b0978f48c2b204b29b4e3a58ee894f02d14ff2a2aa9c12145ed` |
+
+Userspace11 and four frozen ABBA boots/eight comparison runs remain required.
+Prior pilot07 is FAILED at 9/10; boot09/10 failures and their NOT_RUN pilots remain
+unchanged. Kernel11 establishes no original-failure cause or fix. Dispatch ends
+at complete immutable-frame acceptance into the Linux serial buffer, not physical
+wire drain or actuator response. No physical, WCET or superiority claim follows.
+The raw copy is ignored local evidence, not a Git backup. External A13/A14,
+genuine release signing and final whole-cohort qualification remain open.
 
 ## ARM CLI coverage to bind
 
@@ -190,7 +244,8 @@ them without rewriting them.
 
 Robot package inspection matches nine of ten pins: Expat remains2.9 against
 pinned2.8.3. That limits exact installed-Robot cohort equality and says nothing
-about the separate A16 disk. Its full package/provider baseline requires its own
-binding. Final selection must also retain build/link/source-material and notice
+about the separate A16 disk. A16's new kernel11 baseline is separately approved
+and bound above; it does not establish historical provider equality. Final
+selection must also retain build/link/source-material and notice
 provenance, genuine release-signing inputs and external A13/A14 evidence. No row
 in this document is a whole-release PASS, physical qualification or CI result.

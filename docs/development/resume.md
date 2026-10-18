@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The latest recorded pushed checkpoint is `98e3fed`; push14 verifies integration
+  The latest recorded pushed checkpoint is `1f6ed1a`; push15 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push14/result.json`).
+  (`artifacts/reconciliation-checkpoint-push15/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,22 +78,42 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
-- **Current stopped state supersedes the older boot09 state below.** Boot10
+- **Current stopped state follows the passing excluded kernel11 pilot.** All
+  ten trials pass, including cold trial 0, with zero recorded loss and 78/78
+  eligible dispatch correlations. Root approved the new 375-package full catalog,
+  two resolved libc provider files and four frozen artifact hashes before the
+  pilot; all three catalog/providers/artifacts fields match before and after.
+  One normal VM poweroff and one supported fixture shutdown complete within the
+  original 490-second window. All recorded carrier/owner units are inactive,
+  MainPID0/empty cgroups/NRestarts0; no repository VM or fixture remains.
+  Saved A16 disk SHA256 is
+  `3b53d71caab1a38eec3a4dedb29594df8812131abf61889f8cf069d4911cf00e`;
+  journal 1004 bytes/boot 49 preserves the old 804-byte prefix. Other stopped public
+  bytes and metadata-only private keys remain unchanged. Authoritative receipts:
+  `artifacts/a16-kernel11-final-stopped-custody01/{result,public-custody}.json`.
+  The [kernel11 evidence table](release-cohort.md#a16-kernel11-excluded-pilot-evidence)
+  binds independent review, cohort approval, selected bytes and raw preservation.
+  Userspace11 and four frozen ABBA boots/eight comparison runs remain required
+  and NOT_RUN at this checkpoint. Pilot07 remains FAILED
+  at 9/10, and boot09/10 failures remain failed with their pilots NOT_RUN. No
+  cause-fix, physical, WCET or superiority claim follows. D2's CAP_BPF-negative
+  owner is source-only; external A13/A14 and release signing remain open.
+  Local ignored raw copies and VM disks are not backed up by Git.
+- Historical boot10 state: Boot10
   launches one fixture/VM but rejects the primary helper's known SSH reset pair;
   original120 expires before any observer baseline or pilot. The cleanup-only
   identity read is not qualification. Normal VM poweroff02 and supported fixture
   shutdown02 both succeed within original490; all eight carrier/owner units are
-  inactive/PID0/empty cgroups/NRestarts0, with no repository actors. Current A16
+  inactive/PID0/empty cgroups/NRestarts0, with no repository actors. Then-recorded A16
   disk is `bb641a84c54d232228b92c082df8c171fcec10442b4ca2568dd24abe8f84a2ca`.
   Journal784 bytes/boot38 preserves old764 prefix; owned endpoints are absent.
   Other public files and private-key metadata remain unchanged. Authoritative
   receipt: `artifacts/a16-kernel10-final-stopped-custody01/result.json`; complete
   public custody: its `public-custody.json`. Boot10 FAILED/pilot10 NOT_RUN remain.
-  Common03/boot11 sources are being prepared with the primary helper's complete
-  transport classification and actual retained bindings left NULL. Root must
-  review all sources, current stopped proof and new inputs before a new window.
+  Common03/boot11 preparation subsequently adopted the primary helper's complete
+  transport classification; its later actual result is recorded above.
   Do not invoke consumed boot10 or the uninvoked but now historical pilot10 owner.
-- Latest state: all VMs and fixtures are off after one unused A16 boot09.
+- Historical boot09 state: all VMs and fixtures were off after one unused boot.
   Pilot09 never runs. The fixture starts once at PID2930053/invocation
   `ecd48e9e4c354906ad1cc89c153e39cc`, appending boot37 to the retained journal;
   an initial host PermissionError is separately resolved by read-only custody.
@@ -107,7 +127,7 @@ Earlier checkpoints and failed attempts remain preserved.
   the waiting unattended-upgrade shutdown helper, whose source is retained.
   Full package/provider approval remains unbound. One guest poweroff completes
   within the unchanged 490s window, followed by supported fixture shutdown.
-  Current A16 disk is
+  Then-recorded A16 disk is
   `26acddea9024652365b8d4844c29d49ab18857cce520bb2ca8163bdc5474a4d1`;
   journal is 764 bytes/boot37 with the original 744-byte prefix unchanged.
   All other stopped disks/seeds/trust and private-key metadata remain exact.
