@@ -5,9 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding remote checkpoint `44320fc` verified on
-  2026-10-18. Current implementation source is `8d6e71d`. The branch CI query
-  returned no runs; no CI pass is claimed.
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `bdf60b4`.
+  Current implementation source is `8d6e71d`. The earlier `44320fc` CI query
+  returned no runs; newer CI is unchecked and no CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -19,9 +19,10 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 - User requested a fresh pause on 2026-10-18. All agent lanes and owned builds
   are stopped; all test guests and fixtures are off. The goal is `paused` and
   the release remains incomplete. The [handoff](resume.md) records next actions,
-  the reviewed native Server build and unsigned candidate, successful ARM build
-  with unfinished native/link receipts, and host-tested archival plan02 awaiting
-  root review. No target update or archival was performed.
+  reviewed native/ARM builds and both unsigned candidates, the installed Server
+  test update with services still cold, and the pending Robot update. Latest
+  shutdown/state receipt: `artifacts/reconciliation-pause01/result.json`.
+  Both original Robot charges and all retained history remain intact.
 
 ## Component evidence (not release acceptance)
 
@@ -1383,6 +1384,33 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   qualification amendment after installing reviewed replacements. Blindly
   repeating the six-preparation campaign would exceed the 16-namespace limit
   from the current 11; only the four unrun preparations fit without deleting history.
+
+### Reconciliation packages and renewed pause — 2026-10-18
+
+- ARM metadata amendment01 finishes without recompilation; 14 bounds checks pass.
+  Root verifies 178 inventory files, 363 Git source files, 28 unchanged allocated
+  sections, 37 native/link receipt paths and 147 exact target-library imports.
+  Both original build preparation/analysis failures remain preserved.
+- Both unsigned packages pass root review. Server changes only its daemon;
+  Robot changes manager and CLI, preserving all other payload bytes/modes/licenses.
+  Separate disposable signed test variants explicitly remain unqualified releases.
+- Archival plan03 passes 19 host checks. Actual Server archive01 preserves one
+  inactive release outside the three-slot managed directory without deleting it
+  or raising quotas. Update02 stages, activates and resumes the Server test
+  manifest `b119afd529f320a97243bea4b6d0f00919cc3be19cb6b9dfcc3fc923fbdd7e65`
+  once through the installed CLI. Three services remain disabled/inactive;
+  17 launcher/16 broker rows, both original charges and credentials are unchanged.
+  Cold-collector and pre-CLI wrapper failures remain separate retained records.
+- Robot boot plan01 has six passing host checks; continuation-plan01 has 18.
+  Neither executes against targets. The Robot plan pins the now-ended Server
+  lifetime and must be amended after a new boot; continuation runtime fields
+  remain null and root execution review is pending.
+- User requests another pause. The goal is paused and no further campaign runs.
+  One guarded Server poweroff passes, preserving exact raw history bytes. Robot
+  and fixture remain off with unchanged disk and boot2 journal. Fresh stopped
+  hashes and absence of owned test processes are verified in
+  `artifacts/reconciliation-pause01/result.json`. Product source is unchanged;
+  no new release acceptance, CI or physical qualification is claimed.
 
 ## Decisions
 

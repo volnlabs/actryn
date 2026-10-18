@@ -9,9 +9,9 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Repository and execution state
 
-- Integration branch: `feat/v0.0.1`; implementation HEAD before this handoff:
-  `8d6e71d`. Remote checkpoint `44320fc` was verified on 2026-10-18. The branch CI
-  query returned no runs; no CI pass is claimed. The user authorized pushing this branch to
+- Integration branch: `feat/v0.0.1`; implementation source remains
+  `8d6e71d`, with preceding pushed checkpoint `bdf60b4`. The earlier `44320fc` CI
+  query returned no runs; newer CI is unchecked. The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
 - All test guests and fixtures are now off. Retained-debit campaign01 performed
@@ -20,7 +20,10 @@ Earlier checkpoints and failed attempts remain preserved.
   Robot cleanup recovered its already-retired context once, exported both original
   captures, stopped both services and unloaded the module. Both guests then
   powered off gracefully once and the exact fixture stopped once. Receipt:
-  `artifacts/robot-retained-debit-cleanup01/result.json`.
+  `artifacts/robot-retained-debit-cleanup01/result.json`. During the subsequent
+  resumed interval, only the Server booted for its package update. It has now
+  powered off gracefully once; all three packaged services stayed cold and both
+  charges remain. Latest receipt: `artifacts/reconciliation-pause01/result.json`.
 - The stopped Server retains 17 launcher/16 broker rows and exactly two outstanding
   Robot charges. Its services never started after the crash; the crashed attempt
   is still `running/pending` on disk pending supported recovery. Peer/key/drop-in
@@ -36,10 +39,12 @@ Earlier checkpoints and failed attempts remain preserved.
   detached `.worktrees/server-importer-build01` freezes source `544c382`.
 - Original userspace: Apache-2.0; kernel/BPF: GPL-2.0-only. No global Git identity
   or provider/signing credentials changed. Account quota telemetry is unavailable.
-- The 2026-10-18 readback revalidates stopped disk, seed and SSH trust identities
-  and hashes, with all three retained guest/fixture units inactive and no repository
-  QEMU process. Receipts: `artifacts/continue-resume-state02/{local-state,remote-ci}.json`.
-  No guest or fixture was started during this resumed interval.
+- Latest stopped disk, seed, SSH trust and fixture-journal identities/hashes are
+  in `artifacts/reconciliation-pause01/result.json`. Server disk SHA256 is
+  `c3e525ab70c853061c7360911d60e15554daf519ee05bd0283a754c988550149`.
+  Robot disk, seeds/trust and its 64-byte boot2 fixture journal are unchanged.
+  No repository QEMU or controller-fixture process remains. No Robot boot,
+  module load, service start or new operation occurred in this resumed interval.
 
 ## Server pressure: instrumented campaign verified, VM off
 
@@ -352,7 +357,10 @@ The Server lane completes unsigned packaging and inspection in
 `e06c12d63958e6c2296c2afc0f87cec3279ed2664d51d888bcada40189baa50d`.
 The component map records mixed source origins and current build/test receipts.
 Qualification remains incomplete, signing custodian null and `promotable=false`.
-Root review of this package remains pending; no candidate was installed or run.
+Root review passes all 15 inventory files and the exact one-entry payload delta
+in `artifacts/reconciliation-resume03/server-package-review.json`. Its separate
+disposable signed test variant was installed as described below; the unsigned
+reference and its incomplete qualification remain unchanged.
 
 ARM build01 preparation failed before Cargo because its recorder attempted to
 create `build-intent.json` twice. Preserve
@@ -366,16 +374,46 @@ Binary SHA256: `e36d5b2857bfa85b9042d529246b0b173c9cc4cac8c7686c3a6bf047a2ce372a
 All 54 build01 files remain unchanged. Build02's metadata analysis then fails:
 an inherited 128-entry guard rejects 272 link-map LOAD entries, including 258
 temporary Rust objects. Preserve `analysis-failure.json` and partial receipts.
-No metadata amendment was executed. Native/link receipt completion, final aggregate
-inventory and root review remain pending; do not rebuild the successful binary.
+Separate `metadata-amendment01` completes the analysis without rebuilding or
+restripping: 14 bounds tests pass, with 381 raw LOAD lines bounded separately
+from selected native inputs. Root verifies all 178 inventory files, 363 source
+files against frozen Git source, all 28 allocated sections, 37 native/link
+receipt paths and all 147 imports. Receipt:
+`artifacts/robot-reconciliation-root-review01/result.json`. Original preparation
+and analysis failures remain unchanged.
 
-Archival plan01 remains an unverified, unchanged draft. Separately numbered
-`artifacts/retained-release-archive-plan02` has 12 passing focused host tests,
-retained failures and pinned source hashes. No target input or eligible slot has
-been selected. Root source review and fresh target readback remain required before
-any reversible move under the existing installer lock. Do not execute either
-plan against a guest now. All three lanes report no owned subprocess remains.
-No signing, archival, guest boot or target installation occurred in this interval.
+The unsigned Robot package also passes independent review: manifest
+`dadd347413b23833d1272bbdf0c45b0e46259b5e8bdd3e40dcc0a907eedbca6a`.
+Only manager and CLI change; 15 entries retain bytes, modes and licenses.
+Receipts: `artifacts/robot-reconciliation-package{,-root-review}01`.
+Both genuine unsigned candidates remain incomplete with null signing custodians.
+
+Separate disposable test variants use the existing test keys and explicit
+NOT-A-RELEASE annotations. Synthetic installer qualification fields are only
+mechanical test inputs. Actual release qualification remains false. Server test
+manifest is `b119afd529f320a97243bea4b6d0f00919cc3be19cb6b9dfcc3fc923fbdd7e65`;
+Robot test manifest is `d77a269823b55ba8fe2541be15b3202651489fdd3c784cab69cd242821a2f012`.
+Private signing keys remain local and excluded from hashes/inventories.
+
+Archival plans01/02 remain preserved. Reviewed plan03 passes 19 host tests,
+including exact Server auxiliary layout, credential drop-in preservation and
+metadata-only handling of credentials and retained output FIFOs. Actual Server
+cold03, archive01 and update02 pass. One inactive `0081072e…` release moves
+reversibly to `/opt/actryn/server/retained-release-archive01/`, under the existing
+installer lock. No bytes are deleted or slot quota raised. Installed CLI stage,
+activate and resume each execute once. Current is now `b119afd5…`, previous
+`98a87977…`, with `0f2ea983…` also retained and the archived fourth slot intact.
+Runtime histories, credentials, configuration and both charges remain unchanged.
+The candidate daemon service has never started. Earlier cold-collector and
+pre-CLI symlink-wrapper failures remain preserved. Evidence:
+`artifacts/reconciliation-server-{cold03,archive01,update02}`.
+
+The user then requested another pause. One guarded graceful Server poweroff
+preserves exact raw history bytes; all owned test processes are now off. The
+Robot update remains NOT_RUN. Its six-check boot plan is preserved in
+`artifacts/reconciliation-robot-boot-plan01`, but its allowed Server sibling
+lifetime is now stale: prepare a separately numbered amendment after fresh
+Server boot/readback rather than executing the old command unchanged.
 
 Retained-debit campaign01 is **FAILED**, not NOT_RUN or passed. Publication01
 installs the exact peer/key/drop-in and starts the three packaged Server services
@@ -413,8 +451,9 @@ service/closure-worker path, including late-publication suppression and slot
 retention until worker exit. The phase and closure protocol remain unchanged.
 Focused lane tests and strict Clippy pass. Root integration passes 135 Rust tests
 with three target-only tests ignored, all 26 debit-harness checks and formatting;
-receipts are under `artifacts/reconciliation-integration-checks01`. No replacement target binary has
-been installed or exercised yet.
+receipts are under `artifacts/reconciliation-integration-checks01`. The Server
+replacement is installed with services still cold; Robot replacement installation
+and authenticated settlement qualification remain pending.
 
 Cleanup uses one explicit Recover because the second context was already retired
 with stopped writers. Both original captures then export, with every leaf hash
@@ -427,18 +466,26 @@ export failures remain preserved. Module unload, independent disabled-zero
 fixture status, both one-shot graceful poweroffs and one fixture shutdown pass.
 The Robot registry remains byte-identical at
 `0a8d736fb748970af5078bbb7865fc8c83e8c2e37643695cb82dd29c1bc8bba3`.
-Stopped disk hashes and identities are in
-`artifacts/robot-retained-debit-cleanup01/result.json`; revalidate them before boot.
+The original stopped disk hashes and identities are in
+`artifacts/robot-retained-debit-cleanup01/result.json`; use the newer
+`artifacts/reconciliation-pause01/result.json` for the next boot baseline.
 Server peer/key/drop-in MUST remain while its two charges are unresolved. No
 record, identity generation, revocation tombstone or fixture journal was deleted.
 
-Next: finish and review ARM build02 metadata receipts without rebuilding; review
-the unsigned Server candidate and prepare its Robot counterpart. Then review
-archival plan02 and qualify retained-history settlement through the authenticated
-installed path. Both installations already have three
-release slots; resolve supported reversible archival of an inactive slot before
-staging another, preserving every byte and the current pointer. Do not raise the
-slot quota. New Robot startup must use the supported inhibited maintenance path.
+After explicit resume: revalidate stopped state, boot the retained Server with
+services cold, then amend the Robot boot plan's sibling lifetime and fresh output
+paths. Inspect the retained Robot before selecting its inactive release slot;
+archive reversibly with all history/identity files preserved and the quota
+unchanged. Install its reviewed test candidate through supported inhibited
+maintenance. Do not issue Grant, Prepare or Propose during that maintenance.
+Then qualify settlement of the original two handles through authenticated RPC.
+`artifacts/robot-retained-debit-continuation-plan01` has 18 passing host checks,
+but runtime inputs are null and the draft has no execution entrypoint. Root review
+and current lifetime/certificate bindings remain required. Arm the connection
+gate before the first new Server service startup; observe and drain both original
+blocked closure workers with zero forwarded bytes and charges retained before
+opening future connections. Preserve unknown task verdicts while settling only
+durably proved completion.
 The test generation `3de5e81b8a630567c2652760914e62ef` and principal
 `debit01-14987a9409d60281` remain installed; test private keys stay local mode 0600
 inside a 0700 directory and outside evidence hashes/inventories.
