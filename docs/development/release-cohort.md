@@ -1,6 +1,7 @@
 # Release cohort and case evidence
 
-Read-only source/evidence reconciliation at checkpoint `b85e1bf`, 2026-10-18.
+Read-only source/evidence reconciliation, 2026-10-18; preceding verified push
+`79910ea` ([push17](../../artifacts/reconciliation-checkpoint-push17/result.json), zero CI runs; no CI pass).
 This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
@@ -98,7 +99,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | A10 | Traffic03 corrected unchanged-capture analysis; lifetime09 gateway replacement/retained-FD, local offline recovery and export. | Preserve earlier failures, uncertain negative reply and the capture-prefix boundary. Zero SAMPLE records are not applied-motion proof. Bind manager11→e36 delta. |
 | A11 | Actual source80→82 gap and hot-journal committed-prefix recovery. | Preserve raw remnant/unknown tail and read/queued/durable distinctions. Metadata-only capture intentionally remains execution-replay-ineligible. |
 | A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
-| A13/A14/A16 | Live-policy/missing-credential controls; observer overhead/loss evidence; both excluded pilots pass 10/10 including cold trial 0, zero loss and 78/78 correlations each under the same approved cohort. Independent reviews and stopped custody pass; exact bindings below. | Authorized live-provider run, independent developer installation and four frozen ABBA boots/eight comparison runs remain open. Pilot07 stays FAILED at 9/10; boot09/10 readiness failures and their NOT_RUN pilots remain. Diagnostic8 is a separate instrumented non-reproduction; none establishes an original cause-fix, physical, WCET or superiority claim. |
+| A13/A14/A16 | Live-policy/missing-credential controls and observer evidence remain separate. Both excluded pilots pass. The [completed A16 comparison](a16-comparison.md) retains all 80 trials: 79 PASS/1 B3 evidence BIND failure; six cohort pairs and four 78/78 diagnostic correlations pass, with independent audit and stopped custody. | A16 workload acceptance remains FAILED; bind role/errno/cause unobserved. Live-provider provisioning, independent installer, signing custodian and release identity remain unconfirmed. Historical failures/diagnostic8 retain their boundaries; no equal-work, physical, WCET or superiority claim follows. |
 
 The latest Server case leaves 24/23 Server rows,16/21 Robot records and zero
 debits; separate failure custody, cold stop and cold integrity preserve all old
@@ -211,10 +212,31 @@ original pidfds and serial shutdown markers establish the recorded deaths.
 | [Stopped public-byte custody](../../artifacts/a16-userspace11-final-stopped-custody01/public-custody.json) | `a03e6cab092f995925ea8ea83518390cce402df0cae146ad1a6e49fb08e647d3` |
 | [Local byte-identical raw copy: 48 files/733882 bytes](../../artifacts/a16-userspace11-raw-preservation01/inventory.json) | `40eac1f36fa1555cd3e8495e81d96fc902bf5f010f7a7f11d3e2f92e63c5a2b7` |
 
-Both pilots are excluded from measured comparison. Four frozen ABBA boots/eight
-runs, retaining all 80 planned comparison trials, remain NOT_RUN. Pilot07 and
-boot09/10 failures remain unchanged. The local raw copy is not a Git backup.
-No comparative overhead, physical qualification, wire-drain or WCET claim follows.
+Both pilots remain excluded from measured comparison. The subsequent four frozen
+ABBA boots/eight runs are complete and FAILED: 79/80, with all 80 begun/ended and
+B3 evidence trial 6's BIND abort retained. Six original-K11 cohort pairs and four
+78/78 trace correlations pass; these do not repair workload acceptance. See the
+[actual eight-run report and exact receipts](a16-comparison.md), including final
+independent audit `4257e045…ef0865`. Latest A16 stopped custody is B4: 24 inactive
+empty units and journal 144/2904 bytes, with unchanged other public/key-metadata
+records. Pilot07/boot09/10 failures remain unchanged; local raw copies are not
+Git backups. No equal-work, significance, superiority, physical or WCET claim follows.
+
+D2 remains open. CAP_BPF-negative execution is NOT_RUN; read-only Server
+extraction01 fails its GPT type predicate with known normal QSD/unmount cleanup
+and no VM boot, Prepare or boot-file extraction in that attempt. Separate
+[numbered extraction02](../../artifacts/server-kernel111-readonly-extraction02/result.json)
+now passes with exact kernel111/newly observed initrd and both read-only QSD
+exports normally closed; no filesystem replay occurs. Full
+[post-extraction custody](../../artifacts/server-kernel111-readonly-extraction02-final-stopped-custody01/result.json)
+passes: 27 cold units, all nine public byte/metadata and key-metadata records unchanged,
+no QSD/FUSE mounts. [Independent saved review](../../artifacts/server-kernel111-extraction02-actual-review01/review.json)
+passes (SHA256 `49cb6ef80a35ceda00752b241bef8fd439017af0334af98f4169792539d148f4`).
+Fresh Server boot and negative
+execution remain NOT_RUN; extraction does not qualify D2. No independent installer, signing
+custodian or release signing identity is confirmed. The documented broker route
+is `/etc/actryn/credentials/openai-api-key` via `LoadCredential`; actual provisioning
+remains unconfirmed for the user to check.
 
 ## ARM CLI coverage to bind
 

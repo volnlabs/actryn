@@ -12,7 +12,7 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push15 records integration checkpoint `1f6ed1a` and its validator-fix branch,
+Push17 records preceding integration checkpoint `79910ea` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The latest composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -22,26 +22,35 @@ and the fixture off, with stopped public-byte custody recorded in
 safe Faulted transport-loss state is retained; its rejected first stop precheck
 sent no Stop. This cleanup closes no additional acceptance row.
 
-A16's excluded kernel11 pilot now passes all 10 trials, including cold trial 0,
-with zero recorded loss and 78/78 eligible dispatch correlations. Root approved
-a new 375-package clean-installed catalog, two resolved libc provider files and
-four frozen artifact hashes before the pilot; catalog/providers/artifacts match
-exactly before and after. This is a new full baseline, not inferred historical
-provider-byte equality. One normal VM poweroff and one supported fixture shutdown
-finish within the original 490 seconds; all repository VMs/fixtures are off. Full
-stopped custody retains boot 49/1004-byte journal and unchanged other public files/private
-key metadata. The [kernel11 evidence table](release-cohort.md#a16-kernel11-excluded-pilot-evidence)
-binds approval, independent review, public custody and the local raw copy.
-Userspace11 subsequently passes all ten trials under that same approved cohort,
-with zero loss and 78/78 correlations; independent review and full stopped custody
-pass ([userspace11 receipts](release-cohort.md#a16-userspace11-excluded-pilot-evidence)).
-Both excluded pilots are complete. Four frozen ABBA boots/eight comparison
-runs remain NOT_RUN; no comparative overhead result is available.
-Pilot07 stays FAILED at 9/10; boot09/10 readiness failures and their NOT_RUN pilots
-remain preserved. No original-cause fix, physical, WCET or superiority claim
-follows. D2's finite CAP_BPF-negative owner is source-only with nine host checks;
-no target Prepare/Start has run. External A13/A14 and release signing remain open.
-Raw evidence and VM state remain ignored local files, not Git backups.
+A16's frozen comparison is complete and FAILED: all 80 trials began and ended,
+79 pass and B3 evidence trial 6 fails during BIND before RECOVER/eligibility.
+Exact role/errno and underlying cause remain unobserved. B1/B2/B4 pass 20/20;
+B3 evidence 9/10 and trace 10/10 remain separate. The exact 19-receipt plan02
+known-cleanup exception admits only block4 and does not rerun or relabel B3.
+Both passing pilots retain their separately excluded 20-trial denominator.
+All six original-K11 catalog/provider/artifact pairs and four 78/78 diagnostic
+trace correlations pass with zero recorded loss; those facts do not qualify
+the failed workload. The [actual comparison report](a16-comparison.md) contains
+the eight rows, metric/dispatch CSVs, known cleanup and exact receipts, including
+independent final audit `4257e045…ef0865`. No pooling, significance, superiority,
+equal-work inference from B3's failed run, physical measurement or WCET claim follows.
+Historical pilot07 and boot09/10 failures stay unchanged.
+
+D2's CAP_BPF-negative owner remains source-only/NOT_RUN. The subsequent Server
+read-only extraction01 fails its GPT type predicate with known normal QSD/unmount
+cleanup and unchanged stopped custody; that failure stays FAILED. Separate
+numbered extraction02 now passes for exact111 kernel and newly observed initrd,
+with both read-only QSD exports normally closed and no filesystem replay. Full
+post-extraction custody passes: 27 cold units, all nine public byte/metadata and
+key-metadata records unchanged, no QSD/FUSE mounts. Independent saved review passes
+(`49cb6ef8…48f4`);
+fresh Server boot and CAP_BPF-negative execution remain NOT_RUN. Whole D2 stays open.
+No independent installer,
+signing custodian or release signing identity is confirmed. The documented hosted-model
+broker credential route is `/etc/actryn/credentials/openai-api-key` through
+`LoadCredential` ([installation contract](../../packaging/release/README.md)); actual
+provisioning remains unconfirmed for the user to check. Raw evidence is local,
+ignored material rather than a Git backup.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|
@@ -54,7 +63,7 @@ Raw evidence and VM state remain ignored local files, not Git backups.
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
 | A13/A14 | Pinned live-policy/missing-credential checks and operator-executed installation recipes. | Authorized live-provider credentials and an independent developer are still external inputs. |
-| A16 | `observer-installed-01` retains its readiness/death/loss and descriptive OFF/ON evidence. Both excluded pilots pass 10/10 including cold trial 0, zero loss and 78/78 correlations each under the same approved cohort; independent reviews and complete stopped custody pass. Amendment7 binaries and limits are unchanged. | Four frozen ABBA boots/eight comparison runs remain required. Pilot07 stays FAILED at 9/10; boot09/10 readiness failures remain, pilots NOT_RUN. Diagnostic8 remains a separate instrumented non-reproduction. No cause-fix, physical, WCET or superiority claim follows. |
+| A16 | [Completed frozen comparison](a16-comparison.md): 80 begun/ended, 79 PASS/1 FAILED; B1/B2/B4 each 20/20, B3 evidence 9/10 and trace 10/10. Six original-K11 cohort pairs, four 78/78 trace correlations, independent final audit and known stopped custody pass. Both pilots remain excluded. | Comparison acceptance stays FAILED on B3 trial 6 BIND abort; role/errno/cause unobserved. No retry or failure exclusion. Historical pilot07/boot09/10 failures and diagnostic8 boundaries remain. No equal-work, superiority, physical or WCET inference. |
 
 Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled
 the pressure inputs but stopped at artifact import: umask077 changed published

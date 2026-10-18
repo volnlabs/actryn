@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding verified push is `881a4b3`; push16 verifies integration
+  The preceding verified push is `79910ea`; push17 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push16/result.json`).
+  (`artifacts/reconciliation-checkpoint-push17/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,21 +78,47 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
-- **Current stopped state follows both passing excluded pilots.** Userspace11
-  passes 10/10 including cold trial 0, zero loss and 78/78 dispatch correlations. Its fresh
-  catalog/providers/artifacts match the original approved kernel11 baseline
-  before and after; no new baseline is selected. Independent raw review passes.
-  Normal VM poweroff and supported fixture shutdown finish within original 490.
-  All 16 carrier/owner units are inactive/MainPID0/empty cgroups/NRestarts0; no
-  repository actors remain. Current A16 disk SHA256 is
-  `cf2b518d110b47f2a752c132fca32ce74a281755d2c6235075757bb8ce7206c8`;
-  journal 1224 bytes/boot 60 preserves the old 1024-byte prefix. Other public bytes
-  and metadata-only keys remain unchanged. Authoritative receipts are
-  `artifacts/a16-userspace11-final-stopped-custody01/{result,public-custody}.json`;
-  the [userspace11 evidence table](release-cohort.md#a16-userspace11-excluded-pilot-evidence)
-  binds the raw copy and independent review. Both pilots are excluded; four
-  frozen ABBA boots/eight comparison runs remain NOT_RUN. D2 negative execution,
-  A13/A14, release signing and whole-cohort qualification remain open.
+- **Current A16 checkpoint: completed comparison FAILED, 79/80.** All 80 trials
+  began and ended, with no unstarted rows; both 10-trial pilots remain excluded.
+  B1/B2/B4 each pass 20/20. B3 evidence trial 6 aborts during BIND before RECOVER;
+  its exact role/errno and underlying cause are unobserved. The later traced
+  run passes 10/10 but cannot repair evidence 9/10. Plan02's exact 19-receipt
+  known-cleanup exception permits only block4; C03 and the failed B3 stay unchanged.
+  All six original-K11 cohort pairs and four 78/78 trace correlations pass, with
+  zero recorded loss. Final analysis/report production completes; workload status
+  remains FAILED. See [the eight-row report and receipt table](a16-comparison.md).
+  B4 stopped custody records 24 units inactive/MainPID0/empty cgroups/NRestarts0,
+  no repository actors, and fixture journal 144/2904 bytes. A16 disk SHA256 is
+  `b039bcc9b842e66d89b81f52af0d9969fd693f4ffc3600543dd764e656621772`;
+  other eight public records and three metadata-only key records are unchanged.
+  Authoritative A16 receipt: `artifacts/a16-block7b04-final-stopped-custody01/result.json`.
+  Independent final audit: `artifacts/a16-abba-final-analysis-actual-review01/review.json`.
+  Subsequent Server read-only extraction01 fails on a GPT type predicate, with
+  known normal QSD/unmount cleanup; its separate stopped custody records 26 units
+  off, all nine public byte records unchanged and no QSD/FUSE/holders. No new VM
+  boot, Prepare or kernel/initrd extraction occurs in that attempt. Receipts:
+  `artifacts/server-kernel111-readonly-extraction01/result.json` and
+  `artifacts/server-kernel111-readonly-extraction01-final-stopped-custody01/result.json`.
+  Separate numbered extraction02 (source03) now passes, preserving the failed01
+  record. Both read-only QSD exports close normally; no VM boot, Prepare or
+  filesystem replay occurs. The extracted kernel is 12,154,816 bytes/SHA256
+  `6d8a7f745280cc06a6d2877c932f4dfa9079b694eb4227b61b27232642340794`;
+  initrd is 36,847,797 bytes, newly observed SHA256
+  `0823b0bd625c69625abdfcf8da9873f45ee17299ba1693e24fc635864c144aa4`.
+  Receipt: `artifacts/server-kernel111-readonly-extraction02/result.json`.
+  Full post-extraction custody passes: 27 units cold, all nine public byte/metadata
+  records and key metadata unchanged, no QSD/FUSE mounts. Receipt
+  `artifacts/server-kernel111-readonly-extraction02-final-stopped-custody01/result.json`
+  has SHA256 `d736959b56bc0fb32bc0207544128b466466301acf17a04dec53c01921e862f2`.
+  Independent review passes: `artifacts/server-kernel111-extraction02-actual-review01/review.json`,
+  SHA256 `49cb6ef80a35ceda00752b241bef8fd439017af0334af98f4169792539d148f4`.
+  The fresh exact111 Server boot and CAP_BPF-negative
+  execution remain NOT_RUN;
+  cold-integrity source preparation and extraction do not close whole D2.
+  No independent installer, signing custodian or release signing identity has
+  been confirmed. The documented broker path is `/etc/actryn/credentials/openai-api-key`
+  via `LoadCredential`; actual provisioning remains unconfirmed for the user to
+  check. A13/A14, release signing and whole-cohort qualification remain open.
 - **Historical kernel11 stopped state.** All
   ten trials pass, including cold trial 0, with zero recorded loss and 78/78
   eligible dispatch correlations. Root approved the new 375-package full catalog,

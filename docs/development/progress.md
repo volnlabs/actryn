@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `881a4b3`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `79910ea`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push16 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push16/result.json`). No CI pass is claimed.
+  push17 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push17/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -61,18 +61,31 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   original fixture once. No reset, restart or operation replay occurs.
   Receipts: `artifacts/reconciliation-post-run05-{robot-stop-owner01,poweroff-owner01,fixture-stop-plan01,fixture-stop-plan02}`
   and `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`.
-- **Latest A16 result: both excluded pilots PASS; all test carriers stopped.**
-  Userspace11 passes all ten trials, including cold trial 0, with zero recorded
-  loss and 78/78 dispatch correlations. Its fresh before/after catalog, providers
-  and artifacts match the same approved kernel11 baseline; no new baseline is
-  selected. Independent saved-byte review verifies all 48 raw files byte for byte.
-  Normal VM poweroff and supported fixture shutdown complete within original 490.
-  Full stopped custody records all 16 carrier/owner units inactive, no repository
-  actors, and journal boot 60/1224 bytes. Other public bytes and private-key
-  metadata remain unchanged. Exact receipts are in the
-  [userspace11 evidence table](release-cohort.md#a16-userspace11-excluded-pilot-evidence).
-  Both pilots remain excluded from the comparison. Four frozen ABBA boots/eight
-  runs remain NOT_RUN; no comparative overhead or physical claim follows.
+- **Latest A16 result: completed comparison FAILED, 79/80; all carriers stopped.**
+  All four frozen ABBA boots/eight runs began and ended all 80 planned trials.
+  B1/B2/B4 pass 20/20; B3 evidence passes 9/10 and trace 10/10. Evidence trial 6
+  aborts on a BIND error reply before RECOVER/eligibility; exact role/errno and
+  underlying cause remain unobserved. The exact 19-receipt plan02 exception admits
+  block4 after known B3 cleanup without rerunning or relabelling B3. Both pilots
+  remain excluded (20 trials). Six cohort pairs match the original approved K11
+  three fields/four binaries; all four traces correlate 78/78 with zero recorded
+  loss. Report production succeeds but workload acceptance remains FAILED.
+  The [actual comparison report](a16-comparison.md) records all eight rows,
+  per-run metrics, dispatch scopes and exact receipts, including independent
+  final audit `4257e045…ef0865`. B4 stopped custody records 24 units inactive/PID0/
+  empty cgroups/NRestarts0 and journal boot 144/2904 bytes; the A16 disk is
+  `b039bcc9b842e66d89b81f52af0d9969fd693f4ffc3600543dd764e656621772`.
+  Other eight public records and three private-key metadata records are unchanged.
+  No equal-work inference from the failed run, superiority, physical or WCET
+  claim follows. D2's CAP_BPF-negative execution remains NOT_RUN. Read-only
+  extraction01's GPT-predicate failure and known cleanup remain preserved.
+  Separate numbered extraction02 (source03) now extracts exact kernel111 and a
+  newly observed initrd, with both read-only QSD exports normally closed and no
+  VM boot, Prepare or filesystem replay. Full post-extraction custody passes:
+  27 units cold, all nine public byte/metadata records and key metadata unchanged,
+  no QSD/FUSE mounts. Independent saved-evidence review passes (`49cb6ef8…48f4`);
+  fresh Server boot remains
+  NOT_RUN. Whole D2 is open.
 - **Kernel11 checkpoint: excluded pilot PASS, then stopped custody PASS.**
   All ten trials pass, including cold trial 0, with zero recorded loss and 78/78
   eligible dispatch correlations. Before the pilot, Root approves a new full
