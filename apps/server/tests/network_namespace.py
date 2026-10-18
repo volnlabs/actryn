@@ -24,6 +24,19 @@ DUMPS = dict(links=['link', 'show'], addresses=['address', 'show'],
              ipv6_routes=['-6', 'route', 'show', 'table', 'all'])
 
 
+class ProofFailure(RuntimeError):
+    """Failed/unknown proof with bounded evidence for its owner to persist."""
+    def __init__(self, evidence):
+        super().__init__('network namespace proof failed; preserve evidence, never retry')
+        self.evidence = evidence
+
+
+def _captured(raw, cap):
+    raw = raw or b''
+    return dict(bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest(),
+                hex=raw[:cap].hex(), omitted_bytes=max(0, len(raw)-cap))
+
+
 def _json(raw):
     def pairs(items):
         result = {}
@@ -106,6 +119,7 @@ def validate(report, expected, ip_pin):
     b = expected['binding']; task = before['task']
     assert before['boot_id'] == b['boot_id'] and before['task_status'] == 'CREATED'
     assert type(before['stdout_bytes']) is type(before['stderr_bytes']) is int and before['stdout_bytes'] == before['stderr_bytes'] == 0
+    assert _positive(task['pid']) and _positive(task['start_ticks'])
     assert (task['pid'], task['start_ticks'], task['cgroup']) == (b['snapshot']['pid'], b['snapshot']['start_ticks'], b['snapshot']['cgroup'])
     _namespace(task['netns'])
     w = report['worker']; initial, joined, final = w['before'], w['joined'], w['after']
@@ -240,23 +254,41 @@ def collect(prepared_reply, expected, ip_pin):
     _checked_ip(ip_pin, deadline)
     parent = _identity(); assert parent['cgroup'] == expected['proof_cgroup']
     pidfd = os.pidfd_open(expected['binding']['snapshot']['pid']); netfd = None
+    child = worker_timeout = None
+    report = dict(schema=SCHEMA, expected=expected, ip_pin=ip_pin)
     try:
         before = _bookend(expected, pidfd, deadline)
+        report['before'] = before
         netfd = os.open('/proc/'+str(before['task']['pid'])+'/ns/net', os.O_RDONLY | os.O_CLOEXEC)
         assert _nsfd(netfd) == before['task']['netns']
         assert _bookend(expected, pidfd, deadline) == before
         payload = json.dumps(dict(ip_pin=ip_pin, proof_cgroup=expected['proof_cgroup'])).encode()
-        child = subprocess.run(['/usr/bin/python3', '-B', '-E', '-s', str(Path(__file__).resolve()), '--child', str(netfd)],
-                               input=payload, capture_output=True, close_fds=True, pass_fds=(netfd,),
-                               timeout=min(15, deadline-time.monotonic()),
-                               env={'PATH': '/usr/sbin:/usr/bin:/sbin:/bin', 'LC_ALL': 'C'})
+        try:
+            child = subprocess.run(['/usr/bin/python3', '-B', '-E', '-s', str(Path(__file__).resolve()), '--child', str(netfd)],
+                                   input=payload, capture_output=True, close_fds=True, pass_fds=(netfd,),
+                                   timeout=min(15, deadline-time.monotonic()),
+                                   env={'PATH': '/usr/sbin:/usr/bin:/sbin:/bin', 'LC_ALL': 'C'})
+        except subprocess.TimeoutExpired as timeout:
+            worker_timeout = timeout
+            raise
         assert child.returncode == 0 and not child.stderr and len(child.stdout) <= 512*1024, 'worker failure/unknown; never retry'
-        report = dict(schema=SCHEMA, expected=expected, ip_pin=ip_pin, before=before,
-                      after=_bookend(expected, pidfd, deadline), worker=_json(child.stdout))
+        report['worker'] = _json(child.stdout)
+        report['after'] = _bookend(expected, pidfd, deadline)
         _checked_ip(ip_pin, deadline)
         assert _identity() == parent and not select.select([pidfd], [], [], 0)[0] and time.monotonic() < deadline
         validate(report, expected, ip_pin)
         return report
+    except Exception as failure:
+        output = worker_timeout if worker_timeout is not None else child
+        evidence = dict(report=report, failure_type=type(failure).__name__,
+                        failure=str(failure)[:4096], worker_output=None)
+        if output is not None:
+            evidence['worker_output'] = dict(returncode=getattr(output, 'returncode', None),
+                stdout=_captured(output.stdout, 512*1024), stderr=_captured(output.stderr, 64*1024))
+        if isinstance(failure, subprocess.TimeoutExpired) and failure is not worker_timeout:
+            evidence['control_timeout_output'] = dict(stdout=_captured(failure.stdout, 32768),
+                stderr=_captured(failure.stderr, 32768))
+        raise ProofFailure(evidence) from failure
     finally:
         if netfd is not None: os.close(netfd)
         os.close(pidfd)

@@ -2,6 +2,7 @@
 import copy
 import errno
 import json
+import subprocess
 import unittest
 from unittest.mock import Mock, patch
 import network_namespace as proof
@@ -129,5 +130,54 @@ class Evidence(unittest.TestCase):
         with patch.object(proof,'_identity',side_effect=[value['worker']['before'],value['worker']['joined']]), patch.object(proof,'_nsfd',return_value=value['worker']['joined']['netns']), patch.object(proof.os,'setns',create=True), patch.object(proof,'_topology',return_value=t),patch.object(proof.socket,'socket') as socket:
             with self.assertRaises(AssertionError):proof._probe(7,value['ip_pin'],value['expected']['proof_cgroup'])
             socket.assert_not_called()
+
+    def test_task_identity_requires_integers(self):
+        for field in ('pid', 'start_ticks'):
+            for kind in (float, bool):
+                with self.subTest(field=field, kind=kind):
+                    value = fixture()
+                    for stage in ('before', 'after'):
+                        value[stage]['task'][field] = kind(value[stage]['task'][field])
+                    with self.assertRaises(AssertionError):
+                        proof.validate(value, value['expected'], value['ip_pin'])
+
+    def test_failed_collection_retains_worker_evidence_and_closes_fds(self):
+        for failure in ('exit', 'errno', 'timeout', 'oversized', 'before_timeout', 'after_timeout', 'ip_timeout'):
+            with self.subTest(failure=failure):
+                value = fixture(); expected = value['expected']
+                prepared = dict(result='ok', inspection=dict(attempt=dict(id=expected['attempt'], artifact_digest=expected['artifact'], state='prepared', outcome='pending', binding=raw(expected['binding'])), robot_binding=None, robot_requests=[]))
+                worker = copy.deepcopy(value['worker'])
+                if failure == 'errno': worker['connect']['errno'] = errno.EPERM
+                stdout = b'x' * (512*1024+1) if failure == 'oversized' else raw(worker).encode()
+                stderr = b'synthetic failure' if failure in ('exit', 'timeout') else b''
+                child = Mock(returncode=1 if failure == 'exit' else 0, stdout=stdout, stderr=stderr)
+                control = subprocess.TimeoutExpired('control', 1, output=b'control stdout', stderr=b'control stderr')
+                book = Mock(return_value=value['before']); ip = Mock()
+                if failure == 'before_timeout': book.side_effect = control
+                if failure == 'after_timeout': book.side_effect = [value['before'], value['before'], control]
+                if failure == 'ip_timeout': ip.side_effect = [None, control]
+                with patch.multiple(proof, _checked_ip=ip, _identity=Mock(return_value=value['worker']['before']), _bookend=book, _nsfd=Mock(return_value=value['before']['task']['netns'])), patch.object(proof.os, 'geteuid', return_value=0), patch.object(proof.os, 'setns', create=True), patch.object(proof.os, 'pidfd_open', return_value=8), patch.object(proof.os, 'open', return_value=9), patch.object(proof.os, 'close') as close, patch.object(proof.select, 'select', return_value=([], [], [])), patch.object(proof.subprocess, 'run', return_value=child) as run:
+                    if failure == 'timeout': run.side_effect = subprocess.TimeoutExpired('synthetic', 15, output=stdout, stderr=stderr)
+                    with self.assertRaises(proof.ProofFailure) as caught:
+                        proof.collect(prepared, expected, value['ip_pin'])
+                evidence = caught.exception.evidence
+                json.dumps(evidence)
+                captured = evidence['worker_output']
+                if failure in ('before_timeout', 'after_timeout', 'ip_timeout'):
+                    self.assertEqual(bytes.fromhex(evidence['control_timeout_output']['stdout']['hex']), b'control stdout')
+                    self.assertEqual(bytes.fromhex(evidence['control_timeout_output']['stderr']['hex']), b'control stderr')
+                if failure == 'before_timeout':
+                    self.assertIsNone(captured)
+                    run.assert_not_called()
+                    close.assert_called_once_with(8)
+                    continue
+                self.assertEqual(bytes.fromhex(captured['stdout']['hex']), stdout[:512*1024])
+                self.assertEqual(captured['stdout']['bytes'], len(stdout))
+                self.assertEqual(captured['stdout']['omitted_bytes'], max(0, len(stdout)-512*1024))
+                self.assertEqual(bytes.fromhex(captured['stderr']['hex']), stderr)
+                self.assertEqual(captured['returncode'], None if failure == 'timeout' else child.returncode)
+                if failure == 'errno': self.assertEqual(evidence['report']['worker']['connect']['errno'], errno.EPERM)
+                self.assertEqual(close.call_args_list, [unittest.mock.call(9), unittest.mock.call(8)])
+                run.assert_called_once()
 
 if __name__=='__main__':unittest.main()
