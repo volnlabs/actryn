@@ -53,10 +53,12 @@ Use containerd through its supported API with a restricted launcher. Select one 
 
 Launch order is contractual:
 
-1. Allocate identity and a dedicated cgroup lifetime; reserve attribution before task creation. Prepare immutable image/rootfs and per-attempt broker socket; close all other inherited descriptors.
-2. Configure namespaces, mount/device allowlists, UID/capabilities, seccomp, resource limits and network isolation. Attach required enforcement and attribution; record installed identities and coverage.
+1. Allocate identity and a dedicated cgroup lifetime; reserve attribution before task creation. Prepare immutable image/rootfs and the protected per-attempt broker directory.
+2. Configure namespaces, mount/device allowlists, UID/capabilities, seccomp, resource limits, network isolation and descriptor allowlists; prepare the required enforcement and attribution configuration.
 3. Create the runtime task without executing image/application code. Trusted runtime setup is separately identified. Reject image-supplied hooks and unapproved runtime extensions.
-4. Verify task/cgroup binding, policy presence and required collector readiness, then invoke task start. Any preceding failure destroys the prepared task and revokes credentials.
+4. Before task start, bind the per-attempt broker listeners, attach required enforcement and verify task/cgroup binding, installed policy and required collector readiness. Record installed identities and coverage; image/application entry receives only approved descriptors. Only then invoke task start. Any preceding failure destroys the prepared task and revokes credentials.
+
+The selected containerd/runc Create state is `CREATED`, gated by its Start FIFO; it is not a cgroup-freezer `PAUSED` state. Only trusted runtime setup may execute between Create and Start. Broker readiness and live enforcement remain mandatory before application execution; this order does not authorize application code during preparation.
 
 The runtime's create/start boundary and early-process attribution require source/integration tests on the selected version. A backend that cannot establish this order is unsupported. Descendants cannot migrate cgroups, acquire host capabilities or access the container engine. Cleanup revokes the attempt broker/credential and kills/reaps its complete cgroup before releasing the live sandbox registration. Immutable attempt identity remains available for retained evidence and outstanding broker reservations; sandbox cleanup does not erase external-work accounting.
 
