@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `ac5fb56`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `f321a0d`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push20 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push20/result.json`). No CI pass is claimed.
+  push21 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push21/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -61,7 +61,29 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   original fixture once. No reset, restart or operation replay occurs.
   Receipts: `artifacts/reconciliation-post-run05-{robot-stop-owner01,poweroff-owner01,fixture-stop-plan01,fixture-stop-plan02}`
   and `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`.
-- **Current Server111 native proof: saved evidence PASS; original runner FAILED.**
+- **Latest diagnostic9: ARM compile PASS; workload observation NOT_RUN.**
+  One null-controller kernel111 boot `b0e13f6b-b80b-4dcb-ba56-ab08c56cb7ca`
+  builds the separately numbered BIND diagnostic with native guest GCC14.2.0.
+  ELF SHA256 `045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612`
+  is 74704 bytes; GNU build ID `9d25126cec88dafbfadd892be2b6c0699be02946`.
+  The selected 375-package catalog, tools, two providers and four old artifacts
+  pass the executed build guards. No workload, gateway or module is executed;
+  no fixture starts. One normal poweroff and final custody pass with 46 units
+  inactive, both fixture journals and the other eight public records unchanged.
+  Current A16 disk is `9378b3ad80830908450f1b8a0dc135a933e6292f2aa42395576cf4637c5649e4`.
+  The candidate is unapproved for observation; original A16 remains FAILED79/80.
+  [Build receipts and boundaries](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
+  distinguish this compile from a comparison or physical qualification.
+- **D2 source association identifies remaining implementation/contract work.**
+  D2-01 installation associations are recorded. D2-02's source review confirms
+  CREATED/Start-FIFO application gating, but broker listeners and the live device
+  filter follow Create, whereas the contract puts them earlier. Proposed branch
+  `docs/server-launch-order-clarification` (`4f7e377`) is awaiting the user's
+  decision and is not integrated. Some observer/socket pre-Start errors also
+  bypass common immediate retirement and leave prepared resources charged until
+  expiry. The narrow cleanup fix/regression is pending; no target reproduction
+  or production fix is claimed. Whole D2 stays open, including literal D2-05.
+- **Server111 native proof checkpoint: saved evidence PASS; original runner FAILED.**
   Fresh boot `364d9871-2a69-475d-8d6a-0db37b4275f8`, exact kernel111 and TEST f32
   pass cold preflight. One supported import and one native sandbox attempt
   `e4fcd5e8dee07e05f67fd0842d765045` produce ten syscall denials, five Broker cases
@@ -142,8 +164,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Independent review, full stopped public-byte custody, exact selected hashes
   and the local raw-copy receipt are in the
   [kernel11 evidence table](release-cohort.md#a16-kernel11-excluded-pilot-evidence).
-  Userspace11 subsequently passes above; four frozen ABBA boots/eight comparison
-  runs remain required.
+  At this historical checkpoint, four frozen ABBA boots/eight comparison runs
+  were still required; the completed FAILED79/80 comparison above supersedes
+  that queue.
   Pilot07 remains FAILED at 9/10; boot09/10 preflight failures and their NOT_RUN
   pilots remain unchanged. This result establishes no original-failure cause or
   fix, physical qualification, WCET or superiority. Ignored raw evidence is not

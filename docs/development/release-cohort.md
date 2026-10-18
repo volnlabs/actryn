@@ -1,7 +1,7 @@
 # Release cohort and case evidence
 
 Read-only source/evidence reconciliation, 2026-10-18; preceding verified push
-`ac5fb56` ([push20](../../artifacts/reconciliation-checkpoint-push20/result.json), zero CI runs; no CI pass).
+`f321a0d` ([push21](../../artifacts/reconciliation-checkpoint-push21/result.json), zero CI runs; no CI pass).
 This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
@@ -445,3 +445,61 @@ human installation and genuine release signing remain incomplete.
 | [Normal poweroff](../../artifacts/server-native-proof-poweroff01/result.json) | `ded572661a5c4630be0375374d96df051b6b3f9815494cea683af659ea15ad84` |
 | [Final stopped custody](../../artifacts/server-native-proof-final-stopped-custody02/result.json) | `35daa5f810cc4b0ff2461e19439d252fe2421ebbe14cbb3014634bbb71b67bf4` |
 | [Host-only harness amendment](../../artifacts/server-native-proof-inspection-amendment02/verification.json) | `79374428cbdedf83712846713c94e1e02e27e88e6c7e1e9d892a37f34917830a` |
+
+## Diagnostic9 build only and current source gaps
+
+One compile-only boot `b0e13f6b-b80b-4dcb-ba56-ab08c56cb7ca` runs exact
+`6.12.111+deb13-arm64`, protected DTB, 2vCPUs/2GiB and the null controller backend.
+The actual guest GCC14.2.0 build verifies the approved 375-package catalog,
+compiler-driver/linker/readelf hashes, two resolved providers and four original
+artifacts. It preserves original workload source c94c2972…6b32 and uses the
+reviewed diagnostic9 derivative 1c4fae3c…a0a43. The result is a 74704-byte AArch64
+ELF, SHA256 `045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612`,
+GNU build ID `9d25126cec88dafbfadd892be2b6c0699be02946`. Public source, actual
+compile argv/catalog/tool reports and ELF are retained; a complete historical
+compiler helper/header/startfile closure is not claimed.
+
+The binary is never executed on host or guest. No module, gateway, fixture or
+controller protocol runs. This null-transport compile environment is distinct
+from the future raw-userspace observation configuration. The build candidate
+keeps Root observation approval, future observation boot/fixture and execution
+NULL/NOT_RUN. No new A16 comparison trial has run; the original 80 trials,
+20 excluded pilot trials and FAILED79/80 result remain unchanged.
+
+One normal poweroff and independently bound host/guest closures precede current
+stopped custody: 46 inactive checked host units, no repository VM/fixture/QSD/FUSE,
+selected listener or image holder. Both fixture journals, three metadata-only
+keys and the other eight public records are unchanged. A16 disk is now
+`9378b3ad80830908450f1b8a0dc135a933e6292f2aa42395576cf4637c5649e4`;
+Server e9aea996…f7ecd and Robot4dc0c78b…92366 remain unchanged, carrying current
+26/24 Server, 16/21 Robot, zero debits and all 374 preservation entries.
+
+The [D2-01/02 source association04](../../artifacts/server-final-d2-runtime-association04/association.json)
+records current installation reuse and the selected runtime Create/Start FIFO
+source boundary, including exact source/patch inputs and build-provenance limits.
+D2-02 remains OPEN: the contract puts the broker socket and live enforcement
+before Create, while current source reserves identity/cgroup/attribution and the
+broker directory first, then installs the filter and listeners before Start.
+The separately pushed [eight-line ordering proposal](https://github.com/volnlabs/actryn/compare/f321a0d74ccc2f880445aa6e0018e26e4714badb...4f7e3776afc065da6c1560d40c6b6802ab26f959)
+is not integrated and awaits the user's scope decision. The original normative
+contract is preserved byte-for-byte in its [snapshot](../../artifacts/server-launch-order-clarification-proposal01/original-contract.md)
+for frozen maps; no original evidence or predicate is rewritten.
+
+Source review also finds a distinct cleanup gap: binding-verification errors
+use the common retirement/cleanup path, but later observer health/socket errors
+return directly, leaving the Launcher prepared until finite expiry while Server
+publication closes. [The narrow fix plan](../../artifacts/server-prestart-cleanup-fix-plan01/PLAN.md)
+requires an actual old-binary regression before implementation, on an isolated
+scratch Server because the legacy fixture overwrites global configuration and
+ownership. No target reproduction or fixed production binary exists yet.
+Literal D2-05 negative-connect evidence, final cohort qualification, A13/A14,
+genuine release signing and the failed A16 comparison remain open.
+
+| Build/source receipt | SHA-256 |
+|---|---|
+| [One actual compile-only sequence](../../artifacts/a16-bind9-compile-root-review01/result.json) | `0928f8403c6c80429c778cfaa888f18f686b3d3d6474a221827023892d523c59` |
+| [Actual native GCC14 build](../../artifacts/a16-bind9-compile01/result.json) | `4e893fabfae4dc1fdd6595d2238157390614607d598993163d7d899788aafb2a` |
+| [Independent saved-build audit](../../artifacts/a16-bind9-compile-actual-peer01/review.json) | `9db4422a11001e19c6fde41996bcedc4baf95a6cac801d3bb43c67d78b99faaf` |
+| [Unapproved build-only candidate](../../artifacts/a16-bind9-compile-root-review01/diagnostic9-build-candidate.json) | `5f0c1ef21b7fc5158e261afcb739f959a3bbfa314c668f536f959e0438deb390` |
+| [Current 46-unit stopped custody](../../artifacts/a16-bind9-compile-final-stopped-custody01/result.json) | `6bf2fc300dd4ecdf704333a6dc838f89c63e17030d0173c36fc2ac9adb51b613` |
+| [D2-01/02 source/runtime association](../../artifacts/server-final-d2-runtime-association04/association.json) | `db16b0671f4541393bce57df538f78d70b9bcfe3d815cdf9e0964afa028b89d3` |

@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding verified push is `ac5fb56`; push20 verifies integration
+  The preceding verified push is `f321a0d`; push21 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push20/result.json`).
+  (`artifacts/reconciliation-checkpoint-push21/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,7 +78,34 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
-- **Current stopped state after native proof:** all Server/Robot/A16 guests and
+- **Latest state: diagnostic9 compiled once; all carriers off.**
+  Actual build boot `b0e13f6b-b80b-4dcb-ba56-ab08c56cb7ca` uses the protected DTB
+  and null controller backend. Native guest GCC14.2.0 produces the 74704-byte ELF
+  `045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612`, build ID
+  `9d25126cec88dafbfadd892be2b6c0699be02946`. No new ELF execution, module load,
+  gateway or fixture start occurs. Normal poweroff and final custody verify
+  all 46 checked units inactive, unchanged fixture journals and other eight
+  public records. A16 disk is now
+  `9378b3ad80830908450f1b8a0dc135a933e6292f2aa42395576cf4637c5649e4`;
+  old b039 is comparison custody only. Server 26/24, Robot16/21, zero debits
+  and all 374 entries remain carried by unchanged Server/Robot disks.
+  The [build-only candidate](../../artifacts/a16-bind9-compile-root-review01/diagnostic9-build-candidate.json)
+  leaves observation approval, future observation boot/fixture and execution
+  NULL/NOT_RUN. Do not run it as the frozen C03 comparison or relabel B3.
+- **Next authorized software fix:** source review confirms observer/socket
+  pre-Start errors can leave a Launcher attempt prepared until expiry despite
+  closed Server publication. Prepare a real regression on a disposable scratch
+  Server, capture old-binary RED, then make the narrow common cleanup fix.
+  The legacy guest_launcher fixture overwrites global configuration/ownership;
+  it must not execute unadapted on the retained authoritative Server VM.
+  [Source evidence and next action](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
+  preserve the distinction between a source-confirmed gap and target proof.
+  Proposed launch-order clarification `4f7e377` is on its own pushed branch,
+  pending the user's decision; the integration contract is unchanged. D2-05's
+  literal negative-connect predicate and whole D2 also remain open. The retained
+  Robot already has all 16 namespace slots: no new preparation, deletion or
+  quota widening on that retained installation.
+- **Historical native-proof stopped checkpoint:** all Server/Robot/A16 guests and
   both fixtures are off; final custody02 verifies 42 inactive host units and
   current Server disk `e9aea9961786c5f30d9cf5c83911e74bdd245b14c0f6891a3924386d9d2f7ecd`.
   Other eight public records, both fixture journals, extracted boot files and
@@ -944,7 +971,9 @@ new instrumentation or changed limits.
   candidate/cohort replacement occurred. Final source/evidence association
   must use new manifests and preserve the older per-component source origins.
 
-## Remaining integration and external gates
+## Historical remaining integration and external gates
+
+The counts and action instructions below describe earlier checkpoints. The current resumed window above supersedes them; do not execute these historical instructions.
 
 Native Server daemon build and static checks completed, with no candidate
 execution. Lane receipt:
@@ -1090,14 +1119,16 @@ inside a 0700 directory and outside evidence hashes/inventories.
 Use a separately numbered continuation amendment and the two original handles;
 do not replay their proposals or crash the Server again merely to rerun setup.
 The original six-preparation campaign would take 11 retained namespaces to17,
-exceeding16. Current 14 namespaces permit exactly two additional preparations,
-reaching 16 without deleting history. Readiness probes need an SSH timeout shorter than their
+exceeding16. At that historical point, 14 namespaces permitted two more preparations.
+Later qualification consumed both: the current retained installation has 16
+namespaces and no free slot. Do not repeat those preparations. Readiness probes need an SSH timeout shorter than their
 outer deadline and narrowly typed timeout handling within the original overall
 budget; identity/output failures remain fatal, and reboot is never retried.
 
 `48ac40d` adds the bounded existing-device 1:7 refusal and actual 256 MiB cgroup OOM
 diagnostic. All 67 root host checks pass; target execution must follow charge
-settlement. A16 production pilots and the required comparison remain pending.
+settlement. At that historical checkpoint the A16 production pilots/comparison were pending;
+the later completed FAILED79/80 comparison above supersedes that status.
 The new reconciliation changes supersede the earlier importer-only source-drift
 audit: final component manifests and source/evidence associations need updating.
 

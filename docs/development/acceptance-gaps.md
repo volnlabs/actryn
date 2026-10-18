@@ -12,7 +12,7 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push20 records preceding integration checkpoint `ac5fb56` and its validator-fix branch,
+Push21 records preceding integration checkpoint `f321a0d` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The existing device/OOM composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -35,6 +35,19 @@ the eight rows, metric/dispatch CSVs, known cleanup and exact receipts, includin
 independent final audit `4257e045…ef0865`. No pooling, significance, superiority,
 equal-work inference from B3's failed run, physical measurement or WCET claim follows.
 Historical pilot07 and boot09/10 failures stay unchanged.
+
+A separately numbered diagnostic9 now has an actual native guest GCC14.2.0
+build (ELF045d9bcd…a612, 74704 bytes) and known normal shutdown/46-unit stopped
+custody. The null controller backend starts no fixture, gateway, module or
+workload; both fixture journals and the other eight public records are unchanged.
+New diagnostic execution remains NOT_RUN/unapproved; A16 remains FAILED79/80.
+D2-01/02 source association also exposes literal pre-Create ordering and
+pre-Start cleanup gaps: selected runtime Create gates application entry, but
+broker socket/live filter binding is later, and some observer/socket failures
+leave prepared resources charged until expiry. The proposed ordering clarification
+is unintegrated pending user decision; the cleanup regression/fix is pending.
+[Exact build and source evidence](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
+closes neither whole D2 nor the failed comparison.
 
 D2 now also has one source-bound native attempt on exact kernel111/TEST f32.
 Unchanged validators independently accept ten syscall denials, five Broker cases
