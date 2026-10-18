@@ -12,9 +12,9 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; implementation source remains
-  `8d6e71d`, with preceding pushed checkpoint `49428f1`. Its remote head is
-  verified. The earlier `167ebcc` CI query returned zero runs; newer CI is
-  unverified. No CI pass is claimed. The user authorized pushing this branch to
+  `8d6e71d`, with preceding pushed checkpoint `934b173`. Its remote head is
+  verified and its CI query returned zero runs. No CI pass is claimed.
+  The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
 - At pause checkpoint `167ebcc`, all test guests and fixtures were off.
@@ -131,6 +131,29 @@ Earlier checkpoints and failed attempts remain preserved.
   Neither continuation campaign has executed.
   Robot history collector/comparator has eight SQLite-copy checks; final target
   history remains pending. These source preparations close no acceptance row.
+- The reviewed fast-guard amendment holds guest service pidfds through one fixed
+  SSH helper per active guest, with fresh nonce/sequence acknowledgements and
+  bounded host/process/metadata checks. It keeps all 1.5/2/3-second harness and
+  30/60-second grant/mapping limits. Twenty-three host checks and a second source
+  review pass. Its Robot-only guard/recorder/real SDK measurement passes in
+  0.118052 seconds, with known helper exit and zero preparations/authority actions:
+  `artifacts/robot-retained-debit-fast-guard-measurement01/result.json`.
+  This is one readiness sample, not a latency bound or campaign pass. A new
+  continuous instance must qualify again and measure both sentinels after guarded
+  Server startup, before fresh recovery or the first Prepare. Same-image,
+  same-argv exec is outside this observer's proof; reviewed services and trusted
+  Linux/manager remain assumptions. Source:
+  `artifacts/robot-retained-debit-fast-guard-plan01`.
+- Server cold05 reuses the unchanged read-only collector and returns a
+  byte-identical complete cold04 receipt, SHA256 `cc80dbae…902a4`; all three services
+  remain cold and both charges remain. Integration03 makes the exact internally
+  constructed gate available to the one startup callback; 30 focused checks pass.
+  Custody03 preserves 374 old public-file/metadata records and has 11 focused
+  checks. The concrete root runner is still under final review; neither gate nor
+  new preparation has been admitted.
+- Separate source-only preparations are ready for the post-settlement Server
+  device/OOM diagnosis (five host checks) and matching A16 userspace09 pilot
+  (six checks). They require actual predecessor receipts and close no target gate.
 
 ## Server pressure: instrumented campaign verified, VM off
 

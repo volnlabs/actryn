@@ -11,7 +11,7 @@ evidence map. See [progress](progress.md) for the individual results and failure
 |---|---|---|
 | A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
 | A02/A09 | `robot-a02-replyloss-02` withholds the initial reply while durable cancellation/reconciliation succeeds. `robot-a09-contention-04` closes the allocation during a measured 611 ms SQLite exclusive lock, with zero STARTs. Both select manager10/module16. | Preserve separate evidence for absent/pre-send cancellation and commit races. SQLite contention is not fsync stall, EIO or media-power-loss proof. |
-| A04/A05/A08 | Existing daemon-death/accounting tests, one settled combined Robot debit, installed capacity01, Robot freeze/crash01 and Server pressure11 retain their separate evidence. Retained-debit campaign01 ran two operations and one Server crash/reboot, then failed coordinator readiness. Cold readbacks preserve 17/16 Server histories, both charges and 11/18 Robot histories. Historical reconciliation/accounting fixes pass 135 root Rust tests plus 26 harness checks. | Campaign01 remains FAILED. Updated Server is installed but its services remain cold; Robot candidate is staged after reversible inactive-slot archival. Authenticated settlement and the four unrun pressure preparations remain pending. The uncommitted tail remains unknown. |
+| A04/A05/A08 | Existing daemon-death/accounting tests, one settled combined Robot debit, installed capacity01, Robot freeze/crash01 and Server pressure11 retain their separate evidence. Retained-debit campaign01 ran two operations and one Server crash/reboot, then failed coordinator readiness. Cold readbacks preserve 17/16 Server histories and both charges. Historical reconciliation/accounting fixes pass 135 root Rust tests plus 26 harness checks. The updated Robot is installed; stopped and new-manager history checks preserve all 11/18 old rows. Separate read-only startup verification passes after preserving a capability-field parser failure. | Campaign01 remains FAILED. Updated Server services remain cold. Authenticated settlement and the four unrun pressure preparations remain pending. The first steady lifetime observer exceeded its 1.5-second harness budget before any Prepare; a reviewed integration amendment must fit existing timing limits before execution. The uncommitted tail remains unknown. |
 | D2 isolation | Existing sandbox bindings verify configured cgroup/device limits; missing `/dev/mem` returns ENOENT. A bounded receipt audit finds 55 JSON and eight archived reports with `oom_kill=0`. | Actual memory-budget kill/export and refusal opening an existing nonphysical forbidden device remain unproven. A one-attempt test-only harness is being prepared; no target run yet. |
 | A06/A07/A15 | Module16 aggregate binds 16 actual ARM cases and 17 cases each in plain, lockdep, KASAN and KCSAN, including owner/leader exit and PID reuse. Current driver/header hashes match the aggregate. | Keep mocked-serdev byte-offset and PM/shutdown callback proof distinct from actual UART and platform suspend/poweroff behavior. Reconcile final artifacts without a blanket diagnostic rerun. |
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
@@ -68,14 +68,20 @@ The remaining target queue includes outstanding-debit/crash/pressure and the ame
 authority comparison, followed by final artifact, provenance and evidence mapping.
 The corrected ARM universal CLI is built, with all 28 allocated sections
 preserved after stripping; all 136 versioned requirements match four libraries
-collected from the exact installed Robot. Installed-path execution remains
-pending. Latest Server/Robot cold readbacks preserve all 17/16 Server rows and
+collected from the exact installed Robot. Its packaged Describe and Recover
+paths now execute during the reviewed update; full CLI acceptance remains open.
+Latest Server/Robot cold readbacks preserve all 17/16 Server rows and
 11/18 Robot histories. The supported fresh test enrollment and pinned pairing
 passed after old certificates expired, preserving all old generations and
 revocations. Retained-debit campaign01 remains FAILED after its readiness cutoff;
 both charges remain. Reconciliation replacements are built and reviewed; Server
-is installed with services cold and Robot is staged pending maintenance proof.
-The module is unchanged. Release signing, live credentials and independent
+is installed with services cold. Robot activation and the separate read-only
+existing-service verification pass, preserving all old history; the failed
+freshness and capability-parser phases remain recorded. The module is unchanged.
+Retained-debit execution awaits the final continuous guard wiring and both-sentinel
+readiness measurement. The separately reviewed Robot-only guard/recorder/SDK
+sample passes in 0.118052 seconds, with known cleanup and no preparation; this
+does not close campaign acceptance. Release signing, live credentials and independent
 installation remain separate external gates. No software result qualifies motion.
 
 ## Historical audit

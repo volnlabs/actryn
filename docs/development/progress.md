@@ -5,9 +5,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `49428f1`.
+- Integration branch: `feat/v0.0.1`; preceding pushed checkpoint `934b173`.
   Current implementation source is `8d6e71d`. The remote head is verified;
-  the earlier `167ebcc` CI query returned zero runs. Newer CI is unverified.
+  its CI query returned zero runs. No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -35,8 +35,10 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   and actual existing-service verification (`35915056…885a`).
 - The first steady lifetime observer misses its 1.5-second harness bound at
   1.501 seconds, before Client construction or any Prepare. Initial public hashes
-  pass. A reviewed harness integration amendment is required before the remaining
-  retained-debit campaign; controller and operation deadlines are unchanged.
+  pass. A separately reviewed fixed pidfd monitor has 23 host checks and a
+  0.118052-second Robot-only monitor/recorder/SDK readiness sample with known
+  cleanup. The same-instance and both-sentinel measurements remain mandatory
+  before the remaining campaign; controller and operation deadlines are unchanged.
 
 ## Component evidence (not release acceptance)
 
