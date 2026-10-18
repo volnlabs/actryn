@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The latest recorded pushed checkpoint is `1f6ed1a`; push15 verifies integration
+  The preceding verified push is `881a4b3`; push16 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push15/result.json`).
+  (`artifacts/reconciliation-checkpoint-push16/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,7 +78,22 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
-- **Current stopped state follows the passing excluded kernel11 pilot.** All
+- **Current stopped state follows both passing excluded pilots.** Userspace11
+  passes 10/10 including cold trial 0, zero loss and 78/78 dispatch correlations. Its fresh
+  catalog/providers/artifacts match the original approved kernel11 baseline
+  before and after; no new baseline is selected. Independent raw review passes.
+  Normal VM poweroff and supported fixture shutdown finish within original 490.
+  All 16 carrier/owner units are inactive/MainPID0/empty cgroups/NRestarts0; no
+  repository actors remain. Current A16 disk SHA256 is
+  `cf2b518d110b47f2a752c132fca32ce74a281755d2c6235075757bb8ce7206c8`;
+  journal 1224 bytes/boot 60 preserves the old 1024-byte prefix. Other public bytes
+  and metadata-only keys remain unchanged. Authoritative receipts are
+  `artifacts/a16-userspace11-final-stopped-custody01/{result,public-custody}.json`;
+  the [userspace11 evidence table](release-cohort.md#a16-userspace11-excluded-pilot-evidence)
+  binds the raw copy and independent review. Both pilots are excluded; four
+  frozen ABBA boots/eight comparison runs remain NOT_RUN. D2 negative execution,
+  A13/A14, release signing and whole-cohort qualification remain open.
+- **Historical kernel11 stopped state.** All
   ten trials pass, including cold trial 0, with zero recorded loss and 78/78
   eligible dispatch correlations. Root approved the new 375-package full catalog,
   two resolved libc provider files and four frozen artifact hashes before the
@@ -93,8 +108,8 @@ Earlier checkpoints and failed attempts remain preserved.
   `artifacts/a16-kernel11-final-stopped-custody01/{result,public-custody}.json`.
   The [kernel11 evidence table](release-cohort.md#a16-kernel11-excluded-pilot-evidence)
   binds independent review, cohort approval, selected bytes and raw preservation.
-  Userspace11 and four frozen ABBA boots/eight comparison runs remain required
-  and NOT_RUN at this checkpoint. Pilot07 remains FAILED
+  Userspace11 was still NOT_RUN at that checkpoint and subsequently passes above.
+  Four frozen ABBA boots/eight comparison runs remain required. Pilot07 remains FAILED
   at 9/10, and boot09/10 failures remain failed with their pilots NOT_RUN. No
   cause-fix, physical, WCET or superiority claim follows. D2's CAP_BPF-negative
   owner is source-only; external A13/A14 and release signing remain open.
@@ -103,7 +118,7 @@ Earlier checkpoints and failed attempts remain preserved.
   launches one fixture/VM but rejects the primary helper's known SSH reset pair;
   original120 expires before any observer baseline or pilot. The cleanup-only
   identity read is not qualification. Normal VM poweroff02 and supported fixture
-  shutdown02 both succeed within original490; all eight carrier/owner units are
+  shutdown02 both succeed within original 490; all eight carrier/owner units are
   inactive/PID0/empty cgroups/NRestarts0, with no repository actors. Then-recorded A16
   disk is `bb641a84c54d232228b92c082df8c171fcec10442b4ca2568dd24abe8f84a2ca`.
   Journal784 bytes/boot38 preserves old764 prefix; owned endpoints are absent.

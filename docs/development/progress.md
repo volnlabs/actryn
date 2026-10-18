@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; latest recorded pushed checkpoint `1f6ed1a`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `881a4b3`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push15 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push15/result.json`). No CI pass is claimed.
+  push16 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push16/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -61,7 +61,19 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   original fixture once. No reset, restart or operation replay occurs.
   Receipts: `artifacts/reconciliation-post-run05-{robot-stop-owner01,poweroff-owner01,fixture-stop-plan01,fixture-stop-plan02}`
   and `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`.
-- **Latest A16 result: excluded kernel11 pilot PASS, then stopped custody PASS.**
+- **Latest A16 result: both excluded pilots PASS; all test carriers stopped.**
+  Userspace11 passes all ten trials, including cold trial 0, with zero recorded
+  loss and 78/78 dispatch correlations. Its fresh before/after catalog, providers
+  and artifacts match the same approved kernel11 baseline; no new baseline is
+  selected. Independent saved-byte review verifies all 48 raw files byte for byte.
+  Normal VM poweroff and supported fixture shutdown complete within original 490.
+  Full stopped custody records all 16 carrier/owner units inactive, no repository
+  actors, and journal boot 60/1224 bytes. Other public bytes and private-key
+  metadata remain unchanged. Exact receipts are in the
+  [userspace11 evidence table](release-cohort.md#a16-userspace11-excluded-pilot-evidence).
+  Both pilots remain excluded from the comparison. Four frozen ABBA boots/eight
+  runs remain NOT_RUN; no comparative overhead or physical claim follows.
+- **Kernel11 checkpoint: excluded pilot PASS, then stopped custody PASS.**
   All ten trials pass, including cold trial 0, with zero recorded loss and 78/78
   eligible dispatch correlations. Before the pilot, Root approves a new full
   cohort: 375 clean-installed packages, two resolved libc provider files and four
@@ -73,7 +85,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   Independent review, full stopped public-byte custody, exact selected hashes
   and the local raw-copy receipt are in the
   [kernel11 evidence table](release-cohort.md#a16-kernel11-excluded-pilot-evidence).
-  Userspace11 and four frozen ABBA boots/eight comparison runs remain required.
+  Userspace11 subsequently passes above; four frozen ABBA boots/eight comparison
+  runs remain required.
   Pilot07 remains FAILED at 9/10; boot09/10 preflight failures and their NOT_RUN
   pilots remain unchanged. This result establishes no original-failure cause or
   fix, physical qualification, WCET or superiority. Ignored raw evidence is not
@@ -119,7 +132,7 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   baseline approval, pilot or authority operation occurs. A separately guarded
   cleanup-only identity read supplies guest boot `6cd18fa4…8fd52`; it gives no
   qualification credit. One normal VM poweroff and one supported fixture shutdown
-  complete within original490. All eight carrier/owner units are inactive, with
+  complete within original 490. All eight carrier/owner units are inactive, with
   MainPID0/empty cgroups/NRestarts0. The retained journal is784 bytes/boot38,
   preserving its old764-byte prefix; canonical endpoints are removed by fixture
   Drop. New A16 disk SHA256 is

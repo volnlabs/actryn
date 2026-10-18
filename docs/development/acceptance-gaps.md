@@ -32,7 +32,11 @@ finish within the original 490 seconds; all repository VMs/fixtures are off. Ful
 stopped custody retains boot 49/1004-byte journal and unchanged other public files/private
 key metadata. The [kernel11 evidence table](release-cohort.md#a16-kernel11-excluded-pilot-evidence)
 binds approval, independent review, public custody and the local raw copy.
-Userspace11 and the four frozen ABBA boots/eight comparison runs remain required.
+Userspace11 subsequently passes all ten trials under that same approved cohort,
+with zero loss and 78/78 correlations; independent review and full stopped custody
+pass ([userspace11 receipts](release-cohort.md#a16-userspace11-excluded-pilot-evidence)).
+Both excluded pilots are complete. Four frozen ABBA boots/eight comparison
+runs remain NOT_RUN; no comparative overhead result is available.
 Pilot07 stays FAILED at 9/10; boot09/10 readiness failures and their NOT_RUN pilots
 remain preserved. No original-cause fix, physical, WCET or superiority claim
 follows. D2's finite CAP_BPF-negative owner is source-only with nine host checks;
@@ -50,7 +54,7 @@ Raw evidence and VM state remain ignored local files, not Git backups.
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
 | A13/A14 | Pinned live-policy/missing-credential checks and operator-executed installation recipes. | Authorized live-provider credentials and an independent developer are still external inputs. |
-| A16 | `observer-installed-01` retains its readiness/death/loss and descriptive OFF/ON evidence. Excluded kernel11 passes 10/10 including cold trial 0, zero loss and 78/78 correlations under the approved new full cohort; independent review and complete stopped custody pass. Amendment7 binaries and limits are unchanged. | Userspace11 and four frozen ABBA boots/eight comparison runs remain required. Pilot07 stays FAILED at 9/10; boot09/10 readiness failures remain, pilots NOT_RUN. Diagnostic8 remains a separate instrumented non-reproduction. No cause-fix, physical, WCET or superiority claim follows. |
+| A16 | `observer-installed-01` retains its readiness/death/loss and descriptive OFF/ON evidence. Both excluded pilots pass 10/10 including cold trial 0, zero loss and 78/78 correlations each under the same approved cohort; independent reviews and complete stopped custody pass. Amendment7 binaries and limits are unchanged. | Four frozen ABBA boots/eight comparison runs remain required. Pilot07 stays FAILED at 9/10; boot09/10 readiness failures remain, pilots NOT_RUN. Diagnostic8 remains a separate instrumented non-reproduction. No cause-fix, physical, WCET or superiority claim follows. |
 
 Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled
 the pressure inputs but stopped at artifact import: umask077 changed published

@@ -98,7 +98,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | A10 | Traffic03 corrected unchanged-capture analysis; lifetime09 gateway replacement/retained-FD, local offline recovery and export. | Preserve earlier failures, uncertain negative reply and the capture-prefix boundary. Zero SAMPLE records are not applied-motion proof. Bind manager11→e36 delta. |
 | A11 | Actual source80→82 gap and hot-journal committed-prefix recovery. | Preserve raw remnant/unknown tail and read/queued/durable distinctions. Metadata-only capture intentionally remains execution-replay-ineligible. |
 | A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
-| A13/A14/A16 | Live-policy/missing-credential controls; observer overhead/loss evidence; excluded kernel11 passes 10/10 including cold trial 0, zero loss and 78/78 correlations under its approved full cohort. Independent review and stopped custody pass; exact bindings below. | Authorized live-provider run, independent developer installation, userspace11 and four frozen ABBA boots/eight comparison runs remain open. Pilot07 stays FAILED at 9/10; boot09/10 readiness failures and their NOT_RUN pilots remain. Diagnostic8 is a separate instrumented non-reproduction; none establishes an original cause-fix, physical, WCET or superiority claim. |
+| A13/A14/A16 | Live-policy/missing-credential controls; observer overhead/loss evidence; both excluded pilots pass 10/10 including cold trial 0, zero loss and 78/78 correlations each under the same approved cohort. Independent reviews and stopped custody pass; exact bindings below. | Authorized live-provider run, independent developer installation and four frozen ABBA boots/eight comparison runs remain open. Pilot07 stays FAILED at 9/10; boot09/10 readiness failures and their NOT_RUN pilots remain. Diagnostic8 is a separate instrumented non-reproduction; none establishes an original cause-fix, physical, WCET or superiority claim. |
 
 The latest Server case leaves 24/23 Server rows,16/21 Robot records and zero
 debits; separate failure custody, cold stop and cold integrity preserve all old
@@ -169,13 +169,52 @@ no disk or private-key hash was collected for this documentation update.
 | [Stopped public-byte custody](../../artifacts/a16-kernel11-final-stopped-custody01/public-custody.json) | `a450475c1c8e68d4b38abacbf3fab8e43ca566f9f097751cfbc33b640d4e1c85` |
 | [Local byte-identical raw copy: 44 files/728235 bytes](../../artifacts/a16-kernel11-raw-preservation02/inventory.json) | `ed60356cc63c6b0978f48c2b204b29b4e3a58ee894f02d14ff2a2aa9c12145ed` |
 
-Userspace11 and four frozen ABBA boots/eight comparison runs remain required.
+Userspace11 subsequently passes below. Four frozen ABBA boots/eight comparison
+runs remain required.
 Prior pilot07 is FAILED at 9/10; boot09/10 failures and their NOT_RUN pilots remain
 unchanged. Kernel11 establishes no original-failure cause or fix. Dispatch ends
 at complete immutable-frame acceptance into the Linux serial buffer, not physical
 wire drain or actuator response. No physical, WCET or superiority claim follows.
 The raw copy is ignored local evidence, not a Git backup. External A13/A14,
 genuine release signing and final whole-cohort qualification remain open.
+
+## A16 userspace11 excluded-pilot evidence
+
+Userspace11 passes all ten trials, including cold trial 0, with zero recorded
+loss, 98 clean capture records and 78/78 independently correlated dispatches.
+Guest boot is `c9b6f5a0-7272-48cc-ad42-82c3007de583`. The same C03 runner and
+four selected binaries above are unchanged. Its fresh catalog/providers/artifacts
+match the original kernel11 approved baseline before and after; the original
+approval remains bound to its original observation. No new baseline is selected.
+The raw arm uses the reviewed gateway and raw UART, with no authority module or
+ADMIN_BIND. Gateway stop, retirement fences, absent relevant descriptor holders,
+capture unload and passive tracing precede normal poweroff.
+
+One pilot, one normal VM poweroff and one supported fixture shutdown complete
+within the original 490-second window. The fixture journal advances 50 to 60 by
+ten CRC entries/200 bytes; its original 1024-byte prefix remains unchanged. Full
+stopped custody records all 16 carrier/owner units inactive/MainPID0/empty cgroups/
+NRestarts0, no repository actors or disk holders, and unchanged other public files
+and metadata-only private keys. The new A16 disk SHA256 is
+`cf2b518d110b47f2a752c132fca32ce74a281755d2c6235075757bb8ce7206c8`.
+Exact QEMU and fixture exit codes are unavailable after unit collection;
+original pidfds and serial shutdown markers establish the recorded deaths.
+
+| Userspace11 receipt | SHA-256 |
+|---|---|
+| [Fresh before-cohort validation](../../artifacts/a16-userspace11-cohort-binding01/before-validation.json) | `05b72aecc16cfb043448866734aa47d5a690755fcb920af15377d48cc3884984` |
+| [Same-cohort before/after validation](../../artifacts/a16-userspace11-pilot-owner01/pair-validation.json) | `05b72aecc16cfb043448866734aa47d5a690755fcb920af15377d48cc3884984` |
+| [Pilot and known normal poweroff](../../artifacts/a16-userspace11-pilot-owner01/result.json) | `7096e1bb6bbaae62f1d83a60e86197f954c4d51b59c1b5ebe45d8f8262e592ae` |
+| [Supported fixture shutdown](../../artifacts/a16-userspace11-fixture-shutdown01/result.json) | `2e10d230865493184aaf8b3eaa7a08af2002310b9f54f60d46dad6bebc255e26` |
+| [Independent saved-evidence review](../../artifacts/a16-userspace11-actual-review01/review.json) | `5468d1b830e9a29167c31f2670879da2e56e8057dcee1c3eb52f96b3d88260ca` |
+| [Final stopped custody](../../artifacts/a16-userspace11-final-stopped-custody01/result.json) | `edf9b4896cbc5356306c5f0ce6a768b9fb360a8b65097f6638c9737f6c14b97a` |
+| [Stopped public-byte custody](../../artifacts/a16-userspace11-final-stopped-custody01/public-custody.json) | `a03e6cab092f995925ea8ea83518390cce402df0cae146ad1a6e49fb08e647d3` |
+| [Local byte-identical raw copy: 48 files/733882 bytes](../../artifacts/a16-userspace11-raw-preservation01/inventory.json) | `40eac1f36fa1555cd3e8495e81d96fc902bf5f010f7a7f11d3e2f92e63c5a2b7` |
+
+Both pilots are excluded from measured comparison. Four frozen ABBA boots/eight
+runs, retaining all 80 planned comparison trials, remain NOT_RUN. Pilot07 and
+boot09/10 failures remain unchanged. The local raw copy is not a Git backup.
+No comparative overhead, physical qualification, wire-drain or WCET claim follows.
 
 ## ARM CLI coverage to bind
 
