@@ -12,9 +12,9 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push18 records preceding integration checkpoint `92955af` and its validator-fix branch,
+Push20 records preceding integration checkpoint `ac5fb56` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
-The latest composite passes the existing-device-denial and cgroup-OOM cases
+The existing device/OOM composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
 Post-run05 shutdown now preserves all histories/accounting and leaves both VMs
 and the fixture off, with stopped public-byte custody recorded in
@@ -36,7 +36,26 @@ independent final audit `4257e045…ef0865`. No pooling, significance, superiori
 equal-work inference from B3's failed run, physical measurement or WCET claim follows.
 Historical pilot07 and boot09/10 failures stay unchanged.
 
-D2's subsequent Server111 window binds boot `62353823-df1e-4515-a744-3d767565835e`,
+D2 now also has one source-bound native attempt on exact kernel111/TEST f32.
+Unchanged validators independently accept ten syscall denials, five Broker cases
+and 196 trace records with zero loss. The original runner remains FAILED because
+it substitutes Launcher Cancel's empty delegated accounting for Broker Status.
+A separate status read supplies the actual Broker inspection; both raw replies
+and independent deadlines remain unchanged. No operation is retried. Cleanup,
+exact three-file Restart restoration, normal poweroff and final custody02 pass:
+26/24 Server, 16/21 Robot, zero debits/all 374 preserved, all 42 host units cold.
+One additive import leaves six charged trees/five approvals at capacity eight;
+current Server configuration hash is cd9a365f…93d03. The maintained regression
+passes 83 host tests; the separately numbered harness amendment has six passing
+host checks and no target execution. [Native evidence and limits](release-cohort.md#server111-native-sandbox-and-broker-evidence)
+replace the earlier missing per-case native records only; they do not close whole
+D2 or transfer unsupported network, physical or policy-origin claims. The additive
+[17-predicate association](../../artifacts/server-final-d2-predicate-map03/association.json)
+and separate composition decision accept preview case coverage while retaining
+the literal D2-05 negative-connect gap and final-cohort review; the exact single
+multimodal-batch story is NOT_RUN.
+
+The preceding D2 capability-denial window binds boot `62353823-df1e-4515-a744-3d767565835e`,
 kernel `6.12.111+deb13-amd64` and unchanged TEST f32. The wrong pre-Stop raw
 baseline leaves cold prerequisite01 FAILED; saved amendment `44fc914b…05f9`
 proves exact prior cold/poweroff bytes without a collection retry. First cold

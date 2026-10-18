@@ -15,9 +15,9 @@ Earlier checkpoints and failed attempts remain preserved.
   `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding verified push is `92955af`; push18 verifies integration
+  The preceding verified push is `ac5fb56`; push20 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push18/result.json`).
+  (`artifacts/reconciliation-checkpoint-push20/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,7 +78,30 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
-- **Latest Server111 window: original negative FAILED; separate cleanup and normal poweroff PASS.**
+- **Current stopped state after native proof:** all Server/Robot/A16 guests and
+  both fixtures are off; final custody02 verifies 42 inactive host units and
+  current Server disk `e9aea9961786c5f30d9cf5c83911e74bdd245b14c0f6891a3924386d9d2f7ecd`.
+  Other eight public records, both fixture journals, extracted boot files and
+  three metadata-only private-key records are unchanged. Counts are 26/24 Server,
+  16/21 Robot and zero debits; all old rows and 374 entries are preserved.
+  One imported native OCI and one sandbox attempt pass unchanged offline proof:
+  ten syscall denials, five Broker cases, 196 trace records/loss0. The original
+  runner stays FAILED on using Launcher Cancel instead of Broker Status.
+  Separate status inspection, cleanup and normal poweroff pass; no attempt or
+  Robot operation is replayed. Both Start deadlines stay unchanged (52 ms apart).
+  Current Server config is `cd9a365ff014879670fda6cfc6dbdefa3addf84e5475363deccac4f25bc93d03`;
+  registry six charged trees/five approvals, unchanged capacity eight.
+  The maintained regression passes 83 host tests; numbered harness amendment02
+  has six host checks and remains target NOT_RUN. Use these latest receipts,
+  not the older 25/23 or pre-import Server disk/config baselines below.
+  [Native evidence](release-cohort.md#server111-native-sandbox-and-broker-evidence)
+  records the exact bindings. Map03 retains all 17 D2 predicates; the separate
+  Root decision accepts preview case composition, while literal negative-connect
+  evidence (D2-05), exact single-batch execution and final-cohort review remain
+  open/NOT_RUN. Whole D2 and A16 remain open/failed respectively;
+  installer, signing custodian and live-model credential provisioning are still
+  unconfirmed. Raw artifacts remain local ignored material.
+- **Preceding Server111 capability-denial window: original negative FAILED; separate cleanup and normal poweroff PASS.**
   Exact kernel `6.12.111+deb13-amd64`, TEST f32 and guest boot
   `62353823-df1e-4515-a744-3d767565835e` are bound. Cold prerequisite01 uses the
   wrong pre-Stop raw baseline and remains FAILED; saved amendment `44fc914b…05f9`

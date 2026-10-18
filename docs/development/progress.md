@@ -5,13 +5,13 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `92955af`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `ac5fb56`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
   built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push18 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push18/result.json`). No CI pass is claimed.
+  push20 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push20/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -61,7 +61,29 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   original fixture once. No reset, restart or operation replay occurs.
   Receipts: `artifacts/reconciliation-post-run05-{robot-stop-owner01,poweroff-owner01,fixture-stop-plan01,fixture-stop-plan02}`
   and `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`.
-- **Latest Server111 window: failed negative preserved; separate cleanup and poweroff PASS.**
+- **Current Server111 native proof: saved evidence PASS; original runner FAILED.**
+  Fresh boot `364d9871-2a69-475d-8d6a-0db37b4275f8`, exact kernel111 and TEST f32
+  pass cold preflight. One supported import and one native sandbox attempt
+  `e4fcd5e8dee07e05f67fd0842d765045` produce ten syscall denials, five Broker cases
+  and 196 loss-free trace records, independently accepted by unchanged validators.
+  The runner incorrectly uses Launcher Cancel accounting; separate Broker Status
+  resolves inspection without retrying the operation. Both replies and their
+  52 ms deadline difference remain unchanged; the original runner remains FAILED.
+  Separate cleanup stops the three services, restores three temporary Restart
+  settings and preserves all 26/24 Server rows, 16/21 Robot records, zero debits
+  and all 374 custody entries. Normal poweroff and final custody02 pass with
+  42 host units inactive, no repository carriers/listeners/image holders, and
+  unchanged Robot/A16 disks, fixtures and metadata-only keys. The additive import
+  leaves six charged registry trees/five approvals; current config is cd9a365f…93d03.
+  The maintained inspection regression passes 83 host tests. Numbered guest
+  harness amendment02 has six passing host checks but target execution is NOT_RUN.
+  [Exact native receipts and scope](release-cohort.md#server111-native-sandbox-and-broker-evidence)
+  retain the failures and distinguish application proof from runner completion.
+  Map03 retains all 17 D2 predicates. Root accepts preview case composition
+  separately; literal negative-connect evidence and final-cohort review remain
+  open, and the exact single-batch story is NOT_RUN. Whole D2, failed A16 and
+  external release gates remain open.
+- **Preceding Server111 capability-denial window: failed negative preserved; separate cleanup and poweroff PASS.**
   Guest boot `62353823-df1e-4515-a744-3d767565835e` runs exact kernel
   `6.12.111+deb13-amd64` and unchanged TEST f32. Cold prerequisite01 fails on a
   wrongly selected pre-Stop raw baseline; saved-only amendment `44fc914b…05f9`

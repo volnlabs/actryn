@@ -1,7 +1,7 @@
 # Release cohort and case evidence
 
 Read-only source/evidence reconciliation, 2026-10-18; preceding verified push
-`92955af` ([push18](../../artifacts/reconciliation-checkpoint-push18/result.json), zero CI runs; no CI pass).
+`ac5fb56` ([push20](../../artifacts/reconciliation-checkpoint-push20/result.json), zero CI runs; no CI pass).
 This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
@@ -92,6 +92,7 @@ readback before installation. These are static/build facts, not behavioral tests
 |---|---|---|
 | D2 existing-device denial and memory pressure | **Two-case composite only:** f32/launcher17a0, existing char1:7 with allowed/absent controls, open results3,-2,-1, 177 loss-free records, fresh max18/oom1/oom_kill1 and natural137; all 27 cold payload/policy files subsequently verified. | Original run05 is FAILED; normal capture05 NOT_RUN. The corrected offline validator and separate custody establish these cases without a new attempt. Trace attribution combines fixed probe/node/control evidence, not a device-policy-origin event. |
 | D2 fixed-policy installation failure | One Server111 Prepare without CAP_BPF reports load EPERM; durable rows retain one reaped/cancelled attempt with null snapshot/device proof, unchanged Broker and no debit. Separate cleanup validates 157 contiguous trace records with no loss, exec or output, then stops once/restores four policy files exactly. Final 25/23 Server, 16/21 Robot, zero debits/all 374 and normal poweroff custody pass. | Original owner remains FAILED on its two-key reply predicate; actual six-field `server_error` keeps `outcome_unknown=true`. Current durable cleanup proof does not relabel that reply or case. No replay, agent Start or whole-D2 PASS. |
+| D2 native sandbox and Broker policy | One source-bound native OCI attempt on kernel111/f32 passes ten syscall denials, five Broker cases and 196 loss-free trace records through unchanged offline validators. Separate status, cleanup, three-file Restart restoration and normal poweroff pass. | Original runner remains FAILED on Launcher Cancel/Broker Status confusion. Retain both independent deadlines and all failures; source-only harness amendment02 is target NOT_RUN. Exact scope and current imported configuration are below. |
 | Other D2 isolation, attribution, method policy, cleanup/export | Historical `server-services-guest05.log`/`-unknown.log`, installed Server receipts, `server-a08-pressure-run11`, and `observer-installed-01` supply separate scopes. Selected observer/BPF and serverd retain their own origins. | Map every [profile rule](../architecture/platform-release-contract.md) to actual controls, prepared snapshots and negative/cleanup evidence. Check the launcher/dependency delta above; do not transfer all older claims solely because package filenames match. Whole D2 remains `OPEN_FINAL_COHORT_RECONCILIATION_REQUIRED`. |
 | A01/A03 | Manager11 lifecycle03: two natural completions under one grant, reconciliation before reuse; module16 stale/replay cases. | Older manager execution is not execution of e36. Bind the reviewed reconciliation delta and its tests/actual settlement separately; no combined-two-operation claim from the one-operation combined demo. |
 | A02/A09 | Replyloss02: initial reply withheld and durable cancellation; contention04: allocated closure during 611 ms SQLite lock, zero STARTs; registry race tests remain separate. | Manager10/module16 evidence. SQLite contention is not fsync-stall, EIO or media-power-loss proof. Current command/front-end coverage is separate below. |
@@ -102,7 +103,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
 | A13/A14/A16 | Live-policy/missing-credential controls and observer evidence remain separate. Both excluded pilots pass. The [completed A16 comparison](a16-comparison.md) retains all 80 trials: 79 PASS/1 B3 evidence BIND failure; six cohort pairs and four 78/78 diagnostic correlations pass, with independent audit and stopped custody. | A16 workload acceptance remains FAILED; bind role/errno/cause unobserved. Live-provider provisioning, independent installer, signing custodian and release identity remain unconfirmed. Historical failures/diagnostic8 retain their boundaries; no equal-work, physical, WCET or superiority claim follows. |
 
-The latest Server case leaves 25/23 Server rows, 16/21 Robot records and zero
+The preceding capability-denial Server case leaves 25/23 Server rows, 16/21 Robot records and zero
 debits. Separate durable-state cleanup, cold stop, exact policy restoration and
 normal poweroff preserve all old rows and 374 entries. Earlier run05 leaves 24/23;
 the still earlier retained-debit cleanup leaves 22/21. All original failed records
@@ -117,15 +118,16 @@ case and separate cleanup are recorded below. The original owner remains FAILED;
 the durable current-state proof is distinct from its uncertain CLI reply.
 The [additive D2-12 association](../../artifacts/server-final-d2-predicate-map02/association.json)
 binds that evidence to the selected launcher without changing the original map.
-Attributed sandbox negatives and forbidden broker-method evidence remain open.
+The later native evidence below supplies attributed individual sandbox negatives and a forbidden Broker-method record; whole-D2 reconciliation remains open.
 
 The [sandbox/method-policy follow-up](../../artifacts/server-final-d2-predicate-map01/sandbox-method-followup01/result.json),
 SHA `e1b774964b38b707b6b60ce3772200c65a4f09fac11fb1f685352208ac229f19`,
 binds the older installed offline positive to its exact manifest/service/agent
 identities and settled call. The selected source comparison retains unchanged
-fixture, harness and policy rules. The early native sandbox summary still lacks
+fixture, harness and policy rules. The early native sandbox summary lacks
 individual negative records and executed-agent attribution; no negative-case
-credit transfers to f32 from that summary. The proposed installation-failure
+credit transfers from that summary. The later source-bound native attempt below
+supplies its own selected-f32 records. The proposed installation-failure
 case has eight passing host checks. Its separately frozen finite owner has nine
 passing host checks at
 `artifacts/server-enforcement-negative-owner-plan01/verification.json`; those
@@ -163,7 +165,7 @@ other eight public byte/metadata records, three metadata-only keys, both fixture
 journals and extracted boot files are unchanged. Whole D2/final-cohort mapping
 remain open; A16 stays FAILED 79/80 and no physical qualification follows.
 
-| Current Server111 receipt | SHA-256 |
+| Capability-denial window receipt | SHA-256 |
 |---|---|
 | [Original cold prerequisite FAILED](../../artifacts/server-kernel111-cold-readonly01/result.json) | `5d8ff9c76ec0a2c6acced080fed82e6886769db4c3fdda1f46348e18414160e7` |
 | [Saved-only cold-baseline amendment](../../artifacts/server-kernel111-cold-readonly-root-review01/cold-receipt-amendment02.json) | `44fc914b4971e5a11ca1ac615fdf7441189f2d342ad2fdd918104a24b94905f9` |
@@ -352,3 +354,94 @@ and bound above; it does not establish historical provider equality. Final
 selection must also retain build/link/source-material and notice
 provenance, genuine release-signing inputs and external A13/A14 evidence. No row
 in this document is a whole-release PASS, physical qualification or CI result.
+
+## Server111 native sandbox and Broker evidence
+
+Fresh guest boot `364d9871-2a69-475d-8d6a-0db37b4275f8` binds exact kernel
+`6.12.111+deb13-amd64` and TEST f32. Cold preflight verifies all 27 payload files,
+four providers, five old registry trees, full 25/23 rows/logs and the Server
+preservation subset. One supported `server import` adds OCI
+`sha256:25e3512d1392fda61c701373fe2ff9885e1b173a01edcd9dfa4da5db1e95fe7c`,
+with static agent SHA256 `0669b102259bbe325c676355ebbbe9dfee800248e0d5209c682ac6bdad006e53`.
+The new configuration is
+`cd9a365ff014879670fda6cfc6dbdefa3addf84e5475363deccac4f25bc93d03`:
+six charged registry trees and five approvals, preserving every old tree and
+approval; capacity remains eight. This is an additive qualification fixture,
+not a new release package or a post-import repeat of the full payload audit.
+
+One sandbox attempt `e4fcd5e8dee07e05f67fd0842d765045` emits individual native
+negative records and five Broker cases. Independent saved-only review passes the
+unchanged complete proof: ten syscall denials, 196 trace records/loss0, selected
+OCI/ELF/runtime/device/cgroup attribution, fork/both exits and exact export/logs.
+Agent stdout remains untrusted but bound to the selected source and execution.
+Only the `admin.grant` record supplies Broker policy-denial origin. AF_INET socket
+denial and zero routes do not establish an attempted external connection;
+missing seccomp-enter events do not establish policy origin. No host execution
+of the ELF, Robot request/binding, operation replay or physical actuation occurs.
+
+The original owner remains **FAILED**: after known Cancel it skips Broker Status
+when Launcher already reports reaped, then compares empty delegated calls/denials
+against the Broker export. A separate bounded Status obtains the actual two calls
+and one denial. Shared attempt/artifact/runtime/state/outcome match; Launcher and
+Broker Start deadlines are independently set, 727224 and 727172 ms. Both raw
+replies and deadlines stay unchanged. The original failure reproduces using the
+original Launcher view; full unchanged validators pass using the actual Broker
+view. These are separate results, not a corrected campaign PASS.
+
+Separate known cleanup stops the same three service lifetimes and restores the
+three temporary Restart files. Cold full-row/log proof retains 26/24 Server,
+16/21 Robot, zero debits and all 374 preservation entries. One normal poweroff
+confirms original pidfd death and new serial markers. Final stopped custody02
+verifies 42 inactive host units with empty cgroups/NRestarts0, no repository
+VM/fixture/QSD/FUSE, selected listeners or image holders. Current Server disk is
+`e9aea9961786c5f30d9cf5c83911e74bdd245b14c0f6891a3924386d9d2f7ecd`;
+other eight public records, both fixture journals, extracted boot files and
+three metadata-only keys are unchanged. Custody01's overstrict host user-systemd
+exe permission check remains FAILED; its numbered correction performs no target
+action. A non-dumpable unrelated systemd process is filtered by readable argv
+before resolving executable links for repository/actor candidates.
+
+The poweroff review copy's generated-program hash `82e11267…3e658` differs from
+actual dispatched bytes `bc307375…1778c`. Saved-only regeneration proves equal
+CTX values, an identical frozen guest-source tail and exact reproduction of the
+actual bytes from the pinned saved context; the difference is first-line Python
+dictionary key order after JSON reload. [Exact association](../../artifacts/server-native-proof-final-independent-review01/poweroff-program-association.json)
+SHA256 `166ca44dc8a9363af3e135a01498ae9711326e71c3acb8e41605b9a627247ff2`
+retains both hashes. The review copy is not claimed byte-identical to dispatch.
+
+The additive [D2 predicate association03](../../artifacts/server-final-d2-predicate-map03/association.json)
+SHA256 `fcebbe2d6a1d752f276d96659eea3e5783f7aac88aa47241f94676f95ec72853`
+retains all 17 original predicate IDs and their remaining source/cohort scope.
+D2-05's literal negative-connect test stays **OPEN**: the fixed profile denies
+AF_INET socket creation, the prebroker scan finds no inherited socket and topology
+has no route, but no external/controller connect syscall is observed. The supported
+prevention invariant is recorded without waiving that test or relaxing the profile.
+Root's [separate composition decision02](../../artifacts/server-final-d2-predicate-map03/root-composition-decision02.json)
+SHA256 `0ebd4ac246d2931988b177d15fdb5123a216f38c4404195a6a022b949bfe2644`
+accepts the existing device/OOM and native access/Broker/export/cleanup cases as
+preview diagnosis coverage. They remain separate attempts/configurations; the
+exact single multimodal-batch story is **NOT_RUN**. This resolves the preview
+composition decision only, preserves frozen map03 and closes no whole D2 gate.
+
+The maintained [Broker regression](../../apps/server/tests/test_broker_evidence.py)
+and [inspection contract](../../apps/server/tests/BROKER_EVIDENCE.md) pass 83 host
+Python tests. Separately numbered guest harness amendment02 always fetches Broker
+Status after known Cancel and retains both source deadlines; four original
+counterexamples fail and six amended host checks pass. Its target execution is
+**NOT_RUN**. Frozen original sources/validators and failed markers are unchanged.
+Whole D2, final coherent artifacts, failed A16, live-model acceptance, independent
+human installation and genuine release signing remain incomplete.
+
+| Saved receipt | SHA-256 |
+|---|---|
+| [Native build](../../artifacts/server-native-proof-build01/receipt.json) | `4db2527e9f4be5feab889d3259660c85ecdc18e270526d5dd833b9cc509f82a0` |
+| [Cold preflight](../../artifacts/server-native-proof-preflight01/result.json) | `a9be31803c35ef70b94e5ff4921cb27e1bbf3209ae46f6f47521d434c39168b2` |
+| [Original FAILED owner](../../artifacts/server-native-proof-owner01/result.json) | `a437ea07e9792d790420647b6641865c5f4ee67fb607f2ffcab5129e01b8871d` |
+| [Separate status/readback](../../artifacts/server-native-proof-failure-readback01/result.json) | `9796a860dafa0896cc4c7756cb2972b895e168d7a2c572b524e4a8dd84e93403` |
+| [Independent complete proof](../../artifacts/server-native-proof-actual-peer01/review.json) | `9da8100dfe14880e462d850fa039c65bb921088a3413a27540be8c4f3b326b87` |
+| [Final independent custody/action audit](../../artifacts/server-native-proof-final-independent-review01/review.json) | `ce636fd43f7d39498f7ffab10a16e8ccddeda8f60ed1262d0e1bcdaecd709190` |
+| [Separate known cleanup](../../artifacts/server-native-proof-failure-cleanup01/result.json) | `8eb6433cc837fed52695b656bb23b41222606b39c3467ea1be8b65fc37ee0d9b` |
+| [Final full Server rows](../../artifacts/server-native-proof-failure-cleanup01/native-cleanup-cold-final-seven-tables.json) | `e9386c04fdf07b6b2ff9739cc0ccf605a5693fd572668d89ed0ef2f2b0fd3f52` |
+| [Normal poweroff](../../artifacts/server-native-proof-poweroff01/result.json) | `ded572661a5c4630be0375374d96df051b6b3f9815494cea683af659ea15ad84` |
+| [Final stopped custody](../../artifacts/server-native-proof-final-stopped-custody02/result.json) | `35daa5f810cc4b0ff2461e19439d252fe2421ebbe14cbb3014634bbb71b67bf4` |
+| [Host-only harness amendment](../../artifacts/server-native-proof-inspection-amendment02/verification.json) | `79374428cbdedf83712846713c94e1e02e27e88e6c7e1e9d892a37f34917830a` |
