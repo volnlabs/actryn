@@ -12,12 +12,13 @@ Earlier checkpoints and failed attempts remain preserved.
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; Server/Robot implementation source remains
-  `8d6e71d`, except launcher build source `14afd962` (integrated as `2e93ccd`),
+  `8d6e71d`, except launcher build source `e6c3fd6` (integrated as `e6120d3`),
+  with fixture corrections integrated as `71696f2` and `ecc5a8b`,
   with preview-agent diagnostic fix `42537e2` integrated and its imported
   OCI's exact capacity diagnostic executed once.
-  The preceding verified push is `f321a0d`; push21 verifies integration
+  The preceding verified push is `d2be824`; push22 verifies integration
   and validator-fix branch heads and records zero CI runs. No CI pass is claimed
-  (`artifacts/reconciliation-checkpoint-push21/result.json`).
+  (`artifacts/reconciliation-checkpoint-push22/result.json`).
   The user authorized pushing this branch to
   `origin`. Every task commit carries
   `Signed-off-by: Utkarsh Maurya <projects.utkarshMaurya@gmail.com>`.
@@ -78,7 +79,53 @@ Earlier checkpoints and failed attempts remain preserved.
 
 ## Current resumed window
 
-- **Latest state: diagnostic9 compiled once; all carriers off.**
+- **Latest Server cleanup regression: full GREEN04; all VMs/fixtures off.**
+  Exact111/f32 scratch boot `4c6f6cde-cc4e-46d0-9976-700859d0d858` executes
+  launcher3ead/sourcee6 and fixture8fae, reusing approved50a without another
+  compile/import or capacity change. All four cases pass: missing broker,
+  unreachable observer with retained durable accounting, healthy/duplicate Start,
+  and active-capacity refusal preserving the preparation and running task.
+  Cold33/24 preserves every old full row/log, adds only four Launcher attempt/
+  runtime rows and has zero outstanding Robot debit. Normal poweroff and latest
+  custody verify 59 checked host units inactive/PID0/empty cgroups/NRestarts0,
+  unchanged original nine public records, key metadata and fixture journals.
+  Private clone SHA256 is
+  `fa9fd3f4e00e00ce9ed95697f377b5b74d5be0fa1ed18734819529aa346ee89d`;
+  originals remain Server26/24, Robot16/21, zero debits/all374 preserved.
+  Exact source is integrated as `e6120d3`/`71696f2`/`ecc5a8b`; 85 maintained
+  Server Python tests pass, alongside the source-bound 66 Rust tests and guest
+  proof. The new ELF is a staged candidate; the installed f32 package is unchanged.
+  [Current receipts](release-cohort.md#full-green04-and-current-stopped-custody)
+  close the cleanup regression, not whole D2 or release qualification.
+- **Preserved numbered failures:** setup01 fails on the directory ownership
+  assumption before candidate execution; fixture02 fails the physical-cgroup-path
+  assertion after missing-broker PASS; setup03 fails before candidate execution
+  on socket pathnames left by the closed manual processes. Read-only probe01's
+  observer-path absence assumption also fails. Their raw failures/unknown flags
+  and partial stages remain unchanged. Numbered reconciliation02 proves all
+  seven 29/24 tables unchanged, then two consumed same-inode unlinks remove only
+  the verified dead socket paths. No database repair, ownership change, deletion
+  of retained artifacts or quota widening occurs. GREEN04 is a new execution,
+  not a relabelled failed attempt.
+- **Historical old-f32 cleanup RED; its normal shutdown is verified.**
+  Scratch-only attempt `8770cdfc99d804296a1588404a574b9d` on boot
+  `00ae01fa-4ad9-44fa-b5ab-bcc1304475fa` rejects Start for a missing broker but
+  remains prepared, producing the intended assertion failure/rc1. The fixture's
+  known Stop reaps it with empty logs; observer/healthy cases remain NOT_STARTED.
+  That run's normal poweroff and stopped custody verify all 51 checked units cold,
+  unchanged original nine public records/keys/fixture journals, retained original
+  26/24 Server and 16/21 Robot rows, zero debits and all 374 entries. The separate
+  private clone has 27/24 rows and SHA256
+  `7675877bcfc65b13617cf6b03eac051c9028306f17dce9f285290453fd20be0c`.
+  [Exact current receipts](release-cohort.md#approved-ordering-and-actual-pre-start-regression)
+  distinguish failure evidence, known cleanup and stopped custody.
+  The isolated common-cleanup fix `e6c3fd6` passes 66 Server package tests and formatting.
+  Its single host build/static check produces the 14139888-byte ELF
+  `3ead4e49f73954137034910028e49a5fad4b0b34d0eeb36c908581447f2afe30`.
+  The later GREEN04 above completes the corrected fixture while preserving
+  every failed predecessor. Do not repeat old RED
+  or run destructive fixtures on the retained master.
+- **Diagnostic9 build checkpoint: compiled once; observation remains NOT_RUN.**
   Actual build boot `b0e13f6b-b80b-4dcb-ba56-ab08c56cb7ca` uses the protected DTB
   and null controller backend. Native guest GCC14.2.0 produces the 74704-byte ELF
   `045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612`, build ID
@@ -92,16 +139,13 @@ Earlier checkpoints and failed attempts remain preserved.
   The [build-only candidate](../../artifacts/a16-bind9-compile-root-review01/diagnostic9-build-candidate.json)
   leaves observation approval, future observation boot/fixture and execution
   NULL/NOT_RUN. Do not run it as the frozen C03 comparison or relabel B3.
-- **Next authorized software fix:** source review confirms observer/socket
-  pre-Start errors can leave a Launcher attempt prepared until expiry despite
-  closed Server publication. Prepare a real regression on a disposable scratch
-  Server, capture old-binary RED, then make the narrow common cleanup fix.
-  The legacy guest_launcher fixture overwrites global configuration/ownership;
-  it must not execute unadapted on the retained authoritative Server VM.
-  [Source evidence and next action](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
-  preserve the distinction between a source-confirmed gap and target proof.
-  Proposed launch-order clarification `4f7e377` is on its own pushed branch,
-  pending the user's decision; the integration contract is unchanged. D2-05's
+- **Approved contract and remaining software work:** the user approves
+  before-Start ordering; exact proposal `4f7e377` is integrated as `025e36e`.
+  Original contract bytes remain preserved for all frozen maps; do not rewrite
+  their evidence. The missing-broker cleanup regression now has actual RED,
+  independent review and known shutdown above. Preserve ordinary capacity
+  refusal as prepared, duplicate running Start as running, and retained charges
+  on unconfirmed cleanup. D2-05's
   literal negative-connect predicate and whole D2 also remain open. The retained
   Robot already has all 16 namespace slots: no new preparation, deletion or
   quota widening on that retained installation.

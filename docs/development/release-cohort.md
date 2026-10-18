@@ -1,7 +1,7 @@
 # Release cohort and case evidence
 
-Read-only source/evidence reconciliation, 2026-10-18; preceding verified push
-`f321a0d` ([push21](../../artifacts/reconciliation-checkpoint-push21/result.json), zero CI runs; no CI pass).
+Source/evidence reconciliation, 2026-10-18; preceding verified push
+`d2be824` ([push22](../../artifacts/reconciliation-checkpoint-push22/result.json), zero CI runs; no CI pass).
 This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
@@ -31,6 +31,13 @@ the other 25 payload bytes, modes and licenses were preserved.
 | `lib/observer.bpf.o` | `13c4882895fb92567c34abdc1a77a0c00b184cbe61e7af621f3547c9887b734d` | Original build receipt unavailable; later byte-identical matching build at `c72bfe0` is separately retained |
 | `bin/controller-fixture` | `d1176146f8b56f21d644bc75c2b9fe686d342b0d8f09ca61532e726276013842` | `2ec9da05bce8f14caff50ad79d0eab9ca67b5600`; reused binary |
 | `share/agent/offline-oci.tar` | `8f0656fc10fb7b78e4667f16ce0efa9d9eaf8c8ec84559fbf35408276b35b928` | Packaged offline artifact; distinct from imported capacity-diagnostic and D2 test artifacts |
+
+The new cleanup launcher candidate is
+`3ead4e49f73954137034910028e49a5fad4b0b34d0eeb36c908581447f2afe30`, built
+from `e6c3fd6` and integrated as `e6120d3`. Its actual corrected GREEN04 fixture
+passes below. It ran directly on the private regression clone; no installed
+Server payload or signed release package was replaced. Final Server candidate
+assembly and applicable cohort qualification remain open.
 
 The installed Robot is disposable TEST manifest
 `d77a269823b55ba8fe2541be15b3202651489fdd3c784cab69cd242821a2f012`, with payload
@@ -72,7 +79,7 @@ using a current branch as a substitute for a component's build source.
 
 | Comparison | Concrete result | Permitted use / remaining work |
 |---|---|---|
-| Server `8d6e71d` archive `79acc8689f9eef8098be5ca4ba0911e0e5285cfa9e2ac34375f73a4d55732831` → launcher `14afd962` archive `270cda4667aea8206012a35c2395f4f705e9448e86a25f9e230d679f91ce7d03` | Within Server production source, Server Cargo.toml, robot-rpc, Cargo.lock and service units, only `bpf/device_policy.insns`, `src/{device_policy,launcher,lib,policy}.rs` and the launcher unit differ. | The final delta is fixed-filter installation after paused task creation, direct/effective MULTI inventory verification before Start, and loader capability. Host instruction/interpreter and binding regressions plus actual D2 filter evidence cover that delta; they do not re-execute every older sandbox case. |
+| Server `8d6e71d` archive `79acc8689f9eef8098be5ca4ba0911e0e5285cfa9e2ac34375f73a4d55732831` → launcher `14afd962` archive `270cda4667aea8206012a35c2395f4f705e9448e86a25f9e230d679f91ce7d03` | Within Server production source, Server Cargo.toml, robot-rpc, Cargo.lock and service units, only `bpf/device_policy.insns`, `src/{device_policy,launcher,lib,policy}.rs` and the launcher unit differ. | The final delta is fixed-filter installation after gated CREATED task creation, direct/effective MULTI inventory verification before Start, and loader capability. Host instruction/interpreter and binding regressions plus actual D2 filter evidence cover that delta; they do not re-execute every older sandbox case. |
 | Historical launcher `d58dd102` archive `515c8a0d4d1186a09f503a02811a7ee3052f6707438921c37dd664457d7093ab` → `14afd962` | Server source additionally changes `artifact.rs`, `robot.rs`, `service.rs`; Cargo.lock also differs. | Do not call the entire old→new build a device-only change. Reuse importer, credential/settlement and final-filter receipts separately; review the applicable dependency/link closure for each older claim. Unrelated workspace changes are not automatically linked code. |
 | Manager11 `02779a0e` archive `e6b4cbecc216a5169a2de20b693c7162691a34642003f286dd24563a1d364747` → Robot `8d6e71d` archive `fbe3e0f227c1579ad00e8d15cdae0e2b76b851d973e13b5f804c4d00aadef085` | In the compared daemon, runtime, intent, evidence, authority-client, RPC and lockfile scope, production changes are intent `src/{lib,store,types}.rs` and runtime `src/{lib,reconciliation,types}.rs`; tests/READMEs also differ. The other named scopes match. | Durable legacy Completed remains reconciliation proof with OutcomeUnknown task verdict; allocated cancellation needs an exact operation/revision marker, queued before writer stop and credited only durably. Missing/corrupt/legacy cancellation proof stays uncredited. Old-reader conservatism is not general downgrade qualification. |
 
@@ -477,21 +484,23 @@ Server e9aea996…f7ecd and Robot4dc0c78b…92366 remain unchanged, carrying cur
 The [D2-01/02 source association04](../../artifacts/server-final-d2-runtime-association04/association.json)
 records current installation reuse and the selected runtime Create/Start FIFO
 source boundary, including exact source/patch inputs and build-provenance limits.
-D2-02 remains OPEN: the contract puts the broker socket and live enforcement
-before Create, while current source reserves identity/cgroup/attribution and the
-broker directory first, then installs the filter and listeners before Start.
+Under that frozen original baseline, D2-02 remains OPEN for the pre-Create
+broker/enforcement requirement. Source reserves identity/cgroup/attribution and
+the broker directory first, then installs the filter/listeners before Start;
+the current approved contract below explicitly adopts that gated sequence.
 The separately pushed [eight-line ordering proposal](https://github.com/volnlabs/actryn/compare/f321a0d74ccc2f880445aa6e0018e26e4714badb...4f7e3776afc065da6c1560d40c6b6802ab26f959)
-is not integrated and awaits the user's scope decision. The original normative
+was approved by the user and integrated exactly as `025e36e`. The original normative
 contract is preserved byte-for-byte in its [snapshot](../../artifacts/server-launch-order-clarification-proposal01/original-contract.md)
 for frozen maps; no original evidence or predicate is rewritten.
 
-Source review also finds a distinct cleanup gap: binding-verification errors
+Review of the original launcher also finds a distinct cleanup gap: binding-verification errors
 use the common retirement/cleanup path, but later observer health/socket errors
 return directly, leaving the Launcher prepared until finite expiry while Server
 publication closes. [The narrow fix plan](../../artifacts/server-prestart-cleanup-fix-plan01/PLAN.md)
 requires an actual old-binary regression before implementation, on an isolated
 scratch Server because the legacy fixture overwrites global configuration and
-ownership. No target reproduction or fixed production binary exists yet.
+ownership. The actual old-binary RED below reproduces that missing-broker path. The isolated
+fix now passes the complete corrected GREEN04 fixture below.
 Literal D2-05 negative-connect evidence, final cohort qualification, A13/A14,
 genuine release signing and the failed A16 comparison remain open.
 
@@ -501,5 +510,147 @@ genuine release signing and the failed A16 comparison remain open.
 | [Actual native GCC14 build](../../artifacts/a16-bind9-compile01/result.json) | `4e893fabfae4dc1fdd6595d2238157390614607d598993163d7d899788aafb2a` |
 | [Independent saved-build audit](../../artifacts/a16-bind9-compile-actual-peer01/review.json) | `9db4422a11001e19c6fde41996bcedc4baf95a6cac801d3bb43c67d78b99faaf` |
 | [Unapproved build-only candidate](../../artifacts/a16-bind9-compile-root-review01/diagnostic9-build-candidate.json) | `5f0c1ef21b7fc5158e261afcb739f959a3bbfa314c668f536f959e0438deb390` |
-| [Current 46-unit stopped custody](../../artifacts/a16-bind9-compile-final-stopped-custody01/result.json) | `6bf2fc300dd4ecdf704333a6dc838f89c63e17030d0173c36fc2ac9adb51b613` |
+| [Compile-only 46-unit stopped custody](../../artifacts/a16-bind9-compile-final-stopped-custody01/result.json) | `6bf2fc300dd4ecdf704333a6dc838f89c63e17030d0173c36fc2ac9adb51b613` |
 | [D2-01/02 source/runtime association](../../artifacts/server-final-d2-runtime-association04/association.json) | `db16b0671f4541393bce57df538f78d70b9bcfe3d815cdf9e0964afa028b89d3` |
+
+
+## Approved ordering and actual pre-Start regression
+
+The user approves the before-Start proposal `4f7e377`, integrated byte-for-byte
+as `025e36e`. The current contract hash is
+`315734b43734f9200ebd2e35cd977a60fcf91dedbd9d85c38fb2805100046b0a`.
+The original `7bd1738b…43ef1` contract snapshot and frozen maps remain unchanged;
+their historical literal-order conclusions are not rewritten. Application entry
+must remain gated until verification finishes. Whole D2 is still open.
+
+One private standalone clone of the retained Server boots exact kernel111/f32
+at `00ae01fa-4ad9-44fa-b5ab-bcc1304475fa`. The unchanged launcher rejects the
+missing-broker Start for attempt `8770cdfc99d804296a1588404a574b9d`, but actual
+inspection remains prepared. The immediate state assertion produces raw rc1;
+this is the intended old-binary RED, independently reviewed. The fixture's known
+finally Stop reaps that attempt with empty stdout/stderr. Later observer and
+healthy cases remain NOT_STARTED. All old 26/24 full rows are preserved; only
+one Launcher attempt/runtime-evidence entry is added, leaving clone27/24 and
+zero debits. A dependency-closure PASS never changes the failed test to PASS.
+
+One acknowledged normal poweroff, original pidfd death and fresh serial shutdown
+markers precede the RED stopped custody: all 51 checked host units inactive,
+original nine public records, three key metadata records and fixture journals
+unchanged. At that RED checkpoint the private clone has SHA256
+`7675877bcfc65b13617cf6b03eac051c9028306f17dce9f285290453fd20be0c`.
+Original Server26/24, Robot16/21, zero debits/all374 entries and original A16
+FAILED79/80 remain unchanged. No installed release component is replaced.
+
+The narrow fix `e6c3fd6` on its isolated branch passes 66 Server package tests and
+formatting with pinned Rust1.92, offline/j1. An initial E0277 compile failure is
+retained; the corrected mutable async capture passes. One host launcher build
+produces the 14139888-byte ELF
+`3ead4e49f73954137034910028e49a5fad4b0b34d0eeb36c908581447f2afe30`.
+Static checks preserve all 31 allocated sections, match 154 exact retained-target
+symbols and retain 22 native inputs. This cached build is not hermetic; target
+providers must be checked freshly before execution. The original pre-exit
+catalogue pins an empty redirected analyzer stdout; a separate post-exit
+association records its exact 328-byte tail and all 50 completed files without
+rewriting the original catalogue or rerunning anything. The corrected-binary GREEN04 below passes; final candidate/cohort qualification,
+literal D2-05, A13/A14 and genuine release signing remain pending. This regression gives no physical qualification.
+
+| Approval/regression receipt | SHA-256 |
+|---|---|
+| [Exact approved integration](../../artifacts/server-launch-order-approved-decision01/result.json) | `405620fe0954ea0879da673e13500b51f0f6382f5bb9d55df33e6ee8ea964956` |
+| [Actual old-binary RED classification](../../artifacts/server-prestart-cleanup-root-review01/old-red-classification.json) | `32aaf351742f21950b73c3e74bd2dced0ef17e877748a72d7de51aa50b62a8ab` |
+| [Independent actual RED audit](../../artifacts/server-prestart-cleanup-actual-red-peer01/review.json) | `c358b9cbd515cd5edfc119fb5331786309891c0a7525a09b70a5038980bfa5de` |
+| [Normal scratch poweroff](../../artifacts/server-prestart-cleanup-poweroff01/result.json) | `bd3cb820a424c2396ee209a3990bbd89ee0e9b22176f4b90a7853986a59503ec` |
+| [RED 51-unit stopped custody](../../artifacts/server-prestart-cleanup-final-stopped-custody01/result.json) | `9bf9810e8bc690fb2da7066df6bad1f210d25c5ce03a1ec601e1b6a17bd7a8a5` |
+| [Independent shutdown/custody audit](../../artifacts/server-prestart-cleanup-stopped-actual-peer01/review.json) | `1abdbe29c269fa2fe7d744d6795f741301c7069fcdcca0ecbfd316f19d786c71` |
+| [Isolated signed-off fix commit](../../artifacts/server-start-cleanup-fix-commit01/result.json) | `c431262c77c4c6495a269def80775525c4b8568a65964eb4a183820b4c4c419b` |
+| [Actual host build/static provenance](../../artifacts/server-prestart-cleanup-build01/provenance.json) | `2dfc87a362703005dea50b232cead639a950908a4632b4055eafc32005553a23` |
+| [Completed catalogue association](../../artifacts/server-prestart-cleanup-build-final-inventory01/result.json) | `a6a6badbe0ed95232fb79957fafa2d6cfa503c082de98459604eb87d1d372705` |
+
+### Numbered GREEN preparation and fixture failures
+
+Green01 boot `4c6f6cde-cc4e-46d0-9976-700859d0d858` uses only the private
+regression clone. Setup01 stops before standalone candidate staging, provider
+checks, dependency starts, import or Prepare: its directory guard expects991,
+but current installed account/directory are987 and the installed tmpfiles rule
+matches. The actual boot actor is not independently traced. The persisted
+scratch lock/config retain991. Raw rc1/remote uncertainty and the seven-file
+partial stage stay unchanged. Read-only reconciliation verifies all seven
+27/24 tables unchanged and known host/guest closure, with no state repair.
+
+Numbered setup02 corrects the exact directory guard to UID/GID987/0700 without
+chown. Fresh target-provider checks pass before the fixed ELF executes.
+Missing-broker attempt `d67f5435d0f16afba462d3245c01c87e` rejects Start, reaps,
+confirms original pidfd death/empty output and rejects replay. Observer attempt
+`07603b3653a44251d912b5e742e769fe` rejects Start and retains its charged
+retiring/cancelled row and binding, then fails the fixture's physical cgroup-path
+assertion. Launcher unregister precedes its explicit rmdir; runtime deletion
+can precede unregister, but the actual deletion actor is unobserved. Retained
+admission identity is the durable non-reaped row, not the transient path.
+The original pidfd wait, restore/reap test marker and healthy/admission controls
+are NOT_REACHED. Its finally restores the exact socket and known Stop reaps.
+Cold29/24 preserves every old row/log, adds only two Launcher attempt/runtime
+rows, and has no outstanding Robot debit. Component rc1 remains failed even
+though dependency and outer host scopes close successfully. At this failed02 checkpoint the scratch VM remains on. The later full GREEN04
+and normal shutdown below supersede that carrier state.
+
+| Numbered failure/reconciliation receipt | SHA-256 |
+|---|---|
+| [Green01 preparation reconciliation](../../artifacts/server-prestart-cleanup-green-preparation-readback01/result.json) | `5309cfdbbb9cef625e412c0fa82fb968c838b9854804eff6fec5337f04552760` |
+| [Independent Green01 reconciliation](../../artifacts/server-prestart-cleanup-green01-readback-peer01/review.json) | `608c86be61d413e0baa05d1e40b063a0b3bc51b81fb54b324d623530f021c1aa` |
+| [Green02 failed fixture classification](../../artifacts/server-prestart-cleanup-green-root-review02/green02-classification.json) | `bf9ac4fd9fc9aa63314150056585d32af9b827b374086fec9af7b2836e079240` |
+| [Independent Green02 failure review](../../artifacts/server-prestart-cleanup-green02-failure-source-peer01/review.json) | `8e25ef257e2f3c491227bfae1aa485e01b38c95ef7daba6d3ab4bcb5fc492bcb` |
+
+### Full GREEN04 and current stopped custody
+
+On the same private exact111/f32 boot, fresh invocation04 runs launcher3ead from
+sourcee6 and fixture106108 from signed-off source8fae. The fixture selects the
+already approved50a artifact from actual02's reviewed C build/import. It performs
+no fresh agent compile/import/configuration rewrite, preserving registry capacity.
+All four source-bound cases pass with harness rc0 and empty stderr: missing-broker
+Start cancels/reaps without execution/replay; observer-unreachable Start retains
+exact durable retiring identity/binding after original task pidfd death while the
+socket is hidden, then reaps after exact restoration; the healthy case executes
+only its expected marker and rejects duplicate Start without cancelling; normal
+active-capacity refusal preserves the second preparation and first running task.
+The assertions and markers establish these cases; separate per-RPC kernel traces
+are not claimed.
+
+All four new attempts finish reaped. Their negative/capacity output is empty;
+the healthy output is exactly `AGENT_STARTED` plus newline, and all four stderr
+logs are empty. Full prior seven-table rows/logs remain unchanged as multisets;
+only four Launcher attempt/runtime rows are added. Final clone33/24 has zero
+Robot debit; Broker24 is unchanged. The independent saved-byte audit agrees.
+The failed01/02/03 and failed read-only probe remain untouched, including their
+unknown flags. Before04, separate reconciliation proves unchanged29/24 and two
+exclusive consumed intents remove only the exact verified dead socket pathnames.
+No database repair, ownership change, retained-artifact deletion or quota change
+occurs.
+
+One acknowledged normal poweroff, original QEMU pidfd death and fresh serial
+shutdown markers precede current full custody:59 actual host units inactive,
+MainPID0/empty cgroups/NRestarts0; original nine public records hash identically
+at both bookends, three private keys remain metadata-only, and both fixture
+journals are unchanged. Original Server26/24, Robot16/21, zero debits and all374
+entries remain carried by their unchanged disks. The separate private clone is
+`fa9fd3f4e00e00ce9ed95697f377b5b74d5be0fa1ed18734819529aa346ee89d`.
+All VMs and fixtures are off.
+
+The three exact signed-off source commits integrate as `e6120d3`, `71696f2` and
+`ecc5a8b`. All85 maintained Server Python tests pass; the source-bound66 Rust tests,
+formatting and actual target-provider checks remain separately recorded. This
+closes the pre-Start cleanup regression only. Installed f32 remains unchanged;
+final Server package assembly, whole D2/final-cohort qualification, A13/A14,
+genuine release signing and the failed A16 comparison remain open. Physical qualification remains
+outside this software preview.
+
+| Current GREEN/shutdown receipt | SHA-256 |
+|---|---|
+| [Full GREEN04 classification](../../artifacts/server-prestart-cleanup-green-root-review04/green04-classification.json) | `a91a8a9ae5b8e0b8ffdd81614769c04d6048bb8b622a94324ec534c3e16c0ece` |
+| [Independent actual GREEN04 audit](../../artifacts/server-prestart-cleanup-green04-actual-peer01/review.json) | `c1baf1535f24f3a51ad9071455c3db4af620a32eee03eef4c1f42d3071f3e0ed` |
+| [Prior03 preparation reconciliation and cleanup](../../artifacts/server-prestart-cleanup-green03-preparation-reconciliation02/final-result.json) | `ec2a63fbb3435e07d9e28d87362b4f54f03cb0c9cd681e23f65513edd8b4e742` |
+| [Independent exact socket-cleanup audit](../../artifacts/server-prestart-cleanup-green03-stale-socket-cleanup-actual-peer01/review.json) | `86618ee4abce4b2e22528bad17eb368845296e121394e5e80e11b1a6c4d844fe` |
+| [Normal scratch poweroff04](../../artifacts/server-prestart-cleanup-green-poweroff04/result.json) | `3dbdba3abbfa5a95ce86549a28cb044139a80783df6ea1778a05ac9e2f81ff93` |
+| [Current59-unit stopped custody](../../artifacts/server-prestart-cleanup-final-stopped-custody04/result.json) | `9101ddce91a6fd21e580b0f8474c9cbef29dc4c1b574c971838794661b4ecc52` |
+| [Independent shutdown/custody audit](../../artifacts/server-prestart-cleanup-green04-stopped-actual-peer01/review.json) | `3de0d536b2d6c5f9bc704686979de8d60230d2c161ceeda7a9148383622d9603` |
+| [Exact signed-off integration](../../artifacts/server-start-cleanup-integration01/result.json) | `cbb3921d5f5b90c969467a8437a0eb5eb24b9b234bf8cb7196ed83687f0786bc` |
+| [85 maintained Python tests](../../artifacts/server-start-cleanup-integrated-python85/result.json) | `17385566bea57423e5169e922c2e00774858de63f7c2809894a8ee0d0b8e17c2` |

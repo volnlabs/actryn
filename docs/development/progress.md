@@ -5,13 +5,14 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 ## Current state
 
 - Baseline: `65a45a6`, 19 supplied files preserved; SHA-256 snapshot retained locally.
-- Integration branch: `feat/v0.0.1`; preceding verified push `f321a0d`.
+- Integration branch: `feat/v0.0.1`; preceding verified push `d2be824`.
   Server/Robot implementation source remains `8d6e71d`, except the new launcher
-  built from `14afd962` (integrated as `2e93ccd`); preview-agent diagnostic
+  now built from `e6c3fd6` (integrated as `e6120d3`), with fixture corrections
+  `71696f2`/`ecc5a8b`; preview-agent diagnostic
   fix `42537e2` is integrated; its imported OCI has executed the exact capacity
   diagnostic. The preceding remote head is verified;
-  push21 verifies both integration and validator-fix branch heads, with zero CI
-  runs (`artifacts/reconciliation-checkpoint-push21/result.json`). No CI pass is claimed.
+  push22 verifies both integration and validator-fix branch heads, with zero CI
+  runs (`artifacts/reconciliation-checkpoint-push22/result.json`). No CI pass is claimed.
 - M0 scope/contracts are committed; exact Debian kernel/build inputs selected.
   M1–M3 implementations have component and installed-path evidence, including
   the full installed Robot lifecycle. M4 release qualification remains incomplete;
@@ -61,7 +62,37 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   original fixture once. No reset, restart or operation replay occurs.
   Receipts: `artifacts/reconciliation-post-run05-{robot-stop-owner01,poweroff-owner01,fixture-stop-plan01,fixture-stop-plan02}`
   and `artifacts/reconciliation-post-run05-stopped-custody01/closed.json`.
-- **Latest diagnostic9: ARM compile PASS; workload observation NOT_RUN.**
+- **Old-binary Server regression: actual RED; known normal shutdown.**
+  Scratch boot `00ae01fa-4ad9-44fa-b5ab-bcc1304475fa` reproduces the missing-broker
+  Start failure with the unchanged f32 launcher: the rejected attempt stays
+  prepared, so the immediate cleanup assertion fails. The fixture's known Stop
+  then reaps it without output. All copied old 26/24 full rows remain; the clone
+  has 27/24 rows and zero debits. Normal poweroff and full stopped custody verify
+  51 inactive checked host units and unchanged original nine public records,
+  metadata-only keys and fixture journals. The private clone is separate evidence.
+  The narrow fix `e6c3fd6` on `fix/server-start-cleanup` passes 66 Server package tests
+  and formatting. One qualified host build/static check produces ELF3ead4e49…afe30,
+  with 31 allocated sections preserved and 154 retained-target symbols matched.
+  Green01 setup and Green03 setup remain failed before candidate execution;
+  Green02's over-specific physical-cgroup-path assertion remains failed.
+  Read-only reconciliation and two guarded same-inode stale-socket unlinks
+  preserve all 29/24 rows without database/ownership/capacity changes.
+  Separately numbered GREEN04 now passes all four cases, including exact durable
+  observer retirement and duplicate/admission preservation. Cold33/24 adds only
+  four Launcher attempt/runtime rows, preserves every old row/log and has zero
+  Robot debit. One normal poweroff and latest59-unit stopped custody pass; all
+  original nine public records, keys' metadata, fixtures and original26/24Server,
+  16/21Robot/all374 remain unchanged. Clone SHAfa9fd3f4…6ee89d is separate.
+  Source integration `e6120d3`/`71696f2`/`ecc5a8b` preserves tested bytes; 85
+  maintained Server Python tests pass. Installed f32 is unchanged; final package
+  assembly/qualification and whole D2 remain open.
+  [Actual RED and approval receipts](release-cohort.md#approved-ordering-and-actual-pre-start-regression)
+  retain the failed test, known cleanup and later unstarted cases separately.
+- **Before-Start contract ordering approved and integrated.**
+  The user approves proposal `4f7e377`; exact cherry-pick `025e36e` changes only
+  the platform contract. The original byte-identical snapshot remains available
+  for frozen maps. This approval closes no whole D2 or release qualification.
+- **Diagnostic9 build checkpoint: ARM compile PASS; workload observation NOT_RUN.**
   One null-controller kernel111 boot `b0e13f6b-b80b-4dcb-ba56-ab08c56cb7ca`
   builds the separately numbered BIND diagnostic with native guest GCC14.2.0.
   ELF SHA256 `045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612`
@@ -75,14 +106,15 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   [Build receipts and boundaries](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
   distinguish this compile from a comparison or physical qualification.
 - **D2 source association identifies remaining implementation/contract work.**
-  D2-01 installation associations are recorded. D2-02's source review confirms
-  CREATED/Start-FIFO application gating, but broker listeners and the live device
-  filter follow Create, whereas the contract puts them earlier. Proposed branch
-  `docs/server-launch-order-clarification` (`4f7e377`) is awaiting the user's
-  decision and is not integrated. Some observer/socket pre-Start errors also
-  bypass common immediate retirement and leave prepared resources charged until
-  expiry. The narrow cleanup fix/regression is pending; no target reproduction
-  or production fix is claimed. Whole D2 stays open, including literal D2-05.
+  D2-01 installation associations are recorded. D2-02's original-baseline review
+  confirms CREATED/Start-FIFO application gating and identifies the later broker
+  listeners/device filter against the original pre-Create contract. Proposed branch
+  `docs/server-launch-order-clarification` (`4f7e377`) is now approved and
+  integrated as `025e36e`. Its original snapshot preserves the old maps' baseline.
+  The separate pre-Start cleanup error is reproduced above on a private clone;
+  the fixed binary passes the complete corrected GREEN04 fixture. The failed
+  predecessors stay preserved. This closes the cleanup source gap only.
+  Whole D2 stays open, including literal D2-05.
 - **Server111 native proof checkpoint: saved evidence PASS; original runner FAILED.**
   Fresh boot `364d9871-2a69-475d-8d6a-0db37b4275f8`, exact kernel111 and TEST f32
   pass cold preflight. One supported import and one native sandbox attempt

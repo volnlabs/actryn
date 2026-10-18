@@ -12,7 +12,7 @@ artifacts to case evidence and identifies source-impact and CLI coverage boundar
 Unsigned Robot candidate `da6b6862…cc5a9` is selected after actual host assembly
 and independent 17-entry review; installed d77 and qualification are unchanged.
 The map closes no acceptance row.
-Push21 records preceding integration checkpoint `f321a0d` and its validator-fix branch,
+Push22 records preceding integration checkpoint `d2be824` and its validator-fix branch,
 with zero CI runs; it supplies no CI pass or backup of ignored raw evidence.
 The existing device/OOM composite passes the existing-device-denial and cgroup-OOM cases
 only; whole D2 remains open for final cohort reconciliation.
@@ -41,11 +41,27 @@ build (ELF045d9bcd…a612, 74704 bytes) and known normal shutdown/46-unit stoppe
 custody. The null controller backend starts no fixture, gateway, module or
 workload; both fixture journals and the other eight public records are unchanged.
 New diagnostic execution remains NOT_RUN/unapproved; A16 remains FAILED79/80.
-D2-01/02 source association also exposes literal pre-Create ordering and
-pre-Start cleanup gaps: selected runtime Create gates application entry, but
-broker socket/live filter binding is later, and some observer/socket failures
-leave prepared resources charged until expiry. The proposed ordering clarification
-is unintegrated pending user decision; the cleanup regression/fix is pending.
+Under the original baseline, D2-01/02 source association exposes literal
+pre-Create ordering and pre-Start cleanup gaps: runtime Create gates application
+entry, but broker socket/live filter binding is later, and old observer/socket
+failures leave prepared resources charged until expiry. The user now approves the ordering
+clarification, integrated exactly as `025e36e`; the original snapshot remains.
+The private-clone missing-broker regression has actual old-binary RED/known cleanup
+and normal shutdown, with 51-unit stopped custody and unchanged original records.
+The isolated cleanup fix passes 66 Server package tests and one host build/static
+check (ELF3ead4e49…afe30). Separately numbered GREEN04 now passes missing-broker
+cleanup, observer-unreachable retirement/recovery, healthy/duplicate Start and
+capacity preservation. Its cold33/24 stores preserve every old row/log and have
+zero Robot debit. Normal poweroff and latest59-unit stopped custody preserve
+all original public records, key metadata, fixtures and original26/24Server,
+16/21Robot/all374. Earlier setup/fixture/read-only failures stay failed; exact
+reconciliation and two consumed same-inode stale-socket unlinks precede the new
+execution, without database/ownership/retained-artifact/capacity changes.
+The fix and test corrections are integrated as `e6120d3`/`71696f2`/`ecc5a8b`;
+85 maintained Server Python tests pass. Final Server candidate packaging and
+whole-cohort qualification remain open; installed f32 is unchanged.
+[Current approval and regression receipts](release-cohort.md#approved-ordering-and-actual-pre-start-regression)
+close no whole acceptance row.
 [Exact build and source evidence](release-cohort.md#diagnostic9-build-only-and-current-source-gaps)
 closes neither whole D2 nor the failed comparison.
 

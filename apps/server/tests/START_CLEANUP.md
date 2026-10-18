@@ -8,8 +8,9 @@ were unstarted. The frozen RED source and raw failure remain preserved. The
 fixed-binary GREEN02 passed the missing-broker case, then failed an overstrict
 physical-cgroup-path assertion in the observer case. Its exact socket restoration
 and known Stop reaped the attempt; the healthy/admission cases were unstarted.
-That failure stays preserved. This corrected fixture is **NOT_RUN** until Root
-executes it on a separately bound disposable guest.
+That failure stays preserved. A separately bound GREEN04 invocation passes all
+four corrected cases with the fixed launcher and approved retained artifact;
+normal poweroff and stopped custody then pass. Exact evidence is linked below.
 
 **Never run this harness on the retained qualification Server, Robot, A16 VM,
 or an operator workstation.** Use a fresh scratch Server VM or a guarded clone
@@ -36,10 +37,11 @@ the new run is not a fresh agent build. This avoids consuming another registry
 slot when numbered source paths change C assertion strings. Capacity and retained
 trees must not be changed to make a regression fit.
 
-The existing invocation is:
+Bind a fresh stage path and exact source before each invocation. Never reuse a
+consumed numbered stage or rerun its failed program. The invocation shape is:
 
 ```
-python3 -B -E -s /root/actryn-prestart-cleanup-green01/guest_launcher.py \
+python3 -B -E -s /root/FRESH_REVIEWED_STAGE/guest_launcher.py \
   /absolute/path/to/reviewed/actryn-launcher \
   /absolute/path/to/reviewed/importer-wrapper \
   /absolute/path/to/build_oci.py
@@ -101,3 +103,12 @@ do not establish whole D2 acceptance or physical qualification. The separate
 GREEN02 classification is retained at
 `artifacts/server-prestart-cleanup-green-root-review02/green02-classification.json`;
 its original failed program is not relabelled by this fixture correction.
+
+The complete corrected result is bound by
+`artifacts/server-prestart-cleanup-green-root-review04/green04-classification.json`
+and independent `artifacts/server-prestart-cleanup-green04-actual-peer01/review.json`.
+It uses source8fae/fixture106108 with launcher3ead/buildsourcee6 on exact kernel111.
+The retained agent50a comes from actual02's build/import; GREEN04 does not rebuild
+or reimport it. Full prior rows/logs are preserved, final clone counts33/24 are
+all reaped with zero Robot debit, and normal shutdown/custody checks59 host units.
+The installed f32 package remains unchanged; no whole-D2 or release claim follows.
