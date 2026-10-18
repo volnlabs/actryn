@@ -75,23 +75,36 @@ def reaped_without_execution(attempt, taskfd):
     empty_output(attempt)
 
 
+def retained_fixture(config, artifact, io_device):
+    assert isinstance(artifact,str) and len(artifact)==71 and artifact.startswith('sha256:') and all(c in '0123456789abcdef' for c in artifact[7:]), 'invalid retained artifact'
+    expected={'server_uid':991,'operator_uid':1000,'io_device':io_device,'artifacts':{
+        artifact:{'rootfs':'/var/lib/actryn-artifacts/'+artifact[7:]+'/rootfs','argv':['/bin/agent']}}}
+    assert config==expected, 'retained fixture configuration differs'
+    return artifact
+
+
 def main():
     assert os.geteuid()==0
+    assert len(sys.argv) in (4,5), 'launcher importer builder [retained-artifact] required'
     binary=pathlib.Path(sys.argv[1]).resolve()
     assert pathlib.Path('/run/actryn/observer.sock').exists(),'real observer required'
     assert pathlib.Path('/run/containerd/containerd.sock').exists(),'real containerd required'
-    root=pathlib.Path('/var/lib/actryn-test-rootfs')
-    (root/'bin').mkdir(parents=True,exist_ok=True)
-    subprocess.run(['cc','-O2','-static','-Wall','-Wextra','-Werror','-o',str(root/'bin/agent'),str(pathlib.Path(__file__).with_name('launcher_agent.c'))],check=True)
     device=os.stat('/').st_dev
     block=pathlib.Path(f'/sys/dev/block/{os.major(device)}:{os.minor(device)}').resolve()
     io_device=(block.parent/'dev').read_text().strip() if (block/'partition').exists() else f'{os.major(device)}:{os.minor(device)}'
-    config={'server_uid':991,'operator_uid':1000,'io_device':io_device,
-        'artifacts':{}}
-    pathlib.Path('/etc/actryn').mkdir(exist_ok=True)
-    pathlib.Path('/etc/actryn/server.json').write_text(json.dumps(config))
-    pathlib.Path('/etc/actryn/server.json').chmod(0o644)
-    artifact=import_fixture(root/'bin/agent',*(sys.argv[2:4]))
+    if len(sys.argv)==5:
+        artifact=retained_fixture(json.loads(pathlib.Path('/etc/actryn/server.json').read_text()),sys.argv[4],io_device)
+        print(json.dumps({'phase':'retained-fixture-artifact','artifact_digest':artifact,'fresh_compile_or_import':False}),flush=True)
+    else:
+        root=pathlib.Path('/var/lib/actryn-test-rootfs')
+        (root/'bin').mkdir(parents=True,exist_ok=True)
+        subprocess.run(['cc','-O2','-static','-Wall','-Wextra','-Werror','-o',str(root/'bin/agent'),str(pathlib.Path(__file__).with_name('launcher_agent.c'))],check=True)
+        config={'server_uid':991,'operator_uid':1000,'io_device':io_device,
+            'artifacts':{}}
+        pathlib.Path('/etc/actryn').mkdir(exist_ok=True)
+        pathlib.Path('/etc/actryn/server.json').write_text(json.dumps(config))
+        pathlib.Path('/etc/actryn/server.json').chmod(0o644)
+        artifact=import_fixture(root/'bin/agent',*(sys.argv[2:4]))
     log=open('/root/actryn-launcher-test.log','w')
     process=subprocess.Popen([str(binary)],stdout=log,stderr=log)
     active=None;broker=None
