@@ -114,6 +114,61 @@ def validate_live_composition(receipt, subjects, refs):
             'live composition qualification boundary')
 
 
+def validate_robot_recovery_update(receipt, subject, refs, checked):
+    require(receipt.get('format') == 'actryn-robot-recovery-qualification-1'
+            and receipt.get('status') == 'PASS_RECOVERY_SERIALIZATION_AND_HUMAN_REHEARSAL',
+            'robot recovery qualification receipt')
+    package = receipt.get('package', {})
+    require(package.get('manifest_sha256') == refs[subject['manifest']]['sha256']
+            and package.get('payload_sha256') == subject['payload_sha256']
+            and package.get('changed_entries') == ['bin/actryn-robotd']
+            and package.get('qualification') == 'incomplete' and package.get('signed') is False,
+            'robot recovery package identity')
+    evidence = receipt.get('evidence', {})
+    require(set(evidence) == {'build', 'failed_rehearsal', 'guest_regression',
+                              'human_report', 'tested_manifest'}
+            and all(value in refs and value in checked for value in evidence.values()),
+            'robot recovery evidence references')
+    build = decode(checked[evidence['build']])
+    failed = decode(checked[evidence['failed_rehearsal']])
+    regression = decode(checked[evidence['guest_regression']])
+    human = decode(checked[evidence['human_report']])
+    tested = decode(checked[evidence['tested_manifest']])
+    manifest = decode(checked[subject['manifest']])
+    revision = receipt.get('source_revision')
+    require(isinstance(revision, str) and re.fullmatch('[0-9a-f]{40}', revision)
+            and build.get('source_revision') == revision
+            and build.get('status') == 'PASS_BUILD_STRIP_ELF_REPORTS'
+            and manifest.get('provenance', {}).get('source_revision') == revision
+            and tested.get('provenance', {}).get('source_revision') == revision,
+            'robot recovery source/build binding')
+    current = {entry['path']: entry for entry in manifest['files']}
+    exercised = {entry['path']: entry for entry in tested['files']}
+    require(current['bin/actryn-robotd'] == exercised['bin/actryn-robotd']
+            and current['bin/actryn-robotd']['sha256'] == build.get('stripped_sha256'),
+            'tested robot manager differs')
+    require('clock checkpoint pending' in failed.get('error', '')
+            and failed.get('automatic_mutation_retry') is False,
+            'original recovery race not retained')
+    final = regression.get('final', {}).get('report', {}).get('runtime', {})
+    kernel = final.get('kernel', {})
+    require(final.get('recovery_ready') is True and final.get('recovery_pending') is False
+            and kernel.get('state') == 0 and kernel.get('flags', 0) & 1
+            and kernel.get('left_permille') == 0 and kernel.get('right_permille') == 0,
+            'installed recovery regression incomplete')
+    require(human.get('status') == 'PASS' and human.get('execution') == 'human'
+            and human.get('operator') == OWNER and human.get('independent') is False
+            and human.get('robot_manifest_sha256') == refs[evidence['tested_manifest']]['sha256']
+            and human.get('same_grant') is True
+            and human.get('cancel_before_proposal_durable') is True
+            and human.get('physical_acceptance') is False and human.get('live_provider_calls') == 0,
+            'human recovery rehearsal incomplete')
+    require(receipt.get('physical_acceptance') is False
+            and receipt.get('release_promotion') is False
+            and receipt.get('release_signature_verified') is False,
+            'robot recovery qualification boundary')
+
+
 def verify_subject_update(role, subject, update, history, refs, checked, root):
     require(set(update) == {'predecessor_manifest', 'qualification', 'payload'}, 'subject update fields')
     predecessor = history['candidate_roles'][role]
@@ -125,7 +180,10 @@ def verify_subject_update(role, subject, update, history, refs, checked, root):
     previous = decode(checked[update['predecessor_manifest']])
     require(manifest['role'] == role and previous['role'] == role, 'manifest role mismatch')
     qualification = decode(checked[update['qualification']])
-    validate_live_composition(qualification, {'server': subject}, refs)
+    if role == 'server':
+        validate_live_composition(qualification, {'server': subject}, refs)
+    else:
+        validate_robot_recovery_update(qualification, subject, refs, checked)
     changed = qualification['package']['changed_entries']
     before = {row['path']: row for row in previous['files']}
     after = {row['path']: row for row in manifest['files']}
@@ -220,7 +278,7 @@ def validate(packet, root=None):
     updates = packet.get('subject_updates', {})
     require((version == 'actryn-solo-qualification-2') == bool(updates)
             and isinstance(updates, dict)
-            and (not updates or set(updates) == {'server'}), 'subject updates')
+            and (not updates or set(updates).issubset({'server', 'robot'})), 'subject updates')
     for role, update in updates.items():
         require(set(update) == {'predecessor_manifest', 'qualification', 'payload'}
                 and update['predecessor_manifest'] in refs and update['qualification'] in refs,

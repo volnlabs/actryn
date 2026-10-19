@@ -168,6 +168,72 @@ class SoloQualificationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             solo.verify_subject_update('server', subject, update, history, refs, checked, self.root)
 
+    def test_robot_update_binds_exact_manager_and_human_recovery(self):
+        def save(name, value):
+            raw = json.dumps(value).encode()
+            (self.root / name).write_bytes(raw)
+            return raw, {'path': name, 'bytes': len(raw),
+                         'sha256': hashlib.sha256(raw).hexdigest()}
+
+        revision = '1' * 40
+        entry = lambda digest: {'path': 'bin/actryn-robotd', 'size': 2, 'mode': 493,
+                                'license': 'Apache-2.0', 'sha256': digest}
+        old = {'role': 'robot', 'provenance': {'source_revision': '0' * 40},
+               'files': [entry('2' * 64)]}
+        new = {'role': 'robot', 'provenance': {'source_revision': revision},
+               'files': [entry('3' * 64)]}
+        old_raw, old_ref = save('old-robot.json', old)
+        new_raw, new_ref = save('new-robot.json', new)
+        tested_raw, tested_ref = save('tested-robot.json', new)
+        build_raw, build_ref = save('build.json', {
+            'status': 'PASS_BUILD_STRIP_ELF_REPORTS', 'source_revision': revision,
+            'stripped_sha256': '3' * 64})
+        failed_raw, failed_ref = save('failed.json', {
+            'error': 'clock checkpoint pending', 'automatic_mutation_retry': False})
+        regression_raw, regression_ref = save('regression.json', {'final': {'report': {'runtime': {
+            'recovery_ready': True, 'recovery_pending': False,
+            'kernel': {'state': 0, 'flags': 1, 'left_permille': 0, 'right_permille': 0}}}}})
+        human_raw, human_ref = save('human.json', {
+            'status': 'PASS', 'execution': 'human', 'operator': solo.OWNER,
+            'independent': False, 'robot_manifest_sha256': tested_ref['sha256'],
+            'same_grant': True, 'cancel_before_proposal_durable': True,
+            'physical_acceptance': False, 'live_provider_calls': 0})
+        payload = b'robot-payload'
+        (self.root / 'robot-payload.tar').write_bytes(payload)
+        payload_ref = {'path': 'robot-payload.tar', 'bytes': len(payload),
+                       'sha256': hashlib.sha256(payload).hexdigest()}
+        refs = {'old': old_ref, 'new': new_ref, 'tested': tested_ref, 'build': build_ref,
+                'failed': failed_ref, 'regression': regression_ref, 'human': human_ref}
+        qualification = {
+            'format': 'actryn-robot-recovery-qualification-1',
+            'status': 'PASS_RECOVERY_SERIALIZATION_AND_HUMAN_REHEARSAL',
+            'source_revision': revision,
+            'package': {'manifest_sha256': new_ref['sha256'],
+                        'payload_sha256': payload_ref['sha256'],
+                        'changed_entries': ['bin/actryn-robotd'],
+                        'qualification': 'incomplete', 'signed': False},
+            'evidence': {'build': 'build', 'failed_rehearsal': 'failed',
+                         'guest_regression': 'regression', 'human_report': 'human',
+                         'tested_manifest': 'tested'},
+            'physical_acceptance': False, 'release_promotion': False,
+            'release_signature_verified': False}
+        qualification_raw, qualification_ref = save('robot-qualification.json', qualification)
+        refs['qualification'] = qualification_ref
+        subject = {'manifest': 'new', 'payload_sha256': payload_ref['sha256']}
+        update = {'predecessor_manifest': 'old', 'qualification': 'qualification',
+                  'payload': payload_ref}
+        history = {'candidate_roles': {'robot': {'manifest': 'historical-old'}},
+                   'public_receipts': {'historical-old': old_ref}}
+        checked = {'old': old_raw, 'new': new_raw, 'tested': tested_raw, 'build': build_raw,
+                   'failed': failed_raw, 'regression': regression_raw, 'human': human_raw,
+                   'qualification': qualification_raw}
+        solo.verify_subject_update('robot', subject, update, history, refs, checked, self.root)
+        bad = copy.deepcopy(qualification)
+        bad['package']['changed_entries'] = []
+        checked['qualification'] = json.dumps(bad).encode()
+        with self.assertRaises(ValueError):
+            solo.verify_subject_update('robot', subject, update, history, refs, checked, self.root)
+
     def test_payload_stream_verification_rejects_changed_archive(self):
         solo.verify_payload(self.root, self.reference)
         (self.root / 'receipt.json').write_bytes(b'changed')
