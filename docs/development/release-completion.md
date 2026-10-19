@@ -229,3 +229,7 @@ Every closure must name selected source/configuration/payload identities and imm
   is local, test-signed and `release_qualification=false`; it does not supply an
   independent installer, live provider credential, release custodian signature,
   durable off-host archive or physical qualification.
+- Local addendum `204e7468…9ff8` archives and restore-verifies 80 new public
+  scripts/receipts (276,480 bytes). It excludes VM images, payload duplicates and
+  all private test/SSH keys. It is ignored local storage, not the still-required
+  durable off-host archive.
