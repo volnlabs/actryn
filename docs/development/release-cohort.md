@@ -60,7 +60,7 @@ passes below. It ran directly on the private regression clone; no installed
 Server payload or signed release package was replaced. Final Server candidate
 assembly is complete as the unsigned selection below; applicable cohort qualification remains open.
 
-**Final Server package: selected unsigned candidate, pending qualification.**
+**Final Server package: selected unsigned candidate, exact payload target-exercised.**
 Manifest `9f749ca31d975e870c2a358762fd01c6c04ebf1e170ca569fe0ea1aa8563a90f`
 has payload `7b596c872290039cee2491595cc23515cc8a0eb559f0da3fcba619455518fe71`
 (70666240 bytes). The [assembly](../../artifacts/server-final-cohort-package01/result.json)
@@ -69,9 +69,23 @@ verify all 27 entries: only launcher3ead replaces launcher17a0; the other 26
 entries, modes and licenses are unchanged. The [component map](../../artifacts/server-final-cohort-package01/component-map.json)
 retains mixed build origins. Source e6/integration e612 and assembly b89 remain
 distinct. Build/inspect both return zero; this assembly performs no compilation,
-installation or signing. The exact bundle is uninstalled, unsigned, nonpromotable
-and qualification incomplete, with no custodian attestation. Installed f32 stays
-unchanged; GREEN04 and the namespace case qualify their stated component scopes.
+installation or signing. The canonical bundle remains uninstalled, unsigned,
+nonpromotable and qualification incomplete, with no custodian attestation.
+
+A fresh Debian 13.7 amd64 guest subsequently installed the exact
+`7b596c87…fe71` payload through disposable test manifest `6346a2fb…c780`.
+Campaign `fa45517ec6f644abb5298e441be5ee07` binds the same payload bytes and
+launcher `3ead4e49…fe30`; it passes tuple/signature rejection, interrupted pointer
+publication, explicit recovery/rollback, bootstrap/offline import, tamper
+rejection, live isolation/limit readback, cancellation/reaping, service restart
+without reexecution, six-artifact export and normal poweroff. Fixture job
+`6b8c14cf…bf23`, exact-tuple receipt `59ec6f6d…9395`, installation log
+`0e0e8e57…cac0`, lifecycle receipt `a84bc238…b5f1`, export
+`6e152833…1d8e` and stopped custody `19a02faa…f56` are retained locally.
+This target exercise is test-signed and `release_qualification=false`; it does
+not promote the canonical manifest or supply A13, A14, a release signature,
+durable archive custody or physical proof. Installed historical f32 stays
+unchanged; its negative/fault cases and GREEN04 retain their stated scopes.
 
 The installed Robot is disposable TEST manifest
 `d77a269823b55ba8fe2541be15b3202651489fdd3c784cab69cd242821a2f012`, with payload
@@ -141,7 +155,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | A06/A07/A15 | Unchanged module16 aggregate: 16 actual ARM cases and 17 cases each in plain/lockdep/KASAN/KCSAN, including retained FD, leader exit, genuine PID reuse and concurrent closure. | Reuse exact module/source/config receipt; no blanket diagnostic rebuild. Mocked serdev byte offsets and PM/shutdown callbacks do not prove physical UART or real-platform suspend/poweroff behavior. |
 | A10 | Traffic03 corrected unchanged-capture analysis; lifetime09 gateway replacement/retained-FD, local offline recovery and export. | Preserve earlier failures, uncertain negative reply and the capture-prefix boundary. Zero SAMPLE records are not applied-motion proof. Bind manager11→e36 delta. |
 | A11 | Actual source80→82 gap and hot-journal committed-prefix recovery. | Preserve raw remnant/unknown tail and read/queued/durable distinctions. Metadata-only capture intentionally remains execution-replay-ineligible. |
-| A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
+| A12 | Fresh installation/interruption tests; exact final Server and Robot payload bytes now pass fresh test-signed derivative campaigns, bootstrap and installed lifecycle. The canonical unsigned manifests remain unchanged. | Canonical candidates remain unsigned, uninstalled and unqualified; test keys do not supply release custody. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
 | A13/A14/A16 | Live-policy/missing-credential controls and observer evidence remain separate. The [original A16 comparison](a16-comparison.md) stays FAILED79/80. A separately frozen passcred10 successor passes two excluded pilots and all 80 ABBA trials on six distinct pinned-kernel boots, with 78/78 correlations in every traced run, independent local analysis and stopped custody. | A16 successor software comparison passes, while historical causality remains unproven and the old failure is not relabelled. Live-provider provisioning, independent installer, signing custodian and release identity remain unconfirmed. No physical, UART-drain, WCET or superiority claim follows. |
 
 The preceding capability-denial Server case leaves 25/23 Server rows, 16/21 Robot records and zero

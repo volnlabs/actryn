@@ -9,7 +9,7 @@ tagging, publication and physical qualification remain separate. Live motion sta
 
 - [ ] Preserve referenced evidence, verify restoration, and confirm a durable private archive destination before guest mutation.
 - [x] Resolve A16: preserve FAILED79/80; diagnose and regress the listener-credential race, freeze the passcred10 successor, then pass two excluded correctness pilots and the full 80-trial ABBA campaign.
-- [ ] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify selected installed bytes using reviewed reuse or targeted new cases.
+- [x] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify both selected payload byte sets on fresh exact target guests through disposable test-signed manifests.
 - [ ] Add host CI and obtain actual green checks at the final head; retain privileged target evidence separately.
 - [ ] Complete A13 with broker-only provisioned credentials and A14 with an independent developer.
 - [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
@@ -41,7 +41,7 @@ Every closure must name selected source/configuration/payload identities and imm
 | A09 | Storage stalls cannot block urgent closure; failed durability cannot authorize effects | SQLite contention is not fsync-stall/EIO/media-power-loss proof; current-cohort closure/durability applicability remains explicitOPEN. |
 | A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Fresh final-payload lifecycle01 passes gateway death, old-namespace rejection, local recovery and retained evidence. Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
 | A11 | Evidence origin, gaps and durable frontiers; complete-prefix replay only | No new raw decoding performed; metadata-only histories remain execution-replay-ineligible. |
-| A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | A fresh exact Robot target installs the da6 payload through a test-signed derivative and passes rejection, interruption, recovery, rollback, bootstrap and lifecycle. The canonical unsigned da6 manifest remains unsigned/uninstalled; Server9f remains uninstalled. Runtime Restart=no overrides are not packaged on-failure. |
+| A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Fresh exact Robot and Server targets install the da6 and 9f payload bytes through test-signed derivatives and pass rejection, interruption, recovery, rollback, bootstrap and lifecycle. Both canonical manifests remain unsigned/uninstalled; runtime Restart=no overrides are not packaged on-failure. |
 | A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | Authorized provider provisioning and actual pinned live-model execution are EXTERNAL/NOT_RUN; no credential inspection or reuse. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
@@ -51,7 +51,7 @@ Every closure must name selected source/configuration/payload identities and imm
 
 | Gate | Required behavior | Remaining task |
 |---|---|---|
-| D2-01 | Installed exact tuple, doctor/config validation and rejected incompatible/unapproved inputs | Fresh Robot final-payload install/doctor/bootstrap passes under exact pinned tuple; Server runtime04 association is retained and final assembled9f remains uninstalled. |
+| D2-01 | Installed exact tuple, doctor/config validation and rejected incompatible/unapproved inputs | Fresh Robot and Server final-payload installs/bootstrap pass under exact pinned tuples. Server rejects unsigned, incomplete, wrong-host and wrong-role candidates before managed-path mutation; its canonical 9f manifest remains unsigned/uninstalled. |
 | D2-02 | Identity/attribution before Create; paused Create before Start; fixed OCI options and no agent hooks | Original literal pre-Create gap remains historical. Approved025e contract adopts gatedCreate/FIFO then live enforcement/listeners beforeStart; staged3ead GREEN04 supplies common verification cleanup and preserves admission refusal. Root final mapping still required. |
 | D2-03 | Unavailable host files, credentials and engine sockets; identity/mount/capability/FD isolation plus attributed failures | Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN. |
 | D2-04 | Only approved character devices; existing forbidden-node failed-open control | Existing device/OOM composite is a scoped case proof, not original campaignPASS; launcher17a0-to3ead source/build association remains final-review input. |
@@ -76,7 +76,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: final-head host CI, qualification-packet reconciliation, Server final-payload qualification and external A13/A14/signing inputs. A16 successor software qualification is complete below.
+- In progress: final-head host CI, qualification-packet reconciliation and external A13/A14/signing/archive inputs. A16 successor and both exact final payload software campaigns are complete below.
 
 ### Checkpoint 1: host CI and evidence preservation
 
@@ -189,3 +189,43 @@ Every closure must name selected source/configuration/payload identities and imm
   local and ignored by Git, `release_qualification=false`, with no physical,
   UART-drain, WCET or superiority claim. It does not close A13, A14, signing,
   durable archive custody or whole-release qualification.
+
+### Checkpoint 5: fresh final Server target
+
+- The exact final Server manifest/payload remain
+  `9f749ca3…a90f` / `7b596c87…fe71` (70,666,240 bytes). Disposable fixture job
+  `6b8c14cf…bf23` rebuilds that payload byte-identically and adds only test
+  qualification metadata/signatures; it does not sign or install the canonical
+  incomplete manifest.
+- A new copy-on-write guest at `.cache/qemu/install-server-final01` uses the
+  independently rehashed Debian 13.7 amd64 base `d4721b56…345d`, kernel
+  `6.12.111+deb13-amd64`, QEMU 11.1.1 and all 14 exact package pins. The initial
+  read-only preflight correctly found the base image lacked containerd, runc and
+  Python venv support. That failure is preserved; one explicit pre-installation
+  provisioning step installed the pinned packages, after which the same
+  boot/machine identity passed and still contained no Actryn state.
+- Campaign `fa45517ec6f644abb5298e441be5ee07` passes unsigned, incomplete,
+  wrong-host and wrong-role rejection; stage/activate; injected exit after
+  durable pointer publication; explicit recovery and rollback; sentinel
+  preservation; and inhibited preflight/resume rejection. No service starts and
+  no authority is issued during installation.
+- Explicit bootstrap verifies installed launcher `3ead4e49…fe30`, imports the
+  shipped offline OCI artifact and clears the installation gate without
+  auto-start. The unchanged reviewed lifecycle then rejects a tampered artifact,
+  observes uid/gid 65532, zero capabilities, no-new-privileges, seccomp mode 2,
+  distinct PID/mount/network/IPC/UTS/cgroup namespaces, zero IPv4 routes,
+  read-only root, device-policy programs and exact CPU/memory/PID/I/O limits.
+  The fixed skill returns one server-attested offline proposal; both attempts
+  cancel and reap with loss-free observer summaries and removed cgroups.
+- A complete service stop/start preserves byte-equivalent Launcher/Broker rows,
+  reaped outcomes and closed publication without agent reexecution. Export
+  `6e152833…1d8e` verifies all six evidence artifacts and remains
+  execution-replay-ineligible. Normal poweroff and stopped custody
+  `19a02faa…f56` record the VM inactive/PID0/NRestarts0, free port, no repository
+  actor, unchanged base pin and overlay `2a716a43…a5d5`.
+- This closes exact-final-payload Server installation, positive isolation,
+  cancellation, restart and export applicability. Broader negative/fault rows
+  still rely on their explicitly mapped component/source evidence. The campaign
+  is local, test-signed and `release_qualification=false`; it does not supply an
+  independent installer, live provider credential, release custodian signature,
+  durable off-host archive or physical qualification.
