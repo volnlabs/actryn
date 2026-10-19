@@ -9,6 +9,11 @@ The approved scope remains [the full plan](../superpowers/plans/2026-10-16-actry
 [Progress](progress.md) and [acceptance gaps](acceptance-gaps.md) retain the evidence.
 Earlier checkpoints and failed attempts remain preserved.
 
+Latest continuation: [release completion checklist](release-completion.md). The
+2026-10-19 completion work adds host CI and local evidence-preservation checks;
+release gates and external ownership remain open. Read its execution ledger before
+continuing the historical checkpoints below.
+
 ## Repository and execution state
 
 - Integration branch: `feat/v0.0.1`; Server/Robot implementation source remains

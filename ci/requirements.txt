@@ -1,0 +1,2 @@
+# Same universal wheel selected by the Server release candidate.
+protobuf==7.36.1 --hash=sha256:7d951e46b3f963d6c264c367c437921de9d5aedd9c3f9612b9077736b4e3ad5c

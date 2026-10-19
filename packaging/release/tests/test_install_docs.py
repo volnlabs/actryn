@@ -27,7 +27,10 @@ class InstallDocumentationTests(unittest.TestCase):
                                     text=True, capture_output=True, timeout=5)
             self.assertEqual(result.returncode, 0, result.stderr)
             embedded.extend(re.findall(r"<<'([A-Z_]+)'\n(.*?)^\1$", script, re.M | re.S))
-        self.assertEqual({name for name, _ in embedded}, {'CONFIG_PY', 'LAYOUT_PY'})
+        self.assertEqual({name for name, _ in embedded}, {
+            'CONFIG_PY', 'LAYOUT_PY', 'WAIT_PY', 'UNIT_WAIT_PY',
+            'PEER_CONFIG_PY', 'ROBOT_CONFIG_PY',
+        })
         for name, source in embedded:
             ast.parse(source, filename=name)
 
