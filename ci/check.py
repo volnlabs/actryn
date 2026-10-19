@@ -24,7 +24,8 @@ SUITES = {
     'python': [
         [sys.executable, '-B', '-m', 'unittest', 'discover', '-s', path, '-p', 'test_*.py']
         for path in PYTHON_DIRS
-    ] + [[sys.executable, '-B', 'ci/qualification.py']],
+    ] + [[sys.executable, '-B', 'ci/qualification.py'],
+         [sys.executable, '-B', 'ci/solo_qualification.py']],
     'kernel-host': [
         ['make', '-C', 'kernel', 'test'],
         [sys.executable, '-B', '-m', 'unittest', 'discover', '-s', 'kernel/tests', '-p', '*_test.py'],
@@ -69,4 +70,8 @@ if __name__ == '__main__':
     parser.add_argument('suite', choices=SUITES)
     parser.add_argument('--output', required=True, type=Path, help='new directory; never overwrite a run')
     args = parser.parse_args()
-    raise SystemExit(run(SUITES[args.suite], args.output))
+    commands = list(SUITES[args.suite])
+    if args.suite == 'rust':
+        commands.append([sys.executable, '-B', 'tests/storage/qualify.py',
+                         '--output', str(args.output.resolve() / 'sqlite-sync')])
+    raise SystemExit(run(commands, args.output))

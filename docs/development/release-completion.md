@@ -5,23 +5,54 @@ Approved continuation, 2026-10-19. Integration: `feat/v0.0.1`; existing PR #1.
 Goal: qualified, signed software-preview candidates and a review-ready PR. Merge,
 tagging, publication and physical qualification remain separate. Live motion stays inhibited.
 
+## Approved solo amendment, 2026-10-19
+
+The [solo plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) and
+[maintainer handoff](solo-preview-handoff.md) govern current work. Utkarsh Maurya
+owns credentials, release signing, external-drive evidence retention and a manual
+fresh-install rehearsal. Original independent A14 is DEFERRED; technical gates
+are unchanged. Earlier ledger entries below remain historical observations.
+The [successor packet](solo-preview-qualification.json) records current readiness
+without modifying the historical incomplete packet.
+
 ## Execution order
 
 - [ ] Preserve referenced evidence, verify restoration, and confirm a durable private archive destination before guest mutation.
 - [x] Resolve A16: preserve FAILED79/80; diagnose and regress the listener-credential race, freeze the passcred10 successor, then pass two excluded correctness pilots and the full 80-trial ABBA campaign.
 - [x] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify both selected payload byte sets on fresh exact target guests through disposable test-signed manifests.
 - [x] Add host CI and obtain actual green push/PR checks; retain privileged target evidence separately and require the exact review head to remain green.
-- [ ] Complete A13 with broker-only provisioned credentials and A14 with an independent developer.
+- [ ] Complete A13 with broker-only credentials and the separate maintainer installation rehearsal; original independent A14 is DEFERRED.
 - [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
+
+## Solo implementation checkpoint
+
+- Successor has 30 bounded software PASS associations, original A14 DEFERRED and
+  five required gates open: A12 packaged restart behavior, A13 live execution,
+  maintainer installation, key recovery and external archive restoration.
+- Local successor validation verifies 142 small receipt references, all 107
+  historical receipts, exact manifest projections and both payload archive hashes.
+  This is integrity/readiness checking, not maintainer approval or release signing.
+- A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
+  robot-intent sources with earlier real-kernel SQLite contention. Host test
+  authority and real-kernel evidence remain distinct; no physical-media claim.
+- Explicit combined live harness mode permits one provider call and preserves
+  original observation freshness, accounting, lineage and kernel completion checks.
+  Host regression passed; no provider call has run in this continuation.
+- Signing/backup/manual installation instructions are ready in the handoff.
+  No release identity or credential was created/read, no drive was selected or
+  formatted, and no personal/independent installation report was manufactured.
+- Final signed-distribution verification is a separate post-attestation receipt,
+  so a frozen qualification hash does not depend on signatures of itself.
 
 ## External inputs
 
 | Input | Owner / location | State |
 |---|---|---|
-| Model credential | Provisioning owner unconfirmed; `/etc/actryn/credentials/openai-api-key` via systemd server-only LoadCredential | BLOCKED_EXTERNAL |
-| Independent installer | Unconfirmed; another developer using shipped instructions on fresh supported guests | BLOCKED_EXTERNAL |
-| Signing custodian | Unconfirmed; externally managed Ed25519 identity and trusted SPKI fingerprint | BLOCKED_EXTERNAL |
-| Durable private archive | Destination and retention owner unconfirmed; no raw upload authorized to an identified destination | BLOCKED_EXTERNAL |
+| Model credential | Utkarsh Maurya; `/etc/actryn/credentials/openai-api-key` via systemd server-only LoadCredential | Provisioning pending |
+| Independent installer | Unassigned until another developer joins; original A14 | DEFERRED, not a solo-release gate |
+| Maintainer rehearsal | Utkarsh Maurya personally follows shipped instructions on fresh guests | NOT_RUN, required |
+| Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | Key establishment/recovery pending |
+| Durable private archive | Utkarsh Maurya; encrypted archive on designated external drive | Drive destination and restore pending |
 
 ## Acceptance work
 

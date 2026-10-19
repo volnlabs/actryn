@@ -758,3 +758,104 @@ fn allocated_cancel_proof_never_submits_and_control_exhaustion_never_claims_dura
         assert!(durable.key_cancelled_durable());
     }
 }
+
+#[test]
+#[ignore = "requires isolated tests/storage/qualify.py sync interceptor"]
+fn actual_sqlite_sync_fault_preserves_urgent_closure_and_restart_fences() {
+    let root = PathBuf::from(std::env::var_os("ACTRYN_SYNC_ROOT").expect("sync fixture root"));
+    let mode = std::env::var("ACTRYN_SYNC_MODE").expect("sync fixture mode");
+    assert!(root.is_absolute() && root.is_dir());
+    assert!(matches!(mode.as_str(), "stall" | "eio"));
+    let path = root.join("intent.sqlite");
+    assert!(!path.exists());
+    let (registry, mut writer, ns, kernel) = ready(&path, Limits::default());
+    if mode == "eio" {
+        registry.propose(&ns, [9; 32], intent()).unwrap();
+        writer.flush().unwrap();
+        assert_eq!(kernel.count("submit"), 1);
+    }
+    let prior_submits = kernel.count("submit");
+    let pending = registry.propose(&ns, [1; 32], intent()).unwrap();
+    fs::write(root.join("armed"), b"one sync boundary").unwrap();
+    let storage = thread::spawn(move || {
+        let result = writer.flush();
+        (writer, result)
+    });
+    let deadline = std::time::Instant::now() + Duration::from_secs(3);
+    while !root.join("sync-entered").exists() {
+        assert!(
+            !storage.is_finished(),
+            "writer completed without intercepted sync"
+        );
+        assert!(
+            std::time::Instant::now() < deadline,
+            "sync interception timeout"
+        );
+        thread::sleep(Duration::from_millis(5));
+    }
+    let (tx, rx) = std::sync::mpsc::channel();
+    let urgent = registry.clone();
+    let urgent_ns = ns.clone();
+    let cancel = thread::spawn(move || tx.send(urgent.cancel(&urgent_ns, [1; 32])).unwrap());
+    let cancelled = rx
+        .recv_timeout(Duration::from_secs(1))
+        .expect("urgent cancellation waited for SQLite sync")
+        .unwrap();
+    cancel.join().unwrap();
+    assert_eq!(cancelled.operation, pending.operation);
+    assert_eq!(cancelled.phase, Phase::CancelPending);
+    assert!(!cancelled.key_cancelled_durable());
+    assert!(matches!(cancelled.closure, Closure::LocallyClosed { .. }));
+    assert_eq!(kernel.count("close"), 1);
+    assert_eq!(kernel.count("submit"), prior_submits);
+    assert!(!storage.is_finished());
+    fs::write(
+        root.join("closure-before-release"),
+        b"close=1; no new submit; cancellation not durable\n",
+    )
+    .unwrap();
+    fs::write(root.join("release"), b"release intercepted sync").unwrap();
+    let (writer, result) = storage.join().unwrap();
+    let snapshot = registry.query(ns.id(), [1; 32]).unwrap();
+    if mode == "eio" {
+        assert!(
+            matches!(result, Err(Error::Sqlite(rusqlite::Error::SqliteFailure(error, _)))
+            if error.extended_code == rusqlite::ffi::SQLITE_IOERR_FSYNC),
+            "{result:?}"
+        );
+        assert!(snapshot.persistence_failed);
+        assert!(!snapshot.key_cancelled_durable());
+        assert!(registry.health().revoke_required);
+        assert!(!registry.namespace_ready(&ns));
+        assert!(registry.propose(&ns, [2; 32], intent()).is_err());
+        assert!(kernel.count("close") >= 2);
+    } else {
+        result.unwrap();
+        assert!(snapshot.key_cancelled_durable());
+    }
+    assert_eq!(kernel.count("submit"), prior_submits);
+    drop(writer);
+    drop(registry);
+    drop(ns);
+    let restarted_kernel = Kernel::new(2);
+    let (restarted, mut writer) =
+        Registry::open(&path, [2; 16], Limits::default(), restarted_kernel.clone()).unwrap();
+    let old = restarted.lookup_namespace([3; 16]).unwrap();
+    assert!(!restarted.namespace_ready(&old));
+    if mode == "eio" {
+        let unknown = restarted.query(old.id(), [9; 32]).unwrap();
+        assert_eq!(unknown.phase, Phase::OutcomeUnknown);
+        assert!(!unknown.key_cancelled_durable());
+        assert_eq!(restarted.propose(&old, [9; 32], intent()).unwrap(), unknown);
+    } else {
+        assert!(restarted
+            .query(old.id(), [1; 32])
+            .unwrap()
+            .key_cancelled_durable());
+    }
+    assert!(restarted.propose(&old, [2; 32], intent()).is_err());
+    writer.flush().unwrap();
+    assert_eq!(restarted_kernel.count("allocate"), 0);
+    assert_eq!(restarted_kernel.count("submit"), 0);
+    println!("PASS actual SQLite {mode}: urgent close before sync release; no new submit; restart fenced");
+}

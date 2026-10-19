@@ -1,5 +1,32 @@
 # Combined offline acceptance
 
+## Explicit live variant
+
+Offline remains the default. Add `--allow-one-live-provider-call` and supply the
+separately imported live OCI digest to run **only** the combined case once.
+It skips the default prestart-negative and unbound-agent cases, so this invocation
+authorizes at most one provider call. Run those cases through the offline campaign.
+The release's separate standalone live test brings the campaign budget to two;
+there are no automatic retries, even after an unknown or stale outcome.
+
+This variant requires operator-provisioned server-only `openai-api-key` in addition
+to `robot-client-key`. Preflight reads credential metadata/ACL only. The broker
+reads the key and acquires the actual simulated Robot observation before inference.
+The harness checks `live-preview-1`, pinned `gpt-5.4-mini-2026-03-17`, finite typed
+targets, actual observed lineage, bounded token accounting and the same kernel
+natural-completion/reconciliation and final evidence checks as offline.
+It accepts no fixture model substitution. The 40-second harness output wait
+allows the existing 30-second broker transport outcome to be recorded; it does
+not change the one-second Robot observation lifetime or the existing grant.
+
+A stale/failed/unknown response retains a failure record and existing identities;
+it does not count as positive A13 execution. Inspect and explicitly close that
+campaign before any new one. Do not refresh an observation or widen freshness to
+make inference fit. Host regression success is preparation only; no live call is
+implied. See the [solo handoff](../../docs/development/solo-preview-handoff.md).
+
+## Offline campaign
+
 `guest_robot_acceptance.py` runs the installed offline OCI agent through the real
 server broker, authenticated Robot manager, Linux authority module and simulated
 controller fixture. It is opt-in and accepts only the pinned Debian x86/ARM guests.

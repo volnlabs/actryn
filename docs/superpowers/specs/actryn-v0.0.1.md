@@ -2,6 +2,12 @@
 
 Approved 2026-10-16. Status: implementation in progress; not a qualified release.
 
+Amended 2026-10-19 by the sole maintainer: use the
+[solo release plan](../plans/2026-10-19-actryn-solo-preview.md). Utkarsh Maurya owns
+release review/signing, provider credentials, evidence retention and the manual
+fresh-install rehearsal. Independent A14 is deferred until another developer is
+available. This does not relax any technical acceptance or authority contract.
+
 ## Product boundary
 
 An external developer installs a supported Linux environment, prepares one isolated
@@ -63,14 +69,23 @@ capabilities, stale identities and mismatched target tuples reject.
 
 ## Promotion and limits
 
-Software D0/D1, D2/D3 and another developer's fresh software installation are
-release requirements. Physical endpoint comparison/selection, qualified firmware,
+Software D0/D1, D2/D3 and the maintainer's personal fresh software installation
+and recovery rehearsal are release requirements. Original independent A14 stays
+DEFERRED and must not be reported PASS. Physical endpoint comparison/selection, qualified firmware,
 physical D4 and robot-deployment D5 remain open; no physical target artifact ships.
-Required signatures, live credentials and the independent operator are external
-release inputs, not reasons to skip offline implementation/verification.
+Required signatures, live credentials, off-host evidence restoration and the
+human maintainer's rehearsal remain release inputs. The same person may own
+these duties. A dedicated encrypted release key may be established for this first
+release; disposable fixture keys are never release identities.
+
+Release claim, only after the required gates pass: **Qualified by the sole
+maintainer; independent installation and physical qualification have not been
+performed.** Use the same claim in release notes and the qualification bundle.
 
 Server may promote independently after its own acceptance; the combined preview
 requires the actual kernel/backend path. Build/test results do not imply publication.
 No remote push, protected/default-branch merge or release publication is included
-without separate authorization. Goal completion requires every acceptance gate,
-including real target tests and independent installation evidence.
+without separate authorization. Candidate completion requires every technical
+acceptance gate, real target tests, the maintainer rehearsal, reviewed signatures
+and tested evidence restoration. Independent installation is a later additive
+qualification record for the exact tested release, never a retroactive claim.
