@@ -48,7 +48,12 @@ not physical UART, suspend or poweroff qualification.
   Later Robot clock-checkpoint/mapping warnings are retained separately and are
   not assigned as the earlier rejection cause. Zero outputs, retained uncertainty,
   explicit local recovery, evidence export and stopped custody are preserved;
-  A13 remains FAIL.
+  A13 remains FAIL in this predecessor packet. A separately authorized successor
+  call later passed the corrected live operation and cleanup, while exposing the
+  predecessor packaged CLI schema mismatch. The exact two-binary successor then
+  passed fresh installation and offline lifecycle qualification without another
+  provider call. [Its bounded composition receipt](live-observation-qualification.json)
+  requires a successor subject rebind; it does not rewrite this packet.
 - D2-01 uses exact final installation/bootstrap/tuple controls. Genuine signed
   distribution remains an open later check.
 - D2-02 uses approved before-Start ordering, runtime association04 and GREEN04.
@@ -122,9 +127,11 @@ media failure and physical power-loss durability are not established.
 
 ## Still required
 
-A12 requires packaged Restart=on-failure behavior; completed final campaigns used
-Restart=no overrides. A13 live and the maintainer rehearsal have not run. Key
-recovery and external archive restoration also remain pending. A14 is deferred
-by scope amendment, not passed by this review. Actual release-key-signed bundle
-verification is a separate post-sign distribution receipt, avoiding a circular
-precondition in the packet that must be frozen before signing.
+A12 packaged restart and the corrected A13 successor behavior now have separate
+additive evidence. This source review still selects the predecessor Server payload,
+so the successor packet rebind, maintainer rehearsal and key recovery remain.
+External archive restoration passed for the earlier evidence set and needs a final
+successor refresh. A14 is deferred by scope amendment, not passed by this review.
+Actual release-key-signed bundle verification remains a separate post-sign
+distribution receipt, avoiding a circular precondition in the packet that must be
+frozen before signing.

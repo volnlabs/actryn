@@ -61,9 +61,21 @@ fn delegation_replies_cannot_substitute_attempt_namespace_or_agent_key() {
         "handle":{"attempt":attempt,"namespace":namespace,"key":"aa".repeat(32)},
         "robot_epoch":"55".repeat(16),"phase":"reserved","cancellation_requested":false,
         "outstanding_debit":true,"deadline_ms":1000,"observation":null,
-        "observation_digest":null,"parent_digest":null,"proposal_digest":null,"last_remote":null,
+        "observation_digest":null,
+        "execution_observation":{"id":2,"acquired_earliest_ns":10,"acquired_latest_ns":11,
+        "valid_until_ns":20,"controller_ns":12,"left_ticks":0,"right_ticks":0,
+        "simulated":true,"context_revision":1,"received_ms":1},
+        "execution_observation_digest":format!("sha256:{}", "cc".repeat(32)),
+        "parent_digest":null,"proposal_digest":null,"last_remote":null,
         "historical_response":false,"remote_unavailable":false}});
     let response: Response = serde_json::from_value(value.clone()).unwrap();
+    match &response {
+        Response::RobotResult { request } => {
+            assert_eq!(request.execution_observation.as_ref().unwrap().id, 2);
+            assert!(request.execution_observation_digest.is_some());
+        }
+        _ => unreachable!(),
+    }
     assert!(validate_server_response(&query, &response).is_ok());
     for (field, replacement) in [("attempt", "bb".repeat(16)), ("key", "aa".repeat(31))] {
         let mut wrong = value.clone();

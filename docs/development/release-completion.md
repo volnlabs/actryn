@@ -23,14 +23,17 @@ without modifying the historical incomplete packet.
 - [x] Add host CI and obtain actual green push/PR checks; retain privileged target evidence separately and require the exact review head to remain green.
 - [x] Qualify packaged guest service restart behavior on isolated overlays of both exact final installations.
 - [x] Execute the frozen two-call A13 campaign once; retain its standalone PASS, combined stale-observation FAIL, uncertain debit, recovery and stopped custody without replay.
-- [ ] Complete the separate maintainer installation rehearsal; original independent A14 is DEFERRED. A13 needs a reviewed correction and new qualification budget before another live attempt.
+- [x] Qualify the reviewed execution-observation correction under one renewed call, close/export the consumed attempt, and install the two-binary successor on a fresh exact target.
+- [ ] Complete the separate maintainer installation rehearsal; original independent A14 is DEFERRED.
 - [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
 
 ## Solo implementation checkpoint
 
-- Successor has 32 bounded software PASS associations, original A14 DEFERRED and
-  three required gates open: A13 live execution, maintainer installation and key
-  recovery.
+- The original successor packet still has 32 bounded software PASS associations,
+  original A14 DEFERRED and three recorded required gates open. New A13 evidence
+  closes the live software behavior by bounded composition, but the packet must
+  be rebound to the two-binary Server successor before attestation. Maintainer
+  installation and key recovery remain open.
 - Local successor validation verifies 164 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
   This is integrity/readiness checking, not maintainer approval or release signing.
@@ -45,6 +48,16 @@ without modifying the historical incomplete packet.
   occurred during retained-state inspection and are not assigned as the rejection
   cause. Local recovery passed while the uncertain debit remained charged, and
   both guests plus the fixture are stopped.
+- One separately authorized A13-02 call consumed 27 tokens. The corrected Server
+  captured observation 68 as model lineage, revalidated newer observation 91,
+  executed operation 1 to `TargetReached`, and reconciled it with zero output.
+  The installed predecessor CLI then rejected the newly added response fields.
+  A current same-source CLI inspected, closed and exported the already-consumed
+  attempt without another provider call. The exact successor package changes
+  only `bin/actryn` and `bin/actryn-serverd`; it passes a fresh exact-target
+  installation, offline lifecycle, restart/export and stopped custody. The
+  tracked [qualification receipt](live-observation-qualification.json) preserves
+  the composition boundary and does not claim a second live call.
 - External-drive evidence custody passed on the dedicated filesystem UUID
   `0347-DCDB`: the encrypted 234,789,052-byte copy hash-matched, was decrypted
   from the drive, and all 3,474 inventoried files plus the qualification packet
@@ -59,7 +72,7 @@ without modifying the historical incomplete packet.
 
 | Input | Owner / location | State |
 |---|---|---|
-| Model credential | Utkarsh Maurya; `/etc/actryn/credentials/openai-api-key` via systemd server-only LoadCredential | Provisioned only in the stopped disposable Server overlay; two-call budget consumed |
+| Model credential | Utkarsh Maurya; `/etc/actryn/credentials/openai-api-key` via systemd server-only LoadCredential | A13-02 used one separately authorized call; credential remained confined to the stopped disposable Server overlay |
 | Independent installer | Unassigned until another developer joins; original A14 | DEFERRED, not a solo-release gate |
 | Maintainer rehearsal | Utkarsh Maurya personally follows shipped instructions on fresh guests | NOT_RUN, required |
 | Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | Key establishment/recovery pending |
@@ -84,7 +97,7 @@ Every closure must name selected source/configuration/payload identities and imm
 | A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Fresh final-payload lifecycle01 passes gateway death, old-namespace rejection, local recovery and retained evidence. Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
 | A11 | Evidence origin, gaps and durable frontiers; complete-prefix replay only | No new raw decoding performed; metadata-only histories remain execution-replay-ineligible. |
 | A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Fresh exact Robot and Server targets install the da6 and 9f payload bytes through test-signed derivatives and pass rejection, interruption, recovery, rollback, bootstrap and lifecycle. Disposable overlays confirm all five packaged guest services retain one-second on-failure restart behavior and restart exactly once after controlled failure without creating Server work or widening Robot authority. Host VM wrappers use Restart=no; both canonical manifests remain unsigned/uninstalled. |
-| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | FAIL. Standalone live proposal passed. The combined call consumed 33 tokens, but its original one-second observation expired during inference and no operation was allocated. Later clock warnings are retained as separate post-failure facts. Recovery preserved the uncertain debit; no replay is allowed under the exhausted two-call budget. |
+| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | PASS by bounded composition for the corrected successor: one renewed call consumed 27 tokens, revalidated observation 68 with newer observation 91, completed/reconciled kernel operation 1 and closed/exported without retry. The predecessor packaged CLI schema failure is preserved. The exact two-binary successor separately passes fresh install/lifecycle/restart/export; it did not consume another provider call. Packet rebinding remains before attestation. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
 | A16 | Latency/overhead/loss and competent userspace comparison without superiority threshold | The original FAILED79/80 result remains immutable and its exact BIND cause remains unproven. A separately frozen passcred10 successor passes two excluded pilots and all 80 comparison trials on six distinct pinned-kernel boots, with 78/78 matches in every traced run and zero recorded loss/discontinuities. Final packet binding remains; no superiority, WCET or physical claim follows. |
@@ -118,7 +131,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: reviewed A13 execution-observation revalidation, maintainer rehearsal and signing-key recovery. A14 remains deferred; A12 packaged restart, A16 successor, both exact final payload software campaigns and the earlier external archive restoration are complete below. The archive predates A12/A13 and needs a final evidence refresh.
+- In progress: successor-packet rebinding, maintainer rehearsal and signing-key recovery. A14 remains deferred; A12 packaged restart, corrected A13 software behavior, A16 successor, both earlier exact payload campaigns and the external archive restoration are complete below. The archive predates the corrected A13 successor and needs a final evidence refresh.
 
 ### Checkpoint 1: host CI and evidence preservation
 
@@ -300,3 +313,40 @@ Every closure must name selected source/configuration/payload identities and imm
   restart and failed-precondition records. This closes A12 for the test-signed
   mechanical campaign only. Final release-key-signed distribution verification
   remains post-attestation, and no physical qualification follows.
+
+### Checkpoint 7: corrected live observation and package compatibility
+
+- Clean source `a4ccbc4` retains the original model-input observation and captures
+  exactly one newer execution observation after inference. It rejects regressed
+  identity/time or changed encoder/context values before dispatch. Host checks and
+  the exact corrected Server build passed before the renewed live call.
+- A13-02 consumed its sole authorized call with no retry. The pinned model returned
+  a bounded 500 ms zero-delta proposal using observation 68. Execution observation
+  91 matched the model context, kernel operation 1 reached `TargetReached`, and
+  Robot reconciliation removed the outstanding debit. The old installed CLI then
+  rejected the added `execution_observation` field; that transport failure remains
+  retained and is not relabelled as a clean same-package harness pass.
+- The current same-source CLI performed read-only inspection and one explicit
+  cleanup path only. The attempt is reaped, its publication is closed, the cgroup
+  is absent, both stores have zero pending/open/outstanding rows, observer loss is
+  zero, Robot recovery is ready, and Server plus Robot evidence exports passed.
+  Cleanup made zero provider calls. Both guests and the fixture then stopped with
+  free ports and hashed overlays.
+- The successor unsigned Server candidate changes exactly `bin/actryn` and
+  `bin/actryn-serverd`. Manifest `cf886513…9f87` binds payload
+  `45829a38…3e82`; the other 25 entries retain their previous bytes, modes and
+  licenses. CLI tests, clippy, section preservation and exact target-symbol checks
+  pass. The candidate remains incomplete, unsigned and non-promotable.
+- A fresh Debian 13.7 amd64 guest on kernel `6.12.111+deb13-amd64` passed all 14
+  package pins, negative installer cases, durable-pointer interruption/recovery,
+  rollback, bootstrap, two isolated offline attempts, service restart, state
+  comparison, evidence export, normal poweroff and stopped custody. The fresh
+  run executed both corrected package binaries but did not repeat the provider
+  call. This bounded composition closes the software behavior while preserving
+  the exact same-run package limitation.
+- Tracked receipt `live-observation-qualification.json` binds the raw local
+  evidence and limitations. The existing solo packet still selects the predecessor
+  Server payload, so A13 cannot be marked PASS in that packet until a successor
+  subject/association review is committed. Maintainer rehearsal, dedicated-key
+  recovery, genuine signing, final archive refresh and physical qualification
+  remain separate.

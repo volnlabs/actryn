@@ -1,0 +1,204 @@
+{
+  "composition_limits": [
+    "The live operation used the corrected packaged serverd but exposed the predecessor packaged CLI schema mismatch after reconciliation.",
+    "A current CLI built from the same clean source revision inspected, closed and exported that live attempt without another provider call.",
+    "The exact successor package containing both corrected binaries passed a separate fresh exact-target install and lifecycle; it did not make another live provider call.",
+    "This is software evidence only. The canonical candidate is unsigned and incomplete; physical motion remains inhibited."
+  ],
+  "date": "2026-10-19",
+  "evidence": {
+    "agent_logs": {
+      "bytes": 1238,
+      "path": "artifacts/solo-a13-live02/combined/combined-agent-logs.json",
+      "sha256": "13da5489772e04e08664d043bb331e17e01f72d9c56efe44dd4b24b7d0fbb09d"
+    },
+    "bootstrap": {
+      "bytes": 198,
+      "path": "artifacts/install-server-live-observation-bootstrap02/result.json",
+      "sha256": "494fb9ca8aec18983cee069b344ee6166591ee3544f83b28f23f281c2a6b45f8"
+    },
+    "bootstrap_log": {
+      "bytes": 2842,
+      "path": "artifacts/install-server-live-observation-bootstrap02/stdout.jsonl",
+      "sha256": "9a27a65e449af8c7fb636474d81da4110a9a2a7c4b83e512b36e9a5d2ab5aa81"
+    },
+    "call_authorization": {
+      "bytes": 228,
+      "path": "artifacts/solo-a13-live02/call-authorization.json",
+      "sha256": "fdc8214bc532ddee712e2da802ad812678bbda7c898505b0167b936d88d0d965"
+    },
+    "cleanup": {
+      "bytes": 895,
+      "path": "artifacts/solo-a13-live02/cleanup02/result.json",
+      "sha256": "658d5533940af90927de642bde802c5aa87242d446def2abbdf6f812df6b27cf"
+    },
+    "cli_build": {
+      "bytes": 858,
+      "path": "artifacts/cli-live-observation-build01/provenance.json",
+      "sha256": "bf372d2d99a8d40b8c599f094687efe6f3708f03d2e9cba219f4a6a5cff67084"
+    },
+    "cli_clippy": {
+      "bytes": 56,
+      "path": "artifacts/cli-live-observation-build01/cli-clippy-result.json",
+      "sha256": "c67a02dda49ef407c8d13aabe704ebaf59551e585edc513c3b78b0081cdc1e82"
+    },
+    "cli_tests": {
+      "bytes": 57,
+      "path": "artifacts/cli-live-observation-build01/cli-tests-result.json",
+      "sha256": "7c579451fa800e0c43510b1757ea0b4988036133d0fd7098aa6bcb8d03351f48"
+    },
+    "exported_evidence": {
+      "bytes": 4973,
+      "path": "artifacts/install-server-live-observation-restart-export02/offline-export.json",
+      "sha256": "8a24805638fb9296c8cdace721d97250738f384fbc908e3d09833cd7cec59b1e"
+    },
+    "fixture": {
+      "bytes": 3083,
+      "path": "artifacts/install-server-live-observation-fixture02/job.json",
+      "sha256": "f497dcf95e981ef5cc067dc318886ddd09bd6147a29a54075c09f46f7cde085a"
+    },
+    "fresh_install_campaign": {
+      "bytes": 455,
+      "path": "artifacts/install-server-live-observation-install02/campaign.json",
+      "sha256": "aa2503d8a1f6d115315bdabd0f1cfdc9b2750e1971ff9f7c5ac88697ac928ea1"
+    },
+    "fresh_install_log": {
+      "bytes": 4451,
+      "path": "artifacts/install-server-live-observation-install02/guest.stdout.jsonl",
+      "sha256": "9748903a9bd57fd23e1bba858e0f32b4894c21a3494f12ee1c26397bee43754d"
+    },
+    "harness_failure": {
+      "bytes": 2105,
+      "path": "artifacts/solo-a13-live02/combined/failure.json",
+      "sha256": "654e3039c1e6ad3d8cd7df7cf48b03b1e1c64eb76831e536992ae1abacd61305"
+    },
+    "kernel_reconciliation": {
+      "bytes": 5060,
+      "path": "artifacts/solo-a13-live02/combined/combined-reconcile-reply.json",
+      "sha256": "70b625cadc88083649ce1d993c33b6cea5d2478d9a5e70069cafa6a475c33393"
+    },
+    "lifecycle": {
+      "bytes": 227,
+      "path": "artifacts/install-server-live-observation-lifecycle02/result.json",
+      "sha256": "a84bc2382052b38aa70fa9018831999b060408ffd5c4d53caa7b4e87d21cb5f1"
+    },
+    "lifecycle_log": {
+      "bytes": 6170,
+      "path": "artifacts/install-server-live-observation-lifecycle02/stdout.jsonl",
+      "sha256": "d374826bf603c7c5d524992bfd15238333839cb1124807494bd474227b692b2b"
+    },
+    "live_stopped_custody": {
+      "bytes": 1176,
+      "path": "artifacts/solo-a13-live02/stopped-custody01/result.json",
+      "sha256": "fea0784ea4a61154e7ac6de26804c1cdbbc3e3beb1e387f613b23276fb2df404"
+    },
+    "live_transport": {
+      "bytes": 144,
+      "path": "artifacts/solo-a13-live02/combined-control/transport.json",
+      "sha256": "e02707e4c4ea3791aa95d7d6877e697638b84035707535f25b124f236edeecda"
+    },
+    "original_standalone": {
+      "bytes": 1031,
+      "path": "artifacts/solo-a13-live01/standalone/receipt.json",
+      "sha256": "accede1ce4b0da59d539462a2a0d810f08a549c0be8bcc4fff9345ad3cd8d781"
+    },
+    "package": {
+      "bytes": 1619,
+      "path": "artifacts/server-live-observation-package03/result.json",
+      "sha256": "9da3ce1ef110ca8cff5716b3556f72d17d9a71691d0d4837d8f1cf04408facc6"
+    },
+    "package_manifest": {
+      "bytes": 11505,
+      "path": "artifacts/server-live-observation-package03/unsigned/manifest.json",
+      "sha256": "cf886513035eba9c38eab3319c9108bdd5a3f6f1c5a0fc424e686e63db839f87"
+    },
+    "package_payload": {
+      "bytes": 70789120,
+      "path": "artifacts/server-live-observation-package03/unsigned/payload.tar",
+      "sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+    },
+    "package_stopped_custody": {
+      "bytes": 3211,
+      "path": "artifacts/install-server-live-observation-custody02/result.json",
+      "sha256": "66ae2a9233dd58e2de7c722f072dfc20e5213941434dde0119f447bb1df4ed43"
+    },
+    "post_call_inspection": {
+      "bytes": 15586,
+      "path": "artifacts/solo-a13-live02/post-call-inspection01/result.json",
+      "sha256": "29a2986c61f985945d09b66aeb7ea7b6df41c04f66fecf485b44fe941f6f92a1"
+    },
+    "restart_export": {
+      "bytes": 227,
+      "path": "artifacts/install-server-live-observation-restart-export02/result.json",
+      "sha256": "21a6451770cf149532c013982e4653ecabe5c7b84d5615cd95b0326625e9e86e"
+    },
+    "robot_export": {
+      "bytes": 337,
+      "path": "artifacts/solo-a13-live02/cleanup02/robot-export-report.json",
+      "sha256": "ee096dc59e313a18b9fb619485215f3a021b032a75b04ca7bb94d05d0394223e"
+    },
+    "server_build": {
+      "bytes": 862,
+      "path": "artifacts/server-live-observation-build01/provenance.json",
+      "sha256": "5c4d7db2affedacb9874d113092b9afcb8ac0c1b6312940fb7d6cceba1c24c16"
+    },
+    "server_evidence": {
+      "bytes": 10066,
+      "path": "artifacts/solo-a13-live02/cleanup02/combined-server-evidence.json",
+      "sha256": "89a3de367951b3340388fd79e44b2e6013c7ec735a933e7f15f471382ad5b08b"
+    }
+  },
+  "exact_target": {
+    "architecture": "amd64",
+    "bootstrap_passed": true,
+    "distribution": "debian",
+    "fresh_install": true,
+    "installation_fixture_passed": true,
+    "kernel": "6.12.111+deb13-amd64",
+    "package_count": 14,
+    "restart_recovery_export_passed": true,
+    "stopped_custody": true,
+    "two_offline_attempts_passed": true,
+    "version": "13.7"
+  },
+  "format": "actryn-live-observation-qualification-1",
+  "independent_installation": false,
+  "live_operation": {
+    "attempt_id": "386154acc9e06aaa13214a87ab952f72",
+    "attempt_state": "reaped",
+    "execution_observation_id": 91,
+    "namespace": "e36a08881fa6658c2d4af37cde83d894",
+    "operation": 1,
+    "original_observation_id": 68,
+    "outstanding_debit": false,
+    "provider_calls_during_cleanup": 0,
+    "publication_closed": true,
+    "reconciled": true,
+    "verdict": "TargetReached"
+  },
+  "package": {
+    "changed_entries": [
+      "bin/actryn",
+      "bin/actryn-serverd"
+    ],
+    "cli_sha256": "783ffe6aa7165e5c183a7ab38102066b9f853e8143bdfe2a30bf1003c2c3e56a",
+    "manifest_sha256": "cf886513035eba9c38eab3319c9108bdd5a3f6f1c5a0fc424e686e63db839f87",
+    "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82",
+    "qualification": "incomplete",
+    "serverd_sha256": "41a8521f8487538c9d4018e98e586db380f519ef9342af636285e3875b8f157f",
+    "signed": false,
+    "unchanged_entries": 25
+  },
+  "physical_acceptance": false,
+  "provider": {
+    "authorized_calls": 1,
+    "automatic_retry": false,
+    "calls": 1,
+    "consumed_tokens": 27,
+    "model": "gpt-5.4-mini-2026-03-17"
+  },
+  "release_promotion": false,
+  "release_signature_verified": false,
+  "source_revision": "a4ccbc402acbff1fae66dba3c2f99ba494c15c01",
+  "status": "PASS_LIVE_OPERATION_AND_EXACT_PACKAGE_BY_BOUNDED_COMPOSITION"
+}

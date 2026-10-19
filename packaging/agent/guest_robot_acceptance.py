@@ -709,7 +709,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--allow-disposable-guests', action='store_true', required=True)
     parser.add_argument('--allow-one-live-provider-call', action='store_true',
-                        help='run only the combined live case; one provider call, no retry or observation refresh')
+                        help='run only the combined live case; one provider call, no retry, then one execution-observation revalidation')
     parser.add_argument('--ssh-key', type=Path, required=True)
     parser.add_argument('--known-hosts', type=Path, required=True)
     parser.add_argument('--server-port', type=int, default=26220)

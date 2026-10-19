@@ -129,6 +129,14 @@ inference. No operation was allocated; later Robot clock warnings are separate
 post-failure facts, and local recovery preserved the uncertain debit. Raw evidence
 is local, ignored material rather than a Git backup.
 
+A separately authorized corrected A13-02 call later consumed 27 tokens without
+retry, revalidated a newer execution observation, completed/reconciled kernel
+operation 1 and closed/exported with no outstanding debit. Its old packaged CLI
+rejected the new response field after execution. The exact two-binary successor
+then passed fresh install/lifecycle/restart/export without another provider call.
+The bounded [successor receipt](live-observation-qualification.json) preserves
+that composition; the predecessor-bound packet still needs a subject rebind.
+
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|
 | A01/A03 | Manager guest08 lifecycle; installed manager11 lifecycle03 passes, including two reconciled natural completions under one grant and later durable terminal rows. Module16 covers stale/duplicate/replayed transport. Manager11's exact target recovery regression passes once. | Earlier installed run01 remains failed. Final source/artifact reconciliation remains. |
@@ -139,7 +147,7 @@ is local, ignored material rather than a Git backup.
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
-| A13/A14 | Pinned live-policy/missing-credential checks, one standalone live PASS, and one combined live FAIL with 33 settled tokens, an expired original observation and zero allocated operation, plus explicit recovery and stopped custody. | A13 needs qualification of the reviewed execution-observation revalidation and a renewed call budget; the failed call must not be replayed. An independent developer remains unavailable and A14 stays deferred. |
+| A13/A14 | Original live-policy/missing-credential checks and failed frozen campaign remain preserved. The corrected successor has one 27-token live operation plus cleanup/export and separate exact-package fresh qualification. | Rebind the packet to the two-binary Server successor before marking A13 PASS there. An independent developer remains unavailable and A14 stays deferred. |
 | A16 | [Completed frozen comparison](a16-comparison.md): 80 begun/ended, 79 PASS/1 FAILED; B1/B2/B4 each 20/20, B3 evidence 9/10 and trace 10/10. Six original-K11 cohort pairs, four 78/78 trace correlations, independent final audit and known stopped custody pass. Both pilots remain excluded. | Comparison acceptance stays FAILED on B3 trial 6 BIND abort; role/errno/cause unobserved. No retry or failure exclusion. Historical pilot07/boot09/10 failures and diagnostic8 boundaries remain. No equal-work, superiority, physical or WCET inference. |
 
 Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled
