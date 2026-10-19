@@ -131,3 +131,38 @@ comparison rows remain unchanged; the aggregate comparison and acceptance
 remain FAILED.
 Normal shutdown and stopped custody complete; this gives no physical or UART
 trace qualification and does not establish that the earlier failure is fixed.
+
+## Passcred10 successor comparison: PASS, 2026-10-19
+
+The original comparison above remains FAILED79/80. A separately numbered
+successor addresses the supported listener-credential race without replaying or
+backfilling the failed trial. Source `7858e1674bacb1f8f67455cf42955e762a54a70254ddbba089f8de7abe0b273e`
+enables `SO_PASSCRED` on the bound gateway listener before `listen`; the exact
+pinned ARM64 target build is `18fc58610ffbfe37c8eeebc583cc55d8fbc3c08fa3c885e253cc3b4cc0ac3835`.
+The common workload `40f75fe9…2398`, production module `a49fd1a…1112`, timing,
+scenario order, limits and amendment7 instrumentation remain unchanged.
+
+Two excluded trace pilots pass 10/10 on distinct kernel/userspace boots with
+78/78 eligible requests correlated in each. The new four-boot ABBA campaign then
+passes all eight fixed runs: **80 planned, begun, ended and passed trials; 0
+failed or unstarted**. Every traced run correlates 78/78 eligible requests. All
+eight summaries report complete event-loss coverage, zero new loss, zero sequence
+discontinuities, zero reversed clock pairs and no saturation. Block 3 evidence
+and trace both pass 10/10, including the position corresponding to the original
+failure.
+
+Independent local analysis receipt
+[`27104456…d9e8`](../../artifacts/a16-passcred10-final-analysis01/result.json)
+reparses raw events and verifies the six distinct boot identities, denominators,
+trace correlations, source pins and preservation of original receipt
+`d4f3ef18…1b8e`. Final custody
+[`216e3586…d7a8`](../../artifacts/a16-passcred10-final-stopped-custody01/result.json)
+records both successor units inactive/PID0/empty cgroups, ports 26226/27448 free,
+and no repository QEMU or fixture actor. The original parent disk remains
+`cf7b67ab…87de`; successor overlay is `20e63d6a…c2f4`.
+
+This establishes the successor software comparison only. Raw evidence remains
+in ignored local artifacts and `.cache`, is not durably archived off-host and is
+not a release signature. It measures host request admission and immutable UART
+frame acceptance, not physical UART drain, controller response, actuation or
+hard WCET, and supports no superiority claim.

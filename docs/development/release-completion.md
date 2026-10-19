@@ -8,7 +8,7 @@ tagging, publication and physical qualification remain separate. Live motion sta
 ## Execution order
 
 - [ ] Preserve referenced evidence, verify restoration, and confirm a durable private archive destination before guest mutation.
-- [ ] Resolve A16: preserve FAILED79/80; diagnose, regress/fix a supported defect, freeze a successor and run correctness pilots plus the full 80-trial ABBA campaign. Passing diagnostics alone cannot resolve the original failure.
+- [x] Resolve A16: preserve FAILED79/80; diagnose and regress the listener-credential race, freeze the passcred10 successor, then pass two excluded correctness pilots and the full 80-trial ABBA campaign.
 - [ ] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify selected installed bytes using reviewed reuse or targeted new cases.
 - [ ] Add host CI and obtain actual green checks at the final head; retain privileged target evidence separately.
 - [ ] Complete A13 with broker-only provisioned credentials and A14 with an independent developer.
@@ -45,7 +45,7 @@ Every closure must name selected source/configuration/payload identities and imm
 | A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | Authorized provider provisioning and actual pinned live-model execution are EXTERNAL/NOT_RUN; no credential inspection or reuse. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
-| A16 | Latency/overhead/loss and competent userspace comparison without superiority threshold | Historical BIND role/errno/cause remains unobserved; diagnostic success does not repair FAILED79/80 or authorize replay/superiority/WCET/physical claims. |
+| A16 | Latency/overhead/loss and competent userspace comparison without superiority threshold | The original FAILED79/80 result remains immutable and its exact BIND cause remains unproven. A separately frozen passcred10 successor passes two excluded pilots and all 80 comparison trials on six distinct pinned-kernel boots, with 78/78 matches in every traced run and zero recorded loss/discontinuities. Final packet binding remains; no superiority, WCET or physical claim follows. |
 
 ## D2 predicate work
 
@@ -76,7 +76,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: host CI with source/exit/log receipts; A16 read-only investigation and host-only reproducer.
+- In progress: final-head host CI, qualification-packet reconciliation, Server final-payload qualification and external A13/A14/signing inputs. A16 successor software qualification is complete below.
 
 ### Checkpoint 1: host CI and evidence preservation
 
@@ -154,3 +154,38 @@ Every closure must name selected source/configuration/payload identities and imm
 - All new Robot evidence remains local, test-signed, nonpromotable and explicitly
   `release_qualification=false`; it is not A14 independent-operator evidence or
   physical qualification.
+
+### Checkpoint 4: A16 passcred10 successor qualification
+
+- The original comparison remains FAILED79/80 at receipt
+  `d4f3ef18…1b8e`; no trial was retried or relabelled. Its stopped parent disk
+  remains byte-identical at `cf7b67ab…87de`.
+- The supported defect is the actual gateway listener window between `accept4`
+  and accepted-socket `SO_PASSCRED`. Frozen derivative source
+  `7858e167…273e` enables credentials on the bound listener before `listen`, so
+  accepted sockets inherit collection from their first queued message. Host race
+  tests pass 2/2. The exact pinned ARM64 guest built target gateway
+  `18fc5861…3835` with GCC 14.2.0-19 on kernel 6.12.111; workload
+  `40f75fe9…2398` and module `a49fd1a…1112` remained unchanged.
+- A new copy-on-write guest and fixture use isolated ports, units, evidence labels
+  and state. One initial launch with a changed MAC reached multi-user but left the
+  provisioned interface down; its no-workload failure and normal QMP poweroff are
+  preserved. The numbered correction restored the provisioned MAC before any
+  build or test action.
+- Frozen successor source12 (`e0392fb7…b47f` runner,
+  `8cc7d05f…bf76` campaign) passed focused host checks and a full read-only
+  baseline/VM/fixture/instrumentation preflight. Separate kernel and userspace
+  trace pilots each pass 10/10 with 78/78 correlations.
+- Four distinct ABBA boots then run the fixed evidence/trace ordering once. All
+  80 planned trials begin, end and pass; each traced run matches 78/78 eligible
+  requests, with zero recorded event loss, sequence discontinuities or reversed
+  clock pairs. Block 3, including the old failure position, passes 20/20.
+- Independent local analysis receipt `27104456…d9e8` reparses raw trial logs,
+  verifies denominators, boot uniqueness, trace correlations and source/binary
+  pins, and preserves the old failure. Final stopped custody
+  `216e3586…d7a8` records both successor units inactive/PID0/empty cgroups,
+  free ports and no repository VM/fixture actor.
+- This closes the A16 software comparison for the successor only. Evidence is
+  local and ignored by Git, `release_qualification=false`, with no physical,
+  UART-drain, WCET or superiority claim. It does not close A13, A14, signing,
+  durable archive custody or whole-release qualification.

@@ -2,7 +2,7 @@
 
 Source/evidence reconciliation, 2026-10-19; preceding verified push
 `117cc93` ([push26](../../artifacts/reconciliation-checkpoint-push26/result.json), zero CI runs; no CI pass).
-This additive map closes no whole D2 or A01–A16 row. It records selected bytes,
+This additive map closes no whole D2 or whole-release qualification. It records selected bytes,
 actual case evidence and the specific work still needed to make a release claim.
 The [approved matrix](../superpowers/plans/2026-10-16-actryn-v0.0.1.md#acceptance-matrix),
 [D2 contract](../superpowers/specs/architecture.md) and
@@ -22,8 +22,9 @@ selected evidence pins and were not reread during this assembly.
 
 The existing release format requires a named qualification-bundle hash and
 role-scoped custodian attestation but defines no inner acceptance schema. This
-packet is an incomplete review input: all final-cohort associations remain OPEN,
-A16 remains FAILED and A13/A14/custodian inputs remain external. No manifest is
+packet is an incomplete review input: its frozen associations remain OPEN and
+its A16 field predates the separately qualified successor below. A13/A14/custodian
+inputs remain external. No manifest is
 changed or signed; adding approved qualification metadata later changes its
 identity. The tracked packet preserves the map, not its ignored local receipts.
 [Static validation](../../artifacts/final-cohort-qualification-packet01/validation.json)
@@ -141,7 +142,7 @@ readback before installation. These are static/build facts, not behavioral tests
 | A10 | Traffic03 corrected unchanged-capture analysis; lifetime09 gateway replacement/retained-FD, local offline recovery and export. | Preserve earlier failures, uncertain negative reply and the capture-prefix boundary. Zero SAMPLE records are not applied-motion proof. Bind manager11→e36 delta. |
 | A11 | Actual source80→82 gap and hot-journal committed-prefix recovery. | Preserve raw remnant/unknown tail and read/queued/durable distinctions. Metadata-only capture intentionally remains execution-replay-ineligible. |
 | A12 | Fresh installation/interruption tests; current f32 cold stage/activate/resume and startup02; d77 update/startup/history custody. Unsigned da6b merges the two reviewed documents and preserves the other 15 entries. | New candidate remains uninstalled, unsigned and unqualified. Runtime-only qualification Restart=no drop-ins are recorded test configuration, not the packaged Restart=on-failure policy. |
-| A13/A14/A16 | Live-policy/missing-credential controls and observer evidence remain separate. Both excluded pilots pass. The [completed A16 comparison](a16-comparison.md) retains all 80 trials: 79 PASS/1 B3 evidence BIND failure; six cohort pairs and four 78/78 diagnostic correlations pass, with independent audit and stopped custody. | A16 workload acceptance remains FAILED; bind role/errno/cause unobserved. Live-provider provisioning, independent installer, signing custodian and release identity remain unconfirmed. Historical failures/diagnostic8 retain their boundaries; no equal-work, physical, WCET or superiority claim follows. |
+| A13/A14/A16 | Live-policy/missing-credential controls and observer evidence remain separate. The [original A16 comparison](a16-comparison.md) stays FAILED79/80. A separately frozen passcred10 successor passes two excluded pilots and all 80 ABBA trials on six distinct pinned-kernel boots, with 78/78 correlations in every traced run, independent local analysis and stopped custody. | A16 successor software comparison passes, while historical causality remains unproven and the old failure is not relabelled. Live-provider provisioning, independent installer, signing custodian and release identity remain unconfirmed. No physical, UART-drain, WCET or superiority claim follows. |
 
 The preceding capability-denial Server case leaves 25/23 Server rows, 16/21 Robot records and zero
 debits. Separate durable-state cleanup, cold stop, exact policy restoration and
