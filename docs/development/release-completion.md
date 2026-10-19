@@ -10,7 +10,7 @@ tagging, publication and physical qualification remain separate. Live motion sta
 - [ ] Preserve referenced evidence, verify restoration, and confirm a durable private archive destination before guest mutation.
 - [x] Resolve A16: preserve FAILED79/80; diagnose and regress the listener-credential race, freeze the passcred10 successor, then pass two excluded correctness pilots and the full 80-trial ABBA campaign.
 - [x] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify both selected payload byte sets on fresh exact target guests through disposable test-signed manifests.
-- [ ] Add host CI and obtain actual green checks at the final head; retain privileged target evidence separately.
+- [x] Add host CI and obtain actual green push/PR checks; retain privileged target evidence separately and require the exact review head to remain green.
 - [ ] Complete A13 with broker-only provisioned credentials and A14 with an independent developer.
 - [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
 
@@ -85,7 +85,8 @@ Every closure must name selected source/configuration/payload identities and imm
   missing-command failure and historical packet claim/reference checks. Actionlint
   1.7.12 passed; independently resolved action SHAs are pinned. Both push and PR
   workflows on code head `2b322fc` completed all Rust, Python and kernel-host jobs
-  successfully. A later documentation head still requires its own final check.
+  successfully. Later documentation/evidence head `5cf318d` also completed all six
+  jobs successfully; the PR exact-head rollup remains the review-time authority.
 - `ci/qualification.py --receipt-root .` verified 107 receipt references and both 44-entry manifest projections; CI without local artifacts reports zero receipt files verified. Neither mode qualifies the release.
 - Preserved 105 unique files (107 receipt references, four larger sources, two payloads and the packet, with shared paths deduplicated) in a 122,890,240-byte local archive and restored/hash-verified every entry. Receipt: `artifacts/release-evidence-preservation01/result.json`; archive SHA256 `9fa503ad49dd24cf261db284e360975eb30899e489a980e1320e6f1ee47b75ce`. This is a selected-evidence snapshot, not a complete raw/VM backup or durable off-host archive. No private key or VM image was read.
 - Independent checkpoint review found no actionable important CI findings. It did not verify hosted CI or target qualification.
