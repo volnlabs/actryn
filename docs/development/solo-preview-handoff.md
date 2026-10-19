@@ -2,14 +2,19 @@
 
 Approved 2026-10-19. Owner of every human step below: **Utkarsh Maurya**.
 The dedicated key custody/recovery check, personal installation rehearsal,
-final Robot-successor archive/restore and maintainer review are complete.
-Release signing and signed-distribution verification remain open.
+final Robot-successor archive/restore and maintainer review are complete. Both
+release manifests are signed and the fresh signed-distribution installation and
+non-starting bootstrap pass. The final encrypted distribution archive was copied
+to the dedicated external drive and restored with all 68 entries verified.
 The earlier off-host archive restore passed, and corrected live software evidence
 is recorded in [the A13 successor receipt](live-observation-qualification.json).
 The [v5 successor packet](solo-preview-qualification-v5.json) now reports
 `ready_for_attestation:true`, with all 188 selected receipts verified locally;
-it still reports `release_qualified:false` until the signed distribution is
-verified. The
+it still reports `release_qualified:false` because it predates signing and
+distribution. The separate [signed-distribution receipt](signed-distribution-verification.json)
+also preserves its pre-archive boundary. The additive
+[final receipt](v0.0.1-release-qualification.json) reports
+`PASS_SOFTWARE_PREVIEW_QUALIFIED` after the archive restore. The
 [predecessor](solo-preview-qualification.json),
 [v2](solo-preview-qualification-v2.json) and
 [v3](solo-preview-qualification-v3.json) and
@@ -19,7 +24,7 @@ release contract. Original independent A14 remains DEFERRED.
 
 After all required gates pass, describe this release as: **Qualified by the sole
 maintainer; independent installation and physical qualification have not been
-performed.** Before that, call it an incomplete candidate.
+performed.** This description now applies to the bounded software-only preview.
 
 The historical [packaging instructions](../../packaging/release/README.md) are
 hash-bound evidence and remain byte-identical. This amendment overrides only
@@ -88,7 +93,11 @@ automatic restart, and live A13 must not be closed by unrelated happy-path tests
 
 Completed 2026-10-19. The public custody record is
 [release-key-custody.json](release-key-custody.json); the commands remain the
-recovery/replacement procedure. Release signing has not yet occurred.
+recovery/replacement procedure. That record is frozen inside the v5 qualification
+hash and therefore retains its pre-sign `release_signing_performed:false` field.
+Both final role manifests were signed on 2026-10-20; the additive
+[signed-distribution receipt](signed-distribution-verification.json) records the
+post-sign state without changing the frozen custody input.
 
 Perform this yourself in a private terminal outside the agent transcript. Use
 the installed OpenSSL; enter passphrases at its prompt, never in flags, files in
@@ -239,6 +248,21 @@ or invent a genuine signature from test evidence. Put post-sign checks in a sepa
 distribution receipt referencing manifests, signatures and the frozen packet; do
 not add it back into the already signed qualification hash. Archive and restore
 the final distribution set and receipt too.
+
+Current result: both signatures verify against the pinned key; fresh Debian 13.7
+Server and Robot guests accepted, staged and activated their matching candidates
+as `installed_inhibited`; non-starting bootstrap/configuration passed; all Actryn
+services remained inactive; and the Robot authority module/device remained absent.
+The payload archives exactly match the v5-qualified subjects, so the bounded
+workflow is composed by byte identity and was not replayed after signing. The
+prepared archive was encrypted, copied to filesystem UUID `0347-DCDB`, decrypted
+from that drive copy and fully verified. The plaintext archive SHA256 is
+`a0830691a8ad02734e604a3adbe40ba2e82ec385f5e7ff6c5c68f61d375bbbab` and
+the ciphertext SHA256 is
+`23092cfa49984cb34a6f4f59636953371f8dbc01cfb632e44d8b68bd3d0ef361`.
+The [archive receipt](final-distribution-archive-restore.json) binds that restore;
+the final receipt closes the bounded release checks without widening A14 or
+physical scope.
 
 Run final host checks and actual hosted CI on the pushed head. Update PR #1 with
 the limited release claim and observed results. Merge, tagging and publication

@@ -25,7 +25,8 @@ SUITES = {
         [sys.executable, '-B', '-m', 'unittest', 'discover', '-s', path, '-p', 'test_*.py']
         for path in PYTHON_DIRS
     ] + [[sys.executable, '-B', 'ci/qualification.py'],
-         [sys.executable, '-B', 'ci/solo_qualification.py']],
+         [sys.executable, '-B', 'ci/solo_qualification.py'],
+         [sys.executable, '-B', 'ci/signed_distribution.py']],
     'kernel-host': [
         ['make', '-C', 'kernel', 'test'],
         [sys.executable, '-B', '-m', 'unittest', 'discover', '-s', 'kernel/tests', '-p', '*_test.py'],

@@ -25,7 +25,7 @@ readiness without modifying the predecessor, v2, v3, v4 or historical incomplete
 - [x] Execute the frozen two-call A13 campaign once; retain its standalone PASS, combined stale-observation FAIL, uncertain debit, recovery and stopped custody without replay.
 - [x] Qualify the reviewed execution-observation correction under one renewed call, close/export the consumed attempt, and install the two-binary successor on a fresh exact target.
 - [x] Complete the separate maintainer installation rehearsal; original independent A14 is DEFERRED.
-- [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
+- [ ] Run hosted checks on the final pushed head and update PR #1 for review. The encrypted final-distribution archive/restore, role-scoped signatures and fresh signed-bundle installation/bootstrap are complete.
 
 ## Solo implementation checkpoint
 
@@ -36,8 +36,11 @@ readiness without modifying the predecessor, v2, v3, v4 or historical incomplete
   maintainer review make it ready for attestation without claiming release signing.
 - Local successor validation verifies 188 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
-  The exact review is recorded; release signing and signed-distribution installation
-  remain separate.
+  The exact review is recorded. Both role manifests are now signed with the
+  recovered release identity and their bundles pass fresh signed installation and
+  non-starting bootstrap. Its final encrypted archive has been restored and the
+  additive final receipt reports `PASS_SOFTWARE_PREVIEW_QUALIFIED` within the
+  sole-maintainer, software-only boundary.
 - A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
   robot-intent sources with earlier real-kernel SQLite contention. Host test
   authority and real-kernel evidence remain distinct; no physical-media claim.
@@ -68,7 +71,22 @@ readiness without modifying the predecessor, v2, v3, v4 or historical incomplete
   grant, cancellation before proposal, restart recovery and hash-verified exports.
   The report is personal (`independent:false`); original A14 remains deferred.
 - Final signed-distribution verification is a separate post-attestation receipt,
-  so a frozen qualification hash does not depend on signatures of itself.
+  so the frozen qualification hash does not depend on signatures of itself. The
+  receipt passes signature, transfer, install, bootstrap, inhibited-state and
+  stopped-custody checks on fresh exact-target guests. It composes the previously
+  qualified identical payload workflow without replaying an operation or provider
+  call. The final 106,106,880-byte plaintext archive was encrypted, copied to
+  filesystem UUID `0347-DCDB`, decrypted from that drive copy, and all 68 entries,
+  both signatures and the release key verified. Archive SHA256 is
+  `a0830691a8ad02734e604a3adbe40ba2e82ec385f5e7ff6c5c68f61d375bbbab`;
+  ciphertext SHA256 is
+  `23092cfa49984cb34a6f4f59636953371f8dbc01cfb632e44d8b68bd3d0ef361`.
+- The final pre-archive host sweep first failed under the restricted agent sandbox:
+  local Unix/TCP socket creation returned `EPERM` across Python, Rust and C tests.
+  That run is retained. A separately numbered rerun with ordinary local-socket
+  permission passes all 11 Python groups, all four Rust checks and all three
+  kernel-host checks. PR #1 head `7fea8e3` has six green hosted checks; the
+  eventual signed-release commit still requires its own exact-head hosted run.
 
 ## External inputs
 
@@ -77,8 +95,8 @@ readiness without modifying the predecessor, v2, v3, v4 or historical incomplete
 | Model credential | Utkarsh Maurya; `/etc/actryn/credentials/openai-api-key` via systemd server-only LoadCredential | A13-02 used one separately authorized call; credential remained confined to the stopped disposable Server overlay |
 | Independent installer | Unassigned until another developer joins; original A14 | DEFERRED, not a solo-release gate |
 | Maintainer rehearsal | Utkarsh Maurya personally follows shipped instructions on fresh guests | PASS; human test-signed two-guest workflow and evidence export retained |
-| Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | PASS; encrypted drive copy restored, matching fingerprint and challenge checks verified; release signing remains pending |
-| Durable private archive | Utkarsh Maurya; encrypted archive on filesystem UUID `0347-DCDB` | Prior Server-successor archive PASS; final Robot-successor addendum and restore pending |
+| Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | PASS; both final manifests signed and independently verified against SPKI `3bc25f59…ce6735` |
+| Durable private archive | Utkarsh Maurya; encrypted archive on filesystem UUID `0347-DCDB` | PASS; base, successor and corrected Robot addenda restored, and the final signed distribution was copied, decrypted from the drive copy and verified |
 
 ## Acceptance work
 

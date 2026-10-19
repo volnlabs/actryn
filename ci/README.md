@@ -42,3 +42,14 @@ locally verified evidence. It never approves/signs a release; hosted structure
 checks alone cannot make it ready. Raw guest traces and large source archives
 are not recursively decoded by this checker; their review/custody remains an
 explicit qualification responsibility.
+
+`python3 ci/signed_distribution.py` verifies the public release key against its
+recovery record, both canonical manifests and Ed25519 signatures, the frozen v5
+qualification hash, exact role/target identities and the bounded post-sign
+distribution receipt. Hosted CI verifies public metadata only. On the custody
+workstation, add `--evidence-root .` to stream and verify the 55 ignored raw
+distribution files, including both payload archives. The checker also validates
+the additive off-host archive/restore receipt and final software-preview receipt;
+`--require-qualified` requires their bounded `release_qualified:true` result.
+That result remains sole-maintainer, software-only qualification: original A14,
+physical acceptance, live motion, merge, tagging and publication stay excluded.

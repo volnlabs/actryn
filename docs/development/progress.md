@@ -4,6 +4,16 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 
 ## Current state
 
+- **Actryn v0.0.1 is qualified for the bounded software-only developer preview.**
+  Both release manifests and payloads pass signature and exact-target installation
+  checks. The encrypted final distribution was copied to filesystem UUID
+  `0347-DCDB`, decrypted from that drive copy, and all 68 inventoried entries plus
+  both signatures verified. The additive
+  [archive receipt](final-distribution-archive-restore.json) and
+  [final receipt](v0.0.1-release-qualification.json) record
+  `PASS_SOFTWARE_PREVIEW_QUALIFIED`. This is sole-maintainer qualification;
+  independent A14 is deferred, and physical acceptance, live motion, merge,
+  tagging and publication remain outside the claim.
 - **A13's original frozen two-call campaign remains FAIL; the corrected successor
   passes by bounded composition.** The original standalone
   pinned live call passed. The combined call settled 33 tokens, but its original
@@ -21,7 +31,11 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   [v5 packet](solo-preview-qualification-v5.json) also binds the one-binary Robot
   recovery successor and completed sole-maintainer rehearsal while preserving all
   earlier packets. The corrected off-host Robot-successor restoration and exact
-  maintainer review pass; release signing and signed-distribution verification remain.
+  maintainer review pass. Both final manifests are signed with the recovered
+  release key; fresh exact-target signed installation, non-starting bootstrap,
+  inhibited state and stopped custody pass. Its final encrypted archive has now
+  been copied to and restored from the external drive, closing the last bounded
+  software-preview release check.
 - **Final qualification packet assembled, still incomplete.**
   The tracked [qualification packet](final-qualification.json) binds the selected
   unsigned Server9f/Robotda6, all44 payload entries,17 D2 predicates and16
@@ -2022,10 +2036,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   cross-language implementation. They remain subject to tested corrections, with
   simultaneous codec/vector updates; they are not physical measurements.
 
-## Required external inputs
+## Deferred external work
 
-- Authorized live-provider credentials for A13; do not inspect or reuse unrelated secrets.
-- Release signing identity/material before signed artifact promotion.
-- An independent developer for the human A14 acceptance run.
+- An independent developer for original A14 when another person joins.
+- Physical fixture qualification before any live-motion claim.
 
-These do not block implementation or offline tests. They do block full release acceptance.
+Neither item is part of the sole-maintainer software-preview qualification.

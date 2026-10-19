@@ -1,0 +1,26 @@
+{
+  "all_entries_verified": true,
+  "archive_sha256": "a0830691a8ad02734e604a3adbe40ba2e82ec385f5e7ff6c5c68f61d375bbbab",
+  "ciphertext_sha256": "23092cfa49984cb34a6f4f59636953371f8dbc01cfb632e44d8b68bd3d0ef361",
+  "created_at": "2026-10-19T21:44:54.023124+00:00",
+  "decrypted_from_drive_copy": true,
+  "files_verified": 68,
+  "filesystem_uuid": "0347-DCDB",
+  "format": "actryn-v0.0.1-final-distribution-archive-restore-1",
+  "independent_installation": false,
+  "inventory_sha256": "749986f3640e6120bab66d20ddde52dd6582285572c762250e22952b27b753f0",
+  "metadata_signatures_verified": 2,
+  "off_host": true,
+  "owner": "Utkarsh Maurya <projects.utkarshMaurya@gmail.com>",
+  "physical_acceptance": false,
+  "raw_verification": {
+    "path": "artifacts/v0.0.1-final-distribution-restore01/verification.json",
+    "sha256": "e957f91f2176efc19e8e749d5f7fde86b3daf800cfb7f9ff3630db243bc7989c"
+  },
+  "safe_regular_file_extraction": true,
+  "signed_distribution_receipt": {
+    "path": "docs/development/signed-distribution-verification.json",
+    "sha256": "4cce5096cffdde3bde8d08a8efabd484a5696717aded43ad48ba19f5003891ac"
+  },
+  "status": "PASS"
+}
