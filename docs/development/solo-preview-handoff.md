@@ -139,6 +139,13 @@ drive remains a single backup failure domain.
 
 ## 4. Bounded live acceptance
 
+**Consumed 2026-10-19: do not rerun this campaign.** The standalone call passed;
+the combined call consumed 33 tokens and failed closed while Robot recorded an
+expired clock mapping. No operation was allocated, outputs stayed zero, local
+recovery preserved the uncertain debit, and stopped custody passed. The two-call
+budget is exhausted. A new attempt requires a separately reviewed clock/protocol
+correction, a new numbered campaign and an explicitly renewed budget.
+
 Provision a dedicated provider key yourself through the documented
 `/etc/actryn/credentials/openai-api-key` server-only `LoadCredential` route.
 Neither agent nor launcher receives it. No key or passphrase belongs in a report.
@@ -150,13 +157,13 @@ Freeze artifact/model-policy digests and guest identities first. The configured
 model remains `gpt-5.4-mini-2026-03-17`; unavailable model/access is a failed input,
 not permission to substitute a model or silently change the profile.
 
-Budget: at most two provider calls total, one standalone live check and one
-combined check. Run the existing standalone harness once with `--expect completed`.
-For the combined invocation, use the exact named arguments from
-[combined acceptance](../../packaging/agent/ROBOT_ACCEPTANCE.md) with the live
-artifact digest and add `--allow-one-live-provider-call`. Use a new output
-directory. That option runs only the combined case, avoiding the extra unbound
-agent call in the default offline campaign. No automatic retries occur.
+The consumed budget was at most two provider calls total, one standalone live
+check and one combined check. The standalone harness ran once with
+`--expect completed`. The combined invocation used the exact named arguments
+from [combined acceptance](../../packaging/agent/ROBOT_ACCEPTANCE.md), the live
+artifact digest and `--allow-one-live-provider-call` in a new output directory.
+That option ran only the combined case, avoiding the extra unbound-agent call in
+the default offline campaign. No automatic retries occurred.
 
 Keep 1,024 output tokens, 64 KiB response, 30-second transport bound and the
 original one-second Robot observation freshness. These are not an invoice cap.

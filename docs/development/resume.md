@@ -10,9 +10,12 @@ The approved scope remains [the full plan](../superpowers/plans/2026-10-16-actry
 Earlier checkpoints and failed attempts remain preserved.
 
 Latest continuation: [release completion checklist](release-completion.md). The
-2026-10-19 completion work adds host CI and local evidence-preservation checks;
-release gates and external ownership remain open. Read its execution ledger before
-continuing the historical checkpoints below.
+2026-10-19 work adds host CI, local evidence preservation and the consumed A13
+campaign. Standalone live acceptance passed; combined live acceptance failed
+closed after 33 tokens while Robot recorded clock-mapping expiry. Its uncertain
+debit, explicit recovery, exports and stopped custody are retained. Do not replay
+or exceed the two-call budget. Release gates and external ownership remain open.
+Read its execution ledger before continuing the historical checkpoints below.
 
 ## Repository and execution state
 

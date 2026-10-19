@@ -547,8 +547,8 @@
     },
     "solo-source-review": {
       "path": "docs/development/solo-preview-evidence.md",
-      "bytes": 8133,
-      "sha256": "5c3a54ec9c4dc638ea41f4492b435c07fe78262cb941e44f0a86293366e47dfa"
+      "bytes": 8509,
+      "sha256": "569445eeb9724beed5846bc62a3e383d3930a2cc22ef61ed04e611c7163b3204"
     },
     "robot-final-intent": {
       "path": "artifacts/install-robot-final-lifecycle01/intent.json",
@@ -759,6 +759,71 @@
       "bytes": 7026,
       "path": "artifacts/solo-a12-restart01/server/result-final.json",
       "sha256": "01799b3d7878f5f6d266375f4ec31fff0d0a1d8e9a6a7abdbd4b83302ccd5d89"
+    },
+    "a13-failure-report": {
+      "path": "artifacts/solo-a13-live01/a13-failure-report.json",
+      "bytes": 1317,
+      "sha256": "63c6a0a6529b8662ba1ae55a3f398cb424ccde750a6518ac9b769fca04af097e"
+    },
+    "a13-standalone-intent": {
+      "path": "artifacts/solo-a13-live01/standalone/intent.json",
+      "bytes": 351,
+      "sha256": "156f910f3653fb6fdb38c258354d4c5a7aff3463a817afcb19c4d8917d9b058f"
+    },
+    "a13-standalone-transport": {
+      "path": "artifacts/solo-a13-live01/standalone/transport.json",
+      "bytes": 143,
+      "sha256": "6137559f831784fd39cb523cc2963be189bce1dd139980891448f27d48309f2d"
+    },
+    "a13-standalone-receipt": {
+      "path": "artifacts/solo-a13-live01/standalone/receipt.json",
+      "bytes": 1031,
+      "sha256": "accede1ce4b0da59d539462a2a0d810f08a549c0be8bcc4fff9345ad3cd8d781"
+    },
+    "a13-combined-intent": {
+      "path": "artifacts/solo-a13-live01/combined03-control/intent.json",
+      "bytes": 334,
+      "sha256": "1fa65e25d2f3b8988cc146031e9c0ca6062db86e5fa483429b7c4cebf5bf1fa0"
+    },
+    "a13-combined-transport": {
+      "path": "artifacts/solo-a13-live01/combined03-control/transport.json",
+      "bytes": 144,
+      "sha256": "6d6609b708a471398e3ef95e58028c7ec7dca9ec3b19e87164a6356a9ebd6dc1"
+    },
+    "a13-combined-failure": {
+      "path": "artifacts/solo-a13-live01/combined03/failure.json",
+      "bytes": 754,
+      "sha256": "ad816e97caaf0078d6e918ede63c104862a8725becc4c3ea07013a51814ba92d"
+    },
+    "a13-combined-state": {
+      "path": "artifacts/solo-a13-live01/combined03/post-failure-state.json",
+      "bytes": 3417,
+      "sha256": "d8f201b35827437a18739657782761d997874208e2a52efcaa0582368570aade"
+    },
+    "a13-combined-recovery": {
+      "path": "artifacts/solo-a13-live01/combined03/manual-recovery-final.json",
+      "bytes": 1200,
+      "sha256": "99b60fd8f91d40df5146eac19091ef605a407c3838d18830afa64678e66624f9"
+    },
+    "a13-server-evidence": {
+      "path": "artifacts/solo-a13-live01/combined03/server-evidence.json",
+      "bytes": 7968,
+      "sha256": "bee6061f151276fc510034d962463f46e9ee1fb22b467d55423bdd3f99ee1c17"
+    },
+    "a13-robot-export": {
+      "path": "artifacts/solo-a13-live01/combined03/robot-export-verification.json",
+      "bytes": 244,
+      "sha256": "3ac551e317afe9bc9e9c955189a05e8b665014f72ffb62669325f54e27a4bc98"
+    },
+    "a13-clock-inhibition": {
+      "path": "artifacts/solo-a13-live01/combined03/clock-inhibition.log",
+      "bytes": 271,
+      "sha256": "b53a952285f4cba10e9a9d1d40bd19c618fc14c87014951ec71a3ce95ddba694"
+    },
+    "a13-stopped-custody": {
+      "path": "artifacts/solo-a13-live01/stopped-custody.json",
+      "bytes": 678,
+      "sha256": "c831b9fe11cb82bda839fd039b540ff4a4bd5a2492f4080853c78140e7043d2f"
     }
   },
   "subjects": {
@@ -1142,12 +1207,25 @@
     {
       "id": "A13",
       "required": true,
-      "status": "NOT_RUN",
+      "status": "FAIL",
       "evidence": [
-        "live-missing-credential"
+        "live-missing-credential",
+        "a13-failure-report",
+        "a13-standalone-intent",
+        "a13-standalone-transport",
+        "a13-standalone-receipt",
+        "a13-combined-intent",
+        "a13-combined-transport",
+        "a13-combined-failure",
+        "a13-combined-state",
+        "a13-combined-recovery",
+        "a13-server-evidence",
+        "a13-robot-export",
+        "a13-clock-inhibition",
+        "a13-stopped-custody"
       ],
       "association": null,
-      "remaining": "Authorized provider provisioning and actual pinned live-model execution are EXTERNAL/NOT_RUN; no credential inspection or reuse."
+      "remaining": "Two-call budget consumed: standalone PASS; combined failed after a 33-token live response while Robot recorded clock-mapping expiry. No operation was allocated, outputs stayed zero, local recovery completed, and the uncertain debit remains charged. A13 requires a separately reviewed protocol/clock correction and renewed qualification budget."
     },
     {
       "id": "A14",

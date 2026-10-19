@@ -4,6 +4,12 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
 
 ## Current state
 
+- **A13 consumed its frozen two-call budget and remains FAIL.** The standalone
+  pinned live call passed. The combined call settled 33 tokens, then failed
+  closed while Robot recorded clock checkpoint expiry and `clock mapping expired`.
+  No kernel operation was allocated and outputs stayed zero. The Server retains
+  one uncertain debit; local Robot recovery, both evidence exports and stopped
+  guest/fixture custody passed. No replay or third provider call is authorized.
 - **Final qualification packet assembled, still incomplete.**
   The tracked [qualification packet](final-qualification.json) binds the selected
   unsigned Server9f/Robotda6, all44 payload entries,17 D2 predicates and16
