@@ -30,18 +30,18 @@ Every closure must name selected source/configuration/payload identities and imm
 
 | Gate | Required behavior | Remaining task |
 |---|---|---|
-| A01 | Two natural completions under one grant; reconcile before reuse | Associate manager11-to-e36 reconciliation delta with selected Robot; do not substitute a one-operation combined demo. |
+| A01 | Two natural completions under one grant; reconcile before reuse | Fresh final-payload lifecycle01 passes two reconciled natural completions under grant 1 with operation IDs 1 then 2. Bind the retained receipt into the final qualification packet. |
 | A02 | Cancellation absent/allocated before ID reply, races and lost acknowledgements | Manager10/module16 origin must remain distinct from selected e36; preserve pre-send/commit-race scope. |
-| A03 | Expired, retired, replayed or changed duplicates cannot regain authority | Final selected manager/source association remains open; no replay of original unknown operations. |
+| A03 | Expired, retired, replayed or changed duplicates cannot regain authority | Fresh final-payload lifecycle01 supplies selected-manager association; no replay of original unknown operations. Packet reconciliation remains. |
 | A04 | Restarts preserve unknown outcomes and prevent automatic resend | Original finalization/abort uncertainty remains; cleanup cannot relabel task success or qualify every restart/media fault. |
 | A05 | Broker reservations survive cancel, oversized replies, unknown work and restart | Bind source/config/global-accounting lineage; real-provider charge/streaming behavior remains A13. |
 | A06 | Malformed UAPI, task/FD identity, owner exit, concurrent closure, detach and PM faults | Mocked PM/shutdown callbacks are not physical UART/platform poweroff qualification; retain actual configuration/source bindings. |
 | A07 | Every-byte cancellation, short/error writes, retained bytes and invalid receipts | Mocked serdev byte-offset tests must not become measured physical stopping evidence. |
 | A08 | Exhaustion preserves reserved closure and active-work semantics | Retain exact limits and source lineage; do not infer untested PID/IO/storage exhaustion. |
 | A09 | Storage stalls cannot block urgent closure; failed durability cannot authorize effects | SQLite contention is not fsync-stall/EIO/media-power-loss proof; current-cohort closure/durability applicability remains explicitOPEN. |
-| A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
+| A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Fresh final-payload lifecycle01 passes gateway death, old-namespace rejection, local recovery and retained evidence. Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
 | A11 | Evidence origin, gaps and durable frontiers; complete-prefix replay only | No new raw decoding performed; metadata-only histories remain execution-replay-ineligible. |
-| A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Unsigned final9f/da6 exact bundles are uninstalled; runtime Restart=no overrides are not packaged on-failure. Robot observedExpat2.9 vsmanifest2.8.3 remains an explicit tuple-equality gap. |
+| A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | A fresh exact Robot target installs the da6 payload through a test-signed derivative and passes rejection, interruption, recovery, rollback, bootstrap and lifecycle. The canonical unsigned da6 manifest remains unsigned/uninstalled; Server9f remains uninstalled. Runtime Restart=no overrides are not packaged on-failure. |
 | A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | Authorized provider provisioning and actual pinned live-model execution are EXTERNAL/NOT_RUN; no credential inspection or reuse. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
@@ -51,7 +51,7 @@ Every closure must name selected source/configuration/payload identities and imm
 
 | Gate | Required behavior | Remaining task |
 |---|---|---|
-| D2-01 | Installed exact tuple, doctor/config validation and rejected incompatible/unapproved inputs | Runtime04 installation/source association retained; final assembled9f is not installed. |
+| D2-01 | Installed exact tuple, doctor/config validation and rejected incompatible/unapproved inputs | Fresh Robot final-payload install/doctor/bootstrap passes under exact pinned tuple; Server runtime04 association is retained and final assembled9f remains uninstalled. |
 | D2-02 | Identity/attribution before Create; paused Create before Start; fixed OCI options and no agent hooks | Original literal pre-Create gap remains historical. Approved025e contract adopts gatedCreate/FIFO then live enforcement/listeners beforeStart; staged3ead GREEN04 supplies common verification cleanup and preserves admission refusal. Root final mapping still required. |
 | D2-03 | Unavailable host files, credentials and engine sockets; identity/mount/capability/FD isolation plus attributed failures | Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN. |
 | D2-04 | Only approved character devices; existing forbidden-node failed-open control | Existing device/OOM composite is a scoped case proof, not original campaignPASS; launcher17a0-to3ead source/build association remains final-review input. |
@@ -81,7 +81,11 @@ Every closure must name selected source/configuration/payload identities and imm
 ### Checkpoint 1: host CI and evidence preservation
 
 - Added `ci/check.py` and GitHub Actions for Rust, Python and kernel-host suites. Local Rust format/Clippy/workspace tests passed; kernel-host checks passed (5 bridge and 116 A16 Python checks plus C sanitizer assertions); Python passed 292 tests after correcting the stale documentation snippet inventory. Original failed run remains in `artifacts/release-completion-host01/python`; corrected run is `artifacts/release-completion-host02/python`.
-- Five CI helper tests verify failure retention, continued checks, no overwrite, missing-command failure and historical packet claim/reference checks. Actionlint 1.7.12 passed; independently resolved action SHAs are pinned. Remote execution remains pending the push.
+- Five CI helper tests verify failure retention, continued checks, no overwrite,
+  missing-command failure and historical packet claim/reference checks. Actionlint
+  1.7.12 passed; independently resolved action SHAs are pinned. Both push and PR
+  workflows on code head `2b322fc` completed all Rust, Python and kernel-host jobs
+  successfully. A later documentation head still requires its own final check.
 - `ci/qualification.py --receipt-root .` verified 107 receipt references and both 44-entry manifest projections; CI without local artifacts reports zero receipt files verified. Neither mode qualifies the release.
 - Preserved 105 unique files (107 receipt references, four larger sources, two payloads and the packet, with shared paths deduplicated) in a 122,890,240-byte local archive and restored/hash-verified every entry. Receipt: `artifacts/release-evidence-preservation01/result.json`; archive SHA256 `9fa503ad49dd24cf261db284e360975eb30899e489a980e1320e6f1ee47b75ce`. This is a selected-evidence snapshot, not a complete raw/VM backup or durable off-host archive. No private key or VM image was read.
 - Independent checkpoint review found no actionable important CI findings. It did not verify hosted CI or target qualification.
@@ -106,3 +110,47 @@ Every closure must name selected source/configuration/payload identities and imm
   tests, and the complete A16 host suite with 118 Python tests plus its C sanitizer
   assertions and fixed-profile check. The receipt correctly records a dirty
   worktree at source revision `02d8cf3`; the commit below binds the tested delta.
+
+### Checkpoint 3: fresh Robot target correction
+
+- The exact Debian13 ARM64 base image is present and independently rehashed to
+  the manifest SHA512 `a34e1c1e…f915c4`.
+- `.cache/qemu/install-robot` is not the never-launched target described by its
+  initial `prepared.json`: retained launch/provision/update receipts, serial,
+  fixture and manager state prove it has been used. It remains preserved and was
+  not launched or changed in this checkpoint.
+- Ruling: do not restore Expat or run A14 on that disk. Create a new uniquely
+  named overlay/seed from the verified base, provision the exact supported tuple,
+  and keep the retained Robot as historical evidence. Cost if wrong: reusing it
+  would invalidate clean-install and package-equality claims.
+- The current selected candidate pins Expat 2.8.3 while the retained Robot has
+  2.9.0. The new guest independently reports the exact ten-package tuple,
+  including `libexpat1 2.8.3-1~deb13u1`; no package mutation was required and the
+  manifest was not rewritten to bless retained-disk drift.
+- A new 16 GiB copy-on-write target at `.cache/qemu/install-robot-final01` binds
+  the independently rehashed base, kernel, initrd, DTB, source-bound fixture and
+  final Robot manifest/payload `da6b6862…cc5a9` / `1e71fe91…66bb`. Preparation,
+  one launch and host-key/exact-tuple preflight are retained separately. The old
+  `.cache/qemu/install-robot` disk was not read through QEMU or changed.
+- The existing installer harness produced test-only campaign
+  `ff560d50cff448c0a4ff898e651a08ba`. Its exact final payload passed unsigned,
+  incomplete, wrong-host and wrong-role rejection; stage/activate; an injected
+  exit after durable pointer publication; explicit recovery and rollback;
+  sentinel preservation and persistent inhibition. This does not sign or promote
+  the canonical final manifest.
+- The reviewed bootstrap harness changed only campaign/manifest/key identities
+  and its unique receipt path. It verified module `a49fd1a…112`, manager
+  `e36d5b…72a`, gateway `8705d2…22f` and the installed ARM CLI, then recovered to
+  an inhibited healthy state without issuing authority.
+- The unchanged full lifecycle passed in 132 seconds: two natural operations
+  reconciled under one grant; absent and pre-send cancellation became durable;
+  gateway death revoked; manager death retained terminal `OutcomeUnknown`
+  without resend; identity rotation retired the old session; CLI/SDK exported
+  and hash-verified 35 files; the independent capture reader passed. The final
+  read-only state had no grant, operation or preparation and required a fresh
+  recovery mapping before future authority. The guest and fixture then completed
+  normal shutdown. Failed postflight validators that over-required a still-fresh
+  recovery mapping remain preserved beside corrected local validation.
+- All new Robot evidence remains local, test-signed, nonpromotable and explicitly
+  `release_qualification=false`; it is not A14 independent-operator evidence or
+  physical qualification.
