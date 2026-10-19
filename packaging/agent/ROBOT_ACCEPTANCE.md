@@ -1,5 +1,34 @@
 # Combined offline acceptance
 
+## Explicit live variant
+
+Offline remains the default. Add `--allow-one-live-provider-call` and supply the
+separately imported live OCI digest to run **only** the combined case once.
+It skips the default prestart-negative and unbound-agent cases, so this invocation
+authorizes at most one provider call. Run those cases through the offline campaign.
+The release's separate standalone live test brings the campaign budget to two;
+there are no automatic retries, even after an unknown or stale outcome.
+
+This variant requires operator-provisioned server-only `openai-api-key` in addition
+to `robot-client-key`. Preflight reads credential metadata/ACL only. The broker
+reads the key and acquires the actual simulated Robot observation before inference.
+After inference it acquires one newer execution observation and requires unchanged
+encoder values and context revision before dispatch.
+The harness checks `live-preview-1`, pinned `gpt-5.4-mini-2026-03-17`, finite typed
+targets, actual observed lineage, bounded token accounting and the same kernel
+natural-completion/reconciliation and final evidence checks as offline.
+It accepts no fixture model substitution. The 40-second harness output wait
+allows the existing 30-second broker transport outcome to be recorded; it does
+not change either observation's one-second lifetime or the existing grant.
+
+A stale/failed/unknown response retains a failure record and existing identities;
+it does not count as positive A13 execution. Inspect and explicitly close that
+campaign before any new one. Do not widen freshness or retry a failed revalidation
+to make inference fit. Host regression success is preparation only; no live call
+is implied. See the [solo handoff](../../docs/development/solo-preview-handoff.md).
+
+## Offline campaign
+
 `guest_robot_acceptance.py` runs the installed offline OCI agent through the real
 server broker, authenticated Robot manager, Linux authority module and simulated
 controller fixture. It is opt-in and accepts only the pinned Debian x86/ARM guests.
@@ -85,7 +114,17 @@ artifact, guest boot, cgroup lifetime, Robot binding, original handle/observatio
 lineage and settled debit. The recorded runtime snapshot must independently show
 UID/GID 65532, no capabilities, no-new-privileges, seccomp mode 2, private namespaces,
 no network routes, a read-only root and no unexpected mounts. It must retain the
-fixed memory/PID/CPU limits, an installed device enforcement program, and the fixed
+fixed memory/PID/CPU limits and the owned fixed device filter: the outer
+`runtime_binding.device_policy` must contain a positive u32 `program_id` and
+`instruction_sha256` equal to
+`c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05`
+(plain lowercase hex, no prefix). This pins the independently authored 160-byte
+instruction array, not the requested OCI allowlist. The owned ID must occur in
+both snapshot `device_programs_direct` and effective `device_programs`; each
+inventory is sorted, unique, at most 64 positive u32 IDs, direct is a subset of
+effective, and `device_attach_flags` is exactly 2 (`BPF_F_ALLOW_MULTI`). Legacy
+program-presence-only captures cannot satisfy this new fixed-profile campaign.
+It must also retain the fixed
 I/O rates on the device read from installed configuration during preflight.
 Cleanup must retain a ready observer with zero loss,
 required probe coverage, the same collector epoch and monotone sequence, plus all
@@ -113,7 +152,8 @@ intent/reply records and never retry. Any failure preserves `failure.json`, atte
 identities and earlier results, then stops; it does not silently cancel/recover or
 rerun the failed campaign. Inspect the retained state and explicitly close/recover
 it before a separately numbered run. A lost reply may leave an unknown outcome or
-held debit. No observation is refreshed to rescue a stale model/dispatch result.
+held debit. No failed execution revalidation is retried to rescue a stale or
+changed model/dispatch result.
 
 The local self-tests check evidence hashes and trusted lineage, grant-preserving
 natural completion, retirement/recovery ordering, strict final evidence semantics,

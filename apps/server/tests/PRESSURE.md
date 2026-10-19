@@ -15,8 +15,14 @@ The three results are separate:
    write and no retry. Four settled zero-token debits, a durable key cancellation
    and at least one exact call-budget refusal are required. EOF/reset after a
    complete burst write remains explicit uncertainty, never a denial inferred
-   from silence. All eight burst requests must be accounted for, with no extra
-   debit. This is finite concurrent call pressure, not an arrival-rate/WCET or
+   from silence. Every confirmed budget refusal must retain a closed cancellation
+   tombstone; an EOF key may have zero or one. These are request-key records,
+   not approved-call reservations. Read-only broker SQL is correlated with each
+   active/final inspection: exactly four digest-bearing settled base reservations,
+   and only burst tombstones with NULL digest/output and zero byte/token/deadline
+   reservations. Duplicate/unrelated rows and extra reservations fail. All eight
+   burst requests remain accounted for, with no extra debit. This is finite
+   concurrent call pressure, not an arrival-rate/WCET or
    proof that every request overlapped inside the broker.
 2. While A remains active, exactly one broker-directory `mkdir` for newly
    allocated B returns `ENOSPC`. The launcher has already retained its binding
@@ -63,18 +69,32 @@ injection API, limit or dependency is added.
 
 `pressure_fixture.py install` installs one fixed **runtime-only** drop-in under
 `/run/systemd/system/actryn-launcher.service.d/90-a08-pressure.conf`. It prefixes
-only the launcher's ExecStart with `/usr/bin/env LD_PRELOAD=...`. This is
+only the launcher's ExecStart with
+`/usr/bin/env LD_PRELOAD=/opt/actryn-a08-pressure/fault.so`. The hash-pinned test
+library is copied once into that fresh root-owned mode-0700 directory, as a
+mode-0600 file; existing files/directories are rejected, never overwritten.
+The control/latch/event directory remains `/run/actryn/a08-pressure`. This
+separation permits loading the library while `/run` remains `noexec`; no mount,
+unit security property or native binary is changed. An existing `/opt` noexec
+mount rejects setup, and post-start checks require an actual executable mapping
+of the exact library device/inode in only the selected launcher. Read-only-only,
+deleted/replaced and legacy `/run` mappings cannot establish instrumentation.
+This is
 **instrumented production-path evidence**, not unchanged installed-unit
 qualification. The normal installed ExecStartPre gate, ExecStopPost, signed
 files, `/etc` unit/drop-in files, capabilities and limits remain intact. A
 preflight rejection stops setup and is retained; it is never bypassed.
 The fixture records the effective unit text/commands and inherited security
 properties, plus selected immutable executable hashes. A bounded process-map
-inventory must find the shim in exactly the current launcher, not the server,
+inventory checks all mappings and executable mappings separately, including the
+old runtime library path, and must find the shim in exactly the launcher, not the server,
 observer or agent. `restore` requires every attempt reaped, removes only the
 owned runtime drop-in, restarts normally, and requires exact original effective
-configuration, unchanged public config and no remaining shim mappings. Library,
-event, imported-artifact and attempt history remain retained.
+configuration, unchanged public config and no remaining mappings of either
+library location (including read-only mappings). Both the persistent library and
+runtime control-directory evidence remain retained for explicit capture; a new
+collector must include `/opt/actryn-a08-pressure/fault.so`. Setup does not remove
+prior failed-run directories. Event, imported-artifact and attempt history remain retained.
 
 ## Reviewed execution stages (guest only)
 
@@ -97,7 +117,7 @@ Keep compiler output, ELF/readelf details and SHA-256 provenance. Compile withou
 ```
 
 Stop the quiescent server/launcher normally, retain the old public config, and
-import this layout once with installed `/usr/bin/actryn-artifact import --layout
+import this layout once with installed `/usr/bin/actryn server import --layout
 ... --digest sha256:ACTUAL_BUILDER_DIGEST`. Preserve the new public config and
 restart the unchanged services. The importer, not an edited allowlist, approves
 the artifact. Its fixed offline profile permits echo but no live model, network

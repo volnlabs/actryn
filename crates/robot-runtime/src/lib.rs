@@ -4,6 +4,7 @@ mod bridge;
 mod capture;
 mod clock;
 mod events;
+mod reconciliation;
 mod skill;
 mod types;
 use authority_client::{boottime_ns, AuthorityDevice, Event, Opcode, Request, Role, Status};
@@ -206,8 +207,18 @@ impl Engine {
                     .registry
                     .retire_namespace(&slot.context.namespace)?;
                 slot.retiring = true;
-                slot.stop.store(true, Ordering::Release);
                 let _ = self.bridge.revoke();
+            }
+            let status = self.bridge.admin.status()?;
+            reconciliation::stop_if_closed(
+                &slot.context.registry,
+                &slot.context.namespace,
+                slot.active.as_mut(),
+                &status,
+                &slot.stop,
+            )?;
+            if !slot.stop.load(Ordering::Acquire) {
+                return Ok(Progress::Pending);
             }
             if slot.workers.iter().any(|w| !w.is_finished()) {
                 return Ok(Progress::Pending);
@@ -667,7 +678,7 @@ impl Engine {
             } else {
                 Verdict::OutcomeUnknown
             };
-            Snapshot::from_registry(s, verdict, false)
+            Snapshot::from_registry(s, verdict)
         });
         Ok(Historical {
             prepared,
@@ -713,7 +724,7 @@ impl Engine {
         } else {
             Verdict::Cancelled
         };
-        Ok(Snapshot::from_registry(result, verdict, false))
+        Ok(Snapshot::from_registry(result, verdict))
     }
     /// Urgent key fence and kernel close; returns pending until tombstone durable.
     pub fn cancel(&self, binding: &Binding, key: [u8; 32]) -> Result<Snapshot> {
@@ -724,7 +735,7 @@ impl Engine {
         } else {
             Verdict::Cancelled
         };
-        Ok(Snapshot::from_registry(result, verdict, false))
+        Ok(Snapshot::from_registry(result, verdict))
     }
     pub fn retire(&self) -> Result<Progress> {
         self.revoke()?;
@@ -769,7 +780,7 @@ impl Engine {
             },
             |a| a.verdict,
         );
-        Snapshot::from_registry(value, verdict, active.is_some_and(|a| a.reconciled))
+        Snapshot::from_registry(value, verdict)
     }
     fn health_for(&self, context: Option<&Context>) -> Health {
         let mut h = Health {
@@ -823,7 +834,7 @@ impl Engine {
                 s.context
                     .registry
                     .query(s.context.prepared.binding.namespace, a.key)
-                    .map(|v| Snapshot::from_registry(v, a.verdict, a.reconciled))
+                    .map(|v| Snapshot::from_registry(v, a.verdict))
             })
         });
         Ok(RuntimeStatus {
@@ -916,13 +927,14 @@ impl Engine {
         }
         let retiring = core.slot.as_ref().unwrap().retiring;
         if retiring {
-            if status.operation == 0 || status.operation_state == 4 {
-                core.slot
-                    .as_ref()
-                    .unwrap()
-                    .stop
-                    .store(true, Ordering::Release);
-            }
+            let slot = core.slot.as_mut().unwrap();
+            reconciliation::stop_if_closed(
+                &context.registry,
+                &context.namespace,
+                slot.active.as_mut(),
+                &status,
+                &slot.stop,
+            )?;
             return Ok(());
         }
         if !self.inhibited.load(Ordering::Acquire) {
@@ -954,10 +966,7 @@ impl Engine {
             return Err(Error::Denied("uncertain intent outcome"));
         }
         if status.operation_state == 4 {
-            active.reconciled = true;
-            if snapshot.phase == robot_intent::Phase::Submitted {
-                context.registry.complete(&context.namespace, active.key)?;
-            }
+            reconciliation::record(&context.registry, &context.namespace, active, &status)?;
             return Ok(());
         }
         if now >= active.deadline {

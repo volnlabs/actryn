@@ -1,0 +1,372 @@
+{
+  "bounded_workflow": {
+    "boundary": "The final signatures change manifest provenance only. Both installed payload archives are byte-identical to the v5-qualified subjects; no operation or provider call was replayed after signing.",
+    "composed_from_qualified_identical_payloads": true,
+    "executed_on_signed_guests": false,
+    "qualification_bundle_sha256": "8e34b5f9a02e6d7f398c6dc8c995b883b775a9944113db7ce778fce6b1111b36"
+  },
+  "created_at": "2026-10-19T21:15:55.149877+00:00",
+  "evidence": [
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/build.py",
+      "sha256": "e1e877cdb725d66ffb9d12c7db5e468a9d8594cc7c8a12cdb38a9ff7f5cffaa4",
+      "size": 4464
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/build-report.json",
+      "sha256": "c7eab47e56f0e3c289fbbab3cf61a33839cbf6b8f75a0dfab604e345d42a340b",
+      "size": 1423
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/server-inputs.json",
+      "sha256": "9c2e2bd8f3aa2d933f5e796fa63cb8833f457f157bdf4cd16ba84ca42cf41fd4",
+      "size": 15024
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/robot-inputs.json",
+      "sha256": "dc8b3c39802936858ef738b23046864657e6ed8a02b6fcea67e082b8b2f4f717",
+      "size": 8911
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/verify-signed.py",
+      "sha256": "c146c5c3b34eecb055de2fb781a6c7057686820c784f1f0e3f02ee9857846a2e",
+      "size": 2886
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/signed-inspection.json",
+      "sha256": "1b1f716f3500c2f18f9bd5c77894e09d35554e21d0be598f9520d4295e16fdea",
+      "size": 1166
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/server/manifest.json",
+      "sha256": "bcc415d038820bc08c15c9f6f6a53f24d2d805d4b188f5f01b733cf8cbd985e9",
+      "size": 11753
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/server/payload.tar",
+      "sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82",
+      "size": 70789120
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/server/signature.ed25519",
+      "sha256": "4cb1c0f4b98727453d46743719a64788e42cf70f52243bd9a61f170286f14222",
+      "size": 64
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/robot/manifest.json",
+      "sha256": "0e4e4ec9d673de73c3a3207056e88c32f4e96074e61841b00a8cc4e0bfe51d80",
+      "size": 7000
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/robot/payload.tar",
+      "sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8",
+      "size": 34959360
+    },
+    {
+      "path": "artifacts/v0.0.1-release-candidates01/robot/signature.ed25519",
+      "sha256": "c308dafa6575b14da481262d7577e406e3a8ad060ef199580f02591cc6bafd84",
+      "size": 64
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/prepare.py",
+      "sha256": "ba5e33994a946dbd6748c4dbb4e5f36c03997de431c4063c7aba6758da907316",
+      "size": 6857
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/prepared.json",
+      "sha256": "ee390d326e7ea9c74870323b52ef5282759940d5915ffc0f432472f583287c06",
+      "size": 421
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/launch.py",
+      "sha256": "99d7b45f4df0a2e54b7a3ee56d69b8ba65a5752c09e1ee44590dace4fa3c6626",
+      "size": 2699
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/launched.json",
+      "sha256": "0be6a8cd91dfa29d0475240ae01e8664b2de426532e9802c5f37ed54b5efe750",
+      "size": 1111
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-known_hosts",
+      "sha256": "0a9913e8ce2be3b60e81fa9eb65c2f145d31efcecef88e799bb181ac4de5ad70",
+      "size": 157
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-known_hosts-attempt02",
+      "sha256": "e35ed95e7beaadc5587e12b259bc29b06bfbf613ab7df0684510a5c407955ac5",
+      "size": 157
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-tuple.txt",
+      "sha256": "6db5d7b81d92f39a6fda2b459cbff4b35254d288b33dde2209e40135abade510",
+      "size": 459
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-tuple.txt",
+      "sha256": "0e73ee2b1b728c782123f55eb1be52a607674068c6551e29a94f9d6a4c5f57a2",
+      "size": 442
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-transfer-sha256.txt",
+      "sha256": "52c6fa33f5afef34ded26ddf6e643631b3a3dc2fb4493c8d730502a105fea839",
+      "size": 502
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-transfer-sha256.txt",
+      "sha256": "6b57d1008749a6b2d80bbc4ed0f43bdbc5cad6fe23a3c598ac2aee5aa32723ba",
+      "size": 499
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-inspect.json",
+      "sha256": "55a3e9ccf4628597c907f2cd5fac6ccfa05c7373a25c29d7634028577ec90d6a",
+      "size": 453
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-inspect.json",
+      "sha256": "3af8ba27de764803f7e66053fa6b778d4e66ff53816e011e319d42a60a342708",
+      "size": 453
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-apt-update.log",
+      "sha256": "21118d8a1858ec0b0fde753d9d894f76240237bdd143a0c3a57edc1e311309af",
+      "size": 1427
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-prerequisite-candidates.txt",
+      "sha256": "978002231a5be2fc0131d57bc599e2b8cc3d6e7dcf67798a71e48d4a6e34b252",
+      "size": 639
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-prerequisite-install.log",
+      "sha256": "d0aa1adcae2802d786f6211c26357ce7ea7d70db74c4185c50633cb3740a5b98",
+      "size": 3346
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-prerequisite-verification.txt",
+      "sha256": "8396ee1ded3bba4ff8695c74fbc38be3911f2f957d34c5d092325fa75d1601c1",
+      "size": 247
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-stage.json",
+      "sha256": "2d7bb1bcad6f2c93ff65c0a70c8c755ba8c04ce7650c4cd8377f262714afb157",
+      "size": 240
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-stage.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-activate.json",
+      "sha256": "2705d22832635e5b12ec85b3e2eaf91ab8c53e06335948b67edeb6f65fb056ec",
+      "size": 253
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-activate.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-stage.json",
+      "sha256": "dcc5d6d0c6ccaa1470dd633109ca9e751cb048de21b00dd640fca1a8faf33b18",
+      "size": 239
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-stage.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-activate.json",
+      "sha256": "0d73a3ba02e85ca53a8bb3cd0cd451926517f6da358ed54753456e17bdc70b7d",
+      "size": 252
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-activate.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-installed-state.txt",
+      "sha256": "44ae43a57a54be91816442bfd80e102a6a1efd5e1457c43dec1f6a516237d26f",
+      "size": 848
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-installed-state.txt",
+      "sha256": "63a114ce68dbcd52294832e5ef73cb35c2d4f112aacb70c1255e2e2becd1bf2c",
+      "size": 791
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-bootstrap-config01.sh",
+      "sha256": "f3aefd850a9ca89311a5d8102b2809f658943744b0623957105b5564a0d95175",
+      "size": 1709
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-bootstrap-import01.sh",
+      "sha256": "c726a9933213128bab4585b74711d077a67d4dbe4a1a362a45a4fd7a8c38ba3e",
+      "size": 1932
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-bootstrap-config01.sh",
+      "sha256": "8b0efc50b094b4d1d6bd0b1c015bf2c7f31b6f9cd2e1dfa46c11504224c7f73a",
+      "size": 1367
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-bootstrap-transfer.txt",
+      "sha256": "bff29aeb58925584329746ca915de311b752afb50f1c77daa04246c6ede6a9b8",
+      "size": 256
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-bootstrap-transfer.txt",
+      "sha256": "5330d05eb4c216e82ede8d5fd9497b1d744bf7ca295bd7f0d1603772c220b65f",
+      "size": 127
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-bootstrap-config.log",
+      "sha256": "f8f06cb591870f07b2a590a2b3433ec373f9146e8bb85a2353846209ee364d60",
+      "size": 609
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-bootstrap-config.err",
+      "sha256": "785964a20642cab4b84663913dd6fdf5565a5cd0c3cb5838a4822e20d7ad40e7",
+      "size": 124
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-bootstrap-import.log",
+      "sha256": "81944c3b06cff8880e3b7d3d79de0fecc87c88a9daa147a1bd11301751da5505",
+      "size": 635
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-bootstrap-import.err",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-bootstrap-config.log",
+      "sha256": "4472fadf5aa60ab0dbe794242672c29f7ff9dd9ff511d113becd97a85f054ea1",
+      "size": 574
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-bootstrap-config.err",
+      "sha256": "fe53449b5dbe5eaabcb171f01bfe23365f1f32acbec7570e786f4bc3d6e52843",
+      "size": 128
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-post-bootstrap-state.txt",
+      "sha256": "213061ef1803deea8d0e97ab39bdfde8e47e328ccd5f9ca708aeba39a2e5d969",
+      "size": 228
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-post-bootstrap-state.txt",
+      "sha256": "5dc28ce427c3efdde032d4c19253f99161e35fbb488b21e0f00d5e728b09362a",
+      "size": 194
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/server-poweroff-request.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/robot-poweroff-request.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/stopped-custody.txt",
+      "sha256": "d9066fa6bd653c84a4c1d6614f2b6b3b012c77acce5f96e8c424e68dd52a498a",
+      "size": 324
+    },
+    {
+      "path": "artifacts/signed-distribution-preparation01/stopped-overlay-sha256.txt",
+      "sha256": "b9239c07a0ce3bbfc69a93c9bd6ee7c93eb08f0b68e3bd0a1ddc448d64641a1d",
+      "size": 235
+    }
+  ],
+  "execution": "automated under maintainer authorization",
+  "format": "actryn-v0.0.1-signed-distribution-verification-1",
+  "fresh_guests": true,
+  "independent_installation": false,
+  "live_actuation": false,
+  "owner": "Utkarsh Maurya <projects.utkarshMaurya@gmail.com>",
+  "physical_acceptance": false,
+  "qualification": {
+    "deferred_gates": [
+      "A14"
+    ],
+    "maintainer_review_path": "docs/development/solo-maintainer-review-v5.json",
+    "maintainer_review_sha256": "73c37ca1176eed05ca0e2b08388cce8995f9f80b0b4221031f432e1b542e8750",
+    "open_required_gates": [],
+    "path": "docs/development/solo-preview-qualification-v5.json",
+    "sha256": "8e34b5f9a02e6d7f398c6dc8c995b883b775a9944113db7ce778fce6b1111b36"
+  },
+  "release_qualified": false,
+  "remaining": [
+    "final-distribution-archive-restore"
+  ],
+  "roles": {
+    "robot": {
+      "activate_result": "installed_inhibited",
+      "active_pointer_verified": true,
+      "authority_issued": false,
+      "automatic_restart": false,
+      "bootstrap_verified": true,
+      "inhibitor_present": true,
+      "manifest_sha256": "0e4e4ec9d673de73c3a3207056e88c32f4e96074e61841b00a8cc4e0bfe51d80",
+      "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8",
+      "promotable": true,
+      "services_inactive": true,
+      "signature_sha256": "c308dafa6575b14da481262d7577e406e3a8ad060ef199580f02591cc6bafd84",
+      "signature_verified": true,
+      "stage_result": "staged",
+      "target": {
+        "architecture": "aarch64",
+        "boot_id": "3824acc9-4f14-4664-89f9-c755d48a3182",
+        "distribution": "debian",
+        "kernel_release": "6.12.111+deb13-arm64",
+        "machine_id": "2898ac3a0b414c8d9efdb7a5f7bd3caa",
+        "version": "13.7",
+        "virtualization": "qemu"
+      }
+    },
+    "server": {
+      "activate_result": "installed_inhibited",
+      "active_pointer_verified": true,
+      "authority_issued": false,
+      "automatic_restart": false,
+      "bootstrap_verified": true,
+      "inhibitor_present": true,
+      "manifest_sha256": "bcc415d038820bc08c15c9f6f6a53f24d2d805d4b188f5f01b733cf8cbd985e9",
+      "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82",
+      "promotable": true,
+      "services_inactive": true,
+      "signature_sha256": "4cb1c0f4b98727453d46743719a64788e42cf70f52243bd9a61f170286f14222",
+      "signature_verified": true,
+      "stage_result": "staged",
+      "target": {
+        "architecture": "x86_64",
+        "boot_id": "674930d0-0b9c-4f3f-9ad1-82ad68319ba7",
+        "distribution": "debian",
+        "kernel_release": "6.12.111+deb13-amd64",
+        "machine_id": "cc00f632fcc74c3ebeb8febcc6188fdd",
+        "version": "13.7",
+        "virtualization": "kvm"
+      }
+    }
+  },
+  "signed_distribution_verified": true,
+  "signer": {
+    "custody_path": "docs/development/release-key-custody.json",
+    "custody_sha256": "1c773dbe3455b0e54ec7d746fb685f8e981769bd6d2e518387fe1b450a263c36",
+    "public_key_path": "docs/development/v0.0.1-signed-metadata/release-public.pem",
+    "public_key_pem_sha256": "69fe768f85ae3d0220e3f5b35b194357c99c349e7edf684c6d1fd32dac34a0bb",
+    "spki_sha256": "3bc25f592073d520c88635fca7fe1838d156428c314b34db4ebd655a18ce6735"
+  },
+  "status": "PASS",
+  "stopped_custody": {
+    "forwarded_ports_free": true,
+    "robot_overlay_sha256": "740c41034acde1736aba43e7a671e801d3f78ef06ba589c8edf68efb0603548e",
+    "server_overlay_sha256": "1f1f480647f8587cf024bbb838a13a523bf1e1a95c0c9acefc1b3b1229c41dcc",
+    "vm_units_inactive": true
+  }
+}

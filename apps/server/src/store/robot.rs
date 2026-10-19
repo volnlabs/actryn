@@ -138,6 +138,8 @@ impl Store {
             deadline_ms: a.deadline_ms.min(binding.deadline_ms),
             observation: None,
             observation_digest: None,
+            execution_observation: None,
+            execution_observation_digest: None,
             parent_digest: None,
             proposal_digest: None,
             last_remote: None,
@@ -225,6 +227,43 @@ impl Store {
         );
         value.proposal_digest = Some(digest.into());
         value.phase = Phase::DispatchIntent;
+        save(&tx, &value)?;
+        tx.commit()?;
+        Ok(value)
+    }
+
+    pub fn robot_execution_observe(
+        &mut self,
+        attempt: &str,
+        key: &str,
+        observation: &Observation,
+        now: i64,
+    ) -> Result<Intent> {
+        observation.validate()?;
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let mut value = get(&tx, attempt, key)?;
+        mutable(&tx, &value, now)?;
+        let original = value
+            .observation
+            .as_ref()
+            .context("model observation missing")?;
+        ensure!(
+            value.phase == Phase::Observed
+                && value.execution_observation.is_none()
+                && observation.id > original.id
+                && observation.acquired_earliest_ns > original.acquired_earliest_ns
+                && observation.acquired_latest_ns > original.acquired_latest_ns
+                && observation.controller_ns >= original.controller_ns
+                && observation.left_ticks == original.left_ticks
+                && observation.right_ticks == original.right_ticks
+                && observation.context_revision == original.context_revision
+                && observation.simulated == original.simulated,
+            "execution observation does not revalidate model context"
+        );
+        value.execution_observation = Some(observation.clone());
+        value.execution_observation_digest = Some(robot::digest(observation)?);
         save(&tx, &value)?;
         tx.commit()?;
         Ok(value)

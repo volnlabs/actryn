@@ -137,6 +137,10 @@ pub struct Intent {
     pub deadline_ms: i64,
     pub observation: Option<Observation>,
     pub observation_digest: Option<String>,
+    #[serde(default)]
+    pub execution_observation: Option<Observation>,
+    #[serde(default)]
+    pub execution_observation_digest: Option<String>,
     pub parent_digest: Option<String>,
     pub proposal_digest: Option<String>,
     pub last_remote: Option<RemoteSnapshot>,
@@ -154,6 +158,8 @@ pub struct Summary {
     pub deadline_ms: i64,
     pub observation_id: Option<u64>,
     pub observation_digest: Option<String>,
+    pub execution_observation_id: Option<u64>,
+    pub execution_observation_digest: Option<String>,
     pub proposal_digest: Option<String>,
     pub remote_verdict: Option<Verdict>,
     pub cancellation_durable: bool,
@@ -173,6 +179,8 @@ impl Intent {
             deadline_ms: self.deadline_ms,
             observation_id: self.observation.as_ref().map(|o| o.id),
             observation_digest: self.observation_digest.clone(),
+            execution_observation_id: self.execution_observation.as_ref().map(|o| o.id),
+            execution_observation_digest: self.execution_observation_digest.clone(),
             proposal_digest: self.proposal_digest.clone(),
             remote_verdict: self.last_remote.as_ref().map(|s| s.verdict.clone()),
             cancellation_durable: self
@@ -314,18 +322,20 @@ impl RemoteSnapshot {
             && self.revision > 0
             && self.durable_revision == self.revision
             && self.terminal
-            && self.verdict != Verdict::OutcomeUnknown
             && ((self.cancellation_durable
                 && self.phase == "CancelledDurable"
                 && self.closure == "NotAllocated"
-                && self.operation.is_none())
+                && self.operation.is_none()
+                && self.verdict != Verdict::OutcomeUnknown)
                 || (matches!(self.phase.as_str(), "Completed" | "CancelledDurable")
                     && self.reconciled
                     && self.operation.is_some()
-                    && matches!(
+                    // Durable Completed/reconciled proves resource closure even when
+                    // task success remains unknown. Unknown work is a different phase.
+                    && (matches!(
                         self.verdict,
                         Verdict::TargetReached | Verdict::TimedOut | Verdict::Cancelled
-                    )))
+                    ) || (self.phase == "Completed" && self.verdict == Verdict::OutcomeUnknown))))
     }
 }
 
@@ -596,8 +606,9 @@ impl Peer {
             "proposal binding mismatch"
         );
         let observation = intent
-            .observation
+            .execution_observation
             .as_ref()
+            .or(intent.observation.as_ref())
             .context("trusted observation missing")?;
         Self::request(
             &b.robot_epoch,

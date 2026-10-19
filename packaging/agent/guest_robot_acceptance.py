@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Opt-in installed, non-actuating two-guest offline integration; never enroll or retry mutations."""
+"""Opt-in non-actuating two-guest integration; offline by default, never retry mutations."""
 import argparse
 import base64
 import copy
@@ -25,6 +25,7 @@ REQUIRED_COVERAGE = ('process.lifecycle', 'syscall.openat', 'syscall.connect', '
                      'syscall.perf_event_open', 'syscall.mount', 'syscall.unshare', 'syscall.setns')
 RESOURCE_COUNTERS = ('memory.current', 'memory.peak', 'memory.events', 'cpu.stat', 'io.stat',
                      'pids.current', 'pids.peak', 'pids.events')
+DEVICE_POLICY_SHA256 = 'c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05'
 
 
 def compact(value, sort=True):
@@ -40,11 +41,22 @@ def require(condition, message):
         raise AssertionError(message)
 
 
-def verify_lineage(value, intent, attempt, namespace):
+def verify_model_tokens(tokens, live=False):
+    require(type(tokens) is int and 0 <= tokens <= (1024 if live else 0), 'model token accounting')
+
+
+def verify_lineage(value, intent, attempt, namespace, live=False):
     require(value['origin'] == 'server_attested' and value['attempt_id'] == attempt, 'attestation identity')
-    require(value['request_key'] == intent['request_key'] == 'preview-1', 'agent request key')
-    require(value['model'] == 'offline-fixture', 'unexpected provider')
-    require(value['output'] == {'left_delta_ticks': 10, 'right_delta_ticks': 10, 'duration_ms': 1000}, 'fixed target')
+    require(value['request_key'] == intent['request_key'] == ('live-preview-1' if live else 'preview-1'), 'agent request key')
+    require(value['model'] == ('gpt-5.4-mini-2026-03-17' if live else 'offline-fixture'), 'unexpected provider')
+    if live:
+        proposal = value['output']
+        require(set(proposal) == {'left_delta_ticks', 'right_delta_ticks', 'duration_ms'}
+                and all(type(v) is int for v in proposal.values())
+                and -100 <= proposal['left_delta_ticks'] <= 100 and -100 <= proposal['right_delta_ticks'] <= 100
+                and 1 <= proposal['duration_ms'] <= 10000, 'bounded live target')
+    else:
+        require(value['output'] == {'left_delta_ticks': 10, 'right_delta_ticks': 10, 'duration_ms': 1000}, 'fixed target')
     handle = intent['handle']
     require(handle == value['robot_handle'] and handle['attempt'] == attempt
             and handle['namespace'] == namespace and re.fullmatch('[0-9a-f]{64}', handle['key']), 'remote handle')
@@ -60,8 +72,25 @@ def verify_lineage(value, intent, attempt, namespace):
     parent = digest({'handle': handle, 'request_digest': intent['request_digest'],
                      'robot_epoch': intent['robot_epoch'], 'observation': observation})
     require(parent == intent['parent_digest'] == value['lineage_digest'], 'parent lineage')
+    if live:
+        execution = intent['execution_observation']
+        require(execution['id'] > observation['id']
+                and execution['acquired_earliest_ns'] > observation['acquired_earliest_ns']
+                and execution['acquired_latest_ns'] > observation['acquired_latest_ns']
+                and execution['controller_ns'] >= observation['controller_ns']
+                and execution['left_ticks'] == observation['left_ticks']
+                and execution['right_ticks'] == observation['right_ticks']
+                and execution['context_revision'] == observation['context_revision']
+                and execution['simulated'] == observation['simulated'],
+                'execution observation did not revalidate model context')
+        execution_hash = digest({k: execution[k] for k in OBSERVATION_FIELDS}, sort=False)
+        require(execution_hash == intent['execution_observation_digest'], 'execution observation digest')
+    else:
+        require(intent.get('execution_observation') is None
+                and intent.get('execution_observation_digest') is None,
+                'offline proposal unexpectedly replaced its observation')
     require(intent['request_digest'] == value['request_digest'], 'input request digest')
-    require(value['agent_observation_reference'] == 'offline-preview-reference', 'diagnostic agent input')
+    require(value['agent_observation_reference'] == ('live-preview-reference' if live else 'offline-preview-reference'), 'diagnostic agent input')
 
 
 def verify_kernel_completion(kernel, operation):
@@ -88,7 +117,25 @@ def verify_bundle(bundle, attempt):
     return names
 
 
-def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifact_digest, io_device):
+def verify_device_policy(binding):
+    snapshot = binding['snapshot']
+    proof = binding.get('device_policy')
+    require(isinstance(proof, dict) and type(proof.get('program_id')) is int
+            and 0 < proof['program_id'] <= 0xffffffff
+            and proof.get('instruction_sha256') == DEVICE_POLICY_SHA256,
+            'fixed owned device policy proof missing or changed')
+    effective, direct = snapshot.get('device_programs'), snapshot.get('device_programs_direct')
+    for values in (effective, direct):
+        require(isinstance(values, list) and 0 < len(values) <= 64
+                and all(type(value) is int and 0 < value <= 0xffffffff for value in values)
+                and values == sorted(set(values)), 'invalid device program inventory')
+    require(set(direct) <= set(effective) and proof['program_id'] in direct
+            and proof['program_id'] in effective
+            and type(snapshot.get('device_attach_flags')) is int and snapshot['device_attach_flags'] == 2,
+            'owned device policy membership or MULTI attachment missing')
+
+
+def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifact_digest, io_device, expected_tokens=0):
     required = {'attempt', 'runtime_binding', 'runtime_facts', 'stdout', 'stderr', 'broker', 'robot'}
     require(verify_bundle(bundle, attempt) == required and bundle['omissions'] == [], 'final artifacts incomplete')
     artifacts = {value['name']: value['content'] for value in bundle['artifacts']}
@@ -101,6 +148,7 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
             and runtime['snapshot']['pid'] > 0 and runtime['snapshot']['start_ticks'] > 0,
             'runtime lifetime binding')
     snapshot = runtime['snapshot']
+    verify_device_policy(runtime)
     require(snapshot['uid'] == snapshot['gid'] == 65532 and snapshot['capabilities'] == 0
             and snapshot['no_new_privileges'] is True and snapshot['seccomp_mode'] == 2,
             'runtime process restrictions missing')
@@ -114,9 +162,6 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
             and len(io_lines[0]) == 5 and io_lines[0][0] == io_device
             and set(io_lines[0][1:]) == {'rbps=1048576', 'wbps=1048576', 'riops=128', 'wiops=128'},
             'runtime I/O limits differ from configured device/policy')
-    require(isinstance(snapshot['device_programs'], list) and snapshot['device_programs']
-            and all(type(value) is int and value > 0 for value in snapshot['device_programs']),
-            'runtime device enforcement missing')
     facts = artifacts['runtime_facts']
     require(facts['observer_health_unavailable'] is False and facts['observer'] is not None, 'cleanup observer unavailable')
     first, final = runtime['observer'], facts['observer']
@@ -139,7 +184,8 @@ def verify_final_bundle(bundle, attempt, binding, completed, logs, boot, artifac
             and len(broker['calls']) == 1, 'final broker evidence/accounting incomplete')
     call = broker['calls'][0]
     require(call['request_key'] == completed['request_key'] and call['state'] == 'settled'
-            and call['consumed_tokens'] == 0 and call['publication_closed'] is True, 'final call attribution')
+            and type(call['consumed_tokens']) is int and call['consumed_tokens'] == expected_tokens
+            and call['publication_closed'] is True, 'final call attribution')
     robot = artifacts['robot']
     require(robot['classification'] == 'trusted_peer_delegation_metadata' and robot['binding'] == binding
             and robot['requests_retained'] == len(robot['requests']) == 1 and robot['outstanding_debits'] == 0,
@@ -246,8 +292,13 @@ print(json.dumps({{'restoration_confirmed':restore,'public_peer_replaced':not re
 
 
 class Campaign:
+    live = False
+    request_key = 'preview-1'
+
     def __init__(self, args):
         self.args, self.epoch = args, b''
+        self.live = getattr(args, 'allow_one_live_provider_call', False)
+        self.request_key = 'live-preview-1' if self.live else 'preview-1'
         self.phase, self.last_poll, self.attempts, self.mutations = 'preflight', None, [], set()
         self.output = args.output.resolve()
         self.output.mkdir(mode=0o700, parents=False, exist_ok=False)
@@ -255,7 +306,8 @@ class Campaign:
         self.remote_output = '/var/lib/actryn-test-campaigns/' + self.token
         self.peer = json.loads(args.peer_config.read_bytes())
         self.operator = None
-        self.save('campaign.json', {'physical_acceptance': False, 'live_provider_calls': False,
+        self.save('campaign.json', {'physical_acceptance': False, 'live_provider_calls_authorized': self.live,
+                  'provider_call_budget': 1 if self.live else 0,
                   'artifact_digest': args.artifact, 'peer_config_digest': digest(self.peer),
                   'principal': self.peer['principal'], 'server_port': args.server_port,
                   'robot_port': args.robot_port, 'token': self.token})
@@ -415,8 +467,8 @@ print(json.dumps({{'stores':stores,'facts':facts,'observer_epoch':epoch,'summary
         self.save(label + '-cleanup-observed.json', observed)
         verify_cleanup(observed['snapshot'], observed['inspection'])
         calls = observed['inspection']['calls']
-        if any(call['request_key'] == 'preview-1' for call in calls):
-            require(self.server('result', '--attempt', attempt, '--key', 'preview-1')['value'] is None,
+        if any(call['request_key'] == self.request_key for call in calls):
+            require(self.server('result', '--attempt', attempt, '--key', self.request_key)['value'] is None,
                     'cancelled result republished')
         else:
             # Prepared negative cases never allocated this key; Result correctly
@@ -437,10 +489,11 @@ print(json.dumps({{'stores':stores,'facts':facts,'observer_epoch':epoch,'summary
                 "import pathlib,sys;sys.stdout.buffer.write(pathlib.Path('/proc/device-tree/compatible').read_bytes())"), 'ARM target is not disposable virt')
         program = f'''import errno,json,pathlib,stat,os,subprocess
 subprocess.run(['/usr/bin/actryn-serverd','--check-config'],check=True,capture_output=True,timeout=20)
-p=pathlib.Path({PEER!r});m=p.lstat();assert stat.S_ISREG(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022 and m.st_size<=65536
+p=pathlib.Path({PEER!r});m=p.lstat();assert stat.S_ISREG(m.st_mode) and m.st_uid==m.st_gid==0 and stat.S_IMODE(m.st_mode)==0o644 and m.st_size<=65536
 peer=json.loads(p.read_bytes());config=json.loads(pathlib.Path('/etc/actryn/server.json').read_bytes())
 root=pathlib.Path(config['artifacts'][{self.args.artifact!r}]['rootfs']);i=json.loads((root/'etc/actryn/input.json').read_bytes())
-assert i.get('mode','offline')=='offline' and i['request_key']=='preview-1'
+assert i.get('mode','offline')=={'live' if self.live else 'offline'!r} and i['request_key']=={self.request_key!r}
+assert i['observation_id']=={'live-preview-reference' if self.live else 'offline-preview-reference'!r}
 credential_path=pathlib.Path('/run/credentials/actryn-serverd.service/robot-client-key')
 for parent in credential_path.parents:
  m=parent.lstat();assert stat.S_ISDIR(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022
@@ -461,6 +514,21 @@ print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config[
         self.save('server-credential-metadata.json', installed['credential_metadata'])
         require(credential_metadata_safe(installed['credential_metadata'], installed['server_uid']),
                 'systemd credential metadata/ACL differs from configured service identity')
+        if self.live:
+            program = '''import errno,json,os,pathlib,stat
+p=pathlib.Path('/run/credentials/actryn-serverd.service/openai-api-key')
+for parent in p.parents:
+ m=parent.lstat();assert stat.S_ISDIR(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022
+m=p.lstat()
+try:acl=os.getxattr(p,'system.posix_acl_access',follow_symlinks=False).hex()
+except OSError as error:
+ if error.errno not in (errno.ENODATA,errno.ENOTSUP):raise
+ acl=None
+print(json.dumps({'regular':stat.S_ISREG(m.st_mode),'uid':m.st_uid,'gid':m.st_gid,
+'mode':stat.S_IMODE(m.st_mode),'nlink':m.st_nlink,'size':m.st_size,'acl_hex':acl}))'''
+            metadata = json.loads(self.ssh(self.args.server_port, program))
+            self.save('provider-credential-metadata.json', metadata)
+            require(credential_metadata_safe(metadata, installed['server_uid']), 'provider credential access')
         self.operator = installed['operator_uid']
         self.agent_input = installed['input']
         self.io_device = installed['io_device']
@@ -576,22 +644,24 @@ print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config[
         self.local_mutation('combined-activate', 'activate')
         self.mark('isolated agent actual observation and kernel operation')
         self.server_mutation('combined-launch', 'launch', '--attempt', attempt)
-        logs = self.poll(lambda: self.logs(attempt), lambda value: value['stdout.log'] or value['stderr.log'])
+        logs = self.poll(lambda: self.logs(attempt), lambda value: value['stdout.log'] or value['stderr.log'],
+                         40 if self.live else 12)
         self.save('combined-agent-logs.json', logs)
         require(not logs['stderr.log'], logs)
         event = json.loads(logs['stdout.log'])
         require(event['event'] == 'preview_proposal' and event['authority_issued'] is False, 'agent result')
-        result = self.server('result', '--attempt', attempt, '--key', 'preview-1')
+        result = self.server('result', '--attempt', attempt, '--key', self.request_key)
         require(result['value'] == event['value'], 'stored result differs from original agent reply')
         inspection = self.server('status', '--attempt', attempt)['inspection']
         require(inspection['evidence_gaps'] == [] and len(inspection['calls']) == 1
-                and inspection['calls'][0]['state'] == 'settled'
-                and inspection['calls'][0]['consumed_tokens'] == 0, 'offline accounting/evidence incomplete')
+                and inspection['calls'][0]['state'] == 'settled', 'accounting/evidence incomplete')
+        tokens = inspection['calls'][0]['consumed_tokens']
+        verify_model_tokens(tokens, self.live)
         self.local_mutation('combined-reconcile', 'reconcile')
-        completed = self.poll(lambda: self.server('robot-query', '--attempt', attempt, '--key', 'preview-1'),
+        completed = self.poll(lambda: self.server('robot-query', '--attempt', attempt, '--key', self.request_key),
                               lambda r: not r['request']['outstanding_debit'], 12)['request']
-        verify_lineage(result['value'], completed, attempt, namespace)
-        require(completed['request_digest'] == digest({'method': 'model.offline', 'input': {
+        verify_lineage(result['value'], completed, attempt, namespace, live=self.live)
+        require(completed['request_digest'] == digest({'method': 'model.propose' if self.live else 'model.offline', 'input': {
             'goal': self.agent_input['goal'], 'observation_id': self.agent_input['observation_id']}}),
             'request digest differs from installed immutable agent input')
         snapshot = completed['last_remote']
@@ -610,7 +680,8 @@ print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config[
         require(final_logs == logs, 'agent logs changed during final cleanup')
         self.save('combined-final-agent-logs.json', final_logs)
         bundle = self.export_server('combined', attempt)
-        verify_final_bundle(bundle, attempt, binding, completed, final_logs, self.server_boot, self.args.artifact, self.io_device)
+        verify_final_bundle(bundle, attempt, binding, completed, final_logs, self.server_boot,
+                            self.args.artifact, self.io_device, expected_tokens=tokens)
         handle = dict(completed['handle'], robot_epoch=completed['robot_epoch'], state='cancel_requested', proposal=None)
         self.save('retained-handle.json', handle)
         report = self.host_cli('export', '--pair', str(self.output / 'pair.json'),
@@ -619,15 +690,26 @@ print(json.dumps({{'peer':peer,'operator_uid':uid,'input':i,'server_uid':config[
                                '--out', str(self.output / 'robot-evidence'), timeout=120)
         require(report['execution_replay_eligible'] is False and report['volatile_tail_unknown'] is True, 'Robot evidence boundary')
         self.save('robot-export-report.json', report)
-        self.save('result.json', {'status': 'PASS', 'test': 'isolated-offline-agent-trusted-robot',
+        self.save('result.json', {'status': 'PASS', 'test': 'isolated-live-agent-trusted-robot' if self.live else 'isolated-offline-agent-trusted-robot',
                   'attempt_id': attempt, 'namespace': namespace, 'operation': operation,
                   'artifact_digest': self.args.artifact, 'physical_acceptance': False,
-                  'live_provider_calls': False, 'two_operations_under_one_grant_tested_here': False})
+                  'live_provider_calls': self.live, 'provider_calls': 1 if self.live else 0,
+                  'consumed_tokens': tokens, 'two_operations_under_one_grant_tested_here': False})
+
+
+def run_scenarios(campaign):
+    campaign.preflight()
+    if not campaign.live:
+        campaign.negative_bindings()
+        campaign.independent_server()
+    campaign.combined()
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--allow-disposable-guests', action='store_true', required=True)
+    parser.add_argument('--allow-one-live-provider-call', action='store_true',
+                        help='run only the combined live case; one provider call, no retry, then one execution-observation revalidation')
     parser.add_argument('--ssh-key', type=Path, required=True)
     parser.add_argument('--known-hosts', type=Path, required=True)
     parser.add_argument('--server-port', type=int, default=26220)
@@ -646,10 +728,7 @@ def main():
     sys.path.insert(0, str(ROOT / 'sdk/python'))
     campaign = Campaign(args)
     try:
-        campaign.preflight()
-        campaign.negative_bindings()
-        campaign.independent_server()
-        campaign.combined()
+        run_scenarios(campaign)
         print(json.dumps({'status': 'PASS', 'output': str(campaign.output)}), flush=True)
     except Exception as error:
         campaign.save('failure.json', {'phase': campaign.phase, 'error': repr(error),
@@ -660,6 +739,14 @@ def main():
 
 
 class VerificationTests(unittest.TestCase):
+    def test_fixed_instruction_hash_matches_authored_source(self):
+        import ast
+        source = ROOT / 'apps/server/bpf/device_policy.insns'
+        rows = ast.literal_eval(re.sub(r'//[^\n]*', '', source.read_text()))
+        self.assertTrue(rows and all(len(row) == 8 for row in rows))
+        self.assertEqual(hashlib.sha256(bytes(value for row in rows for value in row)).hexdigest(),
+                         DEVICE_POLICY_SHA256)
+
     def test_natural_reconciliation_preserves_grant_but_requires_zero_output(self):
         operation = {'device': [1]*16, 'boot': 1, 'session': 2, 'runtime_nonce': [3]*16,
                      'grant': 4, 'instance': 5, 'operation': 6, 'stream': 7}
@@ -735,12 +822,15 @@ class VerificationTests(unittest.TestCase):
         content = {
             'attempt': {'id': attempt, 'state': 'reaped', 'artifact_digest': 'sha256:' + '1' * 64},
             'runtime_binding': {'boot_id': 'boot-1', 'cgroup_id': 42, 'ambiguous_create': False,
-                                'observer': observer, 'snapshot': {'cgroup': '/actryn/' + attempt, 'pid': 2, 'start_ticks': 3,
+                                'observer': observer, 'device_policy': {'program_id': 42,
+                                'instruction_sha256': 'c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05'},
+                                'snapshot': {'cgroup': '/actryn/' + attempt, 'pid': 2, 'start_ticks': 3,
                                 'uid': 65532, 'gid': 65532, 'capabilities': 0, 'no_new_privileges': True,
                                 'seccomp_mode': 2, 'private_namespaces': True, 'network_routes': 0,
                                 'memory_max': 268435456, 'pids_max': 64, 'cpu_max': '50000 100000\n',
                                 'io_max': '254:0 rbps=1048576 wbps=1048576 riops=128 wiops=128\n',
-                                'device_programs': [42], 'root_readonly': True, 'unexpected_mounts': []}},
+                                'device_programs': [42], 'device_programs_direct': [42], 'device_attach_flags': 2,
+                                'root_readonly': True, 'unexpected_mounts': []}},
             'runtime_facts': {'observer_health_unavailable': False, 'observer': dict(observer, sequence=12),
                               'resources': {'classification': 'observed_cgroup_v2_counters', 'captured_boottime_ms': 123,
                                             'stage': 'after_descendants_empty_before_runtime_delete',
@@ -763,6 +853,25 @@ class VerificationTests(unittest.TestCase):
                     'bytes': len(compact(value)), 'sha256': digest(value)} for name, value in values.items()]}
         check = lambda value: verify_final_bundle(value, attempt, binding, completed, logs, 'boot-1', 'sha256:' + '1' * 64, '254:0')
         check(bundle(content))
+        for fault in ('missing_proof', 'wrong_hash', 'bool_id', 'overflow_id', 'missing_direct',
+                      'missing_effective', 'flags0', 'flags1', 'bool_flags', 'duplicate',
+                      'nonpositive', 'overflow', 'unsorted', 'not_subset'):
+            changed = copy.deepcopy(content); runtime = changed['runtime_binding']; snapshot = runtime['snapshot']
+            if fault == 'missing_proof': del runtime['device_policy']
+            elif fault == 'wrong_hash': runtime['device_policy']['instruction_sha256'] = 'sha256:' + '0' * 64
+            elif fault == 'bool_id': runtime['device_policy']['program_id'] = True
+            elif fault == 'overflow_id': runtime['device_policy']['program_id'] = 2**32
+            elif fault == 'missing_direct': del snapshot['device_programs_direct']
+            elif fault == 'missing_effective': snapshot['device_programs'] = [43]
+            elif fault == 'flags0': snapshot['device_attach_flags'] = 0
+            elif fault == 'flags1': snapshot['device_attach_flags'] = 1
+            elif fault == 'bool_flags': snapshot['device_attach_flags'] = True
+            elif fault == 'duplicate': snapshot['device_programs_direct'] = [42, 42]
+            elif fault == 'nonpositive': snapshot['device_programs'] = [0, 42]
+            elif fault == 'overflow': snapshot['device_programs'] = list(range(1, 66))
+            elif fault == 'unsorted': snapshot['device_programs'] = [43, 42]
+            else: snapshot['device_programs_direct'] = [42, 43]
+            with self.subTest(device_proof=fault), self.assertRaises(AssertionError): check(bundle(changed))
         for field, value in [('uid', 0), ('gid', 0), ('capabilities', 1), ('no_new_privileges', False),
                              ('seccomp_mode', 0), ('private_namespaces', False), ('network_routes', 1),
                              ('memory_max', 0), ('pids_max', 0), ('cpu_max', 'max 100000'), ('io_max', ''),

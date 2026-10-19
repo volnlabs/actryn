@@ -68,7 +68,13 @@ selection; neither candidate03 nor an A16 amendment is implicitly reusable.
 
 ## Disposable guest identity
 
-The existing, never-launched preparation is `.cache/qemu/install-robot`:
+The historical preparation at `.cache/qemu/install-robot` has now been launched,
+provisioned, installed and reused by later numbered qualification campaigns.
+Its `prepared.json` value `guest_launch=NOT_RUN` is the immutable preparation-time
+fact, not current state. The disk, serial log, fixture journal and manager update
+state all contain retained results; this directory is **not** a fresh installer
+target and must not be reset or reused for A14. The exact inputs below remain a
+reference for creating a new uniquely named disposable preparation:
 
 - Base Debian13.7 ARM64 image SHA512
   `a34e1c1eea1fbb9ad31ebdfc6c776d1d579ce9e3d740ab10549ebcdca6fe1a46c28e0a42cbcdf1eb561795776733c178f6e816fe1a2cb60d26ffc56c07f915c4`.
@@ -81,16 +87,28 @@ The existing, never-launched preparation is `.cache/qemu/install-robot`:
 - Pinned QEMU11.1.1 `virt`, TCG/cortex-a72, 2vCPUs/2GiB; guest SSH port26223,
   gateway host-forward27445 to guest7443. The first PL011 is the console; second
   `/pl011@9040000` contains the `actryn,fixture-v2` serdev child at115200 baud.
-- Dedicated new SSH key/seed, serial log, controller state/admin/transport sockets
-  and QMP socket are already in that directory. Never read or print private keys.
+- Its dedicated SSH key/seed, serial log, controller state/admin/transport sockets
+  and QMP socket are retained historical material. Never read or print private keys.
   Record the SSH host key from serial and compare before creating known_hosts;
   retain actual boot ID/machine ID/hostname/kernel/DT compatible readbacks.
 
-Parent owns launch scheduling and at least4GiB MemAvailable preflight. No launch,
-disk copy, package installation or controller process change is authorized by
-this document. An amended host fixture executable requires a separate numbered
-preexecution amendment with original prepared hashes retained. Do not touch the
-original preview Robot, server03 preserved disk, A16 guest or any other service.
+The later `install-robot-run01` and `install-robot-update04-run01` receipts record
+the actual launch, provision and update windows. This document authorizes no new
+launch or mutation of that retained disk. Parent owns scheduling and at least4GiB
+MemAvailable preflight for a separately prepared guest. An amended host fixture
+executable requires a numbered preexecution amendment with original hashes
+retained. Do not touch the original preview Robot, server03 disk, A16 guest or
+any other service.
+
+The separately prepared `.cache/qemu/install-robot-final01` campaign used a new
+copy-on-write overlay, SSH identity, cloud seed, ports and source-bound fixture.
+It independently matched all ten target package pins, including Expat2.8.3,
+then installed the exact final Robot payload through a disposable test-signed
+manifest. Installer transitions, explicit bootstrap, the unchanged full Robot
+lifecycle, evidence decoding and inhibited postflight passed; normal poweroff
+then stopped both host units. The canonical final manifest remains unsigned and
+the receipts remain local, nonpromotable software-fixture evidence. Preserve this
+guest and its failed/corrected postflight validators; do not reuse it for A14.
 
 When separately authorized, provision only the new guest's exact manifest
 prerequisites using authenticated APT and a retained simulation. Refuse broad OS

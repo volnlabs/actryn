@@ -15,13 +15,13 @@ config=json.loads(pathlib.Path('/etc/actryn/server.json').read_bytes())
 assert config['operator_uid']==1000
 
 def cli(*arguments):
-    process=subprocess.run(['/usr/local/bin/actryn',*arguments],capture_output=True,text=True,
+    process=subprocess.run(['/usr/bin/actryn',*arguments],capture_output=True,text=True,
         timeout=20,user=1000,group=1000,extra_groups=[])
     assert process.returncode==0,(arguments,process.stdout,process.stderr)
     return json.loads(process.stdout)
 
 subprocess.run(['systemctl','stop','actryn-serverd','actryn-launcher'],check=True,timeout=40)
-process=subprocess.run(['/usr/bin/actryn-artifact','import','--layout',str(args.layout),'--digest',args.digest],
+process=subprocess.run(['/usr/bin/actryn','server','import','--layout',str(args.layout),'--digest',args.digest],
     capture_output=True,text=True,timeout=20)
 assert process.returncode==0,(process.stdout,process.stderr)
 subprocess.run(['systemctl','start','actryn-serverd'],check=True,timeout=40)

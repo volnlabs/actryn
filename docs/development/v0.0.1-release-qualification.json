@@ -1,0 +1,50 @@
+{
+  "archive_restore": {
+    "path": "docs/development/final-distribution-archive-restore.json",
+    "sha256": "40e5769cb65cef9961cc23ff1d467cad3bb76f523089341892866beb477b9579",
+    "verified": true
+  },
+  "claim": "Qualified by the sole maintainer; independent installation and physical qualification have not been performed.",
+  "created_at": "2026-10-19T21:44:54.023124+00:00",
+  "format": "actryn-v0.0.1-software-preview-qualification-1",
+  "independent_installation": false,
+  "live_motion": false,
+  "merged": false,
+  "original_a14": "DEFERRED_UNTIL_ANOTHER_DEVELOPER_JOINS",
+  "owner": "Utkarsh Maurya <projects.utkarshMaurya@gmail.com>",
+  "physical_acceptance": false,
+  "publication_performed": false,
+  "qualification": {
+    "deferred_gates": [
+      "A14"
+    ],
+    "maintainer_review_path": "docs/development/solo-maintainer-review-v5.json",
+    "maintainer_review_sha256": "73c37ca1176eed05ca0e2b08388cce8995f9f80b0b4221031f432e1b542e8750",
+    "open_required_gates": [],
+    "path": "docs/development/solo-preview-qualification-v5.json",
+    "sha256": "8e34b5f9a02e6d7f398c6dc8c995b883b775a9944113db7ce778fce6b1111b36"
+  },
+  "qualified_scope": "software-only external developer preview",
+  "release_qualified": true,
+  "remaining_release_checks": [],
+  "roles": {
+    "robot": {
+      "manifest_sha256": "0e4e4ec9d673de73c3a3207056e88c32f4e96074e61841b00a8cc4e0bfe51d80",
+      "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8",
+      "signature_sha256": "c308dafa6575b14da481262d7577e406e3a8ad060ef199580f02591cc6bafd84"
+    },
+    "server": {
+      "manifest_sha256": "bcc415d038820bc08c15c9f6f6a53f24d2d805d4b188f5f01b733cf8cbd985e9",
+      "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82",
+      "signature_sha256": "4cb1c0f4b98727453d46743719a64788e42cf70f52243bd9a61f170286f14222"
+    }
+  },
+  "signed_distribution": {
+    "path": "docs/development/signed-distribution-verification.json",
+    "sha256": "4cce5096cffdde3bde8d08a8efabd484a5696717aded43ad48ba19f5003891ac",
+    "verified": true
+  },
+  "signer_spki_sha256": "3bc25f592073d520c88635fca7fe1838d156428c314b34db4ebd655a18ce6735",
+  "status": "PASS_SOFTWARE_PREVIEW_QUALIFIED",
+  "tag_created": false
+}

@@ -18,6 +18,7 @@ COVERAGE = {'process.lifecycle', 'syscall.openat', 'syscall.connect', 'syscall.b
             'syscall.perf_event_open', 'syscall.mount', 'syscall.unshare', 'syscall.setns'}
 COUNTERS = {'cpu.stat', 'io.stat', 'memory.current', 'memory.events', 'memory.peak',
             'pids.current', 'pids.events', 'pids.peak'}
+DEVICE_POLICY_SHA256 = 'c7b12a60a8b611b7b760af1aa2628a1b884f8ebf3ee6a85c48fe82b9910d8e05'
 
 
 def require(value, reason):
@@ -52,8 +53,26 @@ def observer_health(health, initial):
             and COVERAGE <= set(health['coverage']), 'observer loss, coverage or epoch changed')
 
 
+def verify_device_policy(binding):
+    snapshot = binding['snapshot']
+    proof = binding.get('device_policy')
+    require(isinstance(proof, dict) and type(proof.get('program_id')) is int
+            and 0 < proof['program_id'] <= 0xffffffff
+            and proof.get('instruction_sha256') == DEVICE_POLICY_SHA256,
+            'fixed owned device policy proof missing or changed')
+    effective, direct = snapshot.get('device_programs'), snapshot.get('device_programs_direct')
+    for values in (effective, direct):
+        require(isinstance(values, list) and 0 < len(values) <= 64
+                and all(type(value) is int and 0 < value <= 0xffffffff for value in values)
+                and values == sorted(set(values)), 'invalid device program inventory')
+    require(set(direct) <= set(effective) and proof['program_id'] in direct
+            and proof['program_id'] in effective
+            and type(snapshot.get('device_attach_flags')) is int and snapshot['device_attach_flags'] == 2,
+            'owned device policy membership or MULTI attachment missing')
+
+
 def validate_export(bundle, attempt, artifact, binding, inspection, logs, summary, trace_bytes, started,
-                    agent_check=None):
+                    agent_check=None, expected_outcome='cancelled', expected_denials=None):
     """Correlate exported descriptors with retained identities and independent raw files."""
     require(bundle.get('schema') == 'actryn.server.evidence.v1'
             and bundle.get('attempt_id') == attempt
@@ -69,13 +88,13 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
     contents = {item['name']: item['content'] for item in entries}
     outcome = contents['attempt']
     require(outcome['id'] == attempt and outcome['artifact_digest'] == artifact
-            and outcome['state'] == 'reaped' and outcome['outcome'] == 'cancelled'
+            and outcome['state'] == 'reaped' and outcome['outcome'] == expected_outcome
             and outcome['binding'] is None, 'export terminal attempt identity')
     require(contents['runtime_binding'] == binding
             and json.loads(inspection['attempt']['binding']) == binding
             and inspection['attempt']['artifact_digest'] == artifact
             and inspection['attempt']['state'] == 'reaped'
-            and inspection['attempt']['outcome'] == 'cancelled'
+            and inspection['attempt']['outcome'] == expected_outcome
             and inspection['evidence_gaps'] == []
             and inspection['robot_binding'] is None and inspection['robot_requests'] == [],
             'retained binding or terminal inspection changed')
@@ -85,6 +104,7 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
     require(str(uuid.UUID(initial['collector_epoch'])) == initial['collector_epoch'], 'observer epoch syntax')
     observer_health(initial, initial)
     snapshot = binding['snapshot']
+    verify_device_policy(binding)
     require(snapshot['pid'] > 1 and snapshot['start_ticks'] > 0
             and snapshot['cgroup'] == '/actryn/' + attempt
             and snapshot['uid'] == snapshot['gid'] == 65532 and snapshot['capabilities'] == 0
@@ -116,10 +136,11 @@ def validate_export(bundle, attempt, artifact, binding, inspection, logs, summar
                 and descriptor['tail_encoding'] == 'hex' and descriptor['tail'] == raw[-2048:].hex()
                 and descriptor['tail_omitted_bytes'] == max(0, len(raw) - 2048), 'raw log integrity')
     broker = contents['broker']
+    denials = [] if expected_denials is None else expected_denials
     require(broker['classification'] == 'broker_application_policy_and_delegated_accounting'
-            and broker['attempt_state'] == 'reaped' and broker['attempt_outcome'] == 'cancelled'
-            and broker['evidence_gaps'] == [] and broker['policy_denials'] == []
-            and broker['policy_denials_retained'] == 0 and inspection['denials'] == []
+            and broker['attempt_state'] == 'reaped' and broker['attempt_outcome'] == expected_outcome
+            and broker['evidence_gaps'] == [] and broker['policy_denials'] == denials
+            and broker['policy_denials_retained'] == len(denials) and inspection['denials'] == denials
             and inspection['denials_omitted'] == 0 and broker['calls'] == inspection['calls'],
             'broker evidence incomplete or changed')
     calls = broker['calls']

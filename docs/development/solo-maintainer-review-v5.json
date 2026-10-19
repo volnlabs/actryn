@@ -1,0 +1,57 @@
+{
+  "decision": "approve-for-attestation",
+  "dispositions": {
+    "A01": "PASS",
+    "A02": "PASS",
+    "A03": "PASS",
+    "A04": "PASS",
+    "A05": "PASS",
+    "A06": "PASS",
+    "A07": "PASS",
+    "A08": "PASS",
+    "A09": "PASS",
+    "A10": "PASS",
+    "A11": "PASS",
+    "A12": "PASS",
+    "A13": "PASS",
+    "A14": "DEFERRED",
+    "A15": "PASS",
+    "A16": "PASS",
+    "ARCHIVE-RESTORE": "PASS",
+    "D2-01": "PASS",
+    "D2-02": "PASS",
+    "D2-03": "PASS",
+    "D2-04": "PASS",
+    "D2-05": "PASS",
+    "D2-06": "PASS",
+    "D2-07": "PASS",
+    "D2-08": "PASS",
+    "D2-09": "PASS",
+    "D2-10": "PASS",
+    "D2-11": "PASS",
+    "D2-12": "PASS",
+    "D2-13": "PASS",
+    "D2-14": "PASS",
+    "D2-15": "PASS",
+    "D2-16": "PASS",
+    "D2-17": "PASS",
+    "KEY-RECOVERY": "PASS",
+    "MAINTAINER-INSTALL": "PASS"
+  },
+  "format": "actryn-solo-maintainer-review-1",
+  "independent_installation": false,
+  "inputs_sha256": "c7823ceec6f8862043455de0c3e6ee1885d9e7dac273ca23ee4e55d2d4f8385c",
+  "owner": "Utkarsh Maurya",
+  "physical_acceptance": false,
+  "release_signing": "not-performed-by-this-review",
+  "subjects": {
+    "robot": {
+      "manifest": "robot-successor-manifest",
+      "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8"
+    },
+    "server": {
+      "manifest": "server-successor-manifest",
+      "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+    }
+  }
+}

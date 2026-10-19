@@ -1,0 +1,25 @@
+{
+  "format": "actryn-solo-check-1",
+  "gate": "KEY-RECOVERY",
+  "owner": "Utkarsh Maurya",
+  "subjects": {
+    "robot": {
+      "manifest": "robot-successor-manifest",
+      "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8"
+    },
+    "server": {
+      "manifest": "server-successor-manifest",
+      "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+    }
+  },
+  "status": "PASS",
+  "encrypted_key": true,
+  "challenge_verified": true,
+  "tamper_rejected": true,
+  "public_key_spki_sha256": "3bc25f592073d520c88635fca7fe1838d156428c314b34db4ebd655a18ce6735",
+  "restored_spki_sha256": "3bc25f592073d520c88635fca7fe1838d156428c314b34db4ebd655a18ce6735",
+  "source_receipt": "key-recovery-report",
+  "external_filesystem_uuid": "0347-DCDB",
+  "physical_acceptance": false,
+  "independent_installation": false
+}

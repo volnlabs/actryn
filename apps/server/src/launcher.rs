@@ -146,7 +146,43 @@ struct Binding {
     cgroup_id: u64,
     observer: Option<ObserverStatus>,
     snapshot: Option<Snapshot>,
+    #[serde(default)]
+    device_policy: Option<crate::device_policy::Proof>,
     ambiguous_create: bool,
+}
+impl Binding {
+    fn verify(
+        &self,
+        current: &Snapshot,
+        boot_id: &str,
+        cgroup_id: u64,
+        cgroup: &str,
+        io_device: &str,
+    ) -> Result<()> {
+        ensure!(
+            self.boot_id == boot_id && !self.ambiguous_create,
+            "retired runtime binding"
+        );
+        let expected = self.snapshot.as_ref().context("unverified task")?;
+        ensure!(
+            current.start_ticks == expected.start_ticks && cgroup_id == self.cgroup_id,
+            "reused task/cgroup identity"
+        );
+        policy::verify_snapshot(current, expected.pid, cgroup, io_device)?;
+        crate::device_policy::verify(
+            self.device_policy
+                .as_ref()
+                .context("fixed device policy was not verified")?,
+            &current.device_programs_direct,
+            &current.device_programs,
+        )?;
+        ensure!(
+            current.device_programs_direct == expected.device_programs_direct
+                && current.device_programs == expected.device_programs,
+            "prepared device policy inventory changed"
+        );
+        Ok(())
+    }
 }
 
 pub struct Launcher {
@@ -352,6 +388,7 @@ impl Launcher {
             cgroup_id,
             observer: None,
             snapshot: None,
+            device_policy: None,
             ambiguous_create: false,
         };
         // Record retirement identity before registering an externally retained observer context.
@@ -433,10 +470,16 @@ impl Launcher {
             .insert(id.into(), unsafe { OwnedFd::from_raw_fd(pidfd as i32) });
         self.store
             .record_binding(id, &serde_json::to_string(&binding)?)?;
+        // runc's setup needs mknod; constrain the completed, still-created task before admission.
+        binding.device_policy = Some(crate::device_policy::install(&cg, cgroup_id)?);
+        self.store
+            .record_binding(id, &serde_json::to_string(&binding)?)?;
         let snapshot = policy::snapshot(created.pid, &cgroup_path(id), &cg)?;
-        policy::verify_snapshot(
-            &snapshot,
-            created.pid,
+        binding.snapshot = Some(snapshot);
+        binding.verify(
+            binding.snapshot.as_ref().context("unverified task")?,
+            &self.boot_id,
+            fs::metadata(&cg)?.ino(),
             &cgroup_path(id),
             &self.config.io_device,
         )?;
@@ -454,57 +497,60 @@ impl Launcher {
             task.pid == created.pid && task.status == 1,
             "task executed before verification"
         );
-        binding.snapshot = Some(snapshot);
         self.store
             .mark_prepared(id, &serde_json::to_string(&binding)?)?;
         Ok(())
     }
     async fn start(&mut self, id: &str) -> Result<()> {
         let a = self.store.inspect(id)?.attempt;
-        let artifact = self
-            .config
-            .artifacts
-            .get(&a.artifact_digest)
-            .context("artifact approval missing")?;
-        crate::artifact::validate_approved(&a.artifact_digest, artifact)?;
         ensure!(a.state == "prepared", "attempt is not prepared");
-        let binding: Binding =
-            serde_json::from_str(a.binding.as_deref().context("missing binding")?)?;
-        ensure!(
-            binding.boot_id == self.boot_id && !binding.ambiguous_create,
-            "retired runtime binding"
-        );
-        let expected = binding.snapshot.as_ref().context("unverified task")?;
-        let current = policy::snapshot(expected.pid, &cgroup_path(id), &cgroup_dir(id))?;
-        ensure!(
-            current.start_ticks == expected.start_ticks
-                && fs::metadata(cgroup_dir(id))?.ino() == binding.cgroup_id,
-            "reused task/cgroup identity"
-        );
-        policy::verify_snapshot(
-            &current,
-            expected.pid,
-            &cgroup_path(id),
-            &self.config.io_device,
-        )?;
-        let health = observer::exchange(
-            Path::new(OBSERVER_SOCKET),
-            &self.observer_request("health", id, binding.cgroup_id),
-        )
-        .await?;
-        health.check(Some(
-            &binding
-                .observer
-                .as_ref()
-                .context("observer was not verified")?
-                .collector_epoch,
-        ))?;
-        let socket = Path::new(BROKER_ROOT).join(id).join("broker.sock");
-        use std::os::unix::fs::FileTypeExt;
-        ensure!(
-            fs::symlink_metadata(socket)?.file_type().is_socket(),
-            "per-attempt broker not ready"
-        );
+        let launcher = &mut *self;
+        let verified: Result<()> = async move {
+            let artifact = launcher
+                .config
+                .artifacts
+                .get(&a.artifact_digest)
+                .context("artifact approval missing")?;
+            crate::artifact::validate_approved(&a.artifact_digest, artifact)?;
+            let binding: Binding =
+                serde_json::from_str(a.binding.as_deref().context("missing binding")?)?;
+            let expected = binding.snapshot.as_ref().context("unverified task")?;
+            let current = policy::snapshot(expected.pid, &cgroup_path(id), &cgroup_dir(id))?;
+            binding.verify(
+                &current,
+                &launcher.boot_id,
+                fs::metadata(cgroup_dir(id))?.ino(),
+                &cgroup_path(id),
+                &launcher.config.io_device,
+            )?;
+            let health = observer::exchange(
+                Path::new(OBSERVER_SOCKET),
+                &launcher.observer_request("health", id, binding.cgroup_id),
+            )
+            .await?;
+            health.check(Some(
+                &binding
+                    .observer
+                    .as_ref()
+                    .context("observer was not verified")?
+                    .collector_epoch,
+            ))?;
+            let socket = Path::new(BROKER_ROOT).join(id).join("broker.sock");
+            use std::os::unix::fs::FileTypeExt;
+            ensure!(
+                fs::symlink_metadata(socket)?.file_type().is_socket(),
+                "per-attempt broker not ready"
+            );
+            Ok(())
+        }
+        .await;
+        if let Err(error) = verified {
+            self.store.cancel(id)?;
+            if let Err(cleanup) = self.cleanup(id).await {
+                eprintln!("retained failed start {id}: {cleanup:#}");
+            }
+            return Err(error).context(format!("start verification failed; attempt {id}"));
+        }
         self.store.start(id, now_ms()?)?;
         if let Err(error) = self
             .tasks
@@ -786,4 +832,103 @@ pub fn lock_service(path: &Path) -> Result<fs::File> {
         "service already owns this state directory"
     );
     Ok(file)
+}
+
+#[cfg(test)]
+mod binding_tests {
+    use super::*;
+
+    fn binding() -> Binding {
+        let snapshot: Snapshot = serde_json::from_value(serde_json::json!({
+            "pid":123,"start_ticks":456,"cgroup":"/actryn/test",
+            "uid":65532,"gid":65532,"capabilities":0,"no_new_privileges":true,
+            "seccomp_mode":2,"private_namespaces":true,"network_routes":0,
+            "memory_max":268435456,"pids_max":64,"cpu_max":"50000 100000",
+            "io_max":"8:0 rbps=1048576 wbps=1048576 riops=128 wiops=128",
+            "device_programs":[7,42,99],"device_programs_direct":[7,42],
+            "device_attach_flags":2,"unexpected_mounts":[],"root_readonly":true
+        }))
+        .unwrap();
+        Binding {
+            boot_id: "boot".into(),
+            cgroup_id: 789,
+            observer: None,
+            snapshot: Some(snapshot),
+            ambiguous_create: false,
+            device_policy: Some(crate::device_policy::Proof {
+                program_id: 42,
+                instruction_sha256: crate::device_policy::instruction_sha256(),
+            }),
+        }
+    }
+
+    fn verify(binding: &Binding, current: &Snapshot) -> Result<()> {
+        binding.verify(current, "boot", 789, "/actryn/test", "8:0")
+    }
+
+    #[test]
+    fn fixed_policy_and_prepared_inventories_must_survive_until_start() {
+        let good = binding();
+        let current = good.snapshot.as_ref().unwrap();
+        verify(&good, current).unwrap();
+        for fault in [
+            "proof",
+            "hash",
+            "id",
+            "direct",
+            "effective",
+            "direct_added",
+            "effective_added",
+            "flags",
+            "pid",
+            "start",
+            "boot",
+            "cgroup",
+            "ambiguous",
+        ] {
+            let mut changed = good.clone();
+            let mut current = current.clone();
+            match fault {
+                "proof" => changed.device_policy = None,
+                "hash" => {
+                    changed.device_policy.as_mut().unwrap().instruction_sha256 = "0".repeat(64)
+                }
+                "id" => changed.device_policy.as_mut().unwrap().program_id = 99,
+                "direct" => current.device_programs_direct = vec![7],
+                "effective" => current.device_programs = vec![7, 99],
+                "direct_added" => current.device_programs_direct = vec![7, 42, 99],
+                "effective_added" => current.device_programs.push(100),
+                "flags" => current.device_attach_flags = 0,
+                "pid" => current.pid += 1,
+                "start" => current.start_ticks += 1,
+                "boot" => changed.boot_id = "another-boot".into(),
+                "cgroup" => changed.cgroup_id += 1,
+                "ambiguous" => changed.ambiguous_create = true,
+                _ => unreachable!(),
+            }
+            assert!(
+                verify(&changed, &current).is_err(),
+                "accepted changed {fault}"
+            );
+        }
+    }
+
+    #[test]
+    fn historical_binding_decodes_for_cleanup_without_becoming_startable() {
+        let good = binding();
+        let mut old = serde_json::to_value(&good).unwrap();
+        old.as_object_mut().unwrap().remove("device_policy");
+        let snapshot = old["snapshot"].as_object_mut().unwrap();
+        snapshot.remove("device_programs_direct");
+        snapshot.remove("device_attach_flags");
+        let decoded: Binding = serde_json::from_value(old).unwrap();
+        assert!(decoded.device_policy.is_none());
+        assert!(decoded
+            .snapshot
+            .as_ref()
+            .unwrap()
+            .device_programs_direct
+            .is_empty());
+        assert!(verify(&decoded, good.snapshot.as_ref().unwrap()).is_err());
+    }
 }

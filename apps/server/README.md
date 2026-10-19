@@ -62,9 +62,13 @@ bytes, one request per connection. Operator and launcher requests are:
 
 Responses are `{"result":"ok","inspection":...}` or
 `{"result":"error","message":"..."}`. Preparation creates a real stopped
-containerd task, verifies process/cgroup/namespaces/mounts/device policy and
-observer coverage, then retains its PID lifetime and cgroup inode. Start rechecks
-that binding. There is no user-supplied OCI spec, path, hook, command, ID allocation
+containerd task and attaches the launcher's fixed device filter before verifying
+process/cgroup/namespaces/mounts and observer coverage. The filter permits only
+read/write access to character devices 1:3/5/8/9, including when runc adds virtual
+device defaults. Preparation retains the program ID and instruction hash alongside
+the PID lifetime, cgroup inode and direct/effective program inventories. Start
+rechecks that binding; missing or changed enforcement cancels and cleans up the
+prepared attempt. There is no user-supplied OCI spec, path, hook, command, ID allocation
 or runtime option. A failed/ambiguous task create remains charged until verified
 cleanup. This implementation uses containerd-client 0.9.0's distinct task
 Create/Get/Start calls, not `ctr tasks start`.
@@ -101,9 +105,11 @@ OpenAI Responses, `gpt-5.4-mini-2026-03-17`, fixed structured output, no hosted 
 no redirects/proxies/retries, 4,096 input text bytes, 1,024 output tokens and a
 65,536-byte response cap. An unbound attempt produces an attested diagnostic
 proposal only. An explicitly bound attempt acquires a trusted Robot observation
-before inference and sends the resulting bounded proposal through authenticated
-Robot admission. `observation_id` in agent input is an untrusted diagnostic
-reference; it never selects or replaces the trusted observation.
+before inference. After inference, the live path acquires exactly one newer
+execution observation and requires the encoder values and context revision to
+match before sending the bounded proposal through authenticated Robot admission.
+`observation_id` in agent input is an untrusted diagnostic reference; it never
+selects or replaces either trusted observation.
 
 For live calls, systemd must deliver `openai-api-key` to the **server service only**
 at `/run/credentials/actryn-serverd.service/openai-api-key`. Missing credentials
@@ -171,15 +177,20 @@ TLS 1.3 validates the CA, DNS name, exact leaf pin and workload identity. Descri
 must match the installed Robot identity/configuration/profile before binding.
 
 The broker commits a random 32-byte remote key and immutable attempt/namespace
-before observing or sending. It stores the actual Robot observation and context
-revision, then includes that observation in the live model input and attested
-result. It commits the proposal intent before preparing its encrypted request.
+before observing or sending. It stores the model-input Robot observation and
+context revision, then includes that observation in the live model input and
+attested result. After provider completion it stores one newer execution
+observation only if the encoder values and context revision still match. The
+original observation remains the model lineage; the newer ID is bound into the
+Robot proposal as a fresh local precondition. It commits the proposal intent
+before preparing its encrypted request.
 At the final publication point, both attempt and request cancellation fences must
 remain open; one consuming, nonblocking ciphertext write publishes the request.
-Partial writes, lost replies and expired observations are never retried. The
-original observation retains Robot's one-second freshness bound; the server also
-rejects a final write one second after local receipt. It never refreshes or
-substitutes observations after inference.
+Partial writes, lost replies and expired observations are never retried. Both
+observations retain Robot's one-second freshness bound; the server also rejects
+a final write one second after receipt of the execution observation. A changed
+state or missing newer observation fails closed instead of relabelling the
+model-input observation.
 
 Cancellation closes those in-memory fences and queues the captured remote handle
 before waiting for SQLite. Reserved network closure therefore remains usable
@@ -243,9 +254,15 @@ guest harness migrates only that fixture's known, inactive accounting files whil
 holding both lifetime locks; it never renames or reuses an unrelated account.
 `actryn-launcher` starts containerd and the observer dependencies, retains only its
 listed capabilities, and cannot open network address families. Linux 6.12's
-[device-program query](https://github.com/torvalds/linux/blob/v6.12/kernel/bpf/syscall.c#L3943)
-requires `CAP_NET_ADMIN` through `bpf_net_capable()`; the helper retains that
-capability to verify installed enforcement before start. `actryn-serverd`
+[device-program load/attach/query](https://github.com/torvalds/linux/blob/v6.12/kernel/bpf/syscall.c)
+requires `CAP_BPF` and `CAP_NET_ADMIN`. The launcher attaches with `ALLOW_MULTI`
+after trusted runtime setup, while the task is paused; runc's filter remains
+attached and a denial from either filter blocks access. The cgroup retains the
+fixed program after its load FD closes and releases it during ordinary cleanup.
+This assumes trusted Linux and a trusted launcher; it does not protect against
+privileged host removal or task migration. The independently authored, helper-free
+fixed bytecode and loader are Apache-2.0; observer BPF remains GPL-2.0-only.
+`actryn-serverd`
 has no capabilities, cannot access the engine socket, and its broker selects only
 the installed Robot peer and named HTTPS model provider. Both use `Restart=on-failure`.
 Their fixed `--recover-only` stop hooks also retire work after normal stops and

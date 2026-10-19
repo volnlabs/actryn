@@ -1,0 +1,1949 @@
+{
+  "A16": {
+    "acceptance_disposition": "FAILED",
+    "excluded_original_pilots": 20,
+    "original_comparison": {
+      "begun": 80,
+      "ended": 80,
+      "failed": 1,
+      "failed_case": "B3 evidence trial6BIND beforeeligibility",
+      "passed": 79,
+      "planned": 80,
+      "role_errno_cause": "UNOBSERVED",
+      "status": "FAILED_PRESERVED"
+    },
+    "separate_diagnostic02": {
+      "ELF_sha256": "045d9bcd534dc673ad091b842d2ae4f21146862a882450660e295003a638a612",
+      "begun": 10,
+      "bind_failures": 0,
+      "ended": 10,
+      "passed": 10,
+      "planned": 10,
+      "pooled_with_comparison": false,
+      "status": "PASS_SCOPED_EVIDENCE_ONLY"
+    }
+  },
+  "D2_predicates": [
+    {
+      "current_packet_disposition": "Runtime04 installation/source association retained; final assembled9f is not installed.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Fresh f32 integrity/startup; one additive import changes config35fe to cd9a, five charged trees/four approvals to six/five; old bytes preserved.",
+      "frozen03_remaining_scope": "Bind final release/cohort and existing A12 receipts; no blanket installer power-loss or independent installer credit.",
+      "id": "D2-01",
+      "later_scoped_inputs": [
+        "d2-runtime04",
+        "server-update"
+      ],
+      "predicate": "Installed exact tuple, doctor/config validation and rejected incompatible/unapproved inputs",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Original literal pre-Create gap remains historical. Approved025e contract adopts gatedCreate/FIFO then live enforcement/listeners beforeStart; staged3ead GREEN04 supplies common verification cleanup and preserves admission refusal. Root final mapping still required.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Actual prepared full binding durably saved before known Launch; PID1248/start60702/cgroup5992; trusted runtime trace precedes agent Exec168, then one fork/both exits.",
+      "frozen03_remaining_scope": "Complete selected containerd/runc Create/Start source/integration association across existing positive/load-failure cases. No explicit pre-Launch stdout snapshot was read by this native helper; do not invent it.",
+      "id": "D2-02",
+      "later_scoped_inputs": [
+        "d2-runtime04",
+        "ordering-approved",
+        "cleanup-old-red",
+        "cleanup-green04",
+        "cleanup-green04-review",
+        "cleanup-integration"
+      ],
+      "predicate": "Identity/attribution before Create; paused Create before Start; fixed OCI options and no agent hooks",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Source-bound prebroker FD scan has no extras/stdio sockets. Kernel-observed openat enum success then three ENOENTs and EACCES readonly write; installed UID/caps/NNP/namespaces/seccomp/root/mount snapshot matches.",
+      "frozen03_remaining_scope": "Fixed-probe raw invocation gap is closed. Retain exact path/FD scope: ENOENT/EACCES alone is not policy-origin proof, host credential existence is not claimed, and /dev/mem absence is not device-policy denial.",
+      "id": "D2-03",
+      "later_scoped_inputs": [],
+      "predicate": "Unavailable host files, credentials and engine sockets; identity/mount/capability/FD isolation plus attributed failures",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Existing device/OOM composite is a scoped case proof, not original campaignPASS; launcher17a0-to3ead source/build association remains final-review input.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Native snapshot/export has ownID115 in direct/effective[114,115],MULTI2,fixed hashc7b12a60. It does not repeat the mounted forbidden-node case.",
+      "frozen03_remaining_scope": "No new device functional test implied; associate existing run05 device certificate with final cohort. Preserve both original run04 and run05 failures.",
+      "id": "D2-04",
+      "later_scoped_inputs": [
+        "d2-device-oom",
+        "d2-cold-integrity"
+      ],
+      "predicate": "Only approved character devices; existing forbidden-node failed-open control",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Later association05 accepts separate trusted netnsENETUNREACH plus original agentAF_INETdenial/noinheritedsocket evidence as preview coverage. Frozen03literalOPEN is not rewritten; no agent externalconnect is claimed.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Source-bound AF_INET socket returns EPERM; FDscan excludes inherited sockets/extras; zero routes; five allowed AF_UNIX broker connect pairs. No external/controller connect occurred.",
+      "frozen03_remaining_scope": "Root checkpoint decision: literal contract75 negative-connect predicate remains OPEN. Record the supported fixed-profile prevention invariant and recommendation for unreachable-trigger applicability, but no waiver/adoption is made here; no fabricated EBADF/EAFNOSUPPORT, profile change or target retry.",
+      "id": "D2-05",
+      "later_scoped_inputs": [
+        "d2-network05",
+        "d2-network-classification"
+      ],
+      "predicate": "No direct external/controller network; topology, no inherited network socket and negative connect evidence",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "bpf321/perf298/unshare272/setns308(-1,0)/mount165 each source-return EPERM and selected actual kernel exit-only -1 records171..175; caps0/seccomp2 snapshot.",
+      "frozen03_remaining_scope": "Record source-order applicability of absent enters under seccomp-before-trace_sys_enter. No invented pair or enforcement-origin event; upstream stable source pins are not a Debian patchset audit. No additional target call is inferred as necessary by this map.",
+      "id": "D2-06",
+      "later_scoped_inputs": [],
+      "predicate": "Privileged bpf/perf/mount/namespace operations unavailable, with selected syscall entry/return evidence",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Existing device/OOM composite is a scoped case proof, not original campaignPASS; launcher17a0-to3ead source/build association remains final-review input.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Native export confirms finite CPU/memory/PID/IO limits and final counters; this case performs no memory-pressure saturation.",
+      "frozen03_remaining_scope": "Associate existing current OOM/device certificate and exact cohort. No independent PID/IO exhaustion or new performance/pressure run is added.",
+      "id": "D2-07",
+      "later_scoped_inputs": [
+        "d2-device-oom",
+        "d2-cold-integrity"
+      ],
+      "predicate": "Explicit finite CPU, memory, PID and I/O limits; counters and pressure diagnosis",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Five source-bound broker cases: offline call/result, exact denied-1/admin.grant/method_not_allowed, durable cancel-first-before-call, closed late-call refusal. Export and actual broker Status match two calls/one denial.",
+      "frozen03_remaining_scope": "Raw selected-cohort allowed/forbidden-method gap is closed for this scope. Do not infer a new wrong-peer-UID negative, live provider or kernel policy-origin event.",
+      "id": "D2-08",
+      "later_scoped_inputs": [],
+      "predicate": "Authenticated fixed broker methods/resources; allowed control and attributable forbidden-method denial",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "One settled offline call and cancelled reserved-key tombstone, publication closed/outputNULL/zero tokens; no new global overload.",
+      "frozen03_remaining_scope": "Carry forward run11 pressure and atomic accounting/model host tests with exact source/config review. Actual provider-charge/streaming limits remain separate A13 input.",
+      "id": "D2-09",
+      "later_scoped_inputs": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04"
+      ],
+      "predicate": "Atomic finite per-attempt/global broker reservations, request/output/deadline caps and overload cancellation",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "All old Robot/accounting rows unchanged; no new native Robot binding/request/debit. Native local calls settle before cleanup.",
+      "frozen03_remaining_scope": "Bind separate retained-debit/restart/unknown proof and its original failures. Native process death is not remote settlement or Robot task-success evidence.",
+      "id": "D2-10",
+      "later_scoped_inputs": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04"
+      ],
+      "predicate": "Unknown external work stays charged through cancellation/restart; no redispatch; publication stays closed",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "One successful native Prepare; no new prepared-capacity/ENOSPC/EBUSY trigger.",
+      "frozen03_remaining_scope": "Carry forward exact capacity/run11 instrumentation/source/config and map02 load-failure branch. No quota change or repeated Prepare is implied.",
+      "id": "D2-11",
+      "later_scoped_inputs": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04"
+      ],
+      "predicate": "Prepared/retiring capacity and allocation/reclaim failure preserve admitted work and reserved closure",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "CAP_BPF-absent EPERM required-load failure and later Start cleanup remain separate; original FAILED/unknown reply stays intact.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Separate map02 CAP_BPF-absent fixed-load EPERM/paused-noexec/known cleanup evidence remains; native positive load is not substituted.",
+      "frozen03_remaining_scope": "No remaining target load-failure gap within that one-path scope. Preserve original uncertain reply/FAILED and distinct cleanup; do not claim all attach/query failures injected.",
+      "id": "D2-12",
+      "later_scoped_inputs": [
+        "d2-load-failure02",
+        "cleanup-green04"
+      ],
+      "predicate": "Required-enforcement installation failure rejects launch and destroys/quarantines preparation safely",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Fixed MULTI/cgroup program reference lifetime and enforcement-followup01 disposition unchanged; current native readback confirms selected policy.",
+      "frozen03_remaining_scope": "Bind source invariant/trusted-Linux applicability in final cohort. No new periodic monitor/hostile-admin detach test or arbitrary enforcement-change detection claim.",
+      "id": "D2-13",
+      "later_scoped_inputs": [],
+      "predicate": "Loss of required enforcement closes launches, quarantines channels and terminates affected attempts",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Current native positive196-record trace has loss0; no new reader-death/loss injection.",
+      "frozen03_remaining_scope": "Bind observer-installed01 actual prestart/death/loss receipts to reused observer/object and reviewed launcher delta. Preserve positive loss/unavailable evidence; never blanket loss0.",
+      "id": "D2-14",
+      "later_scoped_inputs": [],
+      "predicate": "Diagnostic-reader death/loss is explicit, enforcement persists, new diagnostic launches close",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "No overhead/performance measurement performed by this association or native case.",
+      "frozen03_remaining_scope": "Bind existing bounded on/off workload denominator/order/failures. No installed-agent overhead/superiority/physical/WCET inference.",
+      "id": "D2-15",
+      "later_scoped_inputs": [],
+      "predicate": "Measured observation overhead and loss, with explicit workload/configuration and denominator",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Frozen03 scoped contribution retained; selected final9f applicability remainsOPEN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Actual six-artifact/raw proof196 records, fork/both exits, two local calls closed, all old25/23 rows plus exact new26/24 retained. Separate Stop/restore/normal poweroff; no runtime,42 hostunits cold.",
+      "frozen03_remaining_scope": "No native local cleanup/attribution gap remains within this case. Final cohort must separately retain old unresolved/restart evidence; process death never alone proves remote settlement.",
+      "id": "D2-16",
+      "later_scoped_inputs": [],
+      "predicate": "Cleanup/export preserve attribution, kill/reap descendants, revoke local channels, retain unresolved accounting",
+      "whole_predicate_qualified": false
+    },
+    {
+      "current_packet_disposition": "Root accepts fixed offline case composition only; exact single multimodal-batch story/live provider remainsNOT_RUN.",
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "frozen03_contribution": "Existing device/OOM case plus current source-bound broker/failed-access case; Robot stayed offline, no new Robot namespace/call/binding.",
+      "frozen03_remaining_scope": "Root must explicitly accept the approved offline software-case composition for the narrative. No actual multimodal batch/live provider/physical sequence is claimed; final cohort and other applicability decisions remain.",
+      "id": "D2-17",
+      "later_scoped_inputs": [
+        "d2-composition"
+      ],
+      "predicate": "Independent Server operator diagnosis story: memory pressure, forbidden access, unauthorized method, inspection/export without Robot grant",
+      "whole_predicate_qualified": false
+    }
+  ],
+  "acceptance_cases": [
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Manager11 lifecycle03 and selected module16 supply the scoped two-completion/stale identity evidence.",
+      "existing_scoped_evidence": [
+        "manager-lifecycle03",
+        "module16",
+        "robot-build-review"
+      ],
+      "id": "A01",
+      "missing_binding_or_limit": "Associate manager11-to-e36 reconciliation delta with selected Robot; do not substitute a one-operation combined demo.",
+      "required_behavior": "Two natural completions under one grant; reconcile before reuse",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Replyloss02 and contention04 retain durable allocation/cancellation closure.",
+      "existing_scoped_evidence": [
+        "replyloss02",
+        "contention04",
+        "robot-build-review"
+      ],
+      "id": "A02",
+      "missing_binding_or_limit": "Manager10/module16 origin must remain distinct from selected e36; preserve pre-send/commit-race scope.",
+      "required_behavior": "Cancellation absent/allocated before ID reply, races and lost acknowledgements",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Lifecycle/module cases and retained historical identities demonstrate their recorded scopes.",
+      "existing_scoped_evidence": [
+        "manager-lifecycle03",
+        "module16",
+        "existing-handle-cleanup"
+      ],
+      "id": "A03",
+      "missing_binding_or_limit": "Final selected manager/source association remains open; no replay of original unknown operations.",
+      "required_behavior": "Expired, retired, replayed or changed duplicates cannot regain authority",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Separate historical restart, raw unknown histories and existing-handle cleanup remain preserved.",
+      "existing_scoped_evidence": [
+        "existing-handle-cleanup",
+        "d2-native-final-review",
+        "hot-journal-reanalysis"
+      ],
+      "id": "A04",
+      "missing_binding_or_limit": "Original finalization/abort uncertainty remains; cleanup cannot relabel task success or qualify every restart/media fault.",
+      "required_behavior": "Restarts preserve unknown outcomes and prevent automatic resend",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Pressure11 plus retained-debit closure and native local Broker proof supply separate scopes.",
+      "existing_scoped_evidence": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "d2-native-proof"
+      ],
+      "id": "A05",
+      "missing_binding_or_limit": "Bind source/config/global-accounting lineage; real-provider charge/streaming behavior remains A13.",
+      "required_behavior": "Broker reservations survive cancel, oversized replies, unknown work and restart",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Selected module16 has16 ARM cases and17 each plain/lockdep/KASAN/KCSAN.",
+      "existing_scoped_evidence": [
+        "module16"
+      ],
+      "id": "A06",
+      "missing_binding_or_limit": "Mocked PM/shutdown callbacks are not physical UART/platform poweroff qualification; retain actual configuration/source bindings.",
+      "required_behavior": "Malformed UAPI, task/FD identity, owner exit, concurrent closure, detach and PM faults",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "The exact module16 aggregate carries the stated byte-offset/protocol diagnostics.",
+      "existing_scoped_evidence": [
+        "module16"
+      ],
+      "id": "A07",
+      "missing_binding_or_limit": "Mocked serdev byte-offset tests must not become measured physical stopping evidence.",
+      "required_behavior": "Every-byte cancellation, short/error writes, retained bytes and invalid receipts",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Pressure/capacity/reclaim, required-enforcement failure and GREEN04 active-capacity refusal remain independently scoped.",
+      "existing_scoped_evidence": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04",
+        "d2-load-failure02"
+      ],
+      "id": "A08",
+      "missing_binding_or_limit": "Retain exact limits and source lineage; do not infer untested PID/IO/storage exhaustion.",
+      "required_behavior": "Exhaustion preserves reserved closure and active-work semantics",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Measured611ms SQLite contention/zeroSTARTs and host crash-reader regression retain their exact claims.",
+      "existing_scoped_evidence": [
+        "contention04",
+        "hot-journal-host"
+      ],
+      "id": "A09",
+      "missing_binding_or_limit": "SQLite contention is not fsync-stall/EIO/media-power-loss proof; current-cohort closure/durability applicability remains explicitOPEN.",
+      "required_behavior": "Storage stalls cannot block urgent closure; failed durability cannot authorize effects",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Unchanged-capture traffic reanalysis and lifetime09 retain the exact gateway/FD/recovery cases.",
+      "existing_scoped_evidence": [
+        "traffic03-reanalysis",
+        "lifetime09",
+        "robot-build-review"
+      ],
+      "id": "A10",
+      "missing_binding_or_limit": "Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof.",
+      "required_behavior": "Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Recorded80-to82 omission and private-copy hot-journal recovery preserve committed prefix and unknown tail.",
+      "existing_scoped_evidence": [
+        "gap-omission",
+        "gap-export",
+        "hot-journal-host",
+        "hot-journal-reanalysis"
+      ],
+      "id": "A11",
+      "missing_binding_or_limit": "No new raw decoding performed; metadata-only histories remain execution-replay-ineligible.",
+      "required_behavior": "Evidence origin, gaps and durable frontiers; complete-prefix replay only",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Existing installed TEST transitions, bootstrap and startup/history custody support their tested tuples.",
+      "existing_scoped_evidence": [
+        "server-update",
+        "robot-update",
+        "robot-installed-update",
+        "server-installed-export",
+        "robot-startup-verification",
+        "robot-startup-parser"
+      ],
+      "id": "A12",
+      "missing_binding_or_limit": "Unsigned final9f/da6 exact bundles are uninstalled; runtime Restart=no overrides are not packaged on-failure. Robot observedExpat2.9 vsmanifest2.8.3 remains an explicit tuple-equality gap.",
+      "required_behavior": "Clean installation, tuple rejection and interrupted update/rollback without grants",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "EXTERNAL",
+      "evidence_summary": "Only bounded live-policy/missing-credential controls are indexed.",
+      "existing_scoped_evidence": [
+        "live-missing-credential"
+      ],
+      "id": "A13",
+      "missing_binding_or_limit": "Authorized provider provisioning and actual pinned live-model execution are EXTERNAL/NOT_RUN; no credential inspection or reuse.",
+      "required_behavior": "Pinned live hosted-model proposals traverse real isolated/kernel-gated path",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "EXTERNAL",
+      "evidence_summary": "Shipped installation/workflow instructions exist; independent execution does not.",
+      "existing_scoped_evidence": [
+        "release-format",
+        "approved-plan"
+      ],
+      "id": "A14",
+      "missing_binding_or_limit": "An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute.",
+      "required_behavior": "Independent developer installs, diagnoses, cancels/recovers and exports",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "OPEN_FINAL_COHORT_ASSOCIATION",
+      "evidence_summary": "Exact module16 aggregate retains actual and diagnostic configuration counts.",
+      "existing_scoped_evidence": [
+        "module16"
+      ],
+      "id": "A15",
+      "missing_binding_or_limit": "Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification.",
+      "required_behavior": "KUnit/selftests and identified lockdep/KASAN/KCSAN runs",
+      "whole_row_pass": false
+    },
+    {
+      "disposition": "FAILED",
+      "evidence_summary": "Original80comparison trials all began/ended:79PASS/1B3BINDfailure;20pilot trials excluded. Separate diagnostic02ten-trial10PASS has noBINDfailure and is not pooled.",
+      "existing_scoped_evidence": [
+        "a16-original-result",
+        "a16-original-analyzer",
+        "a16-original-cohort",
+        "a16-original-review",
+        "diagnostic02-result",
+        "diagnostic02-progress",
+        "diagnostic02-pair",
+        "diagnostic02-review"
+      ],
+      "id": "A16",
+      "missing_binding_or_limit": "Historical BIND role/errno/cause remains unobserved; diagnostic success does not repair FAILED79/80 or authorize replay/superiority/WCET/physical claims.",
+      "required_behavior": "Latency/overhead/loss and competent userspace comparison without superiority threshold",
+      "whole_row_pass": false
+    }
+  ],
+  "approved_scope": "Software developer preview; physical qualification/live motion outside scope; A14 independent developer installation remains required; historical failures preserved.",
+  "candidate_roles": {
+    "robot": {
+      "assembly": "robot-assembly",
+      "compatibility": {
+        "live_actuation": false,
+        "physical_acceptance": false,
+        "rpc": 1,
+        "server_rpc_max": 1,
+        "server_rpc_min": 1,
+        "state_schema": 1,
+        "uapi": 1,
+        "wire": 2
+      },
+      "component_map": "robot-components",
+      "components": [
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/0",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/actryn",
+          "selected_source_path": "artifacts/arm-cli-importer-build01/actryn",
+          "sha256": "4102e793c48fc43767680ed3c9cf4ffd2f8512171271e3340ab2632090fd1fc5",
+          "size": 10667864,
+          "source_origin": {
+            "component_map_pointer": "/components/0/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "544c3824a486097ca30b66b56220a148d9bbd742"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/1",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/actryn-gatewayd",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/bin/actryn-gatewayd",
+          "sha256": "8705d2ca43ec18440a8328e1cb24b0de12ed7858c2960548809d516b0f12822f",
+          "size": 2752232,
+          "source_origin": {
+            "component_map_pointer": "/components/1/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "a47623935380d37310154fbfa0d8ce7a4294f53f"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/2",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/actryn-robotd",
+          "selected_source_path": "artifacts/robot-reconciliation-build02/actryn-robotd",
+          "sha256": "e36d5b2857bfa85b9042d529246b0b173c9cc4cac8c7686c3a6bf047a2ce372a",
+          "size": 15018112,
+          "source_origin": {
+            "component_map_pointer": "/components/2/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "8d6e71df39738fe742421348e6c16d68d1cbb727"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/3",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "GPL-2.0-only",
+          "mode": 420,
+          "path": "module/actryn_authority.ko",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/module/actryn_authority.ko",
+          "sha256": "a49fd1a48bbdc39447a78fc0b0714e2e713c34f4fe25c11e989a790778291112",
+          "size": 793528,
+          "source_origin": {
+            "component_map_pointer": "/components/3/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "d3f48e8694faac2ae4f360e8d4d010824d50ec0a"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/4",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/docs/INSTALL.md",
+          "selected_source_path": "packaging/release/README.md",
+          "sha256": "c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add",
+          "size": 51667,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/5",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/licenses/Apache-2.0.txt",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/share/licenses/Apache-2.0.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "size": 11358,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/6",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "GPL-2.0-only",
+          "mode": 420,
+          "path": "share/licenses/GPL-2.0-only.txt",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/share/licenses/GPL-2.0-only.txt",
+          "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+          "size": 17984,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/7",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "SEE-NOTICES",
+          "mode": 420,
+          "path": "share/licenses/THIRD-PARTY.txt",
+          "selected_source_path": "artifacts/release-notices02/THIRD-PARTY.txt",
+          "sha256": "98ec4b48f120976337d35ff57ea16e4b56b18c9c10406a237206c401d410a985",
+          "size": 2759327,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/8",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "GPL-2.0-only",
+          "mode": 420,
+          "path": "share/source/kernel.tar",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/share/source/kernel.tar",
+          "sha256": "56e42e74afc899a726b451c1bf73e1cd6a9f06525d4509ea3241aca7b429a5ee",
+          "size": 2795520,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/9",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/target/build-inputs.toml",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/share/target/build-inputs.toml",
+          "sha256": "60ec99a5d032831a94c36036555a2c9b1b969fa3f2e9436293d521459f0e1831",
+          "size": 1136,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/10",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/target/profile.toml",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/share/target/profile.toml",
+          "sha256": "6b9f174af8b018e0cf95bfd282ed52b5385d364ebe7e372d54ce6a91d1d99be8",
+          "size": 2224,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/11",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/target/virt-actryn.dtb",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/share/target/virt-actryn.dtb",
+          "sha256": "b7a13e2f87dccf996274d65e91603b988b4d170bfa3ca9f2610f173d0dcc2011",
+          "size": 8392,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/12",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "sysusers/robot.conf",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/sysusers/robot.conf",
+          "sha256": "b6dfc4f77d1ff73037e60247ef5a277493b74a72dc480b3d6a36af5ccec28f31",
+          "size": 75,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/13",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "tools/install.py",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/tools/install.py",
+          "sha256": "fb1a766122f56869299269c8c5d1f88d21e5ccefd48cbc4c737cc6ca3daaef81",
+          "size": 26899,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/14",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "tools/release.py",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/tools/release.py",
+          "sha256": "9d3385ae0c14063f1e14e45837edfa7061fcd0dab654268bf27155826ee6ec34",
+          "size": 30461,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/15",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "units/actryn-gatewayd.service",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/units/actryn-gatewayd.service",
+          "sha256": "d5cfa5ca18d7836d6e68b4a9c7a50116d9e1e5d00a32338022425325a90c1bef",
+          "size": 828,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/16",
+            "receipt": "robot-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "units/actryn-robotd.service",
+          "selected_source_path": "artifacts/install-robot-inputs-04/inputs/units/actryn-robotd.service",
+          "sha256": "2a3d872c8572f99aa36fc097ca5231063cec1ebdfe6ad91b58a83d18f63fb4cd",
+          "size": 863,
+          "source_origin": null
+        }
+      ],
+      "custodian_attestation": null,
+      "exact_bundle_installed": false,
+      "independent_byte_review": "robot-review",
+      "limits": [
+        "Mixed build origins are retained; current manifest source revision is not each component build revision.",
+        "Payload archive and executable bytes were not reread by this packet assembly; saved independent byte review is the basis."
+      ],
+      "manifest": "robot-manifest",
+      "missing_bindings": [
+        "Root final predicate-to-selected-cohort applicability disposition",
+        "Role-scoped external custodian attestation and genuine signature"
+      ],
+      "payload": {
+        "bytes": 34959360,
+        "path": "artifacts/robot-final-cohort-package-plan01/unsigned/payload.tar",
+        "sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb",
+        "verification": "DECLARED_IN_ASSEMBLY_AND_INDEPENDENT_BYTE_REVIEW_NOT_REREAD_HERE"
+      },
+      "promotable": false,
+      "qualification": "incomplete",
+      "selected_provenance": {
+        "build_inputs_sha256": "60ec99a5d032831a94c36036555a2c9b1b969fa3f2e9436293d521459f0e1831",
+        "custodian_attestation": null,
+        "evidence": {
+          "cli-importer-build": "80b6e471482ecfd1929930166f7e483afad60ec57ff17980e4a0730a57fadcd2",
+          "cli-importer-inventory": "a04846e8ba394b15c1e585a47ee3e3b03904570cc7ec09d3021b6c5e864374d5",
+          "cli-importer-native-inputs": "a67fbecd12920f0e5ff724a1c57a2c316cf387413f1fa52f52f7cc22e610017d",
+          "cli-importer-source": "529b3d51d9f4cab8af2ac1aee45a607347ace1d529d9157e7bdcc39f41765776",
+          "cli-importer-static-target-abi": "080fd43f46d218449ad6d79c5c2141e684736ec0de7827b5f75708488cbed67a",
+          "component-origin-map": "a6b69b4151581d657dc9f2a24b6b462a57a5c127dff909174e216f9ddf028622",
+          "dadd-runtime-base-manifest": "dadd347413b23833d1272bbdf0c45b0e46259b5e8bdd3e40dcc0a907eedbca6a",
+          "dadd-runtime-base-spec": "08db8a6eaf5cbc96fa07dd03909654d4efd8df094aa038481fa835020dfd14d4",
+          "gateway-historical-transform": "8a090138e083aba148c49acecbd973d0b2c0b58dde13a3d6bf7badee310385ec",
+          "historical-base-reference": "e93f301471d8ce56948c515368d91d79b513611bd27591370527ffdd7b598996",
+          "module16-component-acceptance": "00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298",
+          "prior-mixed-component-map": "cee2746aac034f0ec48213b2c77fe68bcd4d8ce4c7055ddc9b8e759da9cc89ee",
+          "prior-runtime-component-map": "80ca5934debfd7ad2dec6bc4baad5ad497ca07dd218083ae4066549cfd76bd9c",
+          "reconciliation-host-integration": "f9ecc6c2a8846906fc4bd833ac5b1206bd090146cd543441d6a65fb6cec4f6f2",
+          "reconciliation-host-rust-receipt": "467bcf3ccb8f28cb6c0046b5e0a97bbf5a8bd1a961f4c99a4fb2aacc4c7b72d1",
+          "reconciliation-host-source-receipt": "7e58d27f8d8711f14437850387be034260f554b017b91da8fa0ee85a918d2e08",
+          "robot-reconciliation-build": "0b8b58ba32810bb9d9cb3f127e775def6aa7810c3b1898bde6fc60b44a5fa90b",
+          "robot-reconciliation-inventory": "3be3f4259b96cedbe5e5aa5ffaeb8054a879bd4a8e00a938c8bbf305f3a46ae1",
+          "robot-reconciliation-native-inputs": "1a72a085bfab45f4bc33f44c4c34dca1383219eb5ee23583ab6b06d15613715b",
+          "robot-reconciliation-root-review": "72c37e7ee8a3df6d19dc2b4a95206e651e014152027920ac7ffe8e4701a6964a",
+          "robot-reconciliation-source": "fbe3e0f227c1579ad00e8d15cdae0e2b76b851d973e13b5f804c4d00aadef085",
+          "robot-reconciliation-static-target-abi": "65e31e7f34fbfcf17b372788fe441cca55b8e1e2764c8db568de9cd7dfcb0efc",
+          "selected-install-document": "c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add",
+          "selected-notice-assembly": "2fae6d2da94bb833acb3711455bd9efdcb6d10f4fbc6958f3baad2adddd668a2",
+          "selected-third-party-notices": "98ec4b48f120976337d35ff57ea16e4b56b18c9c10406a237206c401d410a985"
+        },
+        "qualification": "incomplete",
+        "rust": "1.92.0",
+        "source_revision": "8d6e71df39738fe742421348e6c16d68d1cbb727"
+      },
+      "signature_verified": false,
+      "target": {
+        "architecture": "arm64",
+        "distribution": "debian",
+        "image_sha512": "a34e1c1eea1fbb9ad31ebdfc6c776d1d579ce9e3d740ab10549ebcdca6fe1a46c28e0a42cbcdf1eb561795776733c178f6e816fe1a2cb60d26ffc56c07f915c4",
+        "kernel_config_sha256": "0f442d89365ea22dc5169463634ee62903925200844558479666cbe3eeb7e555",
+        "kernel_image_sha256": "5028c424ee9fd0f4d18c38269122e30e3d084deb1b13404ab070a3f478ddd30a",
+        "kernel_release": "6.12.111+deb13-arm64",
+        "packages": {
+          "libc6": "2.41-12+deb13u4",
+          "libexpat1": "2.8.3-1~deb13u1",
+          "libgcc-s1": "14.2.0-19",
+          "libssl3t64": "3.5.7-1~deb13u3",
+          "libzstd1": "1.5.7+dfsg-1",
+          "linux-image-6.12.111+deb13-arm64": "6.12.111-1",
+          "openssl": "3.5.7-1~deb13u3",
+          "python3": "3.13.5-1",
+          "systemd": "257.13-1~deb13u1",
+          "zlib1g": "1:1.3.dfsg+really1.3.1-1+b1"
+        },
+        "version": "13.7"
+      }
+    },
+    "server": {
+      "assembly": "server-assembly",
+      "compatibility": {
+        "live_actuation": false,
+        "physical_acceptance": false,
+        "rpc": 1,
+        "server_rpc_max": 1,
+        "server_rpc_min": 1,
+        "state_schema": 1,
+        "uapi": 1,
+        "wire": 2
+      },
+      "component_map": "server-components",
+      "components": [
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/0",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/actryn",
+          "selected_source_path": "artifacts/server-importer-build01/actryn",
+          "sha256": "f5840d33b5ffff7b9de58cf32581299fb25289c186ba38f1ede69a1f9c42443c",
+          "size": 11446232,
+          "source_origin": {
+            "component_map_pointer": "/components/0/historical_origin/historical_origin/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "544c3824a486097ca30b66b56220a148d9bbd742"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/1",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/actryn-launcher",
+          "selected_source_path": "artifacts/server-prestart-cleanup-build01/actryn-launcher",
+          "sha256": "3ead4e49f73954137034910028e49a5fad4b0b34d0eeb36c908581447f2afe30",
+          "size": 14139888,
+          "source_origin": {
+            "component_map_pointer": "/components/1/component_source_revision",
+            "field": "component_source_revision",
+            "revision": "e6c3fd645387f1465bf3d7838c21ecec52a7d73e"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/2",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/actryn-observer",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/bin/actryn-observer",
+          "sha256": "bf2b4d2214940722c8ac3e5f11c67321787834126a0bdb7c787cc76f88537a7c",
+          "size": 13792392,
+          "source_origin": {
+            "component_map_pointer": "/components/2/historical_origin/historical_origin/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "770c87915b329e4c597cc298f4cc02ad74fcc157"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/3",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/actryn-serverd",
+          "selected_source_path": "artifacts/server-reconciliation-build01/actryn-serverd",
+          "sha256": "afef317ba581fe2feedf24bd46c244c17fdbd5aacf4b75dd62058a64a93ada5b",
+          "size": 25947032,
+          "source_origin": {
+            "component_map_pointer": "/components/3/historical_origin/historical_origin/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "8d6e71df39738fe742421348e6c16d68d1cbb727"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/4",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 493,
+          "path": "bin/controller-fixture",
+          "selected_source_path": "artifacts/install-robot-inputs-02/controller-fixture",
+          "sha256": "d1176146f8b56f21d644bc75c2b9fe686d342b0d8f09ca61532e726276013842",
+          "size": 705984,
+          "source_origin": {
+            "component_map_pointer": "/components/4/historical_origin/historical_origin/component_build_revision",
+            "field": "component_build_revision",
+            "revision": "2ec9da05bce8f14caff50ad79d0eab9ca67b5600"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/5",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "GPL-2.0-only",
+          "mode": 420,
+          "path": "lib/observer.bpf.o",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/lib/observer.bpf.o",
+          "sha256": "13c4882895fb92567c34abdc1a77a0c00b184cbe61e7af621f3547c9887b734d",
+          "size": 19224,
+          "source_origin": {
+            "component_map_pointer": "/components/5/historical_origin/historical_origin/historical_origin/source_revision",
+            "field": "source_revision",
+            "revision": "cc530d253c79d8454957b12c955d8e1db7625b33"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/6",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/agent/offline-oci.tar",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/agent/offline-oci.tar",
+          "sha256": "8f0656fc10fb7b78e4667f16ce0efa9d9eaf8c8ec84559fbf35408276b35b928",
+          "size": 1484800,
+          "source_origin": {
+            "component_map_pointer": "/components/6/historical_origin/historical_origin/historical_origin/source_revision",
+            "field": "source_revision",
+            "revision": "b4beaee20dfd793a3d666123402f80d8ec599ef5"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/7",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/docs/INSTALL.md",
+          "selected_source_path": "packaging/release/README.md",
+          "sha256": "c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add",
+          "size": 51667,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/8",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/licenses/Apache-2.0.txt",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/licenses/Apache-2.0.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "size": 11358,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/9",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "GPL-2.0-only",
+          "mode": 420,
+          "path": "share/licenses/GPL-2.0-only.txt",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/licenses/GPL-2.0-only.txt",
+          "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+          "size": 17984,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/10",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "SEE-NOTICES",
+          "mode": 420,
+          "path": "share/licenses/THIRD-PARTY.txt",
+          "selected_source_path": "artifacts/release-notices02/THIRD-PARTY.txt",
+          "sha256": "98ec4b48f120976337d35ff57ea16e4b56b18c9c10406a237206c401d410a985",
+          "size": 2759327,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/11",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/sdk/actryn/__init__.py",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/sdk/actryn/__init__.py",
+          "sha256": "5c77f3cd72dc1109884f7d865c97963b3d353fea3424fc858c287f69bd6fffe5",
+          "size": 223,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/12",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/sdk/actryn/client.py",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/sdk/actryn/client.py",
+          "sha256": "3540367ed103a7c80f8ddb80581e3e98f31f5766e05411a66d1950e43abd48b4",
+          "size": 8554,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/13",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/sdk/actryn/robot_v1_pb2.py",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/sdk/actryn/robot_v1_pb2.py",
+          "sha256": "7349d0e3a01ae4a75f5837865f2e220c18d6e123930d4b26f1ad5ef5f41258a7",
+          "size": 6842,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/14",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/sdk/pyproject.toml",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/sdk/pyproject.toml",
+          "sha256": "eb2e5292776559236bcfcebcbf4e25277aa798e9541ed9f980573fdcf6c20816",
+          "size": 340,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/15",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "GPL-2.0-only",
+          "mode": 420,
+          "path": "share/source/observer.Makefile",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/source/observer.Makefile",
+          "sha256": "af17503ba951cf825b3ca1092c7541575a303bd60d98b9efab8f3400bdc14edd",
+          "size": 232,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/16",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "GPL-2.0-only",
+          "mode": 420,
+          "path": "share/source/observer.bpf.c",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/source/observer.bpf.c",
+          "sha256": "356f3ba5a081cb97f67d427a37470e247cd93adad6fac1386fd3bf3b5eb58fad",
+          "size": 2739,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/17",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/target/build-inputs.toml",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/target/build-inputs.toml",
+          "sha256": "60ec99a5d032831a94c36036555a2c9b1b969fa3f2e9436293d521459f0e1831",
+          "size": 1136,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/18",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "share/target/profile.toml",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/target/profile.toml",
+          "sha256": "6b9f174af8b018e0cf95bfd282ed52b5385d364ebe7e372d54ce6a91d1d99be8",
+          "size": 2224,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/19",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "SEE-NOTICES",
+          "mode": 420,
+          "path": "share/wheels/protobuf-7.36.1-py3-none-any.whl",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/share/wheels/protobuf-7.36.1-py3-none-any.whl",
+          "sha256": "7d951e46b3f963d6c264c367c437921de9d5aedd9c3f9612b9077736b4e3ad5c",
+          "size": 179813,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/20",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "sysusers/server.conf",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/sysusers/server.conf",
+          "sha256": "b44037ffcdd1d9dab99169dad944e331e8cc0a1ec5c4bd93f078ea69eaa80513",
+          "size": 164,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/21",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "tmpfiles/server.conf",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/tmpfiles/server.conf",
+          "sha256": "c8bec39ca0806675dbc72f2fd02e7e11296a07459503b91a0e5cee3e2105a8fe",
+          "size": 443,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/22",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "tools/install.py",
+          "selected_source_path": "artifacts/install-server-host03/tools/install.py",
+          "sha256": "fb1a766122f56869299269c8c5d1f88d21e5ccefd48cbc4c737cc6ca3daaef81",
+          "size": 26899,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/23",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "tools/release.py",
+          "selected_source_path": "artifacts/install-server-host03/tools/release.py",
+          "sha256": "9d3385ae0c14063f1e14e45837edfa7061fcd0dab654268bf27155826ee6ec34",
+          "size": 30461,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/24",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "units/actryn-launcher.service",
+          "selected_source_path": "artifacts/server-device-policy-package01/actryn-launcher.service",
+          "sha256": "778d4698d09a94b8a94a6d4981a39fd324ec6d42bf7c2191aee8d9e41a4f9acb",
+          "size": 1233,
+          "source_origin": {
+            "component_map_pointer": "/components/24/historical_origin/component_source_revision",
+            "field": "component_source_revision",
+            "revision": "14afd962b9bea0986a4507230c2dd5710c52dca9"
+          }
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/25",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "units/actryn-observer.service",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/units/actryn-observer.service",
+          "sha256": "ba5db18101c792e2765ce549aaf055d6fb4d15f2f5051e0d8c11b25f9277f40e",
+          "size": 985,
+          "source_origin": null
+        },
+        {
+          "complete_origin_record": {
+            "json_pointer": "/components/26",
+            "receipt": "server-components"
+          },
+          "current_whole_crate_source_equality_claim": false,
+          "license": "Apache-2.0",
+          "mode": 420,
+          "path": "units/actryn-serverd.service",
+          "selected_source_path": "artifacts/release-fixture-inputs-01/inputs/server/units/actryn-serverd.service",
+          "sha256": "55b05a332f05e6a51e913c2b2b4a920e5846d4a75fc532fdb308cb5f8ae13995",
+          "size": 1427,
+          "source_origin": null
+        }
+      ],
+      "custodian_attestation": null,
+      "exact_bundle_installed": false,
+      "independent_byte_review": "server-review",
+      "limits": [
+        "Mixed build origins are retained; current manifest source revision is not each component build revision.",
+        "Payload archive and executable bytes were not reread by this packet assembly; saved independent byte review is the basis."
+      ],
+      "manifest": "server-manifest",
+      "missing_bindings": [
+        "Root final predicate-to-selected-cohort applicability disposition",
+        "Role-scoped external custodian attestation and genuine signature"
+      ],
+      "payload": {
+        "bytes": 70666240,
+        "path": "artifacts/server-final-cohort-package01/unsigned/payload.tar",
+        "sha256": "7b596c872290039cee2491595cc23515cc8a0eb559f0da3fcba619455518fe71",
+        "verification": "DECLARED_IN_ASSEMBLY_AND_INDEPENDENT_BYTE_REVIEW_NOT_REREAD_HERE"
+      },
+      "promotable": false,
+      "qualification": "incomplete",
+      "selected_provenance": {
+        "build_inputs_sha256": "60ec99a5d032831a94c36036555a2c9b1b969fa3f2e9436293d521459f0e1831",
+        "custodian_attestation": null,
+        "evidence": {
+          "binary-transform-record": "8a090138e083aba148c49acecbd973d0b2c0b58dde13a3d6bf7badee310385ec",
+          "bpf-matching-build": "12391c3f3cafc1463b6678eb411c7de8e743265f3a1c7b44842d5ffba1e0d205",
+          "cleanup-GREEN04": "a91a8a9ae5b8e0b8ffdd81614769c04d6048bb8b622a94324ec534c3e16c0ece",
+          "cleanup-GREEN04-review": "c1baf1535f24f3a51ad9071455c3db4af620a32eee03eef4c1f42d3071f3e0ed",
+          "cleanup-abi": "0ee596c997a6e3c464154828242f768e8042ae6b1182dff75feeb130db67c72b",
+          "cleanup-build": "2dfc87a362703005dea50b232cead639a950908a4632b4055eafc32005553a23",
+          "cleanup-build-review": "6230578c7656070a02e8a561c57d5bf0c52a2691c4f2f6ea82b562f0323abb97",
+          "cleanup-completed-build-catalogue": "a6a6badbe0ed95232fb79957fafa2d6cfa503c082de98459604eb87d1d372705",
+          "cleanup-custody-review": "3de0d536b2d6c5f9bc704686979de8d60230d2c161ceeda7a9148383622d9603",
+          "cleanup-custody59": "9101ddce91a6fd21e580b0f8474c9cbef29dc4c1b574c971838794661b4ecc52",
+          "cleanup-dependencies": "54710631be5c6eb49dccfc8cb496de4c73e58367cea8e0820d75c196322b9f6f",
+          "cleanup-host85": "17385566bea57423e5169e922c2e00774858de63f7c2809894a8ee0d0b8e17c2",
+          "cleanup-integration": "cbb3921d5f5b90c969467a8437a0eb5eb24b9b234bf8cb7196ed83687f0786bc",
+          "cleanup-native-inputs": "5716a4c0dd05d2e024da509189c18acfbc63bfa30c12979b7dc81a54d1efbd7d",
+          "cleanup-source": "8938e866acbf27829df575fc2bacf9f4af11dea01eb3e360c4781f7e4a589034",
+          "cleanup-source-tests": "d7468994f987ace53a7d656c70bb7a95400302104d2e1b1e68326f687513f466",
+          "cli-exact-runtime-complete": "11299b9d85e5b4ff126fddf4b975d8940d9080e6831fc9f6ac627d87553fad29",
+          "cli-exact-runtime-partial": "7441f9cb8b73ede190282cf84edf9bc0d1faeaf6c2afb3f7a1bf551873533ec7",
+          "cli-native-link-inputs": "3e1a3138d746cd2ef56a86b97bd0ca7c5bc1647dc6a69d9499d4f0ab409ca407",
+          "cli-umask-registry-build": "b26ef38f3dc6c473b2e3233d677d42fe8564c627d650a8f23cd85beae9e4b547",
+          "component-origin-map": "ccc6588f2f07cf233d06a46b09e9ad5dbc69913215f90008f8acdb5e080dceb1",
+          "device-policy-abi": "95ee14c3121cf6c9d41bb3bbcc7e19b1fc9369d4b42188f06b450d297ab80d29",
+          "device-policy-build": "fd7c18d41c2fbad01d119d58d3efee3b04dcaabe7b7c46f33199b82153b85193",
+          "device-policy-build-inventory": "5f7682ce3d312449068423e7647b3177c7992dd7b76a3f00a09adedb3c0a6331",
+          "device-policy-dependencies": "3314c1dae3a29b640dd652f5e75478e5cff320c0e059a4d9f8404b35f68c804d",
+          "device-policy-helper-tests": "002c489a119b50dbfa3b0fd8c41349b41b521c402b35f6cb7107e37a3d035268",
+          "device-policy-native-inputs": "7221df7f45960be0ec44b1dad46b66ac6c25ee5f229c2938bb03effe5650ea7b",
+          "device-policy-root-tests": "2e0fb58ecf830e9932c4877867fd82ab8e43b42710bdf34c2089264453d56b49",
+          "device-policy-source": "270cda4667aea8206012a35c2395f4f705e9448e86a25f9e230d679f91ce7d03",
+          "device-policy-validator-tests": "d85f12b7d020e770371b46068cc96c3f1c4a1f626002b2f60762ee15c08c76fa",
+          "fixture-runtime-compatibility": "b48c74315b837c6fbc9e615441d6e8579e63bafd0e71f67fc0fb2b5efc352b85",
+          "fixture-source-build": "461448181532d0b17d2204e3c0b0f65004c0daed197e15c7510f073145a814dd",
+          "glibc-complete-source": "2a30db699284a392a017a2a847ab9198990b4fd59b8040c66d1ee10e814e80e6",
+          "glibc-compressed-source-inputs": "fb4c662170c0f18ad37ce709622e4d06ceb5705f42882d8a2b8c8cf7b8640e31",
+          "glibc-recipe-correspondence": "c3cba47a58cd2fad2dd4a4d00e1f92cbbbf19a6ab0d5ec388da7197756041a01",
+          "historical-component-origin-map": "b301e38ca94d278cc32c9eca9804e1ad200cae48ba3873658b6fc82052a803c9",
+          "historical-package-manifest": "e06c12d63958e6c2296c2afc0f87cec3279ed2664d51d888bcada40189baa50d",
+          "independent-notices-review": "7dbd9bbf5cd34ae0f1eacb837f37bb50439912802700e8e9f67877193e707d7a",
+          "manager11-build": "3caae896f9afd6a5600cd5b403ea71d3b9915d0ddfcbf25e815b2d8db143c7c9",
+          "module16-acceptance": "00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298",
+          "native-provenance": "5d79ed9d389ccc6114c5c225bbdc76e7e2795e7107e9d853482bb991036f5e26",
+          "oci-matching-build": "403eb15593ad79caf18b063d628f75410a94c800ffb4327d6fe42d977a9a08c6",
+          "oci-matching-provenance": "afc7e0e1cbc8094d0599da5b7b9b95c2824cf70531d8cee0f81f8f8f9abae42d",
+          "oci-native-link-trace": "77ca0bef54598cb76800fabf378ab69da2e78bc84ad498874bc7e461d6bc79f6",
+          "prior-build-source-review": "4d52f6754e2e9f7112c62db900e03f25750f9668639bf3fb9951b24b9cc86734",
+          "prior-mixed-component-map": "cee2746aac034f0ec48213b2c77fe68bcd4d8ce4c7055ddc9b8e759da9cc89ee",
+          "prior-server-component-map": "51d45112d30e6d74c2e8ebfc91810b90f35b2f44b89d60f335ffe7da057f78f0",
+          "prior-server-manifest": "fbfc394a2e710cadf738596830dcfc1b7f778e99b8a1336d85a9bf2a64547c78",
+          "reconciliation-host-integration": "f9ecc6c2a8846906fc4bd833ac5b1206bd090146cd543441d6a65fb6cec4f6f2",
+          "reconciliation-host-rust-receipt": "467bcf3ccb8f28cb6c0046b5e0a97bbf5a8bd1a961f4c99a4fb2aacc4c7b72d1",
+          "reconciliation-host-source-receipt": "7e58d27f8d8711f14437850387be034260f554b017b91da8fa0ee85a918d2e08",
+          "reviewed-notices-assembly": "2fae6d2da94bb833acb3711455bd9efdcb6d10f4fbc6958f3baad2adddd668a2",
+          "selected-changes": "da901c706edc30023ee1fed33863a0cf2b4bd420fb46ea0a14536b8b058364be",
+          "server-deploy02": "841dc56b4fdf739bffc1ffd1239c46b279e334284072446a93081e08f9a8d515",
+          "server-deploy03": "01ffe87b0a213fb322167be03deb6e241b9de82703282bb977093a8230e0d21e",
+          "server-reconciliation-abi": "cae80b694509cb43467ac393338521725774105dc37f34245190bb12f9e1be52",
+          "server-reconciliation-build": "39150625840f9a85875fc7017c9a11e28434c865b597506a56c9304ac518a539",
+          "server-reconciliation-build-inventory": "ce86fb79c163a6034701a99b13d352da5204fbd15ca7246f4a9ea9586755ac79",
+          "server-reconciliation-native-inputs": "eb3e30cd9e5c2e14caad79acabc2ce84927f5374c0f263e674f1e62ff8b05659",
+          "server-reconciliation-root-review": "18642f2e0b0a0a7e8101831ade64049789c1695a153776c2f0a6fc2d76eee6dd",
+          "server-reconciliation-source": "79acc8689f9eef8098be5ca4ba0911e0e5285cfa9e2ac34375f73a4d55732831",
+          "tracked-source": "1cc85d421fb0d2cbf2dd65430af93846f91df1271cb0036ece708e4bb1eeb013",
+          "tracked-source-544c382": "529b3d51d9f4cab8af2ac1aee45a607347ace1d529d9157e7bdcc39f41765776"
+        },
+        "qualification": "incomplete",
+        "rust": "1.92.0",
+        "source_revision": "e6c3fd645387f1465bf3d7838c21ecec52a7d73e"
+      },
+      "signature_verified": false,
+      "target": {
+        "architecture": "amd64",
+        "distribution": "debian",
+        "image_sha512": "d4721b56d60472370f3ff088a85ca36f298b360d3131af421a009bb8ea03c4d80eb67915bb57a69f6057e56c5bd48e69d3a47fbc5b8efacc5434a9c756b345d3",
+        "kernel_config_sha256": "7264f6c17e856bf18ec53085a01be10d8e466f32a8dcb13c08c4e705d3b2c35b",
+        "kernel_image_sha256": "6d8a7f745280cc06a6d2877c932f4dfa9079b694eb4227b61b27232642340794",
+        "kernel_release": "6.12.111+deb13-amd64",
+        "packages": {
+          "containerd": "1.7.24~ds1-6+deb13u1",
+          "libc6": "2.41-12+deb13u4",
+          "libelf1t64": "0.192-4",
+          "libexpat1": "2.8.3-1~deb13u1",
+          "libgcc-s1": "14.2.0-19",
+          "libssl3t64": "3.5.7-1~deb13u3",
+          "libzstd1": "1.5.7+dfsg-1",
+          "linux-image-6.12.111+deb13-amd64": "6.12.111-1",
+          "openssl": "3.5.7-1~deb13u3",
+          "python3": "3.13.5-1",
+          "python3-venv": "3.13.5-1",
+          "runc": "1.1.15+ds1-2+b4",
+          "systemd": "257.13-1~deb13u1",
+          "zlib1g": "1:1.3.dfsg+really1.3.1-1+b1"
+        },
+        "version": "13.7"
+      }
+    }
+  },
+  "custodian_attestation": null,
+  "evidence_retention": "Local ignored receipts/raw evidence are not backed up by Git push. A tracked byte-identical packet preserves this map and hashes, not the underlying raw evidence.",
+  "external_inputs": {
+    "A13": {
+      "actual_live_model_gate": "NOT_RUN",
+      "actual_provisioning_confirmed": false,
+      "disposition": "EXTERNAL"
+    },
+    "A14": {
+      "actual_human_installation_report": null,
+      "disposition": "EXTERNAL",
+      "independent_developer": null
+    },
+    "release_custodian": {
+      "disposition": "EXTERNAL",
+      "identity": null,
+      "public_key_SPKI_sha256": null,
+      "role_attestations": null
+    }
+  },
+  "format_basis": "actryn-release-1 provenance evidence qualification-bundle reference; inner content is a review packet, not a new release-loader schema",
+  "format_limitations": [
+    "Existing release.py enforces evidence name/hash and role-scoped custodian_attestation; it defines no internal qualification-bundle schema or acceptance oracle. This packet is reviewable evidence, not custodian approval.",
+    "Neither original manifest is modified or given qualification-bundle by this assembly. Adding qualification/attestation later changes manifest identity even if payload bytes remain equal.",
+    "Server-independent-D2 promotion does not require combinedA13 acceptance; it still requires completed role evidence and genuine external custodian/signature. Full Robot/preview gates remain incomplete."
+  ],
+  "indirect_declared_large_inputs": [
+    {
+      "bytes": 4628480,
+      "id": "server-inherited-cleanup-source",
+      "path": "artifacts/server-prestart-cleanup-build01/source.tar",
+      "sha256": "8938e866acbf27829df575fc2bacf9f4af11dea01eb3e360c4781f7e4a589034",
+      "verification": "DECLARED_BY_HASH_BOUND_CANDIDATE_EVIDENCE_INDEX_NOT_REREAD"
+    },
+    {
+      "bytes": 4188160,
+      "id": "robot-inherited-cli-importer-source",
+      "path": "artifacts/server-importer-build01/source-544c382.tar",
+      "sha256": "529b3d51d9f4cab8af2ac1aee45a607347ace1d529d9157e7bdcc39f41765776",
+      "verification": "DECLARED_BY_HASH_BOUND_CANDIDATE_EVIDENCE_INDEX_NOT_REREAD"
+    },
+    {
+      "bytes": 4341760,
+      "id": "robot-inherited-robot-reconciliation-source",
+      "path": "artifacts/robot-reconciliation-build02/source-8d6e71d.tar",
+      "sha256": "fbe3e0f227c1579ad00e8d15cdae0e2b76b851d973e13b5f804c4d00aadef085",
+      "verification": "DECLARED_BY_HASH_BOUND_CANDIDATE_EVIDENCE_INDEX_NOT_REREAD"
+    },
+    {
+      "bytes": 2759327,
+      "id": "robot-inherited-selected-third-party-notices",
+      "path": "artifacts/release-notices02/THIRD-PARTY.txt",
+      "sha256": "98ec4b48f120976337d35ff57ea16e4b56b18c9c10406a237206c401d410a985",
+      "verification": "DECLARED_BY_HASH_BOUND_CANDIDATE_EVIDENCE_INDEX_NOT_REREAD"
+    }
+  ],
+  "missing_selected_receipts": [],
+  "physical_acceptance": false,
+  "promotable": false,
+  "public_receipts": {
+    "a16-original-analyzer": {
+      "bytes": 22796,
+      "path": "artifacts/a16-abba-final-analysis01/analyzer.json",
+      "sha256": "5843282ba98973397914e093c8e3a42c9b0c8abba66b53ead8da25a148bf0494"
+    },
+    "a16-original-cohort": {
+      "bytes": 565,
+      "path": "artifacts/a16-abba-final-analysis01/cohort-gate.json",
+      "sha256": "1bcfd6809ae42fddf2528b34a99d5a1657dc6e74f1de3f2fff1e28cba491aba7"
+    },
+    "a16-original-result": {
+      "bytes": 961,
+      "path": "artifacts/a16-abba-final-analysis01/result.json",
+      "sha256": "d4f3ef18f85a43995da6dbb451861f3c8099dba7aba8f4f75f8260aeb89c1b8e"
+    },
+    "a16-original-review": {
+      "bytes": 9981,
+      "path": "artifacts/a16-abba-final-analysis-actual-review01/review.json",
+      "sha256": "4257e0458a9e4d94e7f316b1f3bbea36e8d040d18a8430e4787c122114ef0865"
+    },
+    "approved-plan": {
+      "bytes": 6856,
+      "path": "artifacts/final-cohort-qualification-packet01/source-snapshots/approved-plan.md",
+      "sha256": "92534437be3249c2d4476fedf36a899520eaeb791e25203c3e5537b0d26fb613"
+    },
+    "arm-cli-abi": {
+      "bytes": 4021,
+      "path": "artifacts/arm-cli-runtime-collection01/abi/result.json",
+      "sha256": "080fd43f46d218449ad6d79c5c2141e684736ec0de7827b5f75708488cbed67a"
+    },
+    "arm-cli-source": {
+      "bytes": 95365,
+      "path": "artifacts/arm-cli-coverage-source01/result.json",
+      "sha256": "e8cbec1e75f312601cdf428a3868897551026234629510e6562d3cacce5a2a66"
+    },
+    "cleanup-build": {
+      "bytes": 988,
+      "path": "artifacts/server-prestart-cleanup-build01/provenance.json",
+      "sha256": "2dfc87a362703005dea50b232cead639a950908a4632b4055eafc32005553a23"
+    },
+    "cleanup-green04": {
+      "bytes": 2506,
+      "path": "artifacts/server-prestart-cleanup-green-root-review04/green04-classification.json",
+      "sha256": "a91a8a9ae5b8e0b8ffdd81614769c04d6048bb8b622a94324ec534c3e16c0ece"
+    },
+    "cleanup-green04-review": {
+      "bytes": 5203,
+      "path": "artifacts/server-prestart-cleanup-green04-actual-peer01/review.json",
+      "sha256": "c1baf1535f24f3a51ad9071455c3db4af620a32eee03eef4c1f42d3071f3e0ed"
+    },
+    "cleanup-integration": {
+      "bytes": 1090,
+      "path": "artifacts/server-start-cleanup-integration01/result.json",
+      "sha256": "cbb3921d5f5b90c969467a8437a0eb5eb24b9b234bf8cb7196ed83687f0786bc"
+    },
+    "cleanup-old-red": {
+      "bytes": 1269,
+      "path": "artifacts/server-prestart-cleanup-root-review01/old-red-classification.json",
+      "sha256": "32aaf351742f21950b73c3e74bd2dced0ef17e877748a72d7de51aa50b62a8ab"
+    },
+    "contention04": {
+      "bytes": 3148,
+      "path": "artifacts/robot-a09-contention-04/result.json",
+      "sha256": "59c49b6b9c1eac0d6b2173a278f7519721e8a4d0f4970e218ddcdf200cbc9927"
+    },
+    "d2-cold-integrity": {
+      "bytes": 761,
+      "path": "artifacts/server-device-policy-cold-integrity-owner01/result.json",
+      "sha256": "d94805cb2ba5bad6ee999ae15df10b971f4984bee1292e7dc3bcd9b4fc484507"
+    },
+    "d2-composition": {
+      "bytes": 3108,
+      "path": "artifacts/server-final-d2-predicate-map03/root-composition-decision02.json",
+      "sha256": "0ebd4ac246d2931988b177d15fdb5123a216f38c4404195a6a022b949bfe2644"
+    },
+    "d2-device-oom": {
+      "bytes": 4373,
+      "path": "artifacts/server-device-policy-composite-cases01/result.json",
+      "sha256": "b66f7bb4516443854b4c222b4b69a76d19eebb423ecfa148607bcb04801d993c"
+    },
+    "d2-frozen03": {
+      "bytes": 25439,
+      "path": "artifacts/server-final-d2-predicate-map03/association.json",
+      "sha256": "fcebbe2d6a1d752f276d96659eea3e5783f7aac88aa47241f94676f95ec72853"
+    },
+    "d2-load-failure02": {
+      "bytes": 6580,
+      "path": "artifacts/server-final-d2-predicate-map02/association.json",
+      "sha256": "68db7b6aa9fbd146adfbd5c8b9bd2a9d075034bf775987453902a8ff4bddf36e"
+    },
+    "d2-native-final-review": {
+      "bytes": 2300,
+      "path": "artifacts/server-native-proof-final-independent-review01/review.json",
+      "sha256": "ce636fd43f7d39498f7ffab10a16e8ccddeda8f60ed1262d0e1bcdaecd709190"
+    },
+    "d2-native-proof": {
+      "bytes": 2437,
+      "path": "artifacts/server-native-proof-actual-peer01/review.json",
+      "sha256": "9da8100dfe14880e462d850fa039c65bb921088a3413a27540be8c4f3b326b87"
+    },
+    "d2-network-classification": {
+      "bytes": 1614,
+      "path": "artifacts/server-network-proof-root-review01/execution-classification.json",
+      "sha256": "2de60ece0168e341cb14be6e5bad3d5468daab01632d9b5779ebac4cc2fe4db3"
+    },
+    "d2-network-custody": {
+      "bytes": 18327,
+      "path": "artifacts/server-network-proof-stopped-custody01/result.json",
+      "sha256": "a1b6f4f25e7a0649e9ea012e719bac2256c40eb88d8c9c4de3fc99bdb44d401a"
+    },
+    "d2-network05": {
+      "bytes": 2843,
+      "path": "artifacts/server-final-d2-network-association05/association.json",
+      "sha256": "4605532a43b465b2169cfdfa22f3f544de872a8c6c47b3a13f2b159d348a908b"
+    },
+    "d2-runtime04": {
+      "bytes": 9376,
+      "path": "artifacts/server-final-d2-runtime-association04/association.json",
+      "sha256": "db16b0671f4541393bce57df538f78d70b9bcfe3d815cdf9e0964afa028b89d3"
+    },
+    "diagnostic02-classification": {
+      "bytes": 1936,
+      "path": "artifacts/a16-bind9-observation-root-review02/classification.json",
+      "sha256": "1b3e91a57d3c07502475366a14ad743b5dcd64f5c81a1ee587d867a1b7e73b2f"
+    },
+    "diagnostic02-pair": {
+      "bytes": 431,
+      "path": "artifacts/a16-bind9-observation02/pair-validation.json",
+      "sha256": "f93195375e6b2ffe8ce025516ff7d233d588e7e48abc822ca21643b4c1e4f241"
+    },
+    "diagnostic02-progress": {
+      "bytes": 1031,
+      "path": "artifacts/a16-bind9-observation02/diagnostic-progress.json",
+      "sha256": "b6dd8974ddbb35ac987b2a1dcd32b8751ae4434a2fef12f4bd55998b06a35d3c"
+    },
+    "diagnostic02-result": {
+      "bytes": 619,
+      "path": "artifacts/a16-bind9-observation02/result.json",
+      "sha256": "aba80814cd38be13edd99b03f18c5cdfe6f1dd91b3bccb69f2f77d4b5d0a7436"
+    },
+    "diagnostic02-review": {
+      "bytes": 16972,
+      "path": "artifacts/a16-bind9-observation-actual-peer02/review.json",
+      "sha256": "827e3cf3dcbf3c27150e6e42cfb4527a4d3f60d1f8fa91fd627a2c3eb62b4ab1"
+    },
+    "existing-handle-cleanup": {
+      "bytes": 6932,
+      "path": "artifacts/robot-retained-debit-finalize-cleanup-actual-review01/review.json",
+      "sha256": "19223fd1dd083fcf8e56321c02bc830f9a70274f68385a1ede55db8a77b757c6"
+    },
+    "gap-export": {
+      "bytes": 482,
+      "path": "artifacts/robot-source-gap-01-export-amendment2/result.json",
+      "sha256": "136c60edd990ad24d9d9ff926d19efdb81dc949878b6e6e347dda64e99450120"
+    },
+    "gap-omission": {
+      "bytes": 3188,
+      "path": "artifacts/robot-source-gap-01/omission.json",
+      "sha256": "7a52b475d619f29fa5bf8a1536439f7cf2a3c40897b4101069d3c039097ab29b"
+    },
+    "hot-journal-host": {
+      "bytes": 142,
+      "path": "artifacts/evidence-hot-journal01/green03.json",
+      "sha256": "0c7ebf619c91329071bfb7d8042b7c31f823c3424bc0934a0225c45502bdcaa7"
+    },
+    "hot-journal-reanalysis": {
+      "bytes": 4248,
+      "path": "artifacts/robot-a10-lifetime-02-recovery-reanalysis01/report02.json",
+      "sha256": "830265fe5dfbf112524230d4bed1d89cf35300a2c5f97571923c02f2cc77109f"
+    },
+    "latest-custody-closure": {
+      "bytes": 209,
+      "path": "artifacts/a16-bind9-final-stopped-custody-root-review02/custody-owner-closure.json",
+      "sha256": "f9742c1bede4e9ce9421f44297ebc0320e96db78b3cf6ec37203b36fa2d78106"
+    },
+    "latest-stopped-custody": {
+      "bytes": 20301,
+      "path": "artifacts/a16-bind9-final-stopped-custody02/result.json",
+      "sha256": "4154a0ac5cbda23f3655a12312df156bf502913802d29edfd1ae5e272864ae31"
+    },
+    "lifetime09": {
+      "bytes": 23388,
+      "path": "artifacts/robot-a10-lifetime-09/result.json",
+      "sha256": "730b8fa965f8b714c1ba6ed25662c61faaa7535ae308dc10e6f5f88119db989f"
+    },
+    "live-missing-credential": {
+      "bytes": 811,
+      "path": "artifacts/server-regression-guest03/live-missing-credential-03.log",
+      "sha256": "fa1f5a936ad193149e093c882a0b79398992c96030cea0c8cd9ff2540468133a"
+    },
+    "manager-lifecycle03": {
+      "bytes": 576,
+      "path": "artifacts/robot-manager11-lifecycle03/result.json",
+      "sha256": "296fcc3762d692f38c1934753a79577cc54bfb28c0fb42256aee86a5ee21a4df"
+    },
+    "module16": {
+      "bytes": 2113,
+      "path": "artifacts/kernel-module16-acceptance01/manifest.json",
+      "sha256": "00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298"
+    },
+    "ordering-approved": {
+      "bytes": 839,
+      "path": "artifacts/server-launch-order-approved-decision01/result.json",
+      "sha256": "405620fe0954ea0879da673e13500b51f0f6382f5bb9d55df33e6ee8ea964956"
+    },
+    "platform-contract": {
+      "bytes": 32680,
+      "path": "artifacts/final-cohort-qualification-packet01/source-snapshots/platform-release-contract.md",
+      "sha256": "315734b43734f9200ebd2e35cd977a60fcf91dedbd9d85c38fb2805100046b0a"
+    },
+    "pressure11": {
+      "bytes": 2817,
+      "path": "artifacts/server-a08-pressure-run11/capture-validated.json",
+      "sha256": "92875b5c76811026708b67c025c54db14f3b3fe6d50c0b2228ee92301caaf840"
+    },
+    "release-format": {
+      "bytes": 51667,
+      "path": "artifacts/final-cohort-qualification-packet01/source-snapshots/selected-install.md",
+      "sha256": "c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add"
+    },
+    "release-validator": {
+      "bytes": 30461,
+      "path": "artifacts/install-server-host03/tools/release.py",
+      "sha256": "9d3385ae0c14063f1e14e45837edfa7061fcd0dab654268bf27155826ee6ec34"
+    },
+    "replyloss02": {
+      "bytes": 3156,
+      "path": "artifacts/robot-a02-replyloss-02/result.json",
+      "sha256": "b6744e8bdd9a0d54ec973dc19cbe579ffa06cb102d2054e651910f73c83f02d4"
+    },
+    "robot-assembly": {
+      "bytes": 1238,
+      "path": "artifacts/robot-final-cohort-package-plan01/result.json",
+      "sha256": "7a32a924214f8c95e43e36efad9f15420c0d499c5ab88bc5a36972db844f3b45"
+    },
+    "robot-build-review": {
+      "bytes": 826,
+      "path": "artifacts/robot-reconciliation-root-review01/result.json",
+      "sha256": "72c37e7ee8a3df6d19dc2b4a95206e651e014152027920ac7ffe8e4701a6964a"
+    },
+    "robot-components": {
+      "bytes": 19566,
+      "path": "artifacts/robot-final-cohort-package-plan01/component-map.json",
+      "sha256": "a6b69b4151581d657dc9f2a24b6b462a57a5c127dff909174e216f9ddf028622"
+    },
+    "robot-delta": {
+      "bytes": 1146,
+      "path": "artifacts/robot-final-cohort-package-plan01/payload-delta.json",
+      "sha256": "adb6b437b1c9205c6bb107022cff0b563227bc3b4c5fd17d711c9dfdadfb2d27"
+    },
+    "robot-evidence-index": {
+      "bytes": 5396,
+      "path": "artifacts/robot-final-cohort-package-plan01/evidence-references.json",
+      "sha256": "f8fffb617bfe243e59cc6539d4a4e5a45a12c505ee3728085d23875bf696e7b8"
+    },
+    "robot-inherited-cli-importer-build": {
+      "bytes": 2905,
+      "path": "artifacts/arm-cli-importer-build01/provenance.json",
+      "sha256": "80b6e471482ecfd1929930166f7e483afad60ec57ff17980e4a0730a57fadcd2"
+    },
+    "robot-inherited-cli-importer-inventory": {
+      "bytes": 6257,
+      "path": "artifacts/arm-cli-importer-build01/artifact-hashes.json",
+      "sha256": "a04846e8ba394b15c1e585a47ee3e3b03904570cc7ec09d3021b6c5e864374d5"
+    },
+    "robot-inherited-cli-importer-native-inputs": {
+      "bytes": 46554,
+      "path": "artifacts/arm-cli-importer-build01/metadata-amendment02/native-inputs.json",
+      "sha256": "a67fbecd12920f0e5ff724a1c57a2c316cf387413f1fa52f52f7cc22e610017d"
+    },
+    "robot-inherited-cli-importer-static-target-abi": {
+      "bytes": 4021,
+      "path": "artifacts/arm-cli-runtime-collection01/abi/result.json",
+      "sha256": "080fd43f46d218449ad6d79c5c2141e684736ec0de7827b5f75708488cbed67a"
+    },
+    "robot-inherited-component-origin-map": {
+      "bytes": 19566,
+      "path": "artifacts/robot-final-cohort-package-plan01/component-map.json",
+      "sha256": "a6b69b4151581d657dc9f2a24b6b462a57a5c127dff909174e216f9ddf028622"
+    },
+    "robot-inherited-dadd-runtime-base-manifest": {
+      "bytes": 5787,
+      "path": "artifacts/robot-reconciliation-package01/unsigned/manifest.json",
+      "sha256": "dadd347413b23833d1272bbdf0c45b0e46259b5e8bdd3e40dcc0a907eedbca6a"
+    },
+    "robot-inherited-dadd-runtime-base-spec": {
+      "bytes": 7645,
+      "path": "artifacts/robot-reconciliation-package01/robot-inputs.json",
+      "sha256": "08db8a6eaf5cbc96fa07dd03909654d4efd8df094aa038481fa835020dfd14d4"
+    },
+    "robot-inherited-gateway-historical-transform": {
+      "bytes": 23419,
+      "path": "artifacts/release-fixture-inputs-01/provenance/binary-transforms.json",
+      "sha256": "8a090138e083aba148c49acecbd973d0b2c0b58dde13a3d6bf7badee310385ec"
+    },
+    "robot-inherited-historical-base-reference": {
+      "bytes": 2274,
+      "path": "artifacts/robot-reconciliation-package01/historical-base.json",
+      "sha256": "e93f301471d8ce56948c515368d91d79b513611bd27591370527ffdd7b598996"
+    },
+    "robot-inherited-module16-component-acceptance": {
+      "bytes": 2113,
+      "path": "artifacts/kernel-module16-acceptance01/manifest.json",
+      "sha256": "00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298"
+    },
+    "robot-inherited-prior-mixed-component-map": {
+      "bytes": 30123,
+      "path": "artifacts/release-cohort01/component-map.json",
+      "sha256": "cee2746aac034f0ec48213b2c77fe68bcd4d8ce4c7055ddc9b8e759da9cc89ee"
+    },
+    "robot-inherited-prior-runtime-component-map": {
+      "bytes": 25777,
+      "path": "artifacts/robot-reconciliation-package01/component-map.json",
+      "sha256": "80ca5934debfd7ad2dec6bc4baad5ad497ca07dd218083ae4066549cfd76bd9c"
+    },
+    "robot-inherited-reconciliation-host-integration": {
+      "bytes": 259,
+      "path": "artifacts/reconciliation-integration-checks01/summary.json",
+      "sha256": "f9ecc6c2a8846906fc4bd833ac5b1206bd090146cd543441d6a65fb6cec4f6f2"
+    },
+    "robot-inherited-reconciliation-host-rust-receipt": {
+      "bytes": 571,
+      "path": "artifacts/reconciliation-integration-checks01/rust-result.json",
+      "sha256": "467bcf3ccb8f28cb6c0046b5e0a97bbf5a8bd1a961f4c99a4fb2aacc4c7b72d1"
+    },
+    "robot-inherited-reconciliation-host-source-receipt": {
+      "bytes": 1170,
+      "path": "artifacts/reconciliation-integration-checks01/source-result.json",
+      "sha256": "7e58d27f8d8711f14437850387be034260f554b017b91da8fa0ee85a918d2e08"
+    },
+    "robot-inherited-robot-reconciliation-build": {
+      "bytes": 5095,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/provenance.json",
+      "sha256": "0b8b58ba32810bb9d9cb3f127e775def6aa7810c3b1898bde6fc60b44a5fa90b"
+    },
+    "robot-inherited-robot-reconciliation-inventory": {
+      "bytes": 32405,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/aggregate-inventory.json",
+      "sha256": "3be3f4259b96cedbe5e5aa5ffaeb8054a879bd4a8e00a938c8bbf305f3a46ae1"
+    },
+    "robot-inherited-robot-reconciliation-native-inputs": {
+      "bytes": 119832,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/native-inputs.json",
+      "sha256": "1a72a085bfab45f4bc33f44c4c34dca1383219eb5ee23583ab6b06d15613715b"
+    },
+    "robot-inherited-robot-reconciliation-root-review": {
+      "bytes": 826,
+      "path": "artifacts/robot-reconciliation-root-review01/result.json",
+      "sha256": "72c37e7ee8a3df6d19dc2b4a95206e651e014152027920ac7ffe8e4701a6964a"
+    },
+    "robot-inherited-robot-reconciliation-static-target-abi": {
+      "bytes": 25218,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/target-abi.json",
+      "sha256": "65e31e7f34fbfcf17b372788fe441cca55b8e1e2764c8db568de9cd7dfcb0efc"
+    },
+    "robot-inherited-selected-install-document": {
+      "bytes": 51667,
+      "path": "packaging/release/README.md",
+      "sha256": "c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add"
+    },
+    "robot-inherited-selected-notice-assembly": {
+      "bytes": 5936,
+      "path": "artifacts/release-notices02/assembly.json",
+      "sha256": "2fae6d2da94bb833acb3711455bd9efdcb6d10f4fbc6958f3baad2adddd668a2"
+    },
+    "robot-inputs": {
+      "bytes": 8202,
+      "path": "artifacts/robot-final-cohort-package-plan01/robot-inputs.json",
+      "sha256": "002fd5b7185c359c02ad56dbff7c1d5e589aa92a15142118db166fc6682296a3"
+    },
+    "robot-installed-update": {
+      "bytes": 5250,
+      "path": "artifacts/install-robot-update04-run01/summary.json",
+      "sha256": "b8f92df2cd7238cc314d54efaa56eacda2ae6497c216c6aa25335e053d1ae357"
+    },
+    "robot-manifest": {
+      "bytes": 6359,
+      "path": "artifacts/robot-final-cohort-package-plan01/unsigned/manifest.json",
+      "sha256": "da6b6862768071ae839c64d73be56f63e23d852ab99e0b7d12f1541f987cc5a9"
+    },
+    "robot-package-inspection": {
+      "bytes": 33810,
+      "path": "artifacts/robot-qualification-package-inspection01/capture.json",
+      "sha256": "f774c54897482e119be5b52b2ce587dd906643c8950c655929e1df9f97ce02a7"
+    },
+    "robot-review": {
+      "bytes": 1676,
+      "path": "artifacts/robot-final-cohort-package-review01/review.json",
+      "sha256": "e7b0355a8eedfb071e81ea30950ad4be09d42bec25e2eaab61248534d105a124"
+    },
+    "robot-startup-parser": {
+      "bytes": 13637,
+      "path": "artifacts/reconciliation-robot-startup01/parser-review.json",
+      "sha256": "f34be51899457fbf245bcb74a85a210fa795aaec2bb80e9e5e6574d8a44304a8"
+    },
+    "robot-startup-verification": {
+      "bytes": 171,
+      "path": "artifacts/reconciliation-robot-startup-verification01/result.json",
+      "sha256": "0a371ffcf5331f3e9e7d5194171d398983a75e57a301c209252d51d3d914f00f"
+    },
+    "robot-update": {
+      "bytes": 181,
+      "path": "artifacts/reconciliation-robot-update01/activate02-result.json",
+      "sha256": "7d81dc464045cdad27b0be52fc3f03217c397045452da0227348820e0773b917"
+    },
+    "server-assembly": {
+      "bytes": 2619,
+      "path": "artifacts/server-final-cohort-package01/result.json",
+      "sha256": "71ec479c99a3285ae6f657568cd84ba474991ed640fd10b49493493e600aefb2"
+    },
+    "server-components": {
+      "bytes": 66255,
+      "path": "artifacts/server-final-cohort-package01/component-map.json",
+      "sha256": "ccc6588f2f07cf233d06a46b09e9ad5dbc69913215f90008f8acdb5e080dceb1"
+    },
+    "server-delta": {
+      "bytes": 650,
+      "path": "artifacts/server-final-cohort-package01/payload-delta.json",
+      "sha256": "29ceb1ff2e2de726328f45bf250b629bbc7d9b44d74cc97fa4274893db2445de"
+    },
+    "server-evidence-index": {
+      "bytes": 3607,
+      "path": "artifacts/server-final-cohort-package01/evidence-references.json",
+      "sha256": "2cc2c3fb1aceeef86db9f761138c4570a57d530bdd2b22e3b56eb6dd7f425b8a"
+    },
+    "server-inherited-cleanup-GREEN04": {
+      "bytes": 2506,
+      "path": "artifacts/server-prestart-cleanup-green-root-review04/green04-classification.json",
+      "sha256": "a91a8a9ae5b8e0b8ffdd81614769c04d6048bb8b622a94324ec534c3e16c0ece"
+    },
+    "server-inherited-cleanup-GREEN04-review": {
+      "bytes": 5203,
+      "path": "artifacts/server-prestart-cleanup-green04-actual-peer01/review.json",
+      "sha256": "c1baf1535f24f3a51ad9071455c3db4af620a32eee03eef4c1f42d3071f3e0ed"
+    },
+    "server-inherited-cleanup-abi": {
+      "bytes": 19326,
+      "path": "artifacts/server-prestart-cleanup-build01/abi-review.json",
+      "sha256": "0ee596c997a6e3c464154828242f768e8042ae6b1182dff75feeb130db67c72b"
+    },
+    "server-inherited-cleanup-build": {
+      "bytes": 988,
+      "path": "artifacts/server-prestart-cleanup-build01/provenance.json",
+      "sha256": "2dfc87a362703005dea50b232cead639a950908a4632b4055eafc32005553a23"
+    },
+    "server-inherited-cleanup-build-review": {
+      "bytes": 3933,
+      "path": "artifacts/server-prestart-cleanup-build-actual-peer01/review.json",
+      "sha256": "6230578c7656070a02e8a561c57d5bf0c52a2691c4f2f6ea82b562f0323abb97"
+    },
+    "server-inherited-cleanup-completed-build-catalogue": {
+      "bytes": 1728,
+      "path": "artifacts/server-prestart-cleanup-build-final-inventory01/result.json",
+      "sha256": "a6a6badbe0ed95232fb79957fafa2d6cfa503c082de98459604eb87d1d372705"
+    },
+    "server-inherited-cleanup-custody-review": {
+      "bytes": 4364,
+      "path": "artifacts/server-prestart-cleanup-green04-stopped-actual-peer01/review.json",
+      "sha256": "3de0d536b2d6c5f9bc704686979de8d60230d2c161ceeda7a9148383622d9603"
+    },
+    "server-inherited-cleanup-custody59": {
+      "bytes": 16476,
+      "path": "artifacts/server-prestart-cleanup-final-stopped-custody04/result.json",
+      "sha256": "9101ddce91a6fd21e580b0f8474c9cbef29dc4c1b574c971838794661b4ecc52"
+    },
+    "server-inherited-cleanup-dependencies": {
+      "bytes": 2143,
+      "path": "artifacts/server-final-cohort-package01/dependency-comparison.json",
+      "sha256": "54710631be5c6eb49dccfc8cb496de4c73e58367cea8e0820d75c196322b9f6f"
+    },
+    "server-inherited-cleanup-host85": {
+      "bytes": 1405,
+      "path": "artifacts/server-start-cleanup-integrated-python85/result.json",
+      "sha256": "17385566bea57423e5169e922c2e00774858de63f7c2809894a8ee0d0b8e17c2"
+    },
+    "server-inherited-cleanup-integration": {
+      "bytes": 1090,
+      "path": "artifacts/server-start-cleanup-integration01/result.json",
+      "sha256": "cbb3921d5f5b90c969467a8437a0eb5eb24b9b234bf8cb7196ed83687f0786bc"
+    },
+    "server-inherited-cleanup-native-inputs": {
+      "bytes": 26402,
+      "path": "artifacts/server-prestart-cleanup-build01/native-inputs.json",
+      "sha256": "5716a4c0dd05d2e024da509189c18acfbc63bfa30c12979b7dc81a54d1efbd7d"
+    },
+    "server-inherited-cleanup-source-tests": {
+      "bytes": 3146,
+      "path": "artifacts/server-start-cleanup-fix-validation01/result.json",
+      "sha256": "d7468994f987ace53a7d656c70bb7a95400302104d2e1b1e68326f687513f466"
+    },
+    "server-inherited-component-origin-map": {
+      "bytes": 66255,
+      "path": "artifacts/server-final-cohort-package01/component-map.json",
+      "sha256": "ccc6588f2f07cf233d06a46b09e9ad5dbc69913215f90008f8acdb5e080dceb1"
+    },
+    "server-inherited-prior-server-component-map": {
+      "bytes": 47945,
+      "path": "artifacts/server-device-policy-package01/component-map.json",
+      "sha256": "51d45112d30e6d74c2e8ebfc91810b90f35b2f44b89d60f335ffe7da057f78f0"
+    },
+    "server-inherited-prior-server-manifest": {
+      "bytes": 10092,
+      "path": "artifacts/server-device-policy-package01/unsigned/manifest.json",
+      "sha256": "fbfc394a2e710cadf738596830dcfc1b7f778e99b8a1336d85a9bf2a64547c78"
+    },
+    "server-inputs": {
+      "bytes": 14747,
+      "path": "artifacts/server-final-cohort-package01/server-inputs.json",
+      "sha256": "7155dcdd1352587dbe62b680e8b190a4769bc1a67f8b759a294da953b1e63f6e"
+    },
+    "server-installed-export": {
+      "bytes": 405,
+      "path": "artifacts/install-server-positive03/export03-validated.json",
+      "sha256": "7c3af1f49af4c776b2f128594036e2117f1f07c05502993c407d5ad48496cc5c"
+    },
+    "server-manifest": {
+      "bytes": 11520,
+      "path": "artifacts/server-final-cohort-package01/unsigned/manifest.json",
+      "sha256": "9f749ca31d975e870c2a358762fd01c6c04ebf1e170ca569fe0ea1aa8563a90f"
+    },
+    "server-review": {
+      "bytes": 998,
+      "path": "artifacts/server-final-cohort-package-root-review02/result.json",
+      "sha256": "3d25e40514552881f2e796e8fba35214820d9b089044a8c967c00308820014d1"
+    },
+    "server-update": {
+      "bytes": 542,
+      "path": "artifacts/reconciliation-server-update02/result.json",
+      "sha256": "1ec8e5c6aa2d2bf04bc160c4b1213f5539c6bbe39e637d6c31c9a0f9b64e959b"
+    },
+    "traffic03-reanalysis": {
+      "bytes": 2217,
+      "path": "artifacts/robot-a10-traffic-03-reanalysis01/report.json",
+      "sha256": "8d90dd14340193385cc0e4e89f0e258b69632645f91832f3972877ca3890e976"
+    }
+  },
+  "qualification": "incomplete",
+  "signature_verified": false,
+  "status": "INCOMPLETE_NONPROMOTABLE_FINAL_COHORT_EVIDENCE_PACKET",
+  "verification_scope": {
+    "archive_payload_image_reads": 0,
+    "builds": 0,
+    "manifests_unchanged": true,
+    "mutable_current_status_docs_hashed": false,
+    "new_functional_tests": 0,
+    "private_key_content_reads_or_hashes": 0,
+    "public_receipts_max_bytes": 2097152,
+    "raw_reanalysis": 0,
+    "target_actions": 0
+  },
+  "whole_D2_pass": false,
+  "whole_release_pass": false
+}

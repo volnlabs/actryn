@@ -68,6 +68,23 @@ def operation_identity(description, attempt, namespace):
     return identity
 
 
+def settled_operation(snapshot, handle, operation):
+    # Task success can remain unknown after a durable, reconciled completion.
+    # Unknown execution, an absent operation, or incomplete durability cannot settle.
+    return (isinstance(snapshot, dict) and operation is not None
+            and snapshot.get('namespace') == list(bytes.fromhex(handle['namespace']))
+            and snapshot.get('key') == list(bytes.fromhex(handle['key']))
+            and snapshot.get('operation') == operation
+            and snapshot.get('terminal') is True and snapshot.get('reconciled') is True
+            and snapshot.get('persistence_failed') is False
+            and type(snapshot.get('revision')) is int and snapshot['revision'] > 0
+            and type(snapshot.get('durable_revision')) is int
+            and snapshot['durable_revision'] == snapshot['revision']
+            and snapshot.get('phase') in ('Completed', 'CancelledDurable')
+            and (snapshot.get('verdict') in ('TargetReached', 'TimedOut', 'Cancelled')
+                 or (snapshot['phase'] == 'Completed' and snapshot.get('verdict') == 'OutcomeUnknown')))
+
+
 def verify_partial(bundle, attempt, binding, intent, logs, *, crashed=False, active=False, settled=False):
     require(not (active and (crashed or settled)), 'contradictory evidence state')
     names = common.verify_bundle(bundle, attempt)
@@ -99,8 +116,10 @@ def verify_partial(bundle, attempt, binding, intent, logs, *, crashed=False, act
             and request['phase'] == ('settled' if settled else 'accepted' if active else 'unknown'),
             'remote closure falsely settled')
     if settled:
-        require(request['reconciled'] is True and request['remote_verdict'] in
-                ('TargetReached', 'TimedOut', 'Cancelled'), 'settlement lacks known reconciliation')
+        proof = intent.get('settlement')
+        require(settled_operation(proof, intent['handle'], intent.get('operation'))
+                and request['reconciled'] is True and request['remote_verdict'] == proof['verdict'],
+                'settlement lacks matching durable completion/reconciliation')
     broker = content['broker']
     require(broker['attempt_state'] == record['state'] and broker['attempt_outcome'] == record['outcome']
             and len(broker['calls']) == 1 and broker['calls'][0]['request_key'] == 'preview-1'
@@ -109,8 +128,10 @@ def verify_partial(bundle, attempt, binding, intent, logs, *, crashed=False, act
             and broker['policy_denials'] == [] and broker['policy_denials_retained'] == 0,
             'offline settlement/publication differs from Robot debit')
     require(content['runtime_binding'] == intent['runtime_binding'], 'sandbox binding changed')
-    expected_gaps = ['log_incomplete'] if crashed else []
-    require(broker['evidence_gaps'] == expected_gaps, 'crash uncertainty missing or unexpected gap')
+    # Launcher omissions own log completeness; broker startup can reap before
+    # tick mirrors that separate store's gap. Do not require duplicate evidence.
+    allowed_gaps = ([], ['log_incomplete']) if crashed else ([],)
+    require(broker['evidence_gaps'] in allowed_gaps, 'unexpected broker evidence gap')
     if crashed:
         require(any(v['artifact'] == 'runtime_facts' and v['reason'] == 'log_incomplete'
                     for v in omissions), 'crash log uncertainty hidden')
@@ -329,7 +350,8 @@ print(json.dumps(result))'''
 
     def partial(self, case, label, *, crashed=False, active=False, settled=False):
         intent = copy.deepcopy(case['intent'])
-        intent.update(artifact_digest=self.args.artifact, runtime_binding=case['runtime_binding'])
+        intent.update(artifact_digest=self.args.artifact, runtime_binding=case['runtime_binding'],
+                      operation=case['watched']['identity'], settlement=case.get('settlement'))
         logs = self.raw_logs(case['attempt'])
         if not active:
             for name, old in case['original_logs'].items():
@@ -360,9 +382,8 @@ print(json.dumps(result))'''
         from actryn import RequestHandle
         with self.direct() as client:
             result = self.poll(lambda: client.query(RequestHandle.from_json(case['intent']['handle'])),
-                               lambda v: v['snapshot'] and v['snapshot']['reconciled']
-                               and v['snapshot']['terminal'] and v['snapshot']['verdict'] != 'OutcomeUnknown'
-                               and v['snapshot']['revision'] == v['snapshot']['durable_revision'], 12)
+                               lambda v: settled_operation(v['snapshot'], case['intent']['handle'],
+                                                           case['watched']['identity']), 12)
         require(result['snapshot']['operation'] == case['watched']['identity'], 'retired identity changed')
         label = case['label']
         self.local_mutation(label + '-retire', 'retire', closure=True)
@@ -461,6 +482,7 @@ print(json.dumps(result))'''
             self.pre_send_ready(self.local('describe'), fifth)
             self.server_mutation('fifth-launch', 'launch', '--attempt', fifth['attempt'])
             logs = self.poll(lambda: self.raw_logs(fifth['attempt']), lambda v: bool(v['stderr.log']))
+            self.save('fifth-refusal-raw-logs.json', logs)
             require(not logs['stdout.log'] and 'robot retained-key/outstanding capacity exhausted'
                     in logs['stderr.log'], 'fifth rejected for wrong cause')
             snap = self.snapshot(fifth['attempt'])
@@ -484,9 +506,10 @@ print(json.dumps(result))'''
         for case in self.cases:
             result = self.poll(lambda: self.server('robot-query', '--attempt', case['attempt'],
                               '--key', 'preview-1')['request'], lambda v: not v['outstanding_debit'], 15)
-            require(result['phase'] == 'settled' and result['last_remote']['operation'] ==
-                    case['watched']['identity'] and result['last_remote']['reconciled'],
+            require(result['phase'] == 'settled' and settled_operation(result['last_remote'],
+                    case['intent']['handle'], case['watched']['identity']),
                     'debit cleared without matching downstream reconciliation')
+            case['settlement'] = result['last_remote']
             self.save(case['label'] + '-settled.json', result)
             self.partial(case, case['label'] + '-settled-export',
                          crashed=case['label'] == 'crash', settled=True)
@@ -497,8 +520,11 @@ print(json.dumps(result))'''
             self.cancel_retained(case); self.drain_and_retire(case)
             result = self.poll(lambda: self.server('robot-query', '--attempt', case['attempt'],
                               '--key', 'preview-1')['request'], lambda v: not v['outstanding_debit'], 15)
-            require(result['last_remote']['operation'] == case['watched']['identity'],
-                    'restored capacity did not retain exact new identity')
+            require(result['phase'] == 'settled' and settled_operation(result['last_remote'],
+                    case['intent']['handle'], case['watched']['identity']),
+                    'restored capacity did not retain exact reconciled identity')
+            case['settlement'] = result['last_remote']
+            self.save('restored-capacity-settled.json', result)
             require(not self.inventory(), 'new reservation did not settle')
             self.partial(case, 'restored-capacity-settled-export', settled=True)
         require(not self.catalog()['tasks'] and all(self.snapshot(attempt)[name]['state'] == 'reaped'

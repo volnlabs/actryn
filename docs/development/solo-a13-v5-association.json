@@ -1,0 +1,24 @@
+{
+  "format": "actryn-solo-check-1",
+  "gate": "A13",
+  "owner": "Utkarsh Maurya",
+  "subjects": {
+    "robot": {
+      "manifest": "robot-successor-manifest",
+      "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8"
+    },
+    "server": {
+      "manifest": "server-successor-manifest",
+      "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+    }
+  },
+  "status": "PASS",
+  "standalone_receipt": "a13-standalone-receipt",
+  "composition_receipt": "a13-successor-qualification",
+  "robot_successor_qualification": "robot-recovery-qualification",
+  "boundary": [
+    "The live operation and exact Server qualification predate the one-binary Robot recovery successor.",
+    "The Robot recovery receipt binds unchanged RPC/runtime behavior, exact manager delta and a no-provider-call human workflow.",
+    "The candidates remain unsigned and nonphysical."
+  ]
+}

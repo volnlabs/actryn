@@ -1,0 +1,36 @@
+{
+  "format": "actryn-solo-check-1",
+  "gate": "MAINTAINER-INSTALL",
+  "owner": "Utkarsh Maurya",
+  "subjects": {
+    "robot": {
+      "manifest": "robot-successor-manifest",
+      "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8"
+    },
+    "server": {
+      "manifest": "server-successor-manifest",
+      "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+    }
+  },
+  "status": "PASS",
+  "execution": "human",
+  "operator": "Utkarsh Maurya",
+  "independent": false,
+  "completed_checks": [
+    "install",
+    "diagnose",
+    "pair",
+    "offline-two-operations",
+    "cancel",
+    "restart-recover",
+    "export"
+  ],
+  "attempt_id": "9dd5e101fda42394472e6af9b217056e",
+  "human_report": "artifacts/solo-maintainer-manual-rehearsal06-continuation04/human-report.json",
+  "tested_robot_manifest_sha256": "494906c267b56d774221fd9deaa0c0b358f5786443a251175d5c0ebb44bdbc2b",
+  "candidate_robot_manifest_sha256": "965928afb34333aa5d564c5a3f529bf85c03d235b5d1e4a3d529fdf4b2c12e11",
+  "exact_candidate_robotd_bytes_verified": true,
+  "physical_acceptance": false,
+  "live_provider_calls": 0,
+  "boundary": "test-signed installation exercised exact successor manager bytes; final release signing and signed-distribution verification remain separate"
+}

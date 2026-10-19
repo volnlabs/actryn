@@ -18,8 +18,8 @@ RestartSec=1
 TimeoutStopSec=30
 UMask=0077
 NoNewPrivileges=yes
-# Linux 6.12 BPF_PROG_QUERY checks bpf_net_capable(), even for cgroup devices.
-CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_SYS_PTRACE CAP_NET_ADMIN
+# Linux 6.12 device-program load/attach/query require BPF and network administration.
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_SYS_PTRACE CAP_NET_ADMIN CAP_BPF
 ProtectSystem=strict
 ProtectHome=yes
 ProtectKernelModules=yes

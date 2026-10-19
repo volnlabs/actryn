@@ -262,16 +262,17 @@ impl Server {
         open_gates(context, key_gate)?;
         let prepared = peer.prepare(&request).await?;
         let received = intent
-            .observation
+            .execution_observation
             .as_ref()
-            .context("trusted observation missing")?
+            .or(intent.observation.as_ref())
+            .context("execution observation missing")?
             .received_ms;
         let sent = context.gate.publish(|| {
             key_gate.publish(|| -> Result<robot_rpc::SentRpc> {
                 let now = launcher::now_ms()?;
                 ensure!(
                     now < saved.deadline_ms && now >= received && now - received < 1000,
-                    "original Robot observation/delegation expired; no refresh performed"
+                    "Robot execution observation/delegation expired"
                 );
                 prepared.try_send_once()
             })
@@ -286,6 +287,26 @@ impl Server {
             "Robot proposal response unknown; query retained handle, never resend"
         );
         Ok(())
+    }
+    async fn revalidate_robot(
+        &self,
+        context: &Arc<ContextState>,
+        key_gate: &PublicationGate,
+        peer: &RobotPeer,
+        binding: &RobotBinding,
+        intent: &RobotIntent,
+    ) -> Result<RobotIntent> {
+        open_gates(context, key_gate)?;
+        let observation = peer.observe(binding).await?;
+        let id = context.attempt_id.clone();
+        let key = intent.request_key.clone();
+        let saved = self
+            .database(move |s| {
+                s.robot_execution_observe(&id, &key, &observation, launcher::now_ms()?)
+            })
+            .await?;
+        open_gates(context, key_gate)?;
+        Ok(saved)
     }
     pub async fn tick(&self) -> Result<()> {
         let attempts = self.database(|s| s.attempts()).await?;
@@ -861,7 +882,7 @@ impl Server {
                     reservation.state == "reserved",
                     "request already dispatched; query its existing outcome"
                 );
-                let remote=if model_input.is_some() {self.begin_robot(context,&request_key,&digest).await?}else{None};
+                let mut remote=if model_input.is_some() {self.begin_robot(context,&request_key,&digest).await?}else{None};
                 open_gates(context,&key_gate)?;
                 let call_id = reservation.id.clone();
                 self.database(move |s| s.mark_dispatched(&call_id, launcher::now_ms()?))
@@ -911,6 +932,11 @@ impl Server {
                     Publication::Published(bytes) => serde_json::from_slice(&bytes)?,
                     _ => anyhow::bail!("publication closed or response too large"),
                 };
+                if method == "model.propose" {
+                    if let Some((peer,binding,intent)) = &mut remote {
+                        *intent = self.revalidate_robot(context,&key_gate,peer,binding,intent).await?;
+                    }
+                }
                 if let Some((peer,binding,intent))=&remote {
                     let target:Proposal=serde_json::from_value(value["output"].clone())?;
                     self.dispatch_robot(context,&key_gate,peer,binding,intent,&target).await?;
@@ -1087,6 +1113,103 @@ mod tests {
         .unwrap();
         assert!(server.robot_closures.capture(&binding, &extra).is_ok());
     }
+    #[tokio::test]
+    async fn historical_completed_unknown_task_settles_only_its_debit_before_worker_exit() {
+        let (_dir, mut store, server, context, binding, intent) = closure_fixture();
+        let id = &intent.handle.attempt;
+        let call = store.reserve_call(id, "key", "digest", 1, 101).unwrap();
+        store.mark_dispatched(&call.id, 102).unwrap();
+        let completed = robot::RemoteSnapshot {
+            namespace: robot::unhex(&intent.handle.namespace).unwrap(),
+            key: robot::unhex(&intent.handle.key).unwrap(),
+            digest: Some([3; 32]),
+            operation: Some(robot::Operation {
+                device: [1; 16],
+                boot: 1,
+                session: 2,
+                runtime_nonce: [2; 16],
+                grant: 3,
+                instance: 4,
+                operation: 5,
+                stream: 6,
+            }),
+            revision: 3,
+            durable_revision: 3,
+            phase: "Completed".into(),
+            terminal: true,
+            closure: "NotRequested".into(),
+            cancellation_durable: false,
+            persistence_failed: false,
+            verdict: robot::Verdict::OutcomeUnknown,
+            reconciled: true,
+        };
+        let mut pending = completed.clone();
+        pending.reconciled = false;
+        store.robot_snapshot(id, "key", &pending).unwrap();
+        context.gate.close();
+        store.recover().unwrap();
+        store.mark_reaped(id).unwrap();
+        let captured = server.robot_closures.capture(&binding, &intent).unwrap();
+        let (release, held) = tokio::sync::oneshot::channel::<()>();
+        let worker_reply = completed.clone();
+        server.queue_robot_closure_with(captured.clone(), async move {
+            held.await?;
+            Ok(RemoteReply::Historical(Some(worker_reply)))
+        });
+        let saved = server
+            .record_robot_reply(&intent, Ok(RemoteReply::Historical(Some(completed))))
+            .await
+            .unwrap();
+        assert!(!saved.outstanding_debit);
+        assert_eq!(saved.phase, robot::Phase::Settled);
+        assert!(
+            saved.cancellation_requested && saved.historical_response && saved.remote_unavailable
+        );
+        assert_eq!(
+            saved.summary().remote_verdict,
+            Some(robot::Verdict::OutcomeUnknown)
+        );
+        assert!(saved.last_remote.unwrap().reconciled);
+        assert!(store.robot_pending().unwrap().is_empty());
+        // A read-only query settled the debit, but the held network worker still owns its slot.
+        assert!(server.robot_closures.any_running());
+        assert_eq!(server.robot_closures.for_attempt(id, Some("key")).len(), 1);
+        assert!(!captured.begin());
+        let before_exit = store.inspect(id).unwrap();
+        assert_eq!(before_exit.attempt.outcome, "unknown");
+        assert_eq!(before_exit.calls[0].state, "unknown");
+        assert!(before_exit.calls[0].publication_closed);
+        assert_eq!(store.result(id, "key", 104).unwrap().1, None);
+        assert!(context.gate.publish(|| ()).is_err());
+        release.send(()).unwrap();
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while !server
+                .robot_closures
+                .for_attempt(id, Some("key"))
+                .is_empty()
+            {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        assert!(!server.robot_closures.any_running());
+        assert!(!captured.begin());
+        let retained = store.robot_intent(id, "key").unwrap();
+        assert!(!retained.outstanding_debit && retained.historical_response);
+        assert_eq!(
+            retained.summary().remote_verdict,
+            Some(robot::Verdict::OutcomeUnknown)
+        );
+        assert_eq!(
+            store.settle(&call.id, 0, b"late reply", 105).unwrap(),
+            Publication::Suppressed
+        );
+        assert_eq!(store.result(id, "key", 105).unwrap().1, None);
+        assert_eq!(store.inspect(id).unwrap().attempt.outcome, "unknown");
+        assert!(context.gate.publish(|| ()).is_err());
+    }
+
     #[tokio::test]
     async fn reserved_cancel_key_exhaustion_queues_all_captured_closures_before_error() {
         let (_dir, _store, server, context, binding, intent) = closure_fixture();

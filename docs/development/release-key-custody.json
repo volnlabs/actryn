@@ -1,0 +1,19 @@
+{
+  "backup_filesystem_uuid": "0347-DCDB",
+  "created_at": "2026-10-19T17:27:17.379417+00:00",
+  "custodian": "Utkarsh Maurya <projects.utkarshMaurya@gmail.com>",
+  "encrypted_private_key_sha256": "71d7be928591e684c156957338465706021dc4c194e38e22c989d0b9e3c6147b",
+  "format": "actryn-release-key-custody-1",
+  "independent_installation": false,
+  "physical_acceptance": false,
+  "private_material_published": false,
+  "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAjvezj68ZLKtpYDV/lr+ldX4eBX5t8EcBILO4Qqi69uM=\n-----END PUBLIC KEY-----\n",
+  "recovery": {
+    "challenge_verified": true,
+    "encrypted_backup_restored": true,
+    "restored_spki_sha256": "3bc25f592073d520c88635fca7fe1838d156428c314b34db4ebd655a18ce6735",
+    "tampered_challenge_rejected": true
+  },
+  "release_signing_performed": false,
+  "spki_sha256": "3bc25f592073d520c88635fca7fe1838d156428c314b34db4ebd655a18ce6735"
+}

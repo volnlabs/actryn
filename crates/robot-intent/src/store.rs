@@ -120,6 +120,47 @@ fn terminal_update_allowed(
 ) -> bool {
     new_revision > old_revision && (!old_terminal || new_terminal)
 }
+fn has_reconciliations(db: &Connection) -> Result<bool> {
+    let kind: Option<String> = db
+        .query_row(
+            "SELECT type FROM sqlite_master WHERE name='reconciliations'",
+            [],
+            |r| r.get(0),
+        )
+        .optional()?;
+    match kind.as_deref() {
+        None => Ok(false),
+        Some("table") => Ok(true),
+        _ => Err(Error::Rejected("invalid reconciliation table")),
+    }
+}
+/// Validate the entire finite marker set, including markers outside the queried
+/// namespace. Legacy databases have no table and gain no cancellation credit.
+fn audit_reconciliations(db: &Connection, limits: &Limits) -> Result<()> {
+    if !has_reconciliations(db)? {
+        return Ok(());
+    }
+    let (markers, keys): (i64, i64) = db.query_row(
+        "SELECT (SELECT COUNT(*) FROM reconciliations),(SELECT COUNT(*) FROM records)",
+        [],
+        |r| Ok((r.get(0)?, r.get(1)?)),
+    )?;
+    if markers < 0 || markers > keys || markers as usize > limits.keys {
+        return Err(Error::Rejected("reconciliation capacity exceeded"));
+    }
+    let invalid: bool = db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM reconciliations m LEFT JOIN records r ON r.namespace=m.namespace AND r.key=m.key
+         LEFT JOIN namespaces n ON n.id=m.namespace
+         WHERE r.key IS NULL OR n.id IS NULL OR typeof(m.namespace)!='blob' OR length(m.namespace)!=16
+         OR typeof(m.key)!='blob' OR length(m.key)!=32 OR typeof(m.revision)!='integer' OR m.revision<=0
+         OR typeof(m.operation)!='blob' OR length(m.operation)!=80 OR r.operation IS NULL
+         OR m.operation!=r.operation OR m.revision!=r.revision OR r.terminal IS NOT 1 OR r.phase IS NOT 5 OR r.intent IS NULL)
+         OR EXISTS(SELECT 1 FROM reconciliations GROUP BY namespace,key HAVING COUNT(*)!=1)", [], |r| r.get(0))?;
+    if invalid {
+        return Err(Error::Rejected("invalid reconciliation binding"));
+    }
+    Ok(())
+}
 impl Store {
     pub fn open(
         path: &Path,
@@ -160,6 +201,12 @@ impl Store {
             CREATE TABLE IF NOT EXISTS namespaces(id BLOB PRIMARY KEY,attempt BLOB NOT NULL,epoch BLOB NOT NULL,revision INTEGER NOT NULL,retired INTEGER NOT NULL);
             CREATE TABLE IF NOT EXISTS records(namespace BLOB NOT NULL,key BLOB NOT NULL,revision INTEGER NOT NULL,terminal INTEGER NOT NULL,
                 phase INTEGER NOT NULL,intent BLOB,operation BLOB,closure BLOB NOT NULL,PRIMARY KEY(namespace,key));")?;
+        // Additive format-1 capability: no legacy row is promoted or rewritten.
+        // Audit before startup retirement can change any record.
+        audit_reconciliations(&db, limits)?;
+        db.execute_batch("CREATE TABLE IF NOT EXISTS reconciliations(
+            namespace BLOB NOT NULL,key BLOB NOT NULL,revision INTEGER NOT NULL,operation BLOB NOT NULL,
+            PRIMARY KEY(namespace,key));")?;
         let reused: bool = db.query_row(
             "SELECT EXISTS(SELECT 1 FROM epochs WHERE epoch=?1)",
             [epoch.as_slice()],
@@ -298,6 +345,17 @@ impl Store {
                     revision=excluded.revision,terminal=excluded.terminal,phase=excluded.phase,intent=excluded.intent,operation=excluded.operation,closure=excluded.closure",
                     params![s.namespace.as_slice(),s.key.as_slice(),s.revision as i64,s.terminal,phase as u8,
                     entry.intent.as_ref().map(encode_intent),s.operation.map(encode_operation),encode_close(s.closure)])?;
+                if let Some(revision) = s.reconciliation_revision {
+                    if revision != s.revision || phase != Phase::CancelledDurable || !s.terminal {
+                        return Err(Error::Rejected("ineligible reconciliation marker"));
+                    }
+                    let operation = s
+                        .operation
+                        .ok_or(Error::Rejected("missing reconciled operation"))?;
+                    tx.execute("INSERT INTO reconciliations VALUES(?1,?2,?3,?4)
+                        ON CONFLICT(namespace,key) DO UPDATE SET revision=excluded.revision,operation=excluded.operation",
+                        params![s.namespace.as_slice(),s.key.as_slice(),revision as i64,encode_operation(operation)])?;
+                }
             }
         }
         tx.commit()?;
@@ -334,6 +392,19 @@ fn read_key(
         return Err(Error::Rejected("invalid key revision"));
     }
     let intent = intent.map(|b| decode_intent(b, max_payload)).transpose()?;
+    let reconciliation_revision = if has_reconciliations(db)? {
+        db.query_row(
+            "SELECT revision FROM reconciliations WHERE namespace=?1 AND key=?2",
+            params![ns.as_slice(), key.as_slice()],
+            |r| r.get::<_, i64>(0),
+        )
+        .optional()?
+        .map(u64::try_from)
+        .transpose()
+        .map_err(|_| Error::Rejected("invalid reconciliation revision"))?
+    } else {
+        None
+    };
     Ok(Some(Entry {
         snapshot: Snapshot {
             namespace: ns,
@@ -346,6 +417,7 @@ fn read_key(
             terminal,
             closure: decode_close(closure)?,
             persistence_failed: false,
+            reconciliation_revision,
         },
         intent,
     }))
@@ -376,6 +448,7 @@ pub fn inspect(
     if versions != [1] {
         return Err(Error::Rejected("unsupported registry format"));
     }
+    audit_reconciliations(&tx, &limits)?;
     let (namespaces,keys,big):(i64,i64,bool)=tx.query_row("SELECT (SELECT COUNT(*) FROM namespaces),(SELECT COUNT(*) FROM records),EXISTS(SELECT 1 FROM records WHERE length(intent)>?1 OR length(operation)>80 OR length(closure)!=9 OR length(key)!=32 OR length(namespace)!=16)",[(104+limits.max_payload_bytes) as i64],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?)))?;
     if namespaces < 0
         || keys < 0

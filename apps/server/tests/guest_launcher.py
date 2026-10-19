@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Destructive only inside the disposable Debian server VM; requires root and real observer/containerd."""
-import json, os, pathlib, shutil, socket, struct, subprocess, sys, time
+"""Destructive scratch/clone VM only: overwrites config and changes registry/state ownership.
+
+Never run on the retained qualification Server VM or an operator workstation.
+Requires root and real observer/containerd; see START_CLEANUP.md before execution.
+"""
+import json, os, pathlib, select, shutil, socket, stat, struct, subprocess, sys, time
 from guest_artifact import import_fixture
 
 
@@ -36,23 +40,71 @@ def wait_for(predicate, timeout=10):
     raise AssertionError('deadline expired')
 
 
+def empty_output(attempt):
+    directory=pathlib.Path('/var/lib/actryn-server')/attempt
+    assert (directory/'stdout.log').read_bytes()==b'', 'application stdout before Start'
+    assert (directory/'stderr.log').read_bytes()==b'', 'application stderr before Start'
+
+
+def rejected_start(attempt):
+    rejected=rpc({'op':'start','attempt_id':attempt})
+    assert rejected['result']=='error',rejected
+    current=rpc({'op':'inspect','attempt_id':attempt})
+    assert current['result']=='ok',current
+    empty_output(attempt)
+    print(json.dumps({'phase':'prestart-rejected','attempt_id':attempt,
+        'reply':rejected,'inspection':current['inspection']}),flush=True)
+    return current['inspection']['attempt']
+
+
+def reaped_without_execution(attempt, taskfd):
+    last=None;deadline=time.monotonic()+10
+    while True:
+        last=rpc({'op':'inspect','attempt_id':attempt})
+        assert last['result']=='ok',last
+        state=last['inspection']['attempt']['state']
+        assert state in ('retiring','reaped'),('failed Start still live/prepared',last)
+        empty_output(attempt)
+        if state=='reaped':break
+        assert time.monotonic()<deadline,('failed Start cleanup did not reap',last)
+        time.sleep(.05)
+    assert select.select([taskfd],[],[],0)[0], 'prepared task still alive after reap'
+    assert not pathlib.Path('/sys/fs/cgroup/actryn',attempt).exists(), 'failed Start cgroup retained'
+    assert not pathlib.Path('/run/actryn/brokers',attempt).exists(), 'failed Start broker directory retained'
+    replay=rpc({'op':'start','attempt_id':attempt});assert replay['result']=='error',replay
+    empty_output(attempt)
+
+
+def retained_fixture(config, artifact, io_device):
+    assert isinstance(artifact,str) and len(artifact)==71 and artifact.startswith('sha256:') and all(c in '0123456789abcdef' for c in artifact[7:]), 'invalid retained artifact'
+    expected={'server_uid':991,'operator_uid':1000,'io_device':io_device,'artifacts':{
+        artifact:{'rootfs':'/var/lib/actryn-artifacts/'+artifact[7:]+'/rootfs','argv':['/bin/agent']}}}
+    assert config==expected, 'retained fixture configuration differs'
+    return artifact
+
+
 def main():
     assert os.geteuid()==0
+    assert len(sys.argv) in (4,5), 'launcher importer builder [retained-artifact] required'
     binary=pathlib.Path(sys.argv[1]).resolve()
     assert pathlib.Path('/run/actryn/observer.sock').exists(),'real observer required'
     assert pathlib.Path('/run/containerd/containerd.sock').exists(),'real containerd required'
-    root=pathlib.Path('/var/lib/actryn-test-rootfs')
-    (root/'bin').mkdir(parents=True,exist_ok=True)
-    subprocess.run(['cc','-O2','-static','-Wall','-Wextra','-Werror','-o',str(root/'bin/agent'),str(pathlib.Path(__file__).with_name('launcher_agent.c'))],check=True)
     device=os.stat('/').st_dev
     block=pathlib.Path(f'/sys/dev/block/{os.major(device)}:{os.minor(device)}').resolve()
     io_device=(block.parent/'dev').read_text().strip() if (block/'partition').exists() else f'{os.major(device)}:{os.minor(device)}'
-    config={'server_uid':991,'operator_uid':1000,'io_device':io_device,
-        'artifacts':{}}
-    pathlib.Path('/etc/actryn').mkdir(exist_ok=True)
-    pathlib.Path('/etc/actryn/server.json').write_text(json.dumps(config))
-    pathlib.Path('/etc/actryn/server.json').chmod(0o644)
-    artifact=import_fixture(root/'bin/agent',*(sys.argv[2:4]))
+    if len(sys.argv)==5:
+        artifact=retained_fixture(json.loads(pathlib.Path('/etc/actryn/server.json').read_text()),sys.argv[4],io_device)
+        print(json.dumps({'phase':'retained-fixture-artifact','artifact_digest':artifact,'fresh_compile_or_import':False}),flush=True)
+    else:
+        root=pathlib.Path('/var/lib/actryn-test-rootfs')
+        (root/'bin').mkdir(parents=True,exist_ok=True)
+        subprocess.run(['cc','-O2','-static','-Wall','-Wextra','-Werror','-o',str(root/'bin/agent'),str(pathlib.Path(__file__).with_name('launcher_agent.c'))],check=True)
+        config={'server_uid':991,'operator_uid':1000,'io_device':io_device,
+            'artifacts':{}}
+        pathlib.Path('/etc/actryn').mkdir(exist_ok=True)
+        pathlib.Path('/etc/actryn/server.json').write_text(json.dumps(config))
+        pathlib.Path('/etc/actryn/server.json').chmod(0o644)
+        artifact=import_fixture(root/'bin/agent',*(sys.argv[2:4]))
     log=open('/root/actryn-launcher-test.log','w')
     process=subprocess.Popen([str(binary)],stdout=log,stderr=log)
     active=None;broker=None
@@ -63,11 +115,92 @@ def main():
         prepared=rpc({'op':'prepare','artifact_digest':artifact});assert prepared['result']=='ok',prepared
         active=prepared['inspection']['attempt']['id']
         assert prepared['inspection']['attempt']['state']=='prepared'
+        assert not os.path.lexists(f'/run/actryn/brokers/{active}/broker.sock')
+        taskfd=os.pidfd_open(json.loads(prepared['inspection']['attempt']['binding'])['snapshot']['pid'])
+        try:
+            rejected_start(active)
+            reaped_without_execution(active,taskfd)
+            print(json.dumps({'test':'prestart-missing-broker-reaped','status':'PASS','attempt_id':active}),flush=True)
+            active=None
+        finally:os.close(taskfd)
+
+        prepared=rpc({'op':'prepare','artifact_digest':artifact});assert prepared['result']=='ok',prepared
+        active=prepared['inspection']['attempt']['id']
+        assert prepared['inspection']['attempt']['state']=='prepared'
+        taskfd=os.pidfd_open(json.loads(prepared['inspection']['attempt']['binding'])['snapshot']['pid'])
+        try:
+            broker=socket.socket(socket.AF_UNIX);broker.bind(f'/run/actryn/brokers/{active}/broker.sock');broker.listen(1)
+            observer=pathlib.Path('/run/actryn/observer.sock')
+            hidden=observer.with_name('observer.sock.start-cleanup-test')
+            before=observer.lstat()
+            def same_socket(path):
+                value=path.lstat()
+                return (value.st_dev,value.st_ino,value.st_mode,value.st_uid,value.st_gid,value.st_nlink)
+            original=same_socket(observer)
+            parent=observer.parent.lstat()
+            assert observer.parent.resolve(strict=True)==observer.parent
+            assert stat.S_ISDIR(parent.st_mode) and parent.st_uid==0 and not parent.st_mode&0o022
+            assert stat.S_ISSOCK(before.st_mode) and before.st_uid==0 and not os.path.lexists(hidden)
+            observer.rename(hidden)
+            try:
+                assert not os.path.lexists(observer) and same_socket(hidden)==original
+                failed=rejected_start(active)
+                assert failed['state']=='retiring' and failed['binding'] is not None,('failed observer must retain cleanup charge',failed)
+                wait_for(lambda:select.select([taskfd],[],[],0)[0])
+                retained=rpc({'op':'inspect','attempt_id':active});assert retained['result']=='ok',retained
+                current=retained['inspection']['attempt']
+                assert current['id']==active and current['state']=='retiring' and current['binding']==failed['binding'] and current['outcome']=='cancelled',('unconfirmed observer closure lost durable cleanup charge',current)
+                empty_output(active)
+            finally:
+                # Restore only the same original socket, never overwrite a replacement.
+                assert not os.path.lexists(observer) and same_socket(hidden)==original
+                hidden.rename(observer)
+                assert same_socket(observer)==original and not os.path.lexists(hidden)
+            reaped_without_execution(active,taskfd)
+            print(json.dumps({'test':'prestart-unreachable-observer-retained-then-reaped','status':'PASS','attempt_id':active}),flush=True)
+            active=None
+        finally:
+            os.close(taskfd)
+            if broker:broker.close();broker=None
+
+        # Fresh preparation preserves the original healthy positive control.
+        prepared=rpc({'op':'prepare','artifact_digest':artifact});assert prepared['result']=='ok',prepared
+        active=prepared['inspection']['attempt']['id']
+        assert prepared['inspection']['attempt']['state']=='prepared'
         output=pathlib.Path('/var/lib/actryn-server')/active/'stdout.log'
         assert output.read_bytes()==b'', 'application executed before start'
         broker=socket.socket(socket.AF_UNIX);broker.bind(f'/run/actryn/brokers/{active}/broker.sock');broker.listen(1)
         started=rpc({'op':'start','attempt_id':active});assert started['result']=='ok',started
         wait_for(lambda:b'AGENT_STARTED' in output.read_bytes())
+        running=rpc({'op':'inspect','attempt_id':active})['inspection']['attempt']
+        identity=json.loads(running['binding'])['snapshot']
+        runningfd=os.pidfd_open(identity['pid'])
+        capacity=None;capacity_broker=None
+        try:
+            duplicate=rpc({'op':'start','attempt_id':active});assert duplicate['result']=='error',duplicate
+            assert rpc({'op':'inspect','attempt_id':active})['inspection']['attempt']==running, 'duplicate Start changed running attempt'
+            prepared=rpc({'op':'prepare','artifact_digest':artifact});assert prepared['result']=='ok',prepared
+            capacity=prepared['inspection']['attempt']['id']
+            expected=prepared['inspection']['attempt'];assert expected['state']=='prepared'
+            capacity_broker=socket.socket(socket.AF_UNIX)
+            capacity_broker.bind(f'/run/actryn/brokers/{capacity}/broker.sock');capacity_broker.listen(1)
+            denied=rpc({'op':'start','attempt_id':capacity})
+            assert denied=={'result':'error','message':'active capacity exhausted'},denied
+            assert rpc({'op':'inspect','attempt_id':capacity})['inspection']['attempt']==expected, 'capacity refusal changed preparation'
+            empty_output(capacity)
+            assert not select.select([runningfd],[],[],0)[0], 'capacity refusal killed running task'
+            assert rpc({'op':'inspect','attempt_id':active})['inspection']['attempt']==running, 'capacity refusal changed running identity'
+            retiring=capacity;capacity=None  # Consume before Stop; never retry an uncertain reply.
+            stopped=rpc({'op':'stop','attempt_id':retiring});assert stopped['result']=='ok',stopped
+            assert stopped['inspection']['attempt']['state']=='reaped',stopped
+            assert not select.select([runningfd],[],[],0)[0], 'staged cleanup killed running task'
+            print(json.dumps({'test':'active-capacity-refusal-preserves-preparation-and-running-task','status':'PASS','attempt_id':retiring,'running_attempt_id':active}),flush=True)
+        finally:
+            if capacity:
+                try:print('cleanup:',rpc({'op':'stop','attempt_id':capacity}))
+                except Exception as error:print('cleanup pending:',error)
+            if capacity_broker:capacity_broker.close()
+            os.close(runningfd)
         stopped=rpc({'op':'stop','attempt_id':active});assert stopped['result']=='ok',stopped
         assert stopped['inspection']['attempt']['state']=='reaped',stopped
         assert not pathlib.Path('/sys/fs/cgroup/actryn',active).exists(),'descendant cgroup retained'

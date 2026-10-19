@@ -182,6 +182,10 @@ pub struct Snapshot {
     pub cpu_max: String,
     pub io_max: String,
     pub device_programs: Vec<u32>,
+    #[serde(default)]
+    pub device_programs_direct: Vec<u32>,
+    #[serde(default)]
+    pub device_attach_flags: u32,
     pub unexpected_mounts: Vec<String>,
     pub root_readonly: bool,
 }
@@ -217,7 +221,11 @@ pub fn verify_snapshot(s: &Snapshot, pid: u32, cgroup: &str, io_device: &str) ->
         "I/O limit missing"
     );
     ensure!(
-        !s.device_programs.is_empty(),
+        !s.device_programs.is_empty()
+            && !s.device_programs_direct.is_empty()
+            && s.device_attach_flags == 2
+            && s.device_programs.iter().all(|id| *id > 0)
+            && s.device_programs_direct.iter().all(|id| *id > 0),
         "device enforcement not installed"
     );
     ensure!(
@@ -305,6 +313,8 @@ pub fn snapshot(pid: u32, cgroup: &str, cgroup_dir: &Path) -> Result<Snapshot> {
     for name in ["CapInh:", "CapPrm:", "CapEff:", "CapBnd:", "CapAmb:"] {
         capabilities |= u64::from_str_radix(field(name)?, 16)?;
     }
+    let direct = crate::device_policy::programs(cgroup_dir, false)?;
+    let effective = crate::device_policy::programs(cgroup_dir, true)?;
     Ok(Snapshot {
         pid,
         start_ticks,
@@ -328,39 +338,10 @@ pub fn snapshot(pid: u32, cgroup: &str, cgroup_dir: &Path) -> Result<Snapshot> {
         pids_max: number(cgroup_dir.join("pids.max"))?,
         cpu_max: fs::read_to_string(cgroup_dir.join("cpu.max"))?,
         io_max: fs::read_to_string(cgroup_dir.join("io.max"))?,
-        device_programs: device_programs(cgroup_dir)?,
+        device_programs: effective.ids,
+        device_programs_direct: direct.ids,
+        device_attach_flags: direct.attach_flags,
         unexpected_mounts: unexpected,
         root_readonly,
     })
-}
-fn device_programs(cgroup: &Path) -> Result<Vec<u32>> {
-    use std::os::fd::AsRawFd;
-    #[repr(C)]
-    struct Query {
-        target_fd: u32,
-        attach_type: u32,
-        query_flags: u32,
-        attach_flags: u32,
-        prog_ids: u64,
-        prog_cnt: u32,
-        pad: u32,
-    }
-    let fd = fs::File::open(cgroup)?;
-    let mut ids = [0u32; 64];
-    let mut query = Query {
-        target_fd: fd.as_raw_fd() as u32,
-        attach_type: 6,
-        query_flags: 1,
-        attach_flags: 0,
-        prog_ids: ids.as_mut_ptr() as u64,
-        prog_cnt: 64,
-        pad: 0,
-    };
-    let result =
-        unsafe { libc::syscall(libc::SYS_bpf, 16, &mut query, std::mem::size_of::<Query>()) };
-    if result < 0 {
-        return Err(std::io::Error::last_os_error()).context("query effective device enforcement");
-    }
-    ensure!(query.prog_cnt <= 64, "device policy inventory overflow");
-    Ok(ids[..query.prog_cnt as usize].to_vec())
 }

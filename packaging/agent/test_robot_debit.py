@@ -31,7 +31,7 @@ def fixture(*, active=False, crashed=False):
         'broker': {'attempt_state': state, 'attempt_outcome': outcome,
                    'calls': [{'request_key': 'preview-1', 'state': 'settled', 'consumed_tokens': 0,
                               'publication_closed': not active}], 'policy_denials': [],
-                   'policy_denials_retained': 0, 'evidence_gaps': ['log_incomplete'] if crashed else []},
+                   'policy_denials_retained': 0, 'evidence_gaps': []},
         'robot': {'classification': 'trusted_peer_delegation_metadata', 'binding': binding,
                   'outstanding_debits': 1, 'requests_retained': 1,
                   'requests': [{**{key: intent[key] for key in ('request_key', 'handle', 'robot_epoch',
@@ -97,22 +97,89 @@ def echo_server():
 
 
 class PartialEvidenceTests(unittest.TestCase):
+    def test_launcher_crash_omissions_do_not_require_a_copied_broker_gap(self):
+        # Launcher recovery owns log completeness. Broker startup can reap the
+        # same attempt before tick has mirrored that separate store's gap.
+        for gaps in ([], ['log_incomplete']):
+            args = list(fixture(crashed=True))
+            values = {v['name']: v['content'] for v in args[0]['artifacts']}
+            values['broker']['evidence_gaps'] = gaps
+            rehash(args[0])
+            before = copy.deepcopy(args)
+            with self.subTest(gaps=gaps):
+                campaign.verify_partial(*args, crashed=True)
+                self.assertEqual(args, before)
+
+    def test_noncrash_cannot_claim_a_broker_log_gap(self):
+        for active in (False, True):
+            args = list(fixture(active=active))
+            broker = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'broker')
+            broker['evidence_gaps'] = ['log_incomplete']
+            rehash(args[0])
+            with self.subTest(active=active), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args, active=active)
+
     def test_actual_partial_shapes_preserve_distinct_states(self):
         for active, crashed in ((False, False), (True, False), (False, True)):
             campaign.verify_partial(*fixture(active=active, crashed=crashed), active=active, crashed=crashed)
 
-    def test_known_remote_settlement_does_not_erase_crash_uncertainty(self):
+    def settled_fixture(self, verdict='TargetReached'):
         args = list(fixture(crashed=True))
         remote = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'robot')
         remote['outstanding_debits'] = 0
         remote['requests'][0].update(outstanding_debit=False, phase='settled',
-                                     reconciled=True, remote_verdict='TargetReached')
+                                     reconciled=True, remote_verdict=verdict)
+        args[3]['operation'] = copy.deepcopy(IDENTITY)
+        args[3]['settlement'] = {
+            'namespace': list(bytes.fromhex(args[3]['handle']['namespace'])),
+            'key': list(bytes.fromhex(args[3]['handle']['key'])),
+            'operation': copy.deepcopy(IDENTITY), 'phase': 'Completed',
+            'terminal': True, 'revision': 3, 'durable_revision': 3,
+            'persistence_failed': False, 'verdict': verdict, 'reconciled': True}
         rehash(args[0])
-        campaign.verify_partial(*args, crashed=True, settled=True)
-        with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True)
-        remote['requests'][0]['reconciled'] = False
-        rehash(args[0])
-        with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True, settled=True)
+        return args
+
+    def test_completed_unknown_task_settlement_preserves_verdict_and_crash_uncertainty(self):
+        for verdict in ('TargetReached', 'TimedOut', 'Cancelled', 'OutcomeUnknown'):
+            args = self.settled_fixture(verdict)
+            before = copy.deepcopy(args)
+            campaign.verify_partial(*args, crashed=True, settled=True)
+            self.assertEqual(args, before)
+            with self.assertRaises(AssertionError): campaign.verify_partial(*args, crashed=True)
+
+    def test_unknown_task_without_exact_durable_completion_cannot_settle(self):
+        for fault in ('unknown_work', 'cancelled', 'unreconciled', 'partial', 'persistence',
+                      'zero', 'overdurable', 'absent', 'key', 'namespace', 'operation',
+                      'nonterminal', 'summary_verdict', 'summary_reconciliation', 'missing_proof'):
+            args = self.settled_fixture('OutcomeUnknown')
+            proof = args[3]['settlement']
+            remote = next(v['content'] for v in args[0]['artifacts'] if v['name'] == 'robot')['requests'][0]
+            if fault == 'unknown_work': proof['phase'] = 'OutcomeUnknown'
+            elif fault == 'cancelled': proof['phase'] = 'CancelledDurable'
+            elif fault == 'unreconciled': proof['reconciled'] = False
+            elif fault == 'partial': proof['durable_revision'] = 2
+            elif fault == 'persistence': proof['persistence_failed'] = True
+            elif fault == 'zero': proof.update(revision=0, durable_revision=0)
+            elif fault == 'overdurable': proof['durable_revision'] = 4
+            elif fault == 'absent': proof['operation'] = None
+            elif fault == 'key': proof['key'] = [7] * 32
+            elif fault == 'namespace': proof['namespace'] = [7] * 16
+            elif fault == 'operation': proof['operation']['stream'] += 1
+            elif fault == 'nonterminal': proof['terminal'] = False
+            elif fault == 'summary_verdict': remote['remote_verdict'] = 'TargetReached'
+            elif fault == 'summary_reconciliation': remote['reconciled'] = False
+            else: args[3].pop('settlement')
+            rehash(args[0])
+            with self.subTest(fault=fault), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args, crashed=True, settled=True)
+
+    def test_known_task_also_requires_durable_matching_reconciliation(self):
+        for field, value in [('reconciled', False), ('durable_revision', 2),
+                             ('persistence_failed', True), ('phase', 'OutcomeUnknown')]:
+            args = self.settled_fixture()
+            args[3]['settlement'][field] = value
+            with self.subTest(field=field), self.assertRaises(AssertionError):
+                campaign.verify_partial(*args, crashed=True, settled=True)
 
     def test_rehashed_wrong_debit_identity_publication_and_log_cannot_pass(self):
         for fault in ('debit', 'handle', 'binding', 'phase', 'closed', 'call_state',
@@ -134,15 +201,22 @@ class PartialEvidenceTests(unittest.TestCase):
                 campaign.verify_partial(*args)
 
     def test_crash_uncertainty_cannot_disappear_or_be_called_complete(self):
-        for fault in ('omission', 'complete', 'gap', 'invented_gap'):
-            args = list(fixture(crashed=True)); values = {v['name']: v['content'] for v in args[0]['artifacts']}
-            if fault == 'omission': args[0]['omissions'].pop()
-            elif fault == 'complete': values['stdout']['file_complete'] = True
-            elif fault == 'gap': values['broker']['evidence_gaps'] = []
-            else: args[0]['omissions'].append({'artifact': 'robot', 'reason': 'arbitrary', 'omitted_records': 1})
-            rehash(args[0])
-            with self.subTest(fault=fault), self.assertRaises(AssertionError):
-                campaign.verify_partial(*args, crashed=True)
+        for gaps in ([], ['log_incomplete']):
+            for fault in ('omission', 'resources_omission', 'complete', 'gap',
+                          'duplicate_gap', 'invented_gap', 'outcome', 'debit'):
+                args = list(fixture(crashed=True)); values = {v['name']: v['content'] for v in args[0]['artifacts']}
+                values['broker']['evidence_gaps'] = gaps
+                if fault == 'omission': args[0]['omissions'].pop()
+                elif fault == 'resources_omission': args[0]['omissions'].pop(0)
+                elif fault == 'complete': values['stdout']['file_complete'] = True
+                elif fault == 'gap': values['broker']['evidence_gaps'] = ['observer_unavailable']
+                elif fault == 'duplicate_gap': values['broker']['evidence_gaps'] = ['log_incomplete', 'log_incomplete']
+                elif fault == 'outcome': values['attempt']['outcome'] = values['broker']['attempt_outcome'] = 'cancelled'
+                elif fault == 'debit': values['robot']['outstanding_debits'] = 0
+                else: args[0]['omissions'].append({'artifact': 'robot', 'reason': 'arbitrary', 'omitted_records': 1})
+                rehash(args[0])
+                with self.subTest(gaps=gaps, fault=fault), self.assertRaises(AssertionError):
+                    campaign.verify_partial(*args, crashed=True)
 
     def test_missing_postcrash_log_requires_independent_absence_and_omission(self):
         args = list(fixture(crashed=True))
