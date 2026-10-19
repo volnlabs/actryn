@@ -47,6 +47,7 @@ pub enum Request {
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "result", rename_all = "snake_case")]
+#[allow(clippy::large_enum_variant)] // Responses are immediately serialized; indirection does not reduce payload size.
 pub enum Response {
     Ok {
         inspection: Inspection,

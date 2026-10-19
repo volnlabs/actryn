@@ -39,6 +39,17 @@ fn observation() -> Observation {
         received_ms: 101,
     }
 }
+fn execution_observation() -> Observation {
+    Observation {
+        id: 2,
+        acquired_earliest_ns: 101,
+        acquired_latest_ns: 102,
+        valid_until_ns: 1_000_000_101,
+        controller_ns: 101,
+        received_ms: 103,
+        ..observation()
+    }
+}
 fn snapshot(intent: &actryn_server::robot::Intent, unknown: bool) -> RemoteSnapshot {
     serde_json::from_value(json!({"namespace":actryn_server::robot::unhex::<16>(&intent.handle.namespace).unwrap(),
         "key":actryn_server::robot::unhex::<32>(&intent.handle.key).unwrap(), "digest":null,
@@ -279,6 +290,42 @@ fn original_observation_cannot_be_replaced_and_dispatch_cannot_repeat() {
         s.robot_intent(&a, "key").unwrap().observation.unwrap().id,
         1
     );
+}
+
+#[test]
+fn execution_observation_must_be_newer_and_match_the_model_context() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut s = Store::open(dir.path().join("db"), Limits::default()).unwrap();
+    let a = prepared(&mut s);
+    s.robot_bind(&binding(&a), 100).unwrap();
+    s.start(&a, 100).unwrap();
+    s.robot_reserve(&a, "key", "digest", 101).unwrap();
+    s.robot_observe(&a, "key", &observation(), 102).unwrap();
+
+    for changed in [
+        observation(),
+        Observation {
+            left_ticks: 1,
+            ..execution_observation()
+        },
+        Observation {
+            context_revision: 2,
+            ..execution_observation()
+        },
+    ] {
+        assert!(s.robot_execution_observe(&a, "key", &changed, 103).is_err());
+    }
+
+    let execution = execution_observation();
+    let saved = s
+        .robot_execution_observe(&a, "key", &execution, 103)
+        .unwrap();
+    assert_eq!(saved.observation.as_ref().unwrap().id, 1);
+    assert_eq!(saved.execution_observation.as_ref(), Some(&execution));
+    assert!(saved.execution_observation_digest.is_some());
+    assert!(s
+        .robot_execution_observe(&a, "key", &execution, 104)
+        .is_err());
 }
 
 #[test]

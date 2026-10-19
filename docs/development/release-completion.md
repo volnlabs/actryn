@@ -22,7 +22,7 @@ without modifying the historical incomplete packet.
 - [x] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify both selected payload byte sets on fresh exact target guests through disposable test-signed manifests.
 - [x] Add host CI and obtain actual green push/PR checks; retain privileged target evidence separately and require the exact review head to remain green.
 - [x] Qualify packaged guest service restart behavior on isolated overlays of both exact final installations.
-- [x] Execute the frozen two-call A13 campaign once; retain its standalone PASS, combined clock-expiry FAIL, uncertain debit, recovery and stopped custody without replay.
+- [x] Execute the frozen two-call A13 campaign once; retain its standalone PASS, combined stale-observation FAIL, uncertain debit, recovery and stopped custody without replay.
 - [ ] Complete the separate maintainer installation rehearsal; original independent A14 is DEFERRED. A13 needs a reviewed correction and new qualification budget before another live attempt.
 - [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
 
@@ -39,10 +39,12 @@ without modifying the historical incomplete packet.
   authority and real-kernel evidence remain distinct; no physical-media claim.
 - The frozen live campaign consumed exactly two provider calls with no retry.
   Standalone acceptance passed on the pinned model/artifact. The combined call
-  settled 33 tokens, then Robot inhibited on an expired clock mapping and the
-  agent reported `broker rejected proposal`; no operation was allocated and
-  wheel outputs stayed zero. Local recovery passed while the uncertain debit
-  remained charged, and both guests plus the fixture are stopped.
+  settled 33 tokens, then the original one-second observation expired before
+  dispatch and the agent reported `broker rejected proposal`; no operation was
+  allocated and wheel outputs stayed zero. Later clock-checkpoint/mapping warnings
+  occurred during retained-state inspection and are not assigned as the rejection
+  cause. Local recovery passed while the uncertain debit remained charged, and
+  both guests plus the fixture are stopped.
 - External-drive evidence custody passed on the dedicated filesystem UUID
   `0347-DCDB`: the encrypted 234,789,052-byte copy hash-matched, was decrypted
   from the drive, and all 3,474 inventoried files plus the qualification packet
@@ -82,7 +84,7 @@ Every closure must name selected source/configuration/payload identities and imm
 | A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Fresh final-payload lifecycle01 passes gateway death, old-namespace rejection, local recovery and retained evidence. Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
 | A11 | Evidence origin, gaps and durable frontiers; complete-prefix replay only | No new raw decoding performed; metadata-only histories remain execution-replay-ineligible. |
 | A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Fresh exact Robot and Server targets install the da6 and 9f payload bytes through test-signed derivatives and pass rejection, interruption, recovery, rollback, bootstrap and lifecycle. Disposable overlays confirm all five packaged guest services retain one-second on-failure restart behavior and restart exactly once after controlled failure without creating Server work or widening Robot authority. Host VM wrappers use Restart=no; both canonical manifests remain unsigned/uninstalled. |
-| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | FAIL. Standalone live proposal passed. The combined call consumed 33 tokens but Robot recorded clock checkpoint expiry and rejected runtime work before allocating an operation. Recovery preserved the uncertain debit; no replay is allowed under the exhausted two-call budget. |
+| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | FAIL. Standalone live proposal passed. The combined call consumed 33 tokens, but its original one-second observation expired during inference and no operation was allocated. Later clock warnings are retained as separate post-failure facts. Recovery preserved the uncertain debit; no replay is allowed under the exhausted two-call budget. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
 | A16 | Latency/overhead/loss and competent userspace comparison without superiority threshold | The original FAILED79/80 result remains immutable and its exact BIND cause remains unproven. A separately frozen passcred10 successor passes two excluded pilots and all 80 comparison trials on six distinct pinned-kernel boots, with 78/78 matches in every traced run and zero recorded loss/discontinuities. Final packet binding remains; no superiority, WCET or physical claim follows. |
@@ -116,7 +118,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: reviewed A13 clock/protocol correction, maintainer rehearsal and signing-key recovery. A14 remains deferred; A12 packaged restart, A16 successor, both exact final payload software campaigns and the earlier external archive restoration are complete below. The archive predates A12/A13 and needs a final evidence refresh.
+- In progress: reviewed A13 execution-observation revalidation, maintainer rehearsal and signing-key recovery. A14 remains deferred; A12 packaged restart, A16 successor, both exact final payload software campaigns and the earlier external archive restoration are complete below. The archive predates A12/A13 and needs a final evidence refresh.
 
 ### Checkpoint 1: host CI and evidence preservation
 

@@ -13,6 +13,11 @@ def lineage():
     intent = {'request_key': 'live-preview-1', 'request_digest': 'sha256:' + 'd' * 64,
               'robot_epoch': 'e' * 32, 'handle': handle, 'observation': observation,
               'observation_digest': campaign.digest(observation, sort=False)}
+    execution = dict(observation, id=8, acquired_earliest_ns=101,
+                     acquired_latest_ns=102, valid_until_ns=1_000_000_101,
+                     controller_ns=103, received_ms=104)
+    intent['execution_observation'] = execution
+    intent['execution_observation_digest'] = campaign.digest(execution, sort=False)
     intent['parent_digest'] = campaign.digest({k: intent[k] for k in ('handle', 'request_digest', 'robot_epoch', 'observation')})
     value = {'origin': 'server_attested', 'attempt_id': handle['attempt'], 'request_key': 'live-preview-1',
              'model': 'gpt-5.4-mini-2026-03-17',
@@ -63,6 +68,15 @@ class LiveCampaignTests(unittest.TestCase):
         value['trusted_robot_observation'] = dict(intent['observation'], id=8)
         with self.assertRaises(AssertionError):
             campaign.verify_lineage(value, intent, 'a' * 32, 'b' * 32, live=True)
+
+    def test_execution_observation_must_be_newer_and_match_model_context(self):
+        for change in ({'id': 7}, {'left_ticks': 6}, {'context_revision': 2}):
+            value, intent = lineage()
+            intent['execution_observation'].update(change)
+            intent['execution_observation_digest'] = campaign.digest(
+                intent['execution_observation'], sort=False)
+            with self.assertRaises(AssertionError):
+                campaign.verify_lineage(value, intent, 'a' * 32, 'b' * 32, live=True)
         value, intent = lineage()
         intent['observation']['valid_until_ns'] += 1
         with self.assertRaises(AssertionError):

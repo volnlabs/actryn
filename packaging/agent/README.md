@@ -80,9 +80,12 @@ These are token/call/byte limits, not an invoice ceiling. Unknown external outco
 retain their reservations, and cancellation suppresses late output.
 
 The supplied `live-preview-reference` remains diagnostic input, not trusted Robot
-sensor evidence. The combined workflow must acquire and retain an actual Robot
-observation before inference and keep its original one-second freshness limit.
-No delayed model result may substitute or silently refresh that observation.
+sensor evidence. The combined workflow acquires and retains an actual Robot
+observation before inference. After inference it acquires exactly one newer
+execution observation; encoder values and context revision must match. The first
+record remains immutable model lineage and the second retains its own one-second
+freshness limit at dispatch. A delayed result cannot reuse an expired observation,
+change state, or trigger a retry.
 
 `guest_live_acceptance.py OCI_DIR DIGEST --expect missing-credential` verifies the
 installed real sandbox fails closed without a provider credential and performs no

@@ -72,6 +72,23 @@ def verify_lineage(value, intent, attempt, namespace, live=False):
     parent = digest({'handle': handle, 'request_digest': intent['request_digest'],
                      'robot_epoch': intent['robot_epoch'], 'observation': observation})
     require(parent == intent['parent_digest'] == value['lineage_digest'], 'parent lineage')
+    if live:
+        execution = intent['execution_observation']
+        require(execution['id'] > observation['id']
+                and execution['acquired_earliest_ns'] > observation['acquired_earliest_ns']
+                and execution['acquired_latest_ns'] > observation['acquired_latest_ns']
+                and execution['controller_ns'] >= observation['controller_ns']
+                and execution['left_ticks'] == observation['left_ticks']
+                and execution['right_ticks'] == observation['right_ticks']
+                and execution['context_revision'] == observation['context_revision']
+                and execution['simulated'] == observation['simulated'],
+                'execution observation did not revalidate model context')
+        execution_hash = digest({k: execution[k] for k in OBSERVATION_FIELDS}, sort=False)
+        require(execution_hash == intent['execution_observation_digest'], 'execution observation digest')
+    else:
+        require(intent.get('execution_observation') is None
+                and intent.get('execution_observation_digest') is None,
+                'offline proposal unexpectedly replaced its observation')
     require(intent['request_digest'] == value['request_digest'], 'input request digest')
     require(value['agent_observation_reference'] == ('live-preview-reference' if live else 'offline-preview-reference'), 'diagnostic agent input')
 

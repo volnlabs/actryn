@@ -12,9 +12,10 @@ Earlier checkpoints and failed attempts remain preserved.
 Latest continuation: [release completion checklist](release-completion.md). The
 2026-10-19 work adds host CI, local evidence preservation and the consumed A13
 campaign. Standalone live acceptance passed; combined live acceptance failed
-closed after 33 tokens while Robot recorded clock-mapping expiry. Its uncertain
-debit, explicit recovery, exports and stopped custody are retained. Do not replay
-or exceed the two-call budget. Release gates and external ownership remain open.
+closed after 33 tokens because its original one-second observation expired during
+inference. Later Robot clock warnings are retained as separate post-failure facts.
+Its uncertain debit, explicit recovery, exports and stopped custody are retained.
+Do not replay or exceed the two-call budget. Release gates remain open.
 Read its execution ledger before continuing the historical checkpoints below.
 
 ## Repository and execution state

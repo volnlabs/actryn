@@ -89,3 +89,10 @@ mocked tests cannot close A13. No runtime/UAPI/RPC changes are planned.
   authorized host-test access. Ten checks (eight test components plus two packet
   validators) passed. Local `--require-ready` correctly exits 1 for the five
   remaining required gates; this is expected incomplete readiness, not a test failure.
+- A13 consumed the frozen two-call budget: standalone passed and combined failed.
+  Timeline review shows the broker rejection preceded the later Robot clock
+  warnings. The model-input observation expired during provider latency, making
+  the old protocol depend on a sub-second hosted response. The correction keeps
+  that observation as immutable model lineage, acquires one newer execution
+  observation after inference, requires unchanged encoder/context state, and
+  retains the one-second dispatch bound. A mismatch fails without retry.

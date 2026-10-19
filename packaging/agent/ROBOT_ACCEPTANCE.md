@@ -12,18 +12,20 @@ there are no automatic retries, even after an unknown or stale outcome.
 This variant requires operator-provisioned server-only `openai-api-key` in addition
 to `robot-client-key`. Preflight reads credential metadata/ACL only. The broker
 reads the key and acquires the actual simulated Robot observation before inference.
+After inference it acquires one newer execution observation and requires unchanged
+encoder values and context revision before dispatch.
 The harness checks `live-preview-1`, pinned `gpt-5.4-mini-2026-03-17`, finite typed
 targets, actual observed lineage, bounded token accounting and the same kernel
 natural-completion/reconciliation and final evidence checks as offline.
 It accepts no fixture model substitution. The 40-second harness output wait
 allows the existing 30-second broker transport outcome to be recorded; it does
-not change the one-second Robot observation lifetime or the existing grant.
+not change either observation's one-second lifetime or the existing grant.
 
 A stale/failed/unknown response retains a failure record and existing identities;
 it does not count as positive A13 execution. Inspect and explicitly close that
-campaign before any new one. Do not refresh an observation or widen freshness to
-make inference fit. Host regression success is preparation only; no live call is
-implied. See the [solo handoff](../../docs/development/solo-preview-handoff.md).
+campaign before any new one. Do not widen freshness or retry a failed revalidation
+to make inference fit. Host regression success is preparation only; no live call
+is implied. See the [solo handoff](../../docs/development/solo-preview-handoff.md).
 
 ## Offline campaign
 
@@ -150,7 +152,8 @@ intent/reply records and never retry. Any failure preserves `failure.json`, atte
 identities and earlier results, then stops; it does not silently cancel/recover or
 rerun the failed campaign. Inspect the retained state and explicitly close/recover
 it before a separately numbered run. A lost reply may leave an unknown outcome or
-held debit. No observation is refreshed to rescue a stale model/dispatch result.
+held debit. No failed execution revalidation is retried to rescue a stale or
+changed model/dispatch result.
 
 The local self-tests check evidence hashes and trusted lineage, grant-preserving
 natural completion, retirement/recovery ordering, strict final evidence semantics,

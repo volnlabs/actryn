@@ -140,11 +140,13 @@ drive remains a single backup failure domain.
 ## 4. Bounded live acceptance
 
 **Consumed 2026-10-19: do not rerun this campaign.** The standalone call passed;
-the combined call consumed 33 tokens and failed closed while Robot recorded an
-expired clock mapping. No operation was allocated, outputs stayed zero, local
-recovery preserved the uncertain debit, and stopped custody passed. The two-call
-budget is exhausted. A new attempt requires a separately reviewed clock/protocol
-correction, a new numbered campaign and an explicitly renewed budget.
+the combined call consumed 33 tokens and failed closed because its original
+one-second observation expired during inference. No operation was allocated,
+outputs stayed zero, local recovery preserved the uncertain debit, and stopped
+custody passed. Later Robot clock warnings are retained as separate post-failure
+facts. The two-call budget is exhausted. A new attempt requires qualification of
+the reviewed execution-observation correction, a new numbered campaign and an
+explicitly renewed budget.
 
 Provision a dedicated provider key yourself through the documented
 `/etc/actryn/credentials/openai-api-key` server-only `LoadCredential` route.
@@ -165,14 +167,16 @@ artifact digest and `--allow-one-live-provider-call` in a new output directory.
 That option ran only the combined case, avoiding the extra unbound-agent call in
 the default offline campaign. No automatic retries occurred.
 
-Keep 1,024 output tokens, 64 KiB response, 30-second transport bound and the
-original one-second Robot observation freshness. These are not an invoice cap.
-The harness checks the real model, bounded target, stable request/observation
-lineage, settled token count, kernel completion, reconciliation and final exports.
-Stale inference is a failure of successful execution even when rejection works
-correctly. Never refresh the observation, loosen the bound, relabel offline
-output or start another campaign until its failed/unknown predecessor is inspected
-and explicitly closed. Record every provider dispatch, including uncertain ones.
+Keep 1,024 output tokens, 64 KiB response and the 30-second transport bound. The
+model-input and execution observations each retain the one-second Robot freshness
+ceiling. The first remains immutable model lineage; after inference the broker
+captures exactly one newer execution observation and requires unchanged encoder
+values and context revision before dispatch. These are not an invoice cap. The
+harness checks the real model, both observation roles, bounded target, settled
+token count, kernel completion, reconciliation and final exports. Never widen the
+bound, retry a mismatch, relabel offline output or start another campaign until
+its failed/unknown predecessor is inspected and explicitly closed. Record every
+provider dispatch, including uncertain ones.
 
 ## 5. Your manual rehearsal
 

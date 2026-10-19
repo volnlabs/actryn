@@ -105,9 +105,11 @@ OpenAI Responses, `gpt-5.4-mini-2026-03-17`, fixed structured output, no hosted 
 no redirects/proxies/retries, 4,096 input text bytes, 1,024 output tokens and a
 65,536-byte response cap. An unbound attempt produces an attested diagnostic
 proposal only. An explicitly bound attempt acquires a trusted Robot observation
-before inference and sends the resulting bounded proposal through authenticated
-Robot admission. `observation_id` in agent input is an untrusted diagnostic
-reference; it never selects or replaces the trusted observation.
+before inference. After inference, the live path acquires exactly one newer
+execution observation and requires the encoder values and context revision to
+match before sending the bounded proposal through authenticated Robot admission.
+`observation_id` in agent input is an untrusted diagnostic reference; it never
+selects or replaces either trusted observation.
 
 For live calls, systemd must deliver `openai-api-key` to the **server service only**
 at `/run/credentials/actryn-serverd.service/openai-api-key`. Missing credentials
@@ -175,15 +177,20 @@ TLS 1.3 validates the CA, DNS name, exact leaf pin and workload identity. Descri
 must match the installed Robot identity/configuration/profile before binding.
 
 The broker commits a random 32-byte remote key and immutable attempt/namespace
-before observing or sending. It stores the actual Robot observation and context
-revision, then includes that observation in the live model input and attested
-result. It commits the proposal intent before preparing its encrypted request.
+before observing or sending. It stores the model-input Robot observation and
+context revision, then includes that observation in the live model input and
+attested result. After provider completion it stores one newer execution
+observation only if the encoder values and context revision still match. The
+original observation remains the model lineage; the newer ID is bound into the
+Robot proposal as a fresh local precondition. It commits the proposal intent
+before preparing its encrypted request.
 At the final publication point, both attempt and request cancellation fences must
 remain open; one consuming, nonblocking ciphertext write publishes the request.
-Partial writes, lost replies and expired observations are never retried. The
-original observation retains Robot's one-second freshness bound; the server also
-rejects a final write one second after local receipt. It never refreshes or
-substitutes observations after inference.
+Partial writes, lost replies and expired observations are never retried. Both
+observations retain Robot's one-second freshness bound; the server also rejects
+a final write one second after receipt of the execution observation. A changed
+state or missing newer observation fails closed instead of relabelling the
+model-input observation.
 
 Cancellation closes those in-memory fences and queues the captured remote handle
 before waiting for SQLite. Reserved network closure therefore remains usable

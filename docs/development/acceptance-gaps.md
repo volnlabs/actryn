@@ -124,9 +124,10 @@ No independent installer or release signing identity is confirmed. The hosted-mo
 credential was provisioned only through the documented Server `LoadCredential`
 route in a disposable overlay. The frozen two-call A13 campaign has now been
 consumed: standalone passed, while the combined call settled 33 tokens and then
-failed closed when Robot recorded clock-mapping expiry. No operation was allocated;
-local recovery preserved the uncertain debit. Raw evidence is local, ignored
-material rather than a Git backup.
+failed closed because its original one-second observation expired during
+inference. No operation was allocated; later Robot clock warnings are separate
+post-failure facts, and local recovery preserved the uncertain debit. Raw evidence
+is local, ignored material rather than a Git backup.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|
@@ -138,7 +139,7 @@ material rather than a Git backup.
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
-| A13/A14 | Pinned live-policy/missing-credential checks, one standalone live PASS, and one combined live FAIL with 33 settled tokens, zero allocated operation, explicit recovery and stopped custody. | A13 needs a separately reviewed clock/protocol correction and renewed call budget; the failed call must not be replayed. An independent developer remains unavailable and A14 stays deferred. |
+| A13/A14 | Pinned live-policy/missing-credential checks, one standalone live PASS, and one combined live FAIL with 33 settled tokens, an expired original observation and zero allocated operation, plus explicit recovery and stopped custody. | A13 needs qualification of the reviewed execution-observation revalidation and a renewed call budget; the failed call must not be replayed. An independent developer remains unavailable and A14 stays deferred. |
 | A16 | [Completed frozen comparison](a16-comparison.md): 80 begun/ended, 79 PASS/1 FAILED; B1/B2/B4 each 20/20, B3 evidence 9/10 and trace 10/10. Six original-K11 cohort pairs, four 78/78 trace correlations, independent final audit and known stopped custody pass. Both pilots remain excluded. | Comparison acceptance stays FAILED on B3 trial 6 BIND abort; role/errno/cause unobserved. No retry or failure exclusion. Historical pilot07/boot09/10 failures and diagnostic8 boundaries remain. No equal-work, superiority, physical or WCET inference. |
 
 Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled

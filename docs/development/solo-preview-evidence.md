@@ -43,10 +43,12 @@ not physical UART, suspend or poweroff qualification.
   identities, traced correlation 78/78 and zero recorded loss. Original 79/80
   remains FAILED with its historical cause unproven; no WCET/superiority claim.
 - A13 consumed its frozen two-call budget without retry. The standalone pinned
-  live proposal passed. The combined call settled 33 tokens, then the Robot
-  recorded clock-mapping expiry and rejected runtime work before operation
-  allocation. Zero outputs, retained uncertainty, explicit local recovery,
-  evidence export and stopped custody are preserved; A13 remains FAIL.
+  live proposal passed. The combined call settled 33 tokens, but its original
+  one-second observation expired during inference and no operation was allocated.
+  Later Robot clock-checkpoint/mapping warnings are retained separately and are
+  not assigned as the earlier rejection cause. Zero outputs, retained uncertainty,
+  explicit local recovery, evidence export and stopped custody are preserved;
+  A13 remains FAIL.
 - D2-01 uses exact final installation/bootstrap/tuple controls. Genuine signed
   distribution remains an open later check.
 - D2-02 uses approved before-Start ordering, runtime association04 and GREEN04.

@@ -262,16 +262,17 @@ impl Server {
         open_gates(context, key_gate)?;
         let prepared = peer.prepare(&request).await?;
         let received = intent
-            .observation
+            .execution_observation
             .as_ref()
-            .context("trusted observation missing")?
+            .or(intent.observation.as_ref())
+            .context("execution observation missing")?
             .received_ms;
         let sent = context.gate.publish(|| {
             key_gate.publish(|| -> Result<robot_rpc::SentRpc> {
                 let now = launcher::now_ms()?;
                 ensure!(
                     now < saved.deadline_ms && now >= received && now - received < 1000,
-                    "original Robot observation/delegation expired; no refresh performed"
+                    "Robot execution observation/delegation expired"
                 );
                 prepared.try_send_once()
             })
@@ -286,6 +287,26 @@ impl Server {
             "Robot proposal response unknown; query retained handle, never resend"
         );
         Ok(())
+    }
+    async fn revalidate_robot(
+        &self,
+        context: &Arc<ContextState>,
+        key_gate: &PublicationGate,
+        peer: &RobotPeer,
+        binding: &RobotBinding,
+        intent: &RobotIntent,
+    ) -> Result<RobotIntent> {
+        open_gates(context, key_gate)?;
+        let observation = peer.observe(binding).await?;
+        let id = context.attempt_id.clone();
+        let key = intent.request_key.clone();
+        let saved = self
+            .database(move |s| {
+                s.robot_execution_observe(&id, &key, &observation, launcher::now_ms()?)
+            })
+            .await?;
+        open_gates(context, key_gate)?;
+        Ok(saved)
     }
     pub async fn tick(&self) -> Result<()> {
         let attempts = self.database(|s| s.attempts()).await?;
@@ -861,7 +882,7 @@ impl Server {
                     reservation.state == "reserved",
                     "request already dispatched; query its existing outcome"
                 );
-                let remote=if model_input.is_some() {self.begin_robot(context,&request_key,&digest).await?}else{None};
+                let mut remote=if model_input.is_some() {self.begin_robot(context,&request_key,&digest).await?}else{None};
                 open_gates(context,&key_gate)?;
                 let call_id = reservation.id.clone();
                 self.database(move |s| s.mark_dispatched(&call_id, launcher::now_ms()?))
@@ -911,6 +932,11 @@ impl Server {
                     Publication::Published(bytes) => serde_json::from_slice(&bytes)?,
                     _ => anyhow::bail!("publication closed or response too large"),
                 };
+                if method == "model.propose" {
+                    if let Some((peer,binding,intent)) = &mut remote {
+                        *intent = self.revalidate_robot(context,&key_gate,peer,binding,intent).await?;
+                    }
+                }
                 if let Some((peer,binding,intent))=&remote {
                     let target:Proposal=serde_json::from_value(value["output"].clone())?;
                     self.dispatch_robot(context,&key_gate,peer,binding,intent,&target).await?;

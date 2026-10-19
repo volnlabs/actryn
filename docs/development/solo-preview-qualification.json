@@ -547,8 +547,8 @@
     },
     "solo-source-review": {
       "path": "docs/development/solo-preview-evidence.md",
-      "bytes": 8509,
-      "sha256": "569445eeb9724beed5846bc62a3e383d3930a2cc22ef61ed04e611c7163b3204"
+      "bytes": 8633,
+      "sha256": "d436a193c62610147a756a773c35bb834b3691e9a6b683044a477f978793c9dd"
     },
     "robot-final-intent": {
       "path": "artifacts/install-robot-final-lifecycle01/intent.json",
@@ -762,8 +762,8 @@
     },
     "a13-failure-report": {
       "path": "artifacts/solo-a13-live01/a13-failure-report.json",
-      "bytes": 1317,
-      "sha256": "63c6a0a6529b8662ba1ae55a3f398cb424ccde750a6518ac9b769fca04af097e"
+      "bytes": 1416,
+      "sha256": "65ce5dc9f0ac730cdaecdec2f2455b4475565bcddfcbf7e023e3fbb0582350af"
     },
     "a13-standalone-intent": {
       "path": "artifacts/solo-a13-live01/standalone/intent.json",
@@ -1225,7 +1225,7 @@
         "a13-stopped-custody"
       ],
       "association": null,
-      "remaining": "Two-call budget consumed: standalone PASS; combined failed after a 33-token live response while Robot recorded clock-mapping expiry. No operation was allocated, outputs stayed zero, local recovery completed, and the uncertain debit remains charged. A13 requires a separately reviewed protocol/clock correction and renewed qualification budget."
+      "remaining": "Two-call budget consumed: standalone PASS; combined failed after a 33-token live response because its original one-second observation expired during inference. No operation was allocated, outputs stayed zero, local recovery completed, and the uncertain debit remains charged. Later Robot clock warnings are separate post-failure facts. A13 requires qualification of the reviewed execution-observation revalidation and renewed qualification budget."
     },
     {
       "id": "A14",
