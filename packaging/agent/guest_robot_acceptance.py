@@ -472,7 +472,7 @@ print(json.dumps({{'stores':stores,'facts':facts,'observer_epoch':epoch,'summary
                 "import pathlib,sys;sys.stdout.buffer.write(pathlib.Path('/proc/device-tree/compatible').read_bytes())"), 'ARM target is not disposable virt')
         program = f'''import errno,json,pathlib,stat,os,subprocess
 subprocess.run(['/usr/bin/actryn-serverd','--check-config'],check=True,capture_output=True,timeout=20)
-p=pathlib.Path({PEER!r});m=p.lstat();assert stat.S_ISREG(m.st_mode) and m.st_uid==0 and not m.st_mode&0o022 and m.st_size<=65536
+p=pathlib.Path({PEER!r});m=p.lstat();assert stat.S_ISREG(m.st_mode) and m.st_uid==m.st_gid==0 and stat.S_IMODE(m.st_mode)==0o644 and m.st_size<=65536
 peer=json.loads(p.read_bytes());config=json.loads(pathlib.Path('/etc/actryn/server.json').read_bytes())
 root=pathlib.Path(config['artifacts'][{self.args.artifact!r}]['rootfs']);i=json.loads((root/'etc/actryn/input.json').read_bytes())
 assert i.get('mode','offline')=={'live' if self.live else 'offline'!r} and i['request_key']=={self.request_key!r}
