@@ -17,7 +17,7 @@ without modifying the historical incomplete packet.
 
 ## Execution order
 
-- [ ] Preserve referenced evidence, verify restoration, and confirm a durable private archive destination before guest mutation.
+- [x] Preserve referenced evidence, verify restoration, and confirm a durable private archive destination before guest mutation.
 - [x] Resolve A16: preserve FAILED79/80; diagnose and regress the listener-credential race, freeze the passcred10 successor, then pass two excluded correctness pilots and the full 80-trial ABBA campaign.
 - [x] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify both selected payload byte sets on fresh exact target guests through disposable test-signed manifests.
 - [x] Add host CI and obtain actual green push/PR checks; retain privileged target evidence separately and require the exact review head to remain green.
@@ -26,10 +26,10 @@ without modifying the historical incomplete packet.
 
 ## Solo implementation checkpoint
 
-- Successor has 30 bounded software PASS associations, original A14 DEFERRED and
-  five required gates open: A12 packaged restart behavior, A13 live execution,
-  maintainer installation, key recovery and external archive restoration.
-- Local successor validation verifies 142 small receipt references, all 107
+- Successor has 31 bounded software PASS associations, original A14 DEFERRED and
+  four required gates open: A12 packaged restart behavior, A13 live execution,
+  maintainer installation and key recovery.
+- Local successor validation verifies 145 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
   This is integrity/readiness checking, not maintainer approval or release signing.
 - A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
@@ -38,9 +38,13 @@ without modifying the historical incomplete packet.
 - Explicit combined live harness mode permits one provider call and preserves
   original observation freshness, accounting, lineage and kernel completion checks.
   Host regression passed; no provider call has run in this continuation.
-- Signing/backup/manual installation instructions are ready in the handoff.
-  No release identity or credential was created/read, no drive was selected or
-  formatted, and no personal/independent installation report was manufactured.
+- External-drive evidence custody passed on the dedicated filesystem UUID
+  `0347-DCDB`: the encrypted 234,789,052-byte copy hash-matched, was decrypted
+  from the drive, and all 3,474 inventoried files plus the qualification packet
+  and both payload archives verified. The drive was not formatted.
+- Signing and manual-installation instructions are ready in the handoff. No
+  release identity was created and no personal/independent installation report
+  was manufactured.
 - Final signed-distribution verification is a separate post-attestation receipt,
   so a frozen qualification hash does not depend on signatures of itself.
 
@@ -52,7 +56,7 @@ without modifying the historical incomplete packet.
 | Independent installer | Unassigned until another developer joins; original A14 | DEFERRED, not a solo-release gate |
 | Maintainer rehearsal | Utkarsh Maurya personally follows shipped instructions on fresh guests | NOT_RUN, required |
 | Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | Key establishment/recovery pending |
-| Durable private archive | Utkarsh Maurya; encrypted archive on designated external drive | Drive destination and restore pending |
+| Durable private archive | Utkarsh Maurya; encrypted archive on filesystem UUID `0347-DCDB` | PASS; encrypted copy and full restored inventory verified |
 
 ## Acceptance work
 
@@ -107,7 +111,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: final-head host CI, qualification-packet reconciliation and external A13/A14/signing/archive inputs. A16 successor and both exact final payload software campaigns are complete below.
+- In progress: A12 packaged restart, A13 live execution, maintainer rehearsal and signing-key recovery. A14 remains deferred; A16 successor, both exact final payload software campaigns and external archive restoration are complete below.
 
 ### Checkpoint 1: host CI and evidence preservation
 

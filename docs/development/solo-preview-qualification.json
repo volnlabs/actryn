@@ -714,6 +714,21 @@
       "path": ".cache/server-deploy-03/provenance.json",
       "bytes": 309,
       "sha256": "01ffe87b0a213fb322167be03deb6e241b9de82703282bb977093a8230e0d21e"
+    },
+    "archive-prepared": {
+      "path": "artifacts/solo-preview-archive01/prepared.json",
+      "bytes": 506,
+      "sha256": "876d8df2b6f5bb34af4ce547a89a25ceaba360fb15193499d8feddbe24e794b9"
+    },
+    "archive-restored": {
+      "path": "artifacts/solo-preview-restore01/verification.json",
+      "bytes": 985,
+      "sha256": "8f5ede7c7c98de5e719feeac84756b1e631661ab0aa92331de61c6310b5b4cf6"
+    },
+    "archive-restore-report": {
+      "path": "artifacts/solo-preview-restore01/archive-restore-report.json",
+      "bytes": 944,
+      "sha256": "54728608556511b074bca3e73267fbf48abf52103917e9088830d652cf2a4e31"
     }
   },
   "subjects": {
@@ -1733,10 +1748,26 @@
     {
       "id": "ARCHIVE-RESTORE",
       "required": true,
-      "status": "NOT_RUN",
-      "evidence": [],
-      "association": null,
-      "remaining": "Utkarsh designates external drive; verify encrypted off-host evidence restoration and inventory."
+      "status": "PASS",
+      "evidence": [
+        "archive-prepared",
+        "archive-restored",
+        "archive-restore-report"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-manifest",
+            "payload_sha256": "7b596c872290039cee2491595cc23515cc8a0eb559f0da3fcba619455518fe71"
+          }
+        },
+        "basis": "Encrypted archive copied to designated external filesystem 0347-DCDB, hash-matched, decrypted from the drive copy, safely restored, and all 3,474 inventoried files plus qualification receipts and both selected payload archives verified."
+      },
+      "remaining": ""
     }
   ]
 }
