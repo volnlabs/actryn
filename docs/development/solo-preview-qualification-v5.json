@@ -914,6 +914,36 @@
       "path": "docs/development/solo-key-recovery-v5-association.json",
       "bytes": 880,
       "sha256": "d5850bd763fd05655bb9a6f83c9006fe5ce7efccf840a5cbefac5b7f1bb61668"
+    },
+    "robot-archive-restore03-failure": {
+      "bytes": 434,
+      "path": "artifacts/solo-preview-robot-restore03/failure.json",
+      "sha256": "40958a40af57b0c78b9b59c92250b1aafc175a2e44a0c3c72b01e23cc671aa0c"
+    },
+    "robot-archive-correction-prepared": {
+      "bytes": 554,
+      "path": "artifacts/solo-preview-robot-addendum04/prepared.json",
+      "sha256": "e545f6e7b8cb43a7fa2e607e60a57d36597dd7e99ecf0498a84d5e715a0a236e"
+    },
+    "robot-archive-correction-copy": {
+      "bytes": 565,
+      "path": "artifacts/solo-preview-robot-addendum04/encrypted-copy.json",
+      "sha256": "73e3451c974e0bc9b005c71c471773f30f652690fc16278e2a9196e384261e91"
+    },
+    "robot-archive-correction-verification": {
+      "bytes": 1026,
+      "path": "artifacts/solo-preview-robot-restore04/verification.json",
+      "sha256": "8b32862dfe87950e9a37804d4b0727395862ec19308a04c7fffde9ac7f20ba3e"
+    },
+    "robot-archive-correction-report": {
+      "bytes": 1012,
+      "path": "artifacts/solo-preview-robot-restore04/archive-restore-report.json",
+      "sha256": "f1cf7ebccc791e6a47fafd8e02572b7735d51f012da1ea824d336e0cd1ad3219"
+    },
+    "solo-maintainer-review-v5": {
+      "bytes": 1451,
+      "path": "docs/development/solo-maintainer-review-v5.json",
+      "sha256": "73c37ca1176eed05ca0e2b08388cce8995f9f80b0b4221031f432e1b542e8750"
     }
   },
   "subjects": {
@@ -926,7 +956,10 @@
       "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
     }
   },
-  "maintainer_review": null,
+  "maintainer_review": {
+    "evidence": "solo-maintainer-review-v5",
+    "owner": "Utkarsh Maurya"
+  },
   "gates": [
     {
       "id": "A01",
@@ -2076,7 +2109,7 @@
     {
       "id": "ARCHIVE-RESTORE",
       "required": true,
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         "archive-prepared",
         "archive-restored",
@@ -2084,10 +2117,27 @@
         "a13-successor-qualification",
         "successor-archive-verification",
         "successor-archive-report",
-        "robot-recovery-qualification"
+        "robot-recovery-qualification",
+        "robot-archive-restore03-failure",
+        "robot-archive-correction-prepared",
+        "robot-archive-correction-copy",
+        "robot-archive-correction-verification",
+        "robot-archive-correction-report"
       ],
-      "association": null,
-      "remaining": "Archive and restore the final Robot successor payload, recovery qualification receipt, manual rehearsal evidence and v5 packet on the designated external drive."
+      "association": {
+        "basis": "The encrypted final Robot-successor addendum was hash-matched on external filesystem 0347-DCDB and safely restored over the previously verified Server successor tree. The first restore correctly failed because one selected public key-recovery receipt was absent; numbered correction addendum04 preserved that failure, supplied only the omitted receipt, and the fresh combined tree verified all 182 selected receipts, 107 historical receipts and both payload archives.",
+        "subjects": {
+          "robot": {
+            "manifest": "robot-successor-manifest",
+            "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        }
+      },
+      "remaining": ""
     }
   ],
   "subject_updates": {

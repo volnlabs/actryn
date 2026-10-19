@@ -29,14 +29,15 @@ readiness without modifying the predecessor, v2, v3, v4 or historical incomplete
 
 ## Solo implementation checkpoint
 
-- The v5 successor packet has 34 bounded software PASS associations, original A14
-  DEFERRED and one required gate open. It binds the two-binary Server successor,
+- The v5 successor packet has 35 bounded software PASS associations, original A14
+  DEFERRED and no required gate open. It binds the two-binary Server successor,
   one-binary Robot recovery successor, completed maintainer installation and
-  recovered release-key identity. Archive restoration is reopened for the new
-  Robot payload and evidence before maintainer review.
-- Local successor validation verifies 182 small receipt references, all 107
+  recovered release-key identity. The corrected off-host restoration and exact
+  maintainer review make it ready for attestation without claiming release signing.
+- Local successor validation verifies 188 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
-  This is integrity/readiness checking, not maintainer approval or release signing.
+  The exact review is recorded; release signing and signed-distribution installation
+  remain separate.
 - A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
   robot-intent sources with earlier real-kernel SQLite contention. Host test
   authority and real-kernel evidence remain distinct; no physical-media claim.

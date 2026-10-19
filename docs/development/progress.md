@@ -20,7 +20,8 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   [the bounded receipt](live-observation-qualification.json). The versioned
   [v5 packet](solo-preview-qualification-v5.json) also binds the one-binary Robot
   recovery successor and completed sole-maintainer rehearsal while preserving all
-  earlier packets. Final Robot-successor archive restoration remains open.
+  earlier packets. The corrected off-host Robot-successor restoration and exact
+  maintainer review pass; release signing and signed-distribution verification remain.
 - **Final qualification packet assembled, still incomplete.**
   The tracked [qualification packet](final-qualification.json) binds the selected
   unsigned Server9f/Robotda6, all44 payload entries,17 D2 predicates and16

@@ -1,13 +1,16 @@
 # Solo-maintainer v0.0.1 handoff
 
 Approved 2026-10-19. Owner of every human step below: **Utkarsh Maurya**.
-The dedicated key custody/recovery check and personal installation rehearsal are
-complete. The final Robot-successor archive/restore, maintainer review, signing
-and signed-distribution verification remain open.
+The dedicated key custody/recovery check, personal installation rehearsal,
+final Robot-successor archive/restore and maintainer review are complete.
+Release signing and signed-distribution verification remain open.
 The earlier off-host archive restore passed, and corrected live software evidence
 is recorded in [the A13 successor receipt](live-observation-qualification.json).
-Current attestation readiness is in [the v5 successor packet](solo-preview-qualification-v5.json);
-the [predecessor](solo-preview-qualification.json),
+The [v5 successor packet](solo-preview-qualification-v5.json) now reports
+`ready_for_attestation:true`, with all 188 selected receipts verified locally;
+it still reports `release_qualified:false` until the signed distribution is
+verified. The
+[predecessor](solo-preview-qualification.json),
 [v2](solo-preview-qualification-v2.json) and
 [v3](solo-preview-qualification-v3.json) and
 [v4](solo-preview-qualification-v4.json) packets remain unchanged.
