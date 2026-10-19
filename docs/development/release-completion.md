@@ -25,7 +25,7 @@ readiness without modifying the predecessor, v2, v3, v4 or historical incomplete
 - [x] Execute the frozen two-call A13 campaign once; retain its standalone PASS, combined stale-observation FAIL, uncertain debit, recovery and stopped custody without replay.
 - [x] Qualify the reviewed execution-observation correction under one renewed call, close/export the consumed attempt, and install the two-binary successor on a fresh exact target.
 - [x] Complete the separate maintainer installation rehearsal; original independent A14 is DEFERRED.
-- [ ] Run hosted checks on the final pushed head and update PR #1 for review. The encrypted final-distribution archive/restore, role-scoped signatures and fresh signed-bundle installation/bootstrap are complete.
+- [x] Complete the encrypted final-distribution archive/restore, run final host and hosted checks, and update PR #1 for review. Role-scoped signatures and fresh signed-bundle installation/bootstrap are complete.
 
 ## Solo implementation checkpoint
 
@@ -85,8 +85,8 @@ readiness without modifying the predecessor, v2, v3, v4 or historical incomplete
   local Unix/TCP socket creation returned `EPERM` across Python, Rust and C tests.
   That run is retained. A separately numbered rerun with ordinary local-socket
   permission passes all 11 Python groups, all four Rust checks and all three
-  kernel-host checks. PR #1 head `7fea8e3` has six green hosted checks; the
-  eventual signed-release commit still requires its own exact-head hosted run.
+  kernel-host checks. PR #1 qualification commit `fed6058` has six green hosted
+  checks: Rust, Python and kernel-host on both push and pull-request workflows.
 
 ## External inputs
 

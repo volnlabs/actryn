@@ -264,7 +264,8 @@ The [archive receipt](final-distribution-archive-restore.json) binds that restor
 the final receipt closes the bounded release checks without widening A14 or
 physical scope.
 
-Run final host checks and actual hosted CI on the pushed head. Update PR #1 with
-the limited release claim and observed results. Merge, tagging and publication
-remain separate. When another human joins, execute original A14 and publish a
-new additive qualification record identifying exactly what they tested.
+Final host checks and all six hosted CI jobs pass on qualification commit
+`fed6058`. PR #1 records the limited release claim and observed results. Merge,
+tagging and publication remain separate. When another human joins, execute
+original A14 and publish a new additive qualification record identifying exactly
+what they tested.
