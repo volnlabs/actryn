@@ -729,6 +729,36 @@
       "path": "artifacts/solo-preview-restore01/archive-restore-report.json",
       "bytes": 944,
       "sha256": "54728608556511b074bca3e73267fbf48abf52103917e9088830d652cf2a4e31"
+    },
+    "a12-restart-association": {
+      "bytes": 4403,
+      "path": "artifacts/solo-a12-restart01/association.json",
+      "sha256": "338fdf6a0ebdc8730df8fe0a29a5b87e85924f529b9df8af7469672be28fb170"
+    },
+    "a12-robot-inspection": {
+      "bytes": 4256,
+      "path": "artifacts/solo-a12-restart01/robot/inspection.json",
+      "sha256": "4164446246c0d72b1f8d702604b40a1eb6da9acee6c656423425cf952bebbd2f"
+    },
+    "a12-robot-precondition-failure": {
+      "bytes": 384,
+      "path": "artifacts/solo-a12-restart01/robot/restart-attempt01.stderr",
+      "sha256": "9bbdcd6e18fbef7020e5c3efed412eb1bc2385e4c842208bbd1d144ef11648a7"
+    },
+    "a12-robot-restart": {
+      "bytes": 8030,
+      "path": "artifacts/solo-a12-restart01/robot/result-final.json",
+      "sha256": "cb9a3d350819e5e01a9c4ba50ddbddd37b6c1f8ae547f316b0065b3cba1befef"
+    },
+    "a12-server-inspection": {
+      "bytes": 7378,
+      "path": "artifacts/solo-a12-restart01/server/inspection.json",
+      "sha256": "aa3810934c41f41320cd209482b6184007cd7aee9164cbac93042c2f016e78da"
+    },
+    "a12-server-restart": {
+      "bytes": 7026,
+      "path": "artifacts/solo-a12-restart01/server/result-final.json",
+      "sha256": "01799b3d7878f5f6d266375f4ec31fff0d0a1d8e9a6a7abdbd4b83302ccd5d89"
     }
   },
   "subjects": {
@@ -1079,17 +1109,35 @@
     {
       "id": "A12",
       "required": true,
-      "status": "NOT_RUN",
+      "status": "PASS",
       "evidence": [
         "server-update",
         "robot-update",
         "robot-installed-update",
         "server-installed-export",
         "robot-startup-verification",
-        "robot-startup-parser"
+        "robot-startup-parser",
+        "a12-restart-association",
+        "a12-robot-inspection",
+        "a12-robot-precondition-failure",
+        "a12-robot-restart",
+        "a12-server-inspection",
+        "a12-server-restart"
       ],
-      "association": null,
-      "remaining": "Exact test-signed payload installation passed. Qualify packaged Restart=on-failure behavior and reconcile installer source evidence. Actual release-key-signed distribution verification is a separate post-attestation receipt, not a circular prerequisite for signing."
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-manifest",
+            "payload_sha256": "7b596c872290039cee2491595cc23515cc8a0eb559f0da3fcba619455518fe71"
+          }
+        },
+        "basis": "Disposable overlays of the exact selected test-signed Server and Robot installations retained packaged Restart=on-failure with a one-second delay. Each of five guest services restarted exactly once with a new PID after controlled SIGKILL; Server remained without tasks/attempt cgroups and Robot remained non-actuating with no operation. The first Robot start correctly rejected the absent documented module precondition; after explicit exact-module load, one unchanged exercise passed. Host VM wrappers remained Restart=no and source disks were not written. Canonical release manifests remain unsigned/uninstalled; signed-distribution verification stays post-attestation and no physical qualification is claimed."
+      },
+      "remaining": ""
     },
     {
       "id": "A13",

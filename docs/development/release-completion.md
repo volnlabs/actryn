@@ -21,15 +21,16 @@ without modifying the historical incomplete packet.
 - [x] Resolve A16: preserve FAILED79/80; diagnose and regress the listener-credential race, freeze the passcred10 successor, then pass two excluded correctness pilots and the full 80-trial ABBA campaign.
 - [x] Freeze exact payloads and dependencies; resolve Robot Expat pin; qualify both selected payload byte sets on fresh exact target guests through disposable test-signed manifests.
 - [x] Add host CI and obtain actual green push/PR checks; retain privileged target evidence separately and require the exact review head to remain green.
+- [x] Qualify packaged guest service restart behavior on isolated overlays of both exact final installations.
 - [ ] Complete A13 with broker-only credentials and the separate maintainer installation rehearsal; original independent A14 is DEFERRED.
 - [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
 
 ## Solo implementation checkpoint
 
-- Successor has 31 bounded software PASS associations, original A14 DEFERRED and
-  four required gates open: A12 packaged restart behavior, A13 live execution,
-  maintainer installation and key recovery.
-- Local successor validation verifies 145 small receipt references, all 107
+- Successor has 32 bounded software PASS associations, original A14 DEFERRED and
+  three required gates open: A13 live execution, maintainer installation and key
+  recovery.
+- Local successor validation verifies 151 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
   This is integrity/readiness checking, not maintainer approval or release signing.
 - A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
@@ -76,7 +77,7 @@ Every closure must name selected source/configuration/payload identities and imm
 | A09 | Storage stalls cannot block urgent closure; failed durability cannot authorize effects | SQLite contention is not fsync-stall/EIO/media-power-loss proof; current-cohort closure/durability applicability remains explicitOPEN. |
 | A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Fresh final-payload lifecycle01 passes gateway death, old-namespace rejection, local recovery and retained evidence. Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
 | A11 | Evidence origin, gaps and durable frontiers; complete-prefix replay only | No new raw decoding performed; metadata-only histories remain execution-replay-ineligible. |
-| A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Fresh exact Robot and Server targets install the da6 and 9f payload bytes through test-signed derivatives and pass rejection, interruption, recovery, rollback, bootstrap and lifecycle. Both canonical manifests remain unsigned/uninstalled; runtime Restart=no overrides are not packaged on-failure. |
+| A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Fresh exact Robot and Server targets install the da6 and 9f payload bytes through test-signed derivatives and pass rejection, interruption, recovery, rollback, bootstrap and lifecycle. Disposable overlays confirm all five packaged guest services retain one-second on-failure restart behavior and restart exactly once after controlled failure without creating Server work or widening Robot authority. Host VM wrappers use Restart=no; both canonical manifests remain unsigned/uninstalled. |
 | A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | Authorized provider provisioning and actual pinned live-model execution are EXTERNAL/NOT_RUN; no credential inspection or reuse. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
@@ -111,7 +112,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: A12 packaged restart, A13 live execution, maintainer rehearsal and signing-key recovery. A14 remains deferred; A16 successor, both exact final payload software campaigns and external archive restoration are complete below.
+- In progress: A13 live execution, maintainer rehearsal and signing-key recovery. A14 remains deferred; A12 packaged restart, A16 successor, both exact final payload software campaigns and external archive restoration are complete below.
 
 ### Checkpoint 1: host CI and evidence preservation
 
@@ -269,3 +270,27 @@ Every closure must name selected source/configuration/payload identities and imm
   scripts/receipts (276,480 bytes). It excludes VM images, payload duplicates and
   all private test/SSH keys. It is ignored local storage, not the still-required
   durable off-host archive.
+
+### Checkpoint 6: packaged service restart behavior
+
+- New disposable overlays back the stopped final Server and Robot installation
+  disks. The backing disks remain read-only through the overlays; unique QEMU,
+  fixture and host-systemd identities avoid changing the retained campaigns.
+- Guest inspection confirms `Restart=on-failure` and `RestartSec=1` in all five
+  packaged services, with only the installer preflight drop-in and no
+  `Restart=no` guest override. Host VM wrappers intentionally retain
+  `Restart=no`; that host lifecycle policy is outside the guest packages.
+- One controlled main-process SIGKILL per service produced an exact restart
+  delta of one and a changed PID. Server had no container tasks or attempt
+  cgroups before or after. Robot reported `live_actuation=false`, no operation
+  and kernel operation zero after both restarts, then the Robot VM and fixture
+  stopped normally.
+- The first Robot start correctly failed closed because a fresh boot had not yet
+  loaded the authority module required by the shipped runbook. That attempt is
+  preserved. The exact installed module `a49fd1a…1112` and loaded build-ID note
+  were verified with the character-device, serdev, DT-compatible and no-TTY
+  checks; one unchanged exercise then passed.
+- Receipt `338fdf6a…fb170` binds both exact selected payloads and the raw inspection,
+  restart and failed-precondition records. This closes A12 for the test-signed
+  mechanical campaign only. Final release-key-signed distribution verification
+  remains post-attestation, and no physical qualification follows.
