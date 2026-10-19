@@ -86,3 +86,23 @@ Every closure must name selected source/configuration/payload identities and imm
 - Preserved 105 unique files (107 receipt references, four larger sources, two payloads and the packet, with shared paths deduplicated) in a 122,890,240-byte local archive and restored/hash-verified every entry. Receipt: `artifacts/release-evidence-preservation01/result.json`; archive SHA256 `9fa503ad49dd24cf261db284e360975eb30899e489a980e1320e6f1ee47b75ce`. This is a selected-evidence snapshot, not a complete raw/VM backup or durable off-host archive. No private key or VM image was read.
 - Independent checkpoint review found no actionable important CI findings. It did not verify hosted CI or target qualification.
 - A16 read-only review found an actual host-reproducible post-accept/pre-SO_PASSCRED credential race. Historical causality remains unproven. Next: preserve frozen sources and add a separately numbered regression/fixed derivative, then qualify that derivative on the pinned guest after archive prerequisites are met.
+
+### Checkpoint 2: A16 listener credential race
+
+- Host RED: a BIND sent after `accept4` but before accepted-socket `SO_PASSCRED`
+  reached the actual receiver/dispatcher as PID0, UID/GID65534 and returned
+  `-EPERM`. This is consistent with the historical failure class, but the old
+  record did not retain enough data to prove causality.
+- Numbered derivative10 enables `SO_PASSCRED` after listener bind and before
+  listen; the frozen comparison gateway remains byte-unchanged. The forced race
+  then preserves the real sender credentials and all four BIND roles pass.
+- Ruling: retain FAILED79/80 and treat derivative10 as a candidate correction,
+  not A16 closure. Cost if wrong: the release stays blocked until the pinned-guest
+  pilot and complete newly frozen comparison establish applicability.
+- No guest, fixture, credential, manifest or selected payload changed. Target
+  build/review, successor freeze and the full ABBA campaign remain pending.
+- Recorded host receipt `artifacts/release-completion-host03/kernel-host/result.json`
+  is PASS with three checks: kernel wire sanitizer assertions, five fixture-bridge
+  tests, and the complete A16 host suite with 118 Python tests plus its C sanitizer
+  assertions and fixed-profile check. The receipt correctly records a dirty
+  worktree at source revision `02d8cf3`; the commit below binds the tested delta.
