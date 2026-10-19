@@ -926,10 +926,7 @@ impl State {
             }
             Command::Recover(_) => {
                 self.close();
-                let _writer = self
-                    .clock_writer
-                    .try_lock()
-                    .map_err(|_| anyhow::anyhow!("clock checkpoint pending"))?;
+                let _writer = self.clock_writer.lock().unwrap();
                 let wall = wall_ns()?;
                 let now = boottime_ns()?;
                 let clock = ClockGuard::new(wall, now, self.floor.load(Ordering::Acquire))?;
