@@ -157,7 +157,8 @@ def verify_special_gate(gate, packet, checked):
         except (ValueError, UnicodeError):
             continue
         if (isinstance(report, dict) and report.get('format') == 'actryn-solo-check-1'
-                and report.get('gate') == gate['id'] and report.get('status') == 'PASS'):
+                and report.get('gate') == gate['id'] and report.get('status') == 'PASS'
+                and report.get('subjects') == packet['subjects']):
             reports.append(report)
     require(len(reports) == 1, 'dedicated gate report required: ' + gate['id'])
     report = reports[0]
@@ -289,7 +290,7 @@ def validate(packet, root=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--packet', type=Path, default=Path('docs/development/solo-preview-qualification-v2.json'))
+    parser.add_argument('--packet', type=Path, default=Path('docs/development/solo-preview-qualification-v3.json'))
     parser.add_argument('--receipt-root', type=Path)
     parser.add_argument('--require-ready', action='store_true', help='fail unless local evidence and review are complete')
     args = parser.parse_args()

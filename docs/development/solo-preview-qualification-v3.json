@@ -1,0 +1,1990 @@
+{
+  "format": "actryn-solo-qualification-2",
+  "maintainer": "Utkarsh Maurya",
+  "physical_acceptance": false,
+  "independent_installation": false,
+  "historical_packet": "historical",
+  "evidence": {
+    "a16-original-analyzer": {
+      "bytes": 22796,
+      "path": "artifacts/a16-abba-final-analysis01/analyzer.json",
+      "sha256": "5843282ba98973397914e093c8e3a42c9b0c8abba66b53ead8da25a148bf0494"
+    },
+    "a16-original-cohort": {
+      "bytes": 565,
+      "path": "artifacts/a16-abba-final-analysis01/cohort-gate.json",
+      "sha256": "1bcfd6809ae42fddf2528b34a99d5a1657dc6e74f1de3f2fff1e28cba491aba7"
+    },
+    "a16-original-result": {
+      "bytes": 961,
+      "path": "artifacts/a16-abba-final-analysis01/result.json",
+      "sha256": "d4f3ef18f85a43995da6dbb451861f3c8099dba7aba8f4f75f8260aeb89c1b8e"
+    },
+    "a16-original-review": {
+      "bytes": 9981,
+      "path": "artifacts/a16-abba-final-analysis-actual-review01/review.json",
+      "sha256": "4257e0458a9e4d94e7f316b1f3bbea36e8d040d18a8430e4787c122114ef0865"
+    },
+    "approved-plan": {
+      "bytes": 6856,
+      "path": "artifacts/final-cohort-qualification-packet01/source-snapshots/approved-plan.md",
+      "sha256": "92534437be3249c2d4476fedf36a899520eaeb791e25203c3e5537b0d26fb613"
+    },
+    "arm-cli-abi": {
+      "bytes": 4021,
+      "path": "artifacts/arm-cli-runtime-collection01/abi/result.json",
+      "sha256": "080fd43f46d218449ad6d79c5c2141e684736ec0de7827b5f75708488cbed67a"
+    },
+    "arm-cli-source": {
+      "bytes": 95365,
+      "path": "artifacts/arm-cli-coverage-source01/result.json",
+      "sha256": "e8cbec1e75f312601cdf428a3868897551026234629510e6562d3cacce5a2a66"
+    },
+    "cleanup-build": {
+      "bytes": 988,
+      "path": "artifacts/server-prestart-cleanup-build01/provenance.json",
+      "sha256": "2dfc87a362703005dea50b232cead639a950908a4632b4055eafc32005553a23"
+    },
+    "cleanup-green04": {
+      "bytes": 2506,
+      "path": "artifacts/server-prestart-cleanup-green-root-review04/green04-classification.json",
+      "sha256": "a91a8a9ae5b8e0b8ffdd81614769c04d6048bb8b622a94324ec534c3e16c0ece"
+    },
+    "cleanup-green04-review": {
+      "bytes": 5203,
+      "path": "artifacts/server-prestart-cleanup-green04-actual-peer01/review.json",
+      "sha256": "c1baf1535f24f3a51ad9071455c3db4af620a32eee03eef4c1f42d3071f3e0ed"
+    },
+    "cleanup-integration": {
+      "bytes": 1090,
+      "path": "artifacts/server-start-cleanup-integration01/result.json",
+      "sha256": "cbb3921d5f5b90c969467a8437a0eb5eb24b9b234bf8cb7196ed83687f0786bc"
+    },
+    "cleanup-old-red": {
+      "bytes": 1269,
+      "path": "artifacts/server-prestart-cleanup-root-review01/old-red-classification.json",
+      "sha256": "32aaf351742f21950b73c3e74bd2dced0ef17e877748a72d7de51aa50b62a8ab"
+    },
+    "contention04": {
+      "bytes": 3148,
+      "path": "artifacts/robot-a09-contention-04/result.json",
+      "sha256": "59c49b6b9c1eac0d6b2173a278f7519721e8a4d0f4970e218ddcdf200cbc9927"
+    },
+    "d2-cold-integrity": {
+      "bytes": 761,
+      "path": "artifacts/server-device-policy-cold-integrity-owner01/result.json",
+      "sha256": "d94805cb2ba5bad6ee999ae15df10b971f4984bee1292e7dc3bcd9b4fc484507"
+    },
+    "d2-composition": {
+      "path": "artifacts/server-final-d2-predicate-map03/root-composition-decision02.json",
+      "bytes": 3108,
+      "sha256": "0ebd4ac246d2931988b177d15fdb5123a216f38c4404195a6a022b949bfe2644"
+    },
+    "d2-device-oom": {
+      "bytes": 4373,
+      "path": "artifacts/server-device-policy-composite-cases01/result.json",
+      "sha256": "b66f7bb4516443854b4c222b4b69a76d19eebb423ecfa148607bcb04801d993c"
+    },
+    "d2-frozen03": {
+      "bytes": 25439,
+      "path": "artifacts/server-final-d2-predicate-map03/association.json",
+      "sha256": "fcebbe2d6a1d752f276d96659eea3e5783f7aac88aa47241f94676f95ec72853"
+    },
+    "d2-load-failure02": {
+      "bytes": 6580,
+      "path": "artifacts/server-final-d2-predicate-map02/association.json",
+      "sha256": "68db7b6aa9fbd146adfbd5c8b9bd2a9d075034bf775987453902a8ff4bddf36e"
+    },
+    "d2-native-final-review": {
+      "bytes": 2300,
+      "path": "artifacts/server-native-proof-final-independent-review01/review.json",
+      "sha256": "ce636fd43f7d39498f7ffab10a16e8ccddeda8f60ed1262d0e1bcdaecd709190"
+    },
+    "d2-native-proof": {
+      "bytes": 2437,
+      "path": "artifacts/server-native-proof-actual-peer01/review.json",
+      "sha256": "9da8100dfe14880e462d850fa039c65bb921088a3413a27540be8c4f3b326b87"
+    },
+    "d2-network-classification": {
+      "bytes": 1614,
+      "path": "artifacts/server-network-proof-root-review01/execution-classification.json",
+      "sha256": "2de60ece0168e341cb14be6e5bad3d5468daab01632d9b5779ebac4cc2fe4db3"
+    },
+    "d2-network-custody": {
+      "bytes": 18327,
+      "path": "artifacts/server-network-proof-stopped-custody01/result.json",
+      "sha256": "a1b6f4f25e7a0649e9ea012e719bac2256c40eb88d8c9c4de3fc99bdb44d401a"
+    },
+    "d2-network05": {
+      "bytes": 2843,
+      "path": "artifacts/server-final-d2-network-association05/association.json",
+      "sha256": "4605532a43b465b2169cfdfa22f3f544de872a8c6c47b3a13f2b159d348a908b"
+    },
+    "d2-runtime04": {
+      "bytes": 9376,
+      "path": "artifacts/server-final-d2-runtime-association04/association.json",
+      "sha256": "db16b0671f4541393bce57df538f78d70b9bcfe3d815cdf9e0964afa028b89d3"
+    },
+    "diagnostic02-classification": {
+      "bytes": 1936,
+      "path": "artifacts/a16-bind9-observation-root-review02/classification.json",
+      "sha256": "1b3e91a57d3c07502475366a14ad743b5dcd64f5c81a1ee587d867a1b7e73b2f"
+    },
+    "diagnostic02-pair": {
+      "bytes": 431,
+      "path": "artifacts/a16-bind9-observation02/pair-validation.json",
+      "sha256": "f93195375e6b2ffe8ce025516ff7d233d588e7e48abc822ca21643b4c1e4f241"
+    },
+    "diagnostic02-progress": {
+      "bytes": 1031,
+      "path": "artifacts/a16-bind9-observation02/diagnostic-progress.json",
+      "sha256": "b6dd8974ddbb35ac987b2a1dcd32b8751ae4434a2fef12f4bd55998b06a35d3c"
+    },
+    "diagnostic02-result": {
+      "bytes": 619,
+      "path": "artifacts/a16-bind9-observation02/result.json",
+      "sha256": "aba80814cd38be13edd99b03f18c5cdfe6f1dd91b3bccb69f2f77d4b5d0a7436"
+    },
+    "diagnostic02-review": {
+      "bytes": 16972,
+      "path": "artifacts/a16-bind9-observation-actual-peer02/review.json",
+      "sha256": "827e3cf3dcbf3c27150e6e42cfb4527a4d3f60d1f8fa91fd627a2c3eb62b4ab1"
+    },
+    "existing-handle-cleanup": {
+      "bytes": 6932,
+      "path": "artifacts/robot-retained-debit-finalize-cleanup-actual-review01/review.json",
+      "sha256": "19223fd1dd083fcf8e56321c02bc830f9a70274f68385a1ede55db8a77b757c6"
+    },
+    "gap-export": {
+      "bytes": 482,
+      "path": "artifacts/robot-source-gap-01-export-amendment2/result.json",
+      "sha256": "136c60edd990ad24d9d9ff926d19efdb81dc949878b6e6e347dda64e99450120"
+    },
+    "gap-omission": {
+      "bytes": 3188,
+      "path": "artifacts/robot-source-gap-01/omission.json",
+      "sha256": "7a52b475d619f29fa5bf8a1536439f7cf2a3c40897b4101069d3c039097ab29b"
+    },
+    "hot-journal-host": {
+      "bytes": 142,
+      "path": "artifacts/evidence-hot-journal01/green03.json",
+      "sha256": "0c7ebf619c91329071bfb7d8042b7c31f823c3424bc0934a0225c45502bdcaa7"
+    },
+    "hot-journal-reanalysis": {
+      "bytes": 4248,
+      "path": "artifacts/robot-a10-lifetime-02-recovery-reanalysis01/report02.json",
+      "sha256": "830265fe5dfbf112524230d4bed1d89cf35300a2c5f97571923c02f2cc77109f"
+    },
+    "latest-custody-closure": {
+      "bytes": 209,
+      "path": "artifacts/a16-bind9-final-stopped-custody-root-review02/custody-owner-closure.json",
+      "sha256": "f9742c1bede4e9ce9421f44297ebc0320e96db78b3cf6ec37203b36fa2d78106"
+    },
+    "latest-stopped-custody": {
+      "bytes": 20301,
+      "path": "artifacts/a16-bind9-final-stopped-custody02/result.json",
+      "sha256": "4154a0ac5cbda23f3655a12312df156bf502913802d29edfd1ae5e272864ae31"
+    },
+    "lifetime09": {
+      "bytes": 23388,
+      "path": "artifacts/robot-a10-lifetime-09/result.json",
+      "sha256": "730b8fa965f8b714c1ba6ed25662c61faaa7535ae308dc10e6f5f88119db989f"
+    },
+    "live-missing-credential": {
+      "bytes": 811,
+      "path": "artifacts/server-regression-guest03/live-missing-credential-03.log",
+      "sha256": "fa1f5a936ad193149e093c882a0b79398992c96030cea0c8cd9ff2540468133a"
+    },
+    "manager-lifecycle03": {
+      "bytes": 576,
+      "path": "artifacts/robot-manager11-lifecycle03/result.json",
+      "sha256": "296fcc3762d692f38c1934753a79577cc54bfb28c0fb42256aee86a5ee21a4df"
+    },
+    "module16": {
+      "path": "artifacts/kernel-module16-acceptance01/manifest.json",
+      "bytes": 2113,
+      "sha256": "00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298"
+    },
+    "ordering-approved": {
+      "bytes": 839,
+      "path": "artifacts/server-launch-order-approved-decision01/result.json",
+      "sha256": "405620fe0954ea0879da673e13500b51f0f6382f5bb9d55df33e6ee8ea964956"
+    },
+    "platform-contract": {
+      "bytes": 32680,
+      "path": "artifacts/final-cohort-qualification-packet01/source-snapshots/platform-release-contract.md",
+      "sha256": "315734b43734f9200ebd2e35cd977a60fcf91dedbd9d85c38fb2805100046b0a"
+    },
+    "pressure11": {
+      "bytes": 2817,
+      "path": "artifacts/server-a08-pressure-run11/capture-validated.json",
+      "sha256": "92875b5c76811026708b67c025c54db14f3b3fe6d50c0b2228ee92301caaf840"
+    },
+    "release-format": {
+      "bytes": 51667,
+      "path": "artifacts/final-cohort-qualification-packet01/source-snapshots/selected-install.md",
+      "sha256": "c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add"
+    },
+    "release-validator": {
+      "bytes": 30461,
+      "path": "artifacts/install-server-host03/tools/release.py",
+      "sha256": "9d3385ae0c14063f1e14e45837edfa7061fcd0dab654268bf27155826ee6ec34"
+    },
+    "replyloss02": {
+      "bytes": 3156,
+      "path": "artifacts/robot-a02-replyloss-02/result.json",
+      "sha256": "b6744e8bdd9a0d54ec973dc19cbe579ffa06cb102d2054e651910f73c83f02d4"
+    },
+    "robot-assembly": {
+      "bytes": 1238,
+      "path": "artifacts/robot-final-cohort-package-plan01/result.json",
+      "sha256": "7a32a924214f8c95e43e36efad9f15420c0d499c5ab88bc5a36972db844f3b45"
+    },
+    "robot-build-review": {
+      "bytes": 826,
+      "path": "artifacts/robot-reconciliation-root-review01/result.json",
+      "sha256": "72c37e7ee8a3df6d19dc2b4a95206e651e014152027920ac7ffe8e4701a6964a"
+    },
+    "robot-components": {
+      "bytes": 19566,
+      "path": "artifacts/robot-final-cohort-package-plan01/component-map.json",
+      "sha256": "a6b69b4151581d657dc9f2a24b6b462a57a5c127dff909174e216f9ddf028622"
+    },
+    "robot-delta": {
+      "bytes": 1146,
+      "path": "artifacts/robot-final-cohort-package-plan01/payload-delta.json",
+      "sha256": "adb6b437b1c9205c6bb107022cff0b563227bc3b4c5fd17d711c9dfdadfb2d27"
+    },
+    "robot-evidence-index": {
+      "bytes": 5396,
+      "path": "artifacts/robot-final-cohort-package-plan01/evidence-references.json",
+      "sha256": "f8fffb617bfe243e59cc6539d4a4e5a45a12c505ee3728085d23875bf696e7b8"
+    },
+    "robot-inherited-cli-importer-build": {
+      "bytes": 2905,
+      "path": "artifacts/arm-cli-importer-build01/provenance.json",
+      "sha256": "80b6e471482ecfd1929930166f7e483afad60ec57ff17980e4a0730a57fadcd2"
+    },
+    "robot-inherited-cli-importer-inventory": {
+      "bytes": 6257,
+      "path": "artifacts/arm-cli-importer-build01/artifact-hashes.json",
+      "sha256": "a04846e8ba394b15c1e585a47ee3e3b03904570cc7ec09d3021b6c5e864374d5"
+    },
+    "robot-inherited-cli-importer-native-inputs": {
+      "bytes": 46554,
+      "path": "artifacts/arm-cli-importer-build01/metadata-amendment02/native-inputs.json",
+      "sha256": "a67fbecd12920f0e5ff724a1c57a2c316cf387413f1fa52f52f7cc22e610017d"
+    },
+    "robot-inherited-cli-importer-static-target-abi": {
+      "bytes": 4021,
+      "path": "artifacts/arm-cli-runtime-collection01/abi/result.json",
+      "sha256": "080fd43f46d218449ad6d79c5c2141e684736ec0de7827b5f75708488cbed67a"
+    },
+    "robot-inherited-component-origin-map": {
+      "bytes": 19566,
+      "path": "artifacts/robot-final-cohort-package-plan01/component-map.json",
+      "sha256": "a6b69b4151581d657dc9f2a24b6b462a57a5c127dff909174e216f9ddf028622"
+    },
+    "robot-inherited-dadd-runtime-base-manifest": {
+      "bytes": 5787,
+      "path": "artifacts/robot-reconciliation-package01/unsigned/manifest.json",
+      "sha256": "dadd347413b23833d1272bbdf0c45b0e46259b5e8bdd3e40dcc0a907eedbca6a"
+    },
+    "robot-inherited-dadd-runtime-base-spec": {
+      "bytes": 7645,
+      "path": "artifacts/robot-reconciliation-package01/robot-inputs.json",
+      "sha256": "08db8a6eaf5cbc96fa07dd03909654d4efd8df094aa038481fa835020dfd14d4"
+    },
+    "robot-inherited-gateway-historical-transform": {
+      "bytes": 23419,
+      "path": "artifacts/release-fixture-inputs-01/provenance/binary-transforms.json",
+      "sha256": "8a090138e083aba148c49acecbd973d0b2c0b58dde13a3d6bf7badee310385ec"
+    },
+    "robot-inherited-historical-base-reference": {
+      "bytes": 2274,
+      "path": "artifacts/robot-reconciliation-package01/historical-base.json",
+      "sha256": "e93f301471d8ce56948c515368d91d79b513611bd27591370527ffdd7b598996"
+    },
+    "robot-inherited-module16-component-acceptance": {
+      "bytes": 2113,
+      "path": "artifacts/kernel-module16-acceptance01/manifest.json",
+      "sha256": "00120810d6e385e32fe4d915852fbed819b9182cbf013aee668538dcb8d9a298"
+    },
+    "robot-inherited-prior-mixed-component-map": {
+      "bytes": 30123,
+      "path": "artifacts/release-cohort01/component-map.json",
+      "sha256": "cee2746aac034f0ec48213b2c77fe68bcd4d8ce4c7055ddc9b8e759da9cc89ee"
+    },
+    "robot-inherited-prior-runtime-component-map": {
+      "bytes": 25777,
+      "path": "artifacts/robot-reconciliation-package01/component-map.json",
+      "sha256": "80ca5934debfd7ad2dec6bc4baad5ad497ca07dd218083ae4066549cfd76bd9c"
+    },
+    "robot-inherited-reconciliation-host-integration": {
+      "bytes": 259,
+      "path": "artifacts/reconciliation-integration-checks01/summary.json",
+      "sha256": "f9ecc6c2a8846906fc4bd833ac5b1206bd090146cd543441d6a65fb6cec4f6f2"
+    },
+    "robot-inherited-reconciliation-host-rust-receipt": {
+      "bytes": 571,
+      "path": "artifacts/reconciliation-integration-checks01/rust-result.json",
+      "sha256": "467bcf3ccb8f28cb6c0046b5e0a97bbf5a8bd1a961f4c99a4fb2aacc4c7b72d1"
+    },
+    "robot-inherited-reconciliation-host-source-receipt": {
+      "bytes": 1170,
+      "path": "artifacts/reconciliation-integration-checks01/source-result.json",
+      "sha256": "7e58d27f8d8711f14437850387be034260f554b017b91da8fa0ee85a918d2e08"
+    },
+    "robot-inherited-robot-reconciliation-build": {
+      "bytes": 5095,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/provenance.json",
+      "sha256": "0b8b58ba32810bb9d9cb3f127e775def6aa7810c3b1898bde6fc60b44a5fa90b"
+    },
+    "robot-inherited-robot-reconciliation-inventory": {
+      "bytes": 32405,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/aggregate-inventory.json",
+      "sha256": "3be3f4259b96cedbe5e5aa5ffaeb8054a879bd4a8e00a938c8bbf305f3a46ae1"
+    },
+    "robot-inherited-robot-reconciliation-native-inputs": {
+      "bytes": 119832,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/native-inputs.json",
+      "sha256": "1a72a085bfab45f4bc33f44c4c34dca1383219eb5ee23583ab6b06d15613715b"
+    },
+    "robot-inherited-robot-reconciliation-root-review": {
+      "bytes": 826,
+      "path": "artifacts/robot-reconciliation-root-review01/result.json",
+      "sha256": "72c37e7ee8a3df6d19dc2b4a95206e651e014152027920ac7ffe8e4701a6964a"
+    },
+    "robot-inherited-robot-reconciliation-static-target-abi": {
+      "bytes": 25218,
+      "path": "artifacts/robot-reconciliation-build02/metadata-amendment01/target-abi.json",
+      "sha256": "65e31e7f34fbfcf17b372788fe441cca55b8e1e2764c8db568de9cd7dfcb0efc"
+    },
+    "robot-inherited-selected-install-document": {
+      "bytes": 51667,
+      "path": "packaging/release/README.md",
+      "sha256": "c8b5f4a7e47e06b198b511bdd8c9ba9dae35018f078afc32bfbf629c08890add"
+    },
+    "robot-inherited-selected-notice-assembly": {
+      "bytes": 5936,
+      "path": "artifacts/release-notices02/assembly.json",
+      "sha256": "2fae6d2da94bb833acb3711455bd9efdcb6d10f4fbc6958f3baad2adddd668a2"
+    },
+    "robot-inputs": {
+      "bytes": 8202,
+      "path": "artifacts/robot-final-cohort-package-plan01/robot-inputs.json",
+      "sha256": "002fd5b7185c359c02ad56dbff7c1d5e589aa92a15142118db166fc6682296a3"
+    },
+    "robot-installed-update": {
+      "bytes": 5250,
+      "path": "artifacts/install-robot-update04-run01/summary.json",
+      "sha256": "b8f92df2cd7238cc314d54efaa56eacda2ae6497c216c6aa25335e053d1ae357"
+    },
+    "robot-manifest": {
+      "bytes": 6359,
+      "path": "artifacts/robot-final-cohort-package-plan01/unsigned/manifest.json",
+      "sha256": "da6b6862768071ae839c64d73be56f63e23d852ab99e0b7d12f1541f987cc5a9"
+    },
+    "robot-package-inspection": {
+      "bytes": 33810,
+      "path": "artifacts/robot-qualification-package-inspection01/capture.json",
+      "sha256": "f774c54897482e119be5b52b2ce587dd906643c8950c655929e1df9f97ce02a7"
+    },
+    "robot-review": {
+      "bytes": 1676,
+      "path": "artifacts/robot-final-cohort-package-review01/review.json",
+      "sha256": "e7b0355a8eedfb071e81ea30950ad4be09d42bec25e2eaab61248534d105a124"
+    },
+    "robot-startup-parser": {
+      "bytes": 13637,
+      "path": "artifacts/reconciliation-robot-startup01/parser-review.json",
+      "sha256": "f34be51899457fbf245bcb74a85a210fa795aaec2bb80e9e5e6574d8a44304a8"
+    },
+    "robot-startup-verification": {
+      "bytes": 171,
+      "path": "artifacts/reconciliation-robot-startup-verification01/result.json",
+      "sha256": "0a371ffcf5331f3e9e7d5194171d398983a75e57a301c209252d51d3d914f00f"
+    },
+    "robot-update": {
+      "bytes": 181,
+      "path": "artifacts/reconciliation-robot-update01/activate02-result.json",
+      "sha256": "7d81dc464045cdad27b0be52fc3f03217c397045452da0227348820e0773b917"
+    },
+    "server-assembly": {
+      "bytes": 2619,
+      "path": "artifacts/server-final-cohort-package01/result.json",
+      "sha256": "71ec479c99a3285ae6f657568cd84ba474991ed640fd10b49493493e600aefb2"
+    },
+    "server-components": {
+      "bytes": 66255,
+      "path": "artifacts/server-final-cohort-package01/component-map.json",
+      "sha256": "ccc6588f2f07cf233d06a46b09e9ad5dbc69913215f90008f8acdb5e080dceb1"
+    },
+    "server-delta": {
+      "bytes": 650,
+      "path": "artifacts/server-final-cohort-package01/payload-delta.json",
+      "sha256": "29ceb1ff2e2de726328f45bf250b629bbc7d9b44d74cc97fa4274893db2445de"
+    },
+    "server-evidence-index": {
+      "bytes": 3607,
+      "path": "artifacts/server-final-cohort-package01/evidence-references.json",
+      "sha256": "2cc2c3fb1aceeef86db9f761138c4570a57d530bdd2b22e3b56eb6dd7f425b8a"
+    },
+    "server-inherited-cleanup-GREEN04": {
+      "bytes": 2506,
+      "path": "artifacts/server-prestart-cleanup-green-root-review04/green04-classification.json",
+      "sha256": "a91a8a9ae5b8e0b8ffdd81614769c04d6048bb8b622a94324ec534c3e16c0ece"
+    },
+    "server-inherited-cleanup-GREEN04-review": {
+      "bytes": 5203,
+      "path": "artifacts/server-prestart-cleanup-green04-actual-peer01/review.json",
+      "sha256": "c1baf1535f24f3a51ad9071455c3db4af620a32eee03eef4c1f42d3071f3e0ed"
+    },
+    "server-inherited-cleanup-abi": {
+      "bytes": 19326,
+      "path": "artifacts/server-prestart-cleanup-build01/abi-review.json",
+      "sha256": "0ee596c997a6e3c464154828242f768e8042ae6b1182dff75feeb130db67c72b"
+    },
+    "server-inherited-cleanup-build": {
+      "bytes": 988,
+      "path": "artifacts/server-prestart-cleanup-build01/provenance.json",
+      "sha256": "2dfc87a362703005dea50b232cead639a950908a4632b4055eafc32005553a23"
+    },
+    "server-inherited-cleanup-build-review": {
+      "bytes": 3933,
+      "path": "artifacts/server-prestart-cleanup-build-actual-peer01/review.json",
+      "sha256": "6230578c7656070a02e8a561c57d5bf0c52a2691c4f2f6ea82b562f0323abb97"
+    },
+    "server-inherited-cleanup-completed-build-catalogue": {
+      "bytes": 1728,
+      "path": "artifacts/server-prestart-cleanup-build-final-inventory01/result.json",
+      "sha256": "a6a6badbe0ed95232fb79957fafa2d6cfa503c082de98459604eb87d1d372705"
+    },
+    "server-inherited-cleanup-custody-review": {
+      "bytes": 4364,
+      "path": "artifacts/server-prestart-cleanup-green04-stopped-actual-peer01/review.json",
+      "sha256": "3de0d536b2d6c5f9bc704686979de8d60230d2c161ceeda7a9148383622d9603"
+    },
+    "server-inherited-cleanup-custody59": {
+      "bytes": 16476,
+      "path": "artifacts/server-prestart-cleanup-final-stopped-custody04/result.json",
+      "sha256": "9101ddce91a6fd21e580b0f8474c9cbef29dc4c1b574c971838794661b4ecc52"
+    },
+    "server-inherited-cleanup-dependencies": {
+      "bytes": 2143,
+      "path": "artifacts/server-final-cohort-package01/dependency-comparison.json",
+      "sha256": "54710631be5c6eb49dccfc8cb496de4c73e58367cea8e0820d75c196322b9f6f"
+    },
+    "server-inherited-cleanup-host85": {
+      "bytes": 1405,
+      "path": "artifacts/server-start-cleanup-integrated-python85/result.json",
+      "sha256": "17385566bea57423e5169e922c2e00774858de63f7c2809894a8ee0d0b8e17c2"
+    },
+    "server-inherited-cleanup-integration": {
+      "bytes": 1090,
+      "path": "artifacts/server-start-cleanup-integration01/result.json",
+      "sha256": "cbb3921d5f5b90c969467a8437a0eb5eb24b9b234bf8cb7196ed83687f0786bc"
+    },
+    "server-inherited-cleanup-native-inputs": {
+      "bytes": 26402,
+      "path": "artifacts/server-prestart-cleanup-build01/native-inputs.json",
+      "sha256": "5716a4c0dd05d2e024da509189c18acfbc63bfa30c12979b7dc81a54d1efbd7d"
+    },
+    "server-inherited-cleanup-source-tests": {
+      "bytes": 3146,
+      "path": "artifacts/server-start-cleanup-fix-validation01/result.json",
+      "sha256": "d7468994f987ace53a7d656c70bb7a95400302104d2e1b1e68326f687513f466"
+    },
+    "server-inherited-component-origin-map": {
+      "bytes": 66255,
+      "path": "artifacts/server-final-cohort-package01/component-map.json",
+      "sha256": "ccc6588f2f07cf233d06a46b09e9ad5dbc69913215f90008f8acdb5e080dceb1"
+    },
+    "server-inherited-prior-server-component-map": {
+      "bytes": 47945,
+      "path": "artifacts/server-device-policy-package01/component-map.json",
+      "sha256": "51d45112d30e6d74c2e8ebfc91810b90f35b2f44b89d60f335ffe7da057f78f0"
+    },
+    "server-inherited-prior-server-manifest": {
+      "bytes": 10092,
+      "path": "artifacts/server-device-policy-package01/unsigned/manifest.json",
+      "sha256": "fbfc394a2e710cadf738596830dcfc1b7f778e99b8a1336d85a9bf2a64547c78"
+    },
+    "server-inputs": {
+      "bytes": 14747,
+      "path": "artifacts/server-final-cohort-package01/server-inputs.json",
+      "sha256": "7155dcdd1352587dbe62b680e8b190a4769bc1a67f8b759a294da953b1e63f6e"
+    },
+    "server-installed-export": {
+      "bytes": 405,
+      "path": "artifacts/install-server-positive03/export03-validated.json",
+      "sha256": "7c3af1f49af4c776b2f128594036e2117f1f07c05502993c407d5ad48496cc5c"
+    },
+    "server-manifest": {
+      "bytes": 11520,
+      "path": "artifacts/server-final-cohort-package01/unsigned/manifest.json",
+      "sha256": "9f749ca31d975e870c2a358762fd01c6c04ebf1e170ca569fe0ea1aa8563a90f"
+    },
+    "server-review": {
+      "bytes": 998,
+      "path": "artifacts/server-final-cohort-package-root-review02/result.json",
+      "sha256": "3d25e40514552881f2e796e8fba35214820d9b089044a8c967c00308820014d1"
+    },
+    "server-update": {
+      "bytes": 542,
+      "path": "artifacts/reconciliation-server-update02/result.json",
+      "sha256": "1ec8e5c6aa2d2bf04bc160c4b1213f5539c6bbe39e637d6c31c9a0f9b64e959b"
+    },
+    "traffic03-reanalysis": {
+      "bytes": 2217,
+      "path": "artifacts/robot-a10-traffic-03-reanalysis01/report.json",
+      "sha256": "8d90dd14340193385cc0e4e89f0e258b69632645f91832f3972877ca3890e976"
+    },
+    "historical": {
+      "path": "docs/development/final-qualification.json",
+      "bytes": 96525,
+      "sha256": "b82dd3d118f039da366e885eaa2b56854f0e42605dda77bcc1ead8204144a727"
+    },
+    "solo-source-review": {
+      "path": "docs/development/solo-preview-evidence-v3.md",
+      "bytes": 9191,
+      "sha256": "47c45b7e04efc519b42b79d1d3278ee20651d34ea801c9c5f6e8c8076f6a37eb"
+    },
+    "robot-final-intent": {
+      "path": "artifacts/install-robot-final-lifecycle01/intent.json",
+      "bytes": 1775,
+      "sha256": "f7ea97ebee83001649c043576d477c09721721d8f08ad97274fa52cbe95b96e7"
+    },
+    "robot-final-result": {
+      "path": "artifacts/install-robot-final-lifecycle01/result.json",
+      "bytes": 624,
+      "sha256": "cffb09ad07b0a1722705a0fcf38a4fef438aa5662062792274e5c4830d978fe4"
+    },
+    "robot-final-op0": {
+      "path": "artifacts/install-robot-final-lifecycle01/campaign/operation-0.json",
+      "bytes": 1819,
+      "sha256": "18f8e44e38f1d03169981ebca1e544f53c11a6d45f185550648520ae54c90c88"
+    },
+    "robot-final-op1": {
+      "path": "artifacts/install-robot-final-lifecycle01/campaign/operation-1.json",
+      "bytes": 1819,
+      "sha256": "d64faf2ef41f40a30ca7eb59aae5df28ea0d635cbfd957418768cd77bea5d3c5"
+    },
+    "robot-final-old-session": {
+      "path": "artifacts/install-robot-final-lifecycle01/campaign/rotation-old-session.json",
+      "bytes": 166,
+      "sha256": "3c5fa9fd7f8fd41141d565a8ffc444575e3be78406c6909c07d04f4e77c3814d"
+    },
+    "robot-final-bootstrap": {
+      "path": "artifacts/install-robot-final-bootstrap01/stdout.jsonl",
+      "bytes": 15076,
+      "sha256": "a82eeb2f6f1ce7f3b7427f445fe469d9fc8daa05f71475ce93533d72da6334ad"
+    },
+    "module16-handoff": {
+      "path": "artifacts/kernel-module16-closure01/04-delayed-handoff.log",
+      "bytes": 80,
+      "sha256": "2159cb33aa196e1b2f614d6344d03625f570f20e9c7fb0677e27fc62f26d30d7"
+    },
+    "module16-lifecycle": {
+      "path": "artifacts/kernel-module16-lifecycle01/01-selftest.log",
+      "bytes": 184,
+      "sha256": "d6d7dc68a5e9e8354722f439b60a2893719b7ff2d4213a600b1ec02f1db24946"
+    },
+    "module16-late-sample": {
+      "path": "artifacts/kernel-module16-closure01/02-late-sample.log",
+      "bytes": 91,
+      "sha256": "3ccde2f87991b857fda603e1abb1712b2656a51a241f84226cbe2e95ad79ffca"
+    },
+    "module16-late-barrier": {
+      "path": "artifacts/kernel-module16-closure01/03-late-barrier.log",
+      "bytes": 92,
+      "sha256": "c7b08d46f007cb347c63261ad2644ebdec34d5f60a83b2a0729adc8d464e4d75"
+    },
+    "selected-rust": {
+      "path": "artifacts/reconciliation-integration-checks01/rust-result.json",
+      "bytes": 571,
+      "sha256": "467bcf3ccb8f28cb6c0046b5e0a97bbf5a8bd1a961f4c99a4fb2aacc4c7b72d1"
+    },
+    "selected-rust-log": {
+      "path": "artifacts/reconciliation-integration-checks01/rust.stdout",
+      "bytes": 14647,
+      "sha256": "fe061ffa2a5d38b95db85f5b296a5eb1b11792ced51425a14198ed5d3d84a28a"
+    },
+    "server-static": {
+      "path": "artifacts/server-final-cohort-package01/static-verification.json",
+      "bytes": 1254,
+      "sha256": "ed14aff9ec2016da3a5684907de06d049d8524577bcb306df9b24a14429af8f4"
+    },
+    "server-dependencies": {
+      "path": "artifacts/server-final-cohort-package01/dependency-comparison.json",
+      "bytes": 2143,
+      "sha256": "54710631be5c6eb49dccfc8cb496de4c73e58367cea8e0820d75c196322b9f6f"
+    },
+    "server-final-probe": {
+      "path": "artifacts/install-server-final-install01/probe.json",
+      "bytes": 271,
+      "sha256": "d4e1ff14b3b2d21971aaf1329dd05e281a8ecb7bbcb437e0e99fb6cca45bbf96"
+    },
+    "server-final-install": {
+      "path": "artifacts/install-server-final-install01/guest.stdout.jsonl",
+      "bytes": 4451,
+      "sha256": "0e0e8e570746ffe29187af3de99c1fbc71bce5fdc846a0ca295e6a21755dcac0"
+    },
+    "server-final-bootstrap": {
+      "path": "artifacts/install-server-final-bootstrap01/stdout.jsonl",
+      "bytes": 2640,
+      "sha256": "887e7f60a5a96b2a0d0803c426e413f1e0bb96b5db5e36dfce3c8409856d657b"
+    },
+    "server-final-intent": {
+      "path": "artifacts/install-server-final-lifecycle01/intent.json",
+      "bytes": 602,
+      "sha256": "bf1f24519ac5e68ccdda19d6188d5667ca058e1986e30f4ad5c00a8c285a8776"
+    },
+    "server-final-result": {
+      "path": "artifacts/install-server-final-lifecycle01/result.json",
+      "bytes": 227,
+      "sha256": "a84bc2382052b38aa70fa9018831999b060408ffd5c4d53caa7b4e87d21cb5f1"
+    },
+    "server-final-readback": {
+      "path": "artifacts/install-server-final-lifecycle01/stdout.jsonl",
+      "bytes": 6170,
+      "sha256": "6c20d7396160f3f9e9451d850190b5df93064871ecc3dd42115aad0bcbc86812"
+    },
+    "server-final-restart": {
+      "path": "artifacts/install-server-final-restart-export01/result.json",
+      "bytes": 227,
+      "sha256": "3abf57a608018ed9a1a800f9225e7bab6c002974f4fc6b293b9fb5ff680a25d5"
+    },
+    "a16-successor": {
+      "path": "artifacts/a16-passcred10-final-analysis01/result.json",
+      "bytes": 1165,
+      "sha256": "2710445619cfeb7463044949a0c3435dafad82e6c9e878f0027c82286775d9e8"
+    },
+    "a16-successor-custody": {
+      "path": "artifacts/a16-passcred10-final-stopped-custody01/result.json",
+      "bytes": 1153,
+      "sha256": "216e3586ba6870dd370aa9668c8975d4faa2c641d8df0c8dce1a7d4ed1d8d7a8"
+    },
+    "observer-loss": {
+      "path": "artifacts/observer-installed-01/gap-readback.stdout.json",
+      "bytes": 1266,
+      "sha256": "cbfee7816060398b03ee3f97797eba08f37d983a43d462b8e72f315075582f58"
+    },
+    "observer-overhead": {
+      "path": "artifacts/observer-installed-01/overhead-readback.stdout.json",
+      "bytes": 24986,
+      "sha256": "edc63db9e6083a63c29b13c2e79798a8d878173f2821dbd1dbae9ac2efa8404c"
+    },
+    "enforcement-lifetime": {
+      "path": "artifacts/server-final-d2-predicate-map01/enforcement-followup01.md",
+      "bytes": 9765,
+      "sha256": "cf9a2f769bf86e1300bdaa952e31aca5b54dc22531e75b1c2d90caa47a944c51"
+    },
+    "a09-sync": {
+      "path": "artifacts/solo-a09-host01/green03/result.json",
+      "bytes": 1699,
+      "sha256": "62b6c129a9a342734e1ea010dde14f671a82b249867f605f3c428a7ef908ed0b"
+    },
+    "a09-selected-source": {
+      "path": "artifacts/solo-a09-host01/selected-source-binding.json",
+      "bytes": 1998,
+      "sha256": "ff5f31d9d0ab9bc77727e3ca8b51c4651f81728017914d81d750179d6be45104"
+    },
+    "a09-kernel-contention": {
+      "path": "artifacts/robot-a09-contention-04/result.json",
+      "bytes": 3148,
+      "sha256": "59c49b6b9c1eac0d6b2173a278f7519721e8a4d0f4970e218ddcdf200cbc9927"
+    },
+    "debit-cold-reboot": {
+      "path": "artifacts/robot-retained-debit-reboot-inspection01/review.json",
+      "bytes": 7827,
+      "sha256": "5d4810a81f838c382bbbb37f19547587649fb0a3978f8c3ccab6a2e443cdc1ba"
+    },
+    "debit-failed-finalization": {
+      "path": "artifacts/robot-retained-debit-finalize-failure-review01/review.json",
+      "bytes": 12920,
+      "sha256": "413181e1337df951dc65a4b1ef4a23b3254167180b5f984feec1b12728fc3cd8"
+    },
+    "pressure-launcher-provenance": {
+      "path": ".cache/server-deploy-02/provenance.json",
+      "bytes": 1414,
+      "sha256": "841dc56b4fdf739bffc1ffd1239c46b279e334284072446a93081e08f9a8d515"
+    },
+    "pressure-server-provenance": {
+      "path": ".cache/server-deploy-03/provenance.json",
+      "bytes": 309,
+      "sha256": "01ffe87b0a213fb322167be03deb6e241b9de82703282bb977093a8230e0d21e"
+    },
+    "archive-prepared": {
+      "path": "artifacts/solo-preview-archive01/prepared.json",
+      "bytes": 506,
+      "sha256": "876d8df2b6f5bb34af4ce547a89a25ceaba360fb15193499d8feddbe24e794b9"
+    },
+    "archive-restored": {
+      "path": "artifacts/solo-preview-restore01/verification.json",
+      "bytes": 985,
+      "sha256": "8f5ede7c7c98de5e719feeac84756b1e631661ab0aa92331de61c6310b5b4cf6"
+    },
+    "archive-restore-report": {
+      "path": "artifacts/solo-preview-restore01/archive-restore-report.json",
+      "bytes": 944,
+      "sha256": "54728608556511b074bca3e73267fbf48abf52103917e9088830d652cf2a4e31"
+    },
+    "a12-restart-association": {
+      "bytes": 4403,
+      "path": "artifacts/solo-a12-restart01/association.json",
+      "sha256": "338fdf6a0ebdc8730df8fe0a29a5b87e85924f529b9df8af7469672be28fb170"
+    },
+    "a12-robot-inspection": {
+      "bytes": 4256,
+      "path": "artifacts/solo-a12-restart01/robot/inspection.json",
+      "sha256": "4164446246c0d72b1f8d702604b40a1eb6da9acee6c656423425cf952bebbd2f"
+    },
+    "a12-robot-precondition-failure": {
+      "bytes": 384,
+      "path": "artifacts/solo-a12-restart01/robot/restart-attempt01.stderr",
+      "sha256": "9bbdcd6e18fbef7020e5c3efed412eb1bc2385e4c842208bbd1d144ef11648a7"
+    },
+    "a12-robot-restart": {
+      "bytes": 8030,
+      "path": "artifacts/solo-a12-restart01/robot/result-final.json",
+      "sha256": "cb9a3d350819e5e01a9c4ba50ddbddd37b6c1f8ae547f316b0065b3cba1befef"
+    },
+    "a12-server-inspection": {
+      "bytes": 7378,
+      "path": "artifacts/solo-a12-restart01/server/inspection.json",
+      "sha256": "aa3810934c41f41320cd209482b6184007cd7aee9164cbac93042c2f016e78da"
+    },
+    "a12-server-restart": {
+      "bytes": 7026,
+      "path": "artifacts/solo-a12-restart01/server/result-final.json",
+      "sha256": "01799b3d7878f5f6d266375f4ec31fff0d0a1d8e9a6a7abdbd4b83302ccd5d89"
+    },
+    "a13-failure-report": {
+      "path": "artifacts/solo-a13-live01/a13-failure-report.json",
+      "bytes": 1416,
+      "sha256": "65ce5dc9f0ac730cdaecdec2f2455b4475565bcddfcbf7e023e3fbb0582350af"
+    },
+    "a13-standalone-intent": {
+      "path": "artifacts/solo-a13-live01/standalone/intent.json",
+      "bytes": 351,
+      "sha256": "156f910f3653fb6fdb38c258354d4c5a7aff3463a817afcb19c4d8917d9b058f"
+    },
+    "a13-standalone-transport": {
+      "path": "artifacts/solo-a13-live01/standalone/transport.json",
+      "bytes": 143,
+      "sha256": "6137559f831784fd39cb523cc2963be189bce1dd139980891448f27d48309f2d"
+    },
+    "a13-standalone-receipt": {
+      "path": "artifacts/solo-a13-live01/standalone/receipt.json",
+      "bytes": 1031,
+      "sha256": "accede1ce4b0da59d539462a2a0d810f08a549c0be8bcc4fff9345ad3cd8d781"
+    },
+    "a13-combined-intent": {
+      "path": "artifacts/solo-a13-live01/combined03-control/intent.json",
+      "bytes": 334,
+      "sha256": "1fa65e25d2f3b8988cc146031e9c0ca6062db86e5fa483429b7c4cebf5bf1fa0"
+    },
+    "a13-combined-transport": {
+      "path": "artifacts/solo-a13-live01/combined03-control/transport.json",
+      "bytes": 144,
+      "sha256": "6d6609b708a471398e3ef95e58028c7ec7dca9ec3b19e87164a6356a9ebd6dc1"
+    },
+    "a13-combined-failure": {
+      "path": "artifacts/solo-a13-live01/combined03/failure.json",
+      "bytes": 754,
+      "sha256": "ad816e97caaf0078d6e918ede63c104862a8725becc4c3ea07013a51814ba92d"
+    },
+    "a13-combined-state": {
+      "path": "artifacts/solo-a13-live01/combined03/post-failure-state.json",
+      "bytes": 3417,
+      "sha256": "d8f201b35827437a18739657782761d997874208e2a52efcaa0582368570aade"
+    },
+    "a13-combined-recovery": {
+      "path": "artifacts/solo-a13-live01/combined03/manual-recovery-final.json",
+      "bytes": 1200,
+      "sha256": "99b60fd8f91d40df5146eac19091ef605a407c3838d18830afa64678e66624f9"
+    },
+    "a13-server-evidence": {
+      "path": "artifacts/solo-a13-live01/combined03/server-evidence.json",
+      "bytes": 7968,
+      "sha256": "bee6061f151276fc510034d962463f46e9ee1fb22b467d55423bdd3f99ee1c17"
+    },
+    "a13-robot-export": {
+      "path": "artifacts/solo-a13-live01/combined03/robot-export-verification.json",
+      "bytes": 244,
+      "sha256": "3ac551e317afe9bc9e9c955189a05e8b665014f72ffb62669325f54e27a4bc98"
+    },
+    "a13-clock-inhibition": {
+      "path": "artifacts/solo-a13-live01/combined03/clock-inhibition.log",
+      "bytes": 271,
+      "sha256": "b53a952285f4cba10e9a9d1d40bd19c618fc14c87014951ec71a3ce95ddba694"
+    },
+    "a13-stopped-custody": {
+      "path": "artifacts/solo-a13-live01/stopped-custody.json",
+      "bytes": 678,
+      "sha256": "c831b9fe11cb82bda839fd039b540ff4a4bd5a2492f4080853c78140e7043d2f"
+    },
+    "server-successor-manifest": {
+      "path": "artifacts/server-live-observation-package03/unsigned/manifest.json",
+      "bytes": 11505,
+      "sha256": "cf886513035eba9c38eab3319c9108bdd5a3f6f1c5a0fc424e686e63db839f87"
+    },
+    "server-successor-package": {
+      "path": "artifacts/server-live-observation-package03/result.json",
+      "bytes": 1619,
+      "sha256": "9da3ce1ef110ca8cff5716b3556f72d17d9a71691d0d4837d8f1cf04408facc6"
+    },
+    "a13-successor-qualification": {
+      "path": "docs/development/live-observation-qualification.json",
+      "bytes": 8466,
+      "sha256": "bc8c0df27d1a97f049f52b0961ba99e7644170c2ed32b37ceff317e21a5417c8"
+    },
+    "a13-successor-report": {
+      "path": "artifacts/solo-successor-rebind01/a13-pass-report.json",
+      "bytes": 791,
+      "sha256": "1964d5c294e2b5e05191ae6d7f1aa57bb0b1f0fea6ba5702631e2c5900792f54"
+    },
+    "successor-archive-verification": {
+      "path": "artifacts/solo-preview-successor-restore02/verification.json",
+      "bytes": 1115,
+      "sha256": "74835e0cf28363fc387c0a789b8b5ed28913b946d7428ba7a347849dbe5d08df"
+    },
+    "successor-archive-report": {
+      "path": "artifacts/solo-preview-successor-restore02/archive-restore-report.json",
+      "bytes": 1003,
+      "sha256": "24074426377c8bc94c981fd297ebecf38542728819020440f876ca8f2bcf8a90"
+    }
+  },
+  "subjects": {
+    "robot": {
+      "manifest": "robot-manifest",
+      "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+    },
+    "server": {
+      "manifest": "server-successor-manifest",
+      "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+    }
+  },
+  "maintainer_review": null,
+  "gates": [
+    {
+      "id": "A01",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "manager-lifecycle03",
+        "module16",
+        "robot-build-review",
+        "solo-source-review",
+        "robot-final-intent",
+        "robot-final-result",
+        "robot-final-bootstrap",
+        "robot-components",
+        "robot-final-op0",
+        "robot-final-op1",
+        "module16-handoff",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Fresh operations 1/2 under grant 1 plus exact module delayed-handoff denial before reconciliation; scopes are composed explicitly. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A02",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "replyloss02",
+        "contention04",
+        "robot-build-review",
+        "robot-final-result",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Historical withheld-first-reply allocation/cancel and real-kernel contention composed with selected-source absent/pre-ID/commit-race/tombstone regressions; proposal/cancel service/RPC unchanged. Original manager10 origin retained. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A03",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "manager-lifecycle03",
+        "module16",
+        "existing-handle-cleanup",
+        "solo-source-review",
+        "robot-final-intent",
+        "robot-final-result",
+        "robot-final-bootstrap",
+        "robot-components",
+        "selected-rust",
+        "selected-rust-log",
+        "module16-lifecycle",
+        "module16-late-sample",
+        "module16-late-barrier",
+        "robot-final-old-session",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Selected manager regressions and exact module stale/changed/expired cases plus fresh session retirement; no runtime operation replay. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A04",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "existing-handle-cleanup",
+        "d2-native-final-review",
+        "hot-journal-reanalysis",
+        "debit-cold-reboot",
+        "debit-failed-finalization",
+        "robot-final-result",
+        "server-final-restart",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Actual cold reboot retains two debits before services restart; selected restart regressions fence unknown work and no resend; exact historical resource settlement preserves OutcomeUnknown. Packaged automatic restart qualification remains A12. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A05",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "d2-native-proof",
+        "debit-cold-reboot",
+        "debit-failed-finalization",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Actual pressure reservations/refusals/tombstones with unchanged accounting source; selected global race/oversize/unknown-debit regressions and matched settlement. Live-provider behavior remains A13. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A06",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "module16",
+        "solo-source-review",
+        "robot-final-intent",
+        "robot-final-result",
+        "robot-final-bootstrap",
+        "robot-components",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Exact unchanged module16 ARM ownership/UAPI and separately identified diagnostic configurations. PM/shutdown injection is software only. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A07",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "module16",
+        "solo-source-review",
+        "robot-final-intent",
+        "robot-final-result",
+        "robot-final-bootstrap",
+        "robot-components",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Exact unchanged module16 byte-offset/late-receipt/parser/queue diagnostics. Mock serdev tests do not qualify physical UART drain. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A08",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04",
+        "d2-load-failure02",
+        "debit-failed-finalization",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Same admitted PID/start lifetime survives allocation ENOSPC/reclaim EBUSY; capacity retained until actual cleanup plus selected finite/control-capacity regressions and final Start cleanup. Not blanket PID/IO/disk exhaustion. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A09",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "contention04",
+        "hot-journal-host",
+        "a09-sync",
+        "a09-selected-source",
+        "a09-kernel-contention",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Actual host journal fsync stall/EIO with unchanged selected robot-intent production source proves urgent closure before sync release, no premature durable ack/submit, failed persistence and restart fencing; composed with retained real-kernel SQLite-contention closure. Distinct environments; no database-file sync/fdatasync, arbitrary media or power-loss guarantee. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A10",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "traffic03-reanalysis",
+        "lifetime09",
+        "robot-build-review",
+        "robot-final-result",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Corrected traffic capture and retained-FD/gateway/local recovery cases apply to unchanged manager/gateway/RPC; final installed lifecycle covers selected recovery. Historical uncertain reply/prefix limits preserved. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A11",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "gap-omission",
+        "gap-export",
+        "hot-journal-host",
+        "hot-journal-reanalysis",
+        "server-final-restart",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Source gap and amended 66-record export plus 30-record hot-journal recovery/16-14 frontiers with unchanged evidence sources. Unknown tail retained; metadata histories remain replay-ineligible. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A12",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "server-update",
+        "robot-update",
+        "robot-installed-update",
+        "server-installed-export",
+        "robot-startup-verification",
+        "robot-startup-parser",
+        "a12-restart-association",
+        "a12-robot-inspection",
+        "a12-robot-precondition-failure",
+        "a12-robot-restart",
+        "a12-server-inspection",
+        "a12-server-restart",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Disposable overlays of the exact selected test-signed Server and Robot installations retained packaged Restart=on-failure with a one-second delay. Each of five guest services restarted exactly once with a new PID after controlled SIGKILL; Server remained without tasks/attempt cgroups and Robot remained non-actuating with no operation. The first Robot start correctly rejected the absent documented module precondition; after explicit exact-module load, one unchanged exercise passed. Host VM wrappers remained Restart=no and source disks were not written. Canonical release manifests remain unsigned/uninstalled; signed-distribution verification stays post-attestation and no physical qualification is claimed. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A13",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "live-missing-credential",
+        "a13-failure-report",
+        "a13-standalone-intent",
+        "a13-standalone-transport",
+        "a13-standalone-receipt",
+        "a13-combined-intent",
+        "a13-combined-transport",
+        "a13-combined-failure",
+        "a13-combined-state",
+        "a13-combined-recovery",
+        "a13-server-evidence",
+        "a13-robot-export",
+        "a13-clock-inhibition",
+        "a13-stopped-custody",
+        "server-successor-manifest",
+        "server-successor-package",
+        "a13-successor-qualification",
+        "a13-successor-report"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "The preserved standalone live PASS and separately authorized corrected call establish the pinned model path. The corrected call completed and reconciled one kernel operation; current-CLI cleanup made no provider call, and the exact two-binary successor separately passed fresh install, offline lifecycle, restart and export."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A14",
+      "required": false,
+      "status": "DEFERRED",
+      "evidence": [
+        "release-format",
+        "approved-plan"
+      ],
+      "association": null,
+      "remaining": "User approved solo preview 2026-10-19; original independent human installation deferred. Separate maintainer rehearsal remains required."
+    },
+    {
+      "id": "A15",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "module16",
+        "solo-source-review",
+        "robot-final-intent",
+        "robot-final-result",
+        "robot-final-bootstrap",
+        "robot-components",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Exact unchanged module16: 16 ARM cases and 17 tests per plain/lockdep/KASAN/KCSAN configuration. Earlier failures preserved. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "A16",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "a16-original-result",
+        "a16-original-analyzer",
+        "a16-original-cohort",
+        "a16-original-review",
+        "diagnostic02-result",
+        "diagnostic02-progress",
+        "diagnostic02-pair",
+        "diagnostic02-review",
+        "solo-source-review",
+        "a16-successor",
+        "a16-successor-custody",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Separately frozen passcred10 successor: 80/80 ABBA, two excluded pilots, six boots, 78/78 traced correlations, zero recorded loss. Original FAILED79/80 unchanged; no WCET or superiority claim. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-01",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-runtime04",
+        "server-update",
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "server-final-probe",
+        "server-final-install",
+        "server-final-bootstrap",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Exact final install/bootstrap/tuple rejection; production-signed distribution remains A12. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-02",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-runtime04",
+        "ordering-approved",
+        "cleanup-old-red",
+        "cleanup-green04",
+        "cleanup-green04-review",
+        "cleanup-integration",
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Approved before-Start ordering and exact launcher GREEN04 cover changed Start cleanup with native runtime association; no invented prelaunch stdout snapshot. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-03",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Unchanged policy and source-bound native path/FD denials plus exact final isolation. ENOENT/EACCES do not prove policy-origin audit events. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-04",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-device-oom",
+        "d2-cold-integrity",
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Unchanged fixed device policy with earlier controlled forbidden-node denial and final inventory. Original failures retained. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-05",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-network05",
+        "d2-network-classification",
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Approved composition of agent AF_INET denial/no inherited network sockets and trusted netns ENETUNREACH; no external connect by agent claimed. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-06",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Unchanged privileged syscall restrictions with native EPERM and exit-only traces; missing enters not invented. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-07",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-device-oom",
+        "d2-cold-integrity",
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Exact installed finite CPU/memory/PID/IO limits plus earlier controlled memory pressure/OOM. PID/IO saturation not claimed. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-08",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Unchanged selected serverd/broker with source-bound allowed/denied/cancel-first/late-call native cases. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-09",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04",
+        "d2-native-proof",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Actual four-call bounded reservation/refusal/tombstone pressure with unchanged broker/store and selected atomic-accounting regressions. Live provider is A13. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-10",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04",
+        "debit-cold-reboot",
+        "debit-failed-finalization",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Actual outstanding debits survive reboot; exact historical matching closure settles only proven resources while OutcomeUnknown remains. Selected recovery closes publication without redispatch. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-11",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "pressure11",
+        "existing-handle-cleanup",
+        "cleanup-green04",
+        "debit-failed-finalization",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Actual allocation/reclaim failure preserves admitted PID/start identity and retains preparation charge until cleanup; selected Start/capacity and closure-capacity regressions. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-12",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-load-failure02",
+        "cleanup-green04",
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Required-load EPERM with no agent execution plus selected launcher GREEN04 cleanup; earlier uncertain reply preserved. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-13",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "enforcement-lifetime",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Cgroup-held device program lifetime under trusted Linux/admin, unchanged implementation; no hostile-root detach detection. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-14",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "observer-loss",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Unchanged observer/BPF with retained prestart, reader-death and actual loss cases; changed Start cleanup covered separately. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-15",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "observer-overhead",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Unchanged observer/BPF eight fixed standalone 30k-open OFF/ON runs; not whole-agent latency or WCET. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-16",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-native-proof",
+        "d2-native-final-review",
+        "existing-handle-cleanup",
+        "server-final-result",
+        "server-final-restart",
+        "solo-source-review",
+        "selected-rust",
+        "selected-rust-log",
+        "pressure-launcher-provenance",
+        "pressure-server-provenance",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Native descendant/export evidence plus matching outstanding-debit cleanup and exact final installed cleanup/restart. Final launcher Start-only delta preserves kill/reap/capture/remove order; process death does not settle external work. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "D2-17",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "d2-composition",
+        "solo-source-review",
+        "server-static",
+        "server-dependencies",
+        "server-final-intent",
+        "server-final-result",
+        "server-final-readback",
+        "server-components",
+        "d2-frozen03",
+        "d2-native-proof",
+        "cleanup-green04",
+        "cleanup-integration",
+        "a13-successor-qualification"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "Accepted offline two-case diagnosis composition bound to unchanged mechanisms and final cleanup; not live/multimodal story or maintainer rehearsal. The Server subject replacement is limited to bin/actryn and bin/actryn-serverd; the successor qualification receipt binds the exact delta, fresh target lifecycle and retained boundaries."
+      },
+      "remaining": ""
+    },
+    {
+      "id": "MAINTAINER-INSTALL",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": [],
+      "association": null,
+      "remaining": "Utkarsh must personally perform fresh installation/recovery and retain a human execution report."
+    },
+    {
+      "id": "KEY-RECOVERY",
+      "required": true,
+      "status": "NOT_RUN",
+      "evidence": [],
+      "association": null,
+      "remaining": "Utkarsh establishes encrypted dedicated Ed25519 key and verifies restored-key fingerprint/challenge."
+    },
+    {
+      "id": "ARCHIVE-RESTORE",
+      "required": true,
+      "status": "PASS",
+      "evidence": [
+        "archive-prepared",
+        "archive-restored",
+        "archive-restore-report",
+        "a13-successor-qualification",
+        "successor-archive-verification",
+        "successor-archive-report"
+      ],
+      "association": {
+        "subjects": {
+          "robot": {
+            "manifest": "robot-manifest",
+            "payload_sha256": "1e71fe911512a61b164e1a3763b41fdcca3af03627c9400a9f663244b02066bb"
+          },
+          "server": {
+            "manifest": "server-successor-manifest",
+            "payload_sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+          }
+        },
+        "basis": "The encrypted successor addendum was copied to external filesystem 0347-DCDB, hash-matched, decrypted from the drive copy and safely overlaid on the previously verified base. All 1,081 addendum entries verified, and the restored v2 checker verified 168 receipts, 107 historical receipts and both selected payload archives."
+      },
+      "remaining": ""
+    }
+  ],
+  "subject_updates": {
+    "server": {
+      "predecessor_manifest": "server-manifest",
+      "qualification": "a13-successor-qualification",
+      "payload": {
+        "path": "artifacts/server-live-observation-package03/unsigned/payload.tar",
+        "bytes": 70789120,
+        "sha256": "45829a380d9662778d53af993cc773af3d2deda434581b694345eca4540f3e82"
+      }
+    }
+  }
+}

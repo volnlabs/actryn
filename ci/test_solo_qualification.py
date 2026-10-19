@@ -209,10 +209,15 @@ class SoloQualificationTests(unittest.TestCase):
                   'operator': solo.OWNER, 'independent': False,
                   'completed_checks': ['install', 'diagnose', 'pair', 'offline-two-operations',
                                        'cancel', 'restart-recover', 'export']}
-        solo.verify_special_gate(gate, self.packet, {'human': json.dumps(report).encode()})
+        gate['evidence'].append('predecessor')
+        predecessor = dict(report, subjects={})
+        solo.verify_special_gate(gate, self.packet, {
+            'human': json.dumps(report).encode(), 'predecessor': json.dumps(predecessor).encode()})
         for change in ({'execution': 'agent'}, {'independent': True}, {'completed_checks': []}, {'subjects': {}}):
             with self.subTest(change=change), self.assertRaises(ValueError):
-                solo.verify_special_gate(gate, self.packet, {'human': json.dumps(dict(report, **change)).encode()})
+                solo.verify_special_gate(gate, self.packet, {
+                    'human': json.dumps(dict(report, **change)).encode(),
+                    'predecessor': json.dumps(predecessor).encode()})
         first = solo.review_input_digest(self.packet)
         self.packet['gates'][0]['remaining'] = 'Changed evidence assessment'
         self.assertNotEqual(first, solo.review_input_digest(self.packet))

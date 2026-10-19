@@ -4,8 +4,9 @@ Approved 2026-10-19. Owner of every human step below: **Utkarsh Maurya**.
 This is preparation, not a claim that keys or a personal installation exist.
 The earlier off-host archive restore passed, and corrected live software evidence
 is recorded in [the A13 successor receipt](live-observation-qualification.json).
-Current attestation readiness is in [the v2 successor packet](solo-preview-qualification-v2.json);
-the [predecessor packet](solo-preview-qualification.json) remains unchanged.
+Current attestation readiness is in [the v3 successor packet](solo-preview-qualification-v3.json);
+the [predecessor](solo-preview-qualification.json) and
+[v2](solo-preview-qualification-v2.json) packets remain unchanged.
 The [approved plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) is the
 release contract. Original independent A14 remains DEFERRED.
 
