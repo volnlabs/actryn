@@ -12,8 +12,8 @@ The [solo plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) and
 owns credentials, release signing, external-drive evidence retention and a manual
 fresh-install rehearsal. Original independent A14 is DEFERRED; technical gates
 are unchanged. Earlier ledger entries below remain historical observations.
-The [v4 successor packet](solo-preview-qualification-v4.json) records current
-readiness without modifying the predecessor, v2, v3 or historical incomplete packets.
+The [v5 successor packet](solo-preview-qualification-v5.json) records current
+readiness without modifying the predecessor, v2, v3, v4 or historical incomplete packets.
 
 ## Execution order
 
@@ -24,16 +24,17 @@ readiness without modifying the predecessor, v2, v3 or historical incomplete pac
 - [x] Qualify packaged guest service restart behavior on isolated overlays of both exact final installations.
 - [x] Execute the frozen two-call A13 campaign once; retain its standalone PASS, combined stale-observation FAIL, uncertain debit, recovery and stopped custody without replay.
 - [x] Qualify the reviewed execution-observation correction under one renewed call, close/export the consumed attempt, and install the two-binary successor on a fresh exact target.
-- [ ] Complete the separate maintainer installation rehearsal; original independent A14 is DEFERRED.
+- [x] Complete the separate maintainer installation rehearsal; original independent A14 is DEFERRED.
 - [ ] Obtain role-scoped custodian attestations/signatures, verify final bundle installation and archived evidence, then update PR #1 for review.
 
 ## Solo implementation checkpoint
 
-- The v4 successor packet has 34 bounded software PASS associations, original A14
+- The v5 successor packet has 34 bounded software PASS associations, original A14
   DEFERRED and one required gate open. It binds the two-binary Server successor,
-  closes A13 by bounded composition, records the restored successor addendum and
-  binds the recovered release-key identity. Maintainer installation remains open.
-- Local successor validation verifies 172 small receipt references, all 107
+  one-binary Robot recovery successor, completed maintainer installation and
+  recovered release-key identity. Archive restoration is reopened for the new
+  Robot payload and evidence before maintainer review.
+- Local successor validation verifies 182 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
   This is integrity/readiness checking, not maintainer approval or release signing.
 - A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
@@ -61,9 +62,10 @@ readiness without modifying the predecessor, v2, v3 or historical incomplete pac
   `0347-DCDB`: the encrypted 234,789,052-byte copy hash-matched, was decrypted
   from the drive, and all 3,474 inventoried files plus the qualification packet
   and both payload archives verified. The drive was not formatted.
-- Signing and manual-installation instructions are ready in the handoff. No
-  release identity was created and no personal/independent installation report
-  was manufactured.
+- The human rehearsal completed on fresh test-signed Server and Robot guests. It
+  retained the injected wrong-pin diagnosis, two reconciled operations under one
+  grant, cancellation before proposal, restart recovery and hash-verified exports.
+  The report is personal (`independent:false`); original A14 remains deferred.
 - Final signed-distribution verification is a separate post-attestation receipt,
   so a frozen qualification hash does not depend on signatures of itself.
 
@@ -73,9 +75,9 @@ readiness without modifying the predecessor, v2, v3 or historical incomplete pac
 |---|---|---|
 | Model credential | Utkarsh Maurya; `/etc/actryn/credentials/openai-api-key` via systemd server-only LoadCredential | A13-02 used one separately authorized call; credential remained confined to the stopped disposable Server overlay |
 | Independent installer | Unassigned until another developer joins; original A14 | DEFERRED, not a solo-release gate |
-| Maintainer rehearsal | Utkarsh Maurya personally follows shipped instructions on fresh guests | NOT_RUN, required |
+| Maintainer rehearsal | Utkarsh Maurya personally follows shipped instructions on fresh guests | PASS; human test-signed two-guest workflow and evidence export retained |
 | Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | PASS; encrypted drive copy restored, matching fingerprint and challenge checks verified; release signing remains pending |
-| Durable private archive | Utkarsh Maurya; encrypted archive on filesystem UUID `0347-DCDB` | PASS; encrypted copy and full restored inventory verified |
+| Durable private archive | Utkarsh Maurya; encrypted archive on filesystem UUID `0347-DCDB` | Prior Server-successor archive PASS; final Robot-successor addendum and restore pending |
 
 ## Acceptance work
 
@@ -377,3 +379,32 @@ Every closure must name selected source/configuration/payload identities and imm
   contains no private key or passphrase.
 - The v4 packet records KEY-RECOVERY PASS. No release manifest has been signed;
   final signing and distribution verification remain after maintainer attestation.
+
+### Checkpoint 10: serialized recovery and sole-maintainer rehearsal
+
+- Human rehearsal 01 exposed a real recovery race: `Recover` used a nonblocking
+  clock-writer lock and rejected a request while the durable checkpoint was in
+  progress. Source `b5aa65e` now serializes that boundary. Host tests, an ARM64
+  build and the installed guest recovery regression pass; the original failure
+  remains immutable.
+- The successor Robot candidate changes only `bin/actryn-robotd`. Manifest
+  `965928af…12e11` binds payload `2a2d9689…198e8`; its other 16 entries match the
+  predecessor exactly. It remains unsigned, incomplete and nonpromotable.
+- Utkarsh executed the fresh two-guest workflow through disposable test signatures.
+  The deliberate wrong certificate pin failed before authority, two operations
+  reached `TargetReached` under one grant with reconciliation before reuse, and
+  cancellation before proposal remained durable. Explicit revoke/retire/recovery,
+  service restart with changed PIDs and post-restart recovery passed with zero
+  outputs and no live provider call.
+- The first post-restart inspection correctly rejected the retired manager epoch.
+  Numbered continuations rediscovered the new epoch without replay. A host/guest
+  `--local` driver mistake and a missing guest export parent each stopped before
+  cancellation; both failures remain preserved. The corrected guest-local export
+  verified all 53 files and 365,650 bytes, then the first server cancellation
+  reconciled and exported the attempt.
+- The [recovery receipt](robot-recovery-qualification.json),
+  [maintainer receipt](solo-maintainer-installation.json) and
+  [v5 packet](solo-preview-qualification-v5.json) bind this composition. Original
+  A14 remains deferred. The final Robot-successor archive/restore, maintainer
+  review, release signing and signed-distribution verification remain open; no
+  physical qualification follows.

@@ -1,0 +1,37 @@
+{
+  "format": "actryn-robot-recovery-qualification-1",
+  "status": "PASS_RECOVERY_SERIALIZATION_AND_HUMAN_REHEARSAL",
+  "source_revision": "b5aa65e446457defc423927d81ed920d7ee93062",
+  "package": {
+    "manifest_sha256": "965928afb34333aa5d564c5a3f529bf85c03d235b5d1e4a3d529fdf4b2c12e11",
+    "payload_sha256": "2a2d96895e88692c6c66165e8b6bf070785fe1ac285bbf8046c6b7aeb63198e8",
+    "changed_entries": [
+      "bin/actryn-robotd"
+    ],
+    "qualification": "incomplete",
+    "signed": false
+  },
+  "evidence": {
+    "build": "robot-recovery-build",
+    "failed_rehearsal": "robot-recovery-failed-rehearsal",
+    "guest_regression": "robot-recovery-guest-regression",
+    "human_report": "robot-recovery-human-report",
+    "tested_manifest": "robot-recovery-tested-manifest"
+  },
+  "scope": {
+    "fix": "explicit Recover waits for the serialized durable clock-checkpoint writer",
+    "human_workflow": [
+      "install",
+      "diagnose",
+      "pair",
+      "offline-two-operations",
+      "cancel",
+      "restart-recover",
+      "export"
+    ],
+    "completion": "immutable human run plus numbered non-retrying closure continuations"
+  },
+  "physical_acceptance": false,
+  "release_promotion": false,
+  "release_signature_verified": false
+}

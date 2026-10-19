@@ -1,14 +1,16 @@
 # Solo-maintainer v0.0.1 handoff
 
 Approved 2026-10-19. Owner of every human step below: **Utkarsh Maurya**.
-The dedicated key custody/recovery check is complete; the personal installation
-rehearsal remains open.
+The dedicated key custody/recovery check and personal installation rehearsal are
+complete. The final Robot-successor archive/restore, maintainer review, signing
+and signed-distribution verification remain open.
 The earlier off-host archive restore passed, and corrected live software evidence
 is recorded in [the A13 successor receipt](live-observation-qualification.json).
-Current attestation readiness is in [the v4 successor packet](solo-preview-qualification-v4.json);
+Current attestation readiness is in [the v5 successor packet](solo-preview-qualification-v5.json);
 the [predecessor](solo-preview-qualification.json),
 [v2](solo-preview-qualification-v2.json) and
-[v3](solo-preview-qualification-v3.json) packets remain unchanged.
+[v3](solo-preview-qualification-v3.json) and
+[v4](solo-preview-qualification-v4.json) packets remain unchanged.
 The [approved plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) is the
 release contract. Original independent A14 remains DEFERRED.
 

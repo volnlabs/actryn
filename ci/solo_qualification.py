@@ -348,7 +348,7 @@ def validate(packet, root=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--packet', type=Path, default=Path('docs/development/solo-preview-qualification-v4.json'))
+    parser.add_argument('--packet', type=Path, default=Path('docs/development/solo-preview-qualification-v5.json'))
     parser.add_argument('--receipt-root', type=Path)
     parser.add_argument('--require-ready', action='store_true', help='fail unless local evidence and review are complete')
     args = parser.parse_args()

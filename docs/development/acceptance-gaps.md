@@ -135,9 +135,9 @@ operation 1 and closed/exported with no outstanding debit. Its old packaged CLI
 rejected the new response field after execution. The exact two-binary successor
 then passed fresh install/lifecycle/restart/export without another provider call.
 The bounded [successor receipt](live-observation-qualification.json) preserves
-that composition. The versioned [successor packet](solo-preview-qualification-v4.json)
-binds the two-binary Server subject, restored addendum and recovered release-key
-identity; earlier packets remain unchanged.
+that composition. The versioned [v5 successor packet](solo-preview-qualification-v5.json)
+also binds the one-binary Robot recovery successor and completed maintainer
+rehearsal; its final archive/restore remains open and earlier packets are unchanged.
 
 | Rows | Actual evidence now available | Remaining boundary |
 |---|---|---|
@@ -149,7 +149,7 @@ identity; earlier packets remain unchanged.
 | A10 | Traffic03 unchanged-capture reanalysis passes its corrected validator; prior lifecycle verifies gateway death, rotation and offline recovery. Lifetime09 passes retained-FD replacement, observed stale-binding no-effect checks, gateway-offline local recovery and export on installed manager11/module16. | Earlier failed campaigns remain failed. Lifetime09 preserves the uncertain negative reply; its old capture prefix does not cover that later request. Its zero SAMPLE records do not establish applied motion. Final cohort reconciliation remains. |
 | A11 | Actual source omission records the 80→82 gap and durable fault. Hot-journal recovery retains only committed records plus the raw remnant and unknown tail. | Recorder overflow/media-loss boundaries remain explicit; metadata-only execution-replay ineligibility is intentional. |
 | A12 | Fresh Server and Robot installer transitions/bootstrap pass. Server03 also passes installed execution/export/restart and BPF loading. Robot candidate04 update/resume/startup preserves all three slots and prior history; manager11 lifecycle03 passes with SDK/CLI export and retained crash history. | Final coherent artifact binding remains; disposable test signing is not release signing. |
-| A13/A14 | Original live-policy/missing-credential checks and failed frozen campaign remain preserved. The corrected successor has one 27-token live operation plus cleanup/export and separate exact-package fresh qualification. A13 is PASS by bounded composition in the v4 packet; successor archive restoration and dedicated-key recovery pass. | An independent developer remains unavailable and A14 stays deferred. The maintainer installation rehearsal remains the sole required pre-attestation gate. |
+| A13/A14 | Original live-policy/missing-credential checks and failed frozen campaign remain preserved. The corrected successor has one 27-token live operation plus cleanup/export and separate exact-package fresh qualification. A13 is PASS by bounded composition; dedicated-key recovery and the sole-maintainer rehearsal pass. | An independent developer remains unavailable and A14 stays deferred. The new Robot-successor archive/restore and maintainer review remain before attestation. |
 | A16 | [Completed frozen comparison](a16-comparison.md): 80 begun/ended, 79 PASS/1 FAILED; B1/B2/B4 each 20/20, B3 evidence 9/10 and trace 10/10. Six original-K11 cohort pairs, four 78/78 trace correlations, independent final audit and known stopped custody pass. Both pilots remain excluded. | Comparison acceptance stays FAILED on B3 trial 6 BIND abort; role/errno/cause unobserved. No retry or failure exclusion. Historical pilot07/boot09/10 failures and diagnostic8 boundaries remain. No equal-work, superiority, physical or WCET inference. |
 
 Work resumed at the user's request on 2026-10-17. Actual Server run06 compiled
