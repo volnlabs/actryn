@@ -82,6 +82,63 @@ def verify_payload(root, item):
     require(digest.hexdigest() == item['sha256'], 'payload digest')
 
 
+def validate_live_composition(receipt, subjects, refs):
+    server = subjects['server']
+    require(receipt.get('format') == 'actryn-live-observation-qualification-1'
+            and receipt.get('status') == 'PASS_LIVE_OPERATION_AND_EXACT_PACKAGE_BY_BOUNDED_COMPOSITION',
+            'live composition receipt')
+    package = receipt.get('package', {})
+    require(package.get('manifest_sha256') == refs[server['manifest']]['sha256']
+            and package.get('payload_sha256') == server['payload_sha256']
+            and package.get('changed_entries') == ['bin/actryn', 'bin/actryn-serverd']
+            and package.get('qualification') == 'incomplete' and package.get('signed') is False,
+            'live composition package identity')
+    operation = receipt.get('live_operation', {})
+    require(operation.get('reconciled') is True and operation.get('outstanding_debit') is False
+            and operation.get('publication_closed') is True and operation.get('verdict') == 'TargetReached'
+            and operation.get('provider_calls_during_cleanup') == 0,
+            'live composition operation closure')
+    provider = receipt.get('provider', {})
+    require(provider.get('model') == 'gpt-5.4-mini-2026-03-17'
+            and provider.get('authorized_calls') == 1 and provider.get('calls') == 1
+            and provider.get('automatic_retry') is False,
+            'live composition provider budget')
+    target = receipt.get('exact_target', {})
+    require(all(target.get(key) is True for key in ('fresh_install', 'installation_fixture_passed',
+                                                     'bootstrap_passed', 'two_offline_attempts_passed',
+                                                     'restart_recovery_export_passed', 'stopped_custody'))
+            and receipt.get('physical_acceptance') is False
+            and receipt.get('independent_installation') is False
+            and receipt.get('release_promotion') is False
+            and receipt.get('release_signature_verified') is False,
+            'live composition qualification boundary')
+
+
+def verify_subject_update(role, subject, update, history, refs, checked, root):
+    require(set(update) == {'predecessor_manifest', 'qualification', 'payload'}, 'subject update fields')
+    predecessor = history['candidate_roles'][role]
+    require(update['predecessor_manifest'] in refs and update['qualification'] in refs,
+            'subject update references')
+    require(refs[update['predecessor_manifest']] == history['public_receipts'][predecessor['manifest']],
+            'subject predecessor changed')
+    manifest = decode(checked[subject['manifest']])
+    previous = decode(checked[update['predecessor_manifest']])
+    require(manifest['role'] == role and previous['role'] == role, 'manifest role mismatch')
+    qualification = decode(checked[update['qualification']])
+    validate_live_composition(qualification, {'server': subject}, refs)
+    changed = qualification['package']['changed_entries']
+    before = {row['path']: row for row in previous['files']}
+    after = {row['path']: row for row in manifest['files']}
+    require(len(before) == len(previous['files']) and len(after) == len(manifest['files'])
+            and set(before) == set(after), 'subject payload paths changed')
+    actual = [path for path in after if after[path] != before[path]]
+    require(actual == changed, 'subject payload delta differs')
+    payload = update['payload']
+    reference_valid(payload, cap=512 * 1024**2)
+    require(payload['sha256'] == subject['payload_sha256'], 'updated payload pin changed')
+    verify_payload(root, payload)
+
+
 def review_input_digest(packet):
     """Bind every input except the review's own receipt, avoiding a hash cycle."""
     value = {k: v for k, v in packet.items() if k != 'maintainer_review'}
@@ -99,7 +156,8 @@ def verify_special_gate(gate, packet, checked):
             report = decode(checked[ref])
         except (ValueError, UnicodeError):
             continue
-        if isinstance(report, dict) and report.get('format') == 'actryn-solo-check-1' and report.get('gate') == gate['id']:
+        if (isinstance(report, dict) and report.get('format') == 'actryn-solo-check-1'
+                and report.get('gate') == gate['id'] and report.get('status') == 'PASS'):
             reports.append(report)
     require(len(reports) == 1, 'dedicated gate report required: ' + gate['id'])
     report = reports[0]
@@ -123,24 +181,28 @@ def verify_special_gate(gate, packet, checked):
         for field in ('archive_sha256', 'restored_inventory_sha256'):
             require(isinstance(report.get(field), str) and re.fullmatch('[0-9a-f]{64}', report[field]), 'archive digest')
     else:
-        standalone, combined = report.get('standalone_receipt'), report.get('combined_receipt')
-        require(standalone in checked and combined in checked and standalone != combined
-                and standalone in gate['evidence'] and combined in gate['evidence'], 'actual live receipts required')
-        single, bound = decode(checked[standalone]), decode(checked[combined])
+        standalone = report.get('standalone_receipt')
+        composition = report.get('composition_receipt')
+        require(standalone in checked and composition in checked and standalone != composition
+                and standalone in gate['evidence'] and composition in gate['evidence'],
+                'actual live receipts required')
+        single, bound = decode(checked[standalone]), decode(checked[composition])
         require(single.get('status') == 'PASS' and single.get('test') == 'verified-oci-live-preview'
                 and single.get('expect') == 'completed'
                 and single.get('output', {}).get('value', {}).get('model') == 'gpt-5.4-mini-2026-03-17',
                 'standalone live acceptance missing')
-        require(bound.get('status') == 'PASS' and bound.get('test') == 'isolated-live-agent-trusted-robot'
-                and bound.get('live_provider_calls') is True and type(bound.get('provider_calls')) is int
-                and bound['provider_calls'] == 1 and bound.get('physical_acceptance') is False,
-                'combined live acceptance missing')
+        validate_live_composition(bound, packet['subjects'], packet['evidence'])
 
 
 def validate(packet, root=None):
-    require(set(packet) == {'format', 'maintainer', 'physical_acceptance', 'independent_installation',
-                           'historical_packet', 'evidence', 'subjects', 'maintainer_review', 'gates'}, 'packet fields')
-    require(packet['format'] == 'actryn-solo-qualification-1' and packet['maintainer'] == OWNER, 'packet identity')
+    version = packet.get('format')
+    fields = {'format', 'maintainer', 'physical_acceptance', 'independent_installation',
+              'historical_packet', 'evidence', 'subjects', 'maintainer_review', 'gates'}
+    if version == 'actryn-solo-qualification-2':
+        fields.add('subject_updates')
+    require(set(packet) == fields, 'packet fields')
+    require(version in ('actryn-solo-qualification-1', 'actryn-solo-qualification-2')
+            and packet['maintainer'] == OWNER, 'packet identity')
     require(packet['physical_acceptance'] is False and packet['independent_installation'] is False,
             'solo preview cannot claim physical or independent acceptance')
     refs = packet['evidence']
@@ -154,6 +216,16 @@ def validate(packet, root=None):
     for subject in subjects.values():
         require(set(subject) == {'manifest', 'payload_sha256'} and subject['manifest'] in refs, 'subject fields')
         require(re.fullmatch('[0-9a-f]{64}', subject['payload_sha256']), 'payload pin')
+    updates = packet.get('subject_updates', {})
+    require((version == 'actryn-solo-qualification-2') == bool(updates)
+            and isinstance(updates, dict)
+            and (not updates or set(updates) == {'server'}), 'subject updates')
+    for role, update in updates.items():
+        require(set(update) == {'predecessor_manifest', 'qualification', 'payload'}
+                and update['predecessor_manifest'] in refs and update['qualification'] in refs,
+                'subject update fields/references')
+        reference_valid(update['payload'], cap=512 * 1024**2)
+        require(update['payload']['sha256'] == subjects[role]['payload_sha256'], 'subject update payload pin')
     gates = packet['gates']
     require([g['id'] for g in gates] == GATES, 'missing, duplicate or reordered gates')
     for gate in gates:
@@ -184,6 +256,9 @@ def validate(packet, root=None):
         history = decode(checked[packet['historical_packet']])
         historical_count = qualification.validate(history, root)['receipt_files_verified']
         for role, subject in subjects.items():
+            if role in updates:
+                verify_subject_update(role, subject, updates[role], history, refs, checked, root)
+                continue
             manifest = decode(checked[subject['manifest']])
             require(manifest['role'] == role, 'manifest role mismatch')
             historical = history['candidate_roles'][role]
@@ -214,7 +289,7 @@ def validate(packet, root=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--packet', type=Path, default=Path('docs/development/solo-preview-qualification.json'))
+    parser.add_argument('--packet', type=Path, default=Path('docs/development/solo-preview-qualification-v2.json'))
     parser.add_argument('--receipt-root', type=Path)
     parser.add_argument('--require-ready', action='store_true', help='fail unless local evidence and review are complete')
     args = parser.parse_args()

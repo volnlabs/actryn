@@ -4,7 +4,8 @@ Approved 2026-10-19. Owner of every human step below: **Utkarsh Maurya**.
 This is preparation, not a claim that keys or a personal installation exist.
 The earlier off-host archive restore passed, and corrected live software evidence
 is recorded in [the A13 successor receipt](live-observation-qualification.json).
-Current attestation readiness remains in [the predecessor-bound successor packet](solo-preview-qualification.json).
+Current attestation readiness is in [the v2 successor packet](solo-preview-qualification-v2.json);
+the [predecessor packet](solo-preview-qualification.json) remains unchanged.
 The [approved plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) is the
 release contract. Original independent A14 remains DEFERRED.
 
@@ -44,11 +45,11 @@ ARCHIVE-RESTORE require a dedicated JSON receipt in their evidence lists:
 `subjects` copied from the packet, and `status: PASS` only after execution.
 Gate-specific required fields are:
 
-- A13: `standalone_receipt` and `combined_receipt`, naming separately retained
-  actual result JSONs also included in the gate evidence list. The checker rejects
-  missing-credential/offline results and requires the live success identities.
-  The corrected live operation is available for the next packet, but its exact
-  Server subject must be the two-binary successor before this gate can be closed.
+- A13: `standalone_receipt` and `composition_receipt`, naming the preserved
+  standalone PASS and the bounded corrected-live/exact-package receipt in the gate
+  evidence list. The checker rejects missing-credential/offline substitution and
+  requires the exact two-binary Server identity, one provider call, reconciled
+  operation closure, fresh-target lifecycle and explicit nonphysical boundaries.
 - MAINTAINER-INSTALL: `execution: human`, `operator: Utkarsh Maurya`,
   `independent: false`, and ordered `completed_checks`: `install`, `diagnose`,
   `pair`, `offline-two-operations`, `cancel`, `restart-recover`, `export`.
@@ -70,8 +71,8 @@ packet cannot substitute for any of these records.
 
 Each gate's PASS must name evidence and a source/configuration association to
 both selected subjects. Changing a selected payload requires renewed affected
-associations; the existing packet is deliberately bound to Server9f/Robotda6,
-while the corrected A13 candidate changes Server CLI and serverd only.
+associations. The predecessor packet remains bound to Server9f/Robotda6; v2 binds
+the corrected Server CLI/serverd pair and retains the same Robot subject.
 Do not edit the historical packet to make it green. A09 sync faults, packaged
 automatic restart, and live A13 must not be closed by unrelated happy-path tests.
 

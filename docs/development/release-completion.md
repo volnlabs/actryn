@@ -12,8 +12,8 @@ The [solo plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) and
 owns credentials, release signing, external-drive evidence retention and a manual
 fresh-install rehearsal. Original independent A14 is DEFERRED; technical gates
 are unchanged. Earlier ledger entries below remain historical observations.
-The [successor packet](solo-preview-qualification.json) records current readiness
-without modifying the historical incomplete packet.
+The [v2 successor packet](solo-preview-qualification-v2.json) records current
+readiness without modifying the predecessor packet or historical incomplete packet.
 
 ## Execution order
 
@@ -29,12 +29,11 @@ without modifying the historical incomplete packet.
 
 ## Solo implementation checkpoint
 
-- The original successor packet still has 32 bounded software PASS associations,
-  original A14 DEFERRED and three recorded required gates open. New A13 evidence
-  closes the live software behavior by bounded composition, but the packet must
-  be rebound to the two-binary Server successor before attestation. Maintainer
-  installation and key recovery remain open.
-- Local successor validation verifies 164 small receipt references, all 107
+- The v2 successor packet has 33 bounded software PASS associations, original A14
+  DEFERRED and three required gates open. It binds the two-binary Server successor
+  and closes A13 by bounded composition. Maintainer installation, key recovery and
+  refreshed archive restoration remain open.
+- Local successor validation verifies 168 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
   This is integrity/readiness checking, not maintainer approval or release signing.
 - A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
@@ -97,7 +96,7 @@ Every closure must name selected source/configuration/payload identities and imm
 | A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Fresh final-payload lifecycle01 passes gateway death, old-namespace rejection, local recovery and retained evidence. Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
 | A11 | Evidence origin, gaps and durable frontiers; complete-prefix replay only | No new raw decoding performed; metadata-only histories remain execution-replay-ineligible. |
 | A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Fresh exact Robot and Server targets install the da6 and 9f payload bytes through test-signed derivatives and pass rejection, interruption, recovery, rollback, bootstrap and lifecycle. Disposable overlays confirm all five packaged guest services retain one-second on-failure restart behavior and restart exactly once after controlled failure without creating Server work or widening Robot authority. Host VM wrappers use Restart=no; both canonical manifests remain unsigned/uninstalled. |
-| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | PASS by bounded composition for the corrected successor: one renewed call consumed 27 tokens, revalidated observation 68 with newer observation 91, completed/reconciled kernel operation 1 and closed/exported without retry. The predecessor packaged CLI schema failure is preserved. The exact two-binary successor separately passes fresh install/lifecycle/restart/export; it did not consume another provider call. Packet rebinding remains before attestation. |
+| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | PASS by bounded composition for the corrected successor: one renewed call consumed 27 tokens, revalidated observation 68 with newer observation 91, completed/reconciled kernel operation 1 and closed/exported without retry. The predecessor packaged CLI schema failure is preserved. The exact two-binary successor separately passes fresh install/lifecycle/restart/export; it did not consume another provider call. The v2 packet binds this subject and evidence. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
 | A16 | Latency/overhead/loss and competent userspace comparison without superiority threshold | The original FAILED79/80 result remains immutable and its exact BIND cause remains unproven. A separately frozen passcred10 successor passes two excluded pilots and all 80 comparison trials on six distinct pinned-kernel boots, with 78/78 matches in every traced run and zero recorded loss/discontinuities. Final packet binding remains; no superiority, WCET or physical claim follows. |
@@ -131,7 +130,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: successor-packet rebinding, maintainer rehearsal and signing-key recovery. A14 remains deferred; A12 packaged restart, corrected A13 software behavior, A16 successor, both earlier exact payload campaigns and the external archive restoration are complete below. The archive predates the corrected A13 successor and needs a final evidence refresh.
+- In progress: maintainer rehearsal, signing-key recovery and final archive refresh. A14 remains deferred; successor-packet rebinding, A12 packaged restart, corrected A13 software behavior, A16 successor, both earlier exact payload campaigns and the predecessor external archive restoration are complete below.
 
 ### Checkpoint 1: host CI and evidence preservation
 
@@ -345,8 +344,8 @@ Every closure must name selected source/configuration/payload identities and imm
   call. This bounded composition closes the software behavior while preserving
   the exact same-run package limitation.
 - Tracked receipt `live-observation-qualification.json` binds the raw local
-  evidence and limitations. The existing solo packet still selects the predecessor
-  Server payload, so A13 cannot be marked PASS in that packet until a successor
-  subject/association review is committed. Maintainer rehearsal, dedicated-key
-  recovery, genuine signing, final archive refresh and physical qualification
-  remain separate.
+  evidence and limitations. The v2 solo packet now selects the two-binary Server
+  successor and validates the old-to-new manifest delta, exact payload and A13
+  composition while retaining the predecessor packet. Maintainer rehearsal,
+  dedicated-key recovery, genuine signing, final archive refresh and physical
+  qualification remain separate.

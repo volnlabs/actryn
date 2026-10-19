@@ -17,8 +17,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   cleanup call. It also exposed an old packaged-CLI schema mismatch. The exact
   successor changes only CLI and serverd and separately passes fresh installation,
   two offline attempts, restart/export and stopped custody. See
-  [the bounded receipt](live-observation-qualification.json). The existing packet
-  still selects the predecessor Server payload and requires successor rebinding.
+  [the bounded receipt](live-observation-qualification.json). The versioned
+  [v2 packet](solo-preview-qualification-v2.json) binds that two-binary Server
+  successor and marks A13 PASS while preserving the predecessor packet unchanged.
 - **Final qualification packet assembled, still incomplete.**
   The tracked [qualification packet](final-qualification.json) binds the selected
   unsigned Server9f/Robotda6, all44 payload entries,17 D2 predicates and16

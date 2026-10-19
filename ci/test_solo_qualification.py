@@ -99,6 +99,75 @@ class SoloQualificationTests(unittest.TestCase):
         with self.assertRaises((ValueError, KeyError)):
             solo.validate(self.packet, self.root)
 
+    def test_v2_requires_an_exact_bounded_subject_update(self):
+        self.packet['format'] = 'actryn-solo-qualification-2'
+        self.packet['evidence']['new-manifest'] = self.reference
+        self.packet['evidence']['qualification'] = self.reference
+        self.packet['subjects']['server'] = {
+            'manifest': 'new-manifest', 'payload_sha256': 'b' * 64}
+        self.packet['subject_updates'] = {'server': {
+            'predecessor_manifest': 'history', 'qualification': 'qualification',
+            'payload': {'path': 'payload.tar', 'bytes': 1, 'sha256': 'b' * 64}}}
+        solo.validate(self.packet)
+        for edit in (lambda p: p['subject_updates'].clear(),
+                     lambda p: p['subject_updates']['server']['payload'].update(sha256='c' * 64),
+                     lambda p: p['subject_updates']['server'].update(unexpected=True)):
+            packet = copy.deepcopy(self.packet)
+            edit(packet)
+            with self.subTest(edit=edit), self.assertRaises(ValueError):
+                solo.validate(packet)
+
+    def test_subject_update_binds_delta_payload_and_live_qualification(self):
+        def save(name, value):
+            raw = json.dumps(value).encode()
+            (self.root / name).write_bytes(raw)
+            return raw, {'path': name, 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
+
+        old = {'role': 'server', 'files': [
+            {'path': 'bin/actryn', 'size': 1, 'mode': 493, 'license': 'Apache-2.0', 'sha256': '1' * 64},
+            {'path': 'bin/actryn-serverd', 'size': 1, 'mode': 493, 'license': 'Apache-2.0', 'sha256': '2' * 64}]}
+        new = copy.deepcopy(old)
+        new['files'][0].update(size=2, sha256='3' * 64)
+        new['files'][1].update(size=2, sha256='4' * 64)
+        old_raw, old_ref = save('old.json', old)
+        new_raw, new_ref = save('new.json', new)
+        payload = b'payload'
+        (self.root / 'payload.tar').write_bytes(payload)
+        payload_ref = {'path': 'payload.tar', 'bytes': len(payload),
+                       'sha256': hashlib.sha256(payload).hexdigest()}
+        qualification = {
+            'format': 'actryn-live-observation-qualification-1',
+            'status': 'PASS_LIVE_OPERATION_AND_EXACT_PACKAGE_BY_BOUNDED_COMPOSITION',
+            'package': {'manifest_sha256': new_ref['sha256'], 'payload_sha256': payload_ref['sha256'],
+                        'changed_entries': ['bin/actryn', 'bin/actryn-serverd'],
+                        'qualification': 'incomplete', 'signed': False},
+            'live_operation': {'reconciled': True, 'outstanding_debit': False,
+                               'publication_closed': True, 'verdict': 'TargetReached',
+                               'provider_calls_during_cleanup': 0},
+            'provider': {'model': 'gpt-5.4-mini-2026-03-17', 'authorized_calls': 1,
+                         'calls': 1, 'automatic_retry': False},
+            'exact_target': {key: True for key in (
+                'fresh_install', 'installation_fixture_passed', 'bootstrap_passed',
+                'two_offline_attempts_passed', 'restart_recovery_export_passed', 'stopped_custody')},
+            'physical_acceptance': False, 'independent_installation': False,
+            'release_promotion': False, 'release_signature_verified': False,
+        }
+        qualification_raw, qualification_ref = save('qualification.json', qualification)
+        refs = {'old': old_ref, 'new': new_ref, 'qualification': qualification_ref}
+        history = {'candidate_roles': {'server': {'manifest': 'historical-old'}},
+                   'public_receipts': {'historical-old': old_ref}}
+        subject = {'manifest': 'new', 'payload_sha256': payload_ref['sha256']}
+        update = {'predecessor_manifest': 'old', 'qualification': 'qualification',
+                  'payload': payload_ref}
+        checked = {'old': old_raw, 'new': new_raw, 'qualification': qualification_raw}
+        solo.verify_subject_update('server', subject, update, history, refs, checked, self.root)
+        changed = copy.deepcopy(new)
+        changed['files'].append({'path': 'extra', 'size': 0, 'mode': 420,
+                                 'license': 'Apache-2.0', 'sha256': '5' * 64})
+        checked['new'] = json.dumps(changed).encode()
+        with self.assertRaises(ValueError):
+            solo.verify_subject_update('server', subject, update, history, refs, checked, self.root)
+
     def test_payload_stream_verification_rejects_changed_archive(self):
         solo.verify_payload(self.root, self.reference)
         (self.root / 'receipt.json').write_bytes(b'changed')
@@ -154,7 +223,7 @@ class SoloQualificationTests(unittest.TestCase):
                              'encrypted_key': True, 'challenge_verified': True, 'tamper_rejected': True},
             'ARCHIVE-RESTORE': {'off_host': True, 'all_entries_verified': True, 'filesystem_uuid': 'test-drive',
                                 'archive_sha256': 'a' * 64, 'restored_inventory_sha256': 'b' * 64},
-            'A13': {'standalone_receipt': 'single', 'combined_receipt': 'bound'},
+            'A13': {'standalone_receipt': 'single', 'composition_receipt': 'bound'},
         }
         for name, checks in additions.items():
             gate = next(g for g in self.packet['gates'] if g['id'] == name)
@@ -163,8 +232,25 @@ class SoloQualificationTests(unittest.TestCase):
                           status='PASS', subjects=self.packet['subjects'], **checks)
             receipts = {'single': json.dumps({'status': 'PASS', 'test': 'verified-oci-live-preview',
                         'expect': 'completed', 'output': {'value': {'model': 'gpt-5.4-mini-2026-03-17'}}}).encode(),
-                        'bound': json.dumps({'status': 'PASS', 'test': 'isolated-live-agent-trusted-robot',
-                        'live_provider_calls': True, 'provider_calls': 1, 'physical_acceptance': False}).encode()}
+                        'bound': json.dumps({
+                            'format': 'actryn-live-observation-qualification-1',
+                            'status': 'PASS_LIVE_OPERATION_AND_EXACT_PACKAGE_BY_BOUNDED_COMPOSITION',
+                            'package': {'manifest_sha256': self.reference['sha256'],
+                                        'payload_sha256': 'a' * 64,
+                                        'changed_entries': ['bin/actryn', 'bin/actryn-serverd'],
+                                        'qualification': 'incomplete', 'signed': False},
+                            'live_operation': {'reconciled': True, 'outstanding_debit': False,
+                                               'publication_closed': True, 'verdict': 'TargetReached',
+                                               'provider_calls_during_cleanup': 0},
+                            'provider': {'model': 'gpt-5.4-mini-2026-03-17', 'authorized_calls': 1,
+                                         'calls': 1, 'automatic_retry': False},
+                            'exact_target': {key: True for key in (
+                                'fresh_install', 'installation_fixture_passed', 'bootstrap_passed',
+                                'two_offline_attempts_passed', 'restart_recovery_export_passed',
+                                'stopped_custody')},
+                            'physical_acceptance': False, 'independent_installation': False,
+                            'release_promotion': False, 'release_signature_verified': False,
+                        }).encode()}
             receipts['report'] = json.dumps(report).encode()
             solo.verify_special_gate(gate, self.packet, receipts)
             bad = dict(report)
