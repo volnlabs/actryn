@@ -1,12 +1,14 @@
 # Solo-maintainer v0.0.1 handoff
 
 Approved 2026-10-19. Owner of every human step below: **Utkarsh Maurya**.
-This is preparation, not a claim that keys or a personal installation exist.
+The dedicated key custody/recovery check is complete; the personal installation
+rehearsal remains open.
 The earlier off-host archive restore passed, and corrected live software evidence
 is recorded in [the A13 successor receipt](live-observation-qualification.json).
-Current attestation readiness is in [the v3 successor packet](solo-preview-qualification-v3.json);
-the [predecessor](solo-preview-qualification.json) and
-[v2](solo-preview-qualification-v2.json) packets remain unchanged.
+Current attestation readiness is in [the v4 successor packet](solo-preview-qualification-v4.json);
+the [predecessor](solo-preview-qualification.json),
+[v2](solo-preview-qualification-v2.json) and
+[v3](solo-preview-qualification-v3.json) packets remain unchanged.
 The [approved plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) is the
 release contract. Original independent A14 remains DEFERRED.
 
@@ -78,6 +80,10 @@ Do not edit the historical packet to make it green. A09 sync faults, packaged
 automatic restart, and live A13 must not be closed by unrelated happy-path tests.
 
 ## 2. Establish the dedicated signing identity
+
+Completed 2026-10-19. The public custody record is
+[release-key-custody.json](release-key-custody.json); the commands remain the
+recovery/replacement procedure. Release signing has not yet occurred.
 
 Perform this yourself in a private terminal outside the agent transcript. Use
 the installed OpenSSL; enter passphrases at its prompt, never in flags, files in

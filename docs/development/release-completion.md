@@ -12,8 +12,8 @@ The [solo plan](../superpowers/plans/2026-10-19-actryn-solo-preview.md) and
 owns credentials, release signing, external-drive evidence retention and a manual
 fresh-install rehearsal. Original independent A14 is DEFERRED; technical gates
 are unchanged. Earlier ledger entries below remain historical observations.
-The [v3 successor packet](solo-preview-qualification-v3.json) records current
-readiness without modifying the predecessor, v2 or historical incomplete packets.
+The [v4 successor packet](solo-preview-qualification-v4.json) records current
+readiness without modifying the predecessor, v2, v3 or historical incomplete packets.
 
 ## Execution order
 
@@ -29,11 +29,11 @@ readiness without modifying the predecessor, v2 or historical incomplete packets
 
 ## Solo implementation checkpoint
 
-- The v3 successor packet has 33 bounded software PASS associations, original A14
-  DEFERRED and two required gates open. It binds the two-binary Server successor,
-  closes A13 by bounded composition and records the restored successor addendum.
-  Maintainer installation and key recovery remain open.
-- Local successor validation verifies 170 small receipt references, all 107
+- The v4 successor packet has 34 bounded software PASS associations, original A14
+  DEFERRED and one required gate open. It binds the two-binary Server successor,
+  closes A13 by bounded composition, records the restored successor addendum and
+  binds the recovered release-key identity. Maintainer installation remains open.
+- Local successor validation verifies 172 small receipt references, all 107
   historical receipts, exact manifest projections and both payload archive hashes.
   This is integrity/readiness checking, not maintainer approval or release signing.
 - A09 now composes actual host journal-fsync stall/EIO tests on selected unchanged
@@ -74,7 +74,7 @@ readiness without modifying the predecessor, v2 or historical incomplete packets
 | Model credential | Utkarsh Maurya; `/etc/actryn/credentials/openai-api-key` via systemd server-only LoadCredential | A13-02 used one separately authorized call; credential remained confined to the stopped disposable Server overlay |
 | Independent installer | Unassigned until another developer joins; original A14 | DEFERRED, not a solo-release gate |
 | Maintainer rehearsal | Utkarsh Maurya personally follows shipped instructions on fresh guests | NOT_RUN, required |
-| Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | Key establishment/recovery pending |
+| Signing custodian | Utkarsh Maurya; dedicated encrypted Ed25519 identity and trusted SPKI fingerprint | PASS; encrypted drive copy restored, matching fingerprint and challenge checks verified; release signing remains pending |
 | Durable private archive | Utkarsh Maurya; encrypted archive on filesystem UUID `0347-DCDB` | PASS; encrypted copy and full restored inventory verified |
 
 ## Acceptance work
@@ -96,7 +96,7 @@ Every closure must name selected source/configuration/payload identities and imm
 | A10 | Forged/flooded/replayed gateway traffic and retained FDs cannot widen authority; offline recovery | Fresh final-payload lifecycle01 passes gateway death, old-namespace rejection, local recovery and retained evidence. Older failures/uncertain negative reply and capture-prefix boundaries stay; zero SAMPLE is not applied-motion proof. |
 | A11 | Evidence origin, gaps and durable frontiers; complete-prefix replay only | No new raw decoding performed; metadata-only histories remain execution-replay-ineligible. |
 | A12 | Clean installation, tuple rejection and interrupted update/rollback without grants | Fresh exact Robot and Server targets install the da6 and 9f payload bytes through test-signed derivatives and pass rejection, interruption, recovery, rollback, bootstrap and lifecycle. Disposable overlays confirm all five packaged guest services retain one-second on-failure restart behavior and restart exactly once after controlled failure without creating Server work or widening Robot authority. Host VM wrappers use Restart=no; both canonical manifests remain unsigned/uninstalled. |
-| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | PASS by bounded composition for the corrected successor: one renewed call consumed 27 tokens, revalidated observation 68 with newer observation 91, completed/reconciled kernel operation 1 and closed/exported without retry. The predecessor packaged CLI schema failure is preserved. The exact two-binary successor separately passes fresh install/lifecycle/restart/export; it did not consume another provider call. The v3 packet binds this subject and evidence. |
+| A13 | Pinned live hosted-model proposals traverse real isolated/kernel-gated path | PASS by bounded composition for the corrected successor: one renewed call consumed 27 tokens, revalidated observation 68 with newer observation 91, completed/reconciled kernel operation 1 and closed/exported without retry. The predecessor packaged CLI schema failure is preserved. The exact two-binary successor separately passes fresh install/lifecycle/restart/export; it did not consume another provider call. The v4 packet binds this subject and evidence. |
 | A14 | Independent developer installs, diagnoses, cancels/recovers and exports | An independent human developer and actual installation/use report remainEXTERNAL; agent execution is not a substitute. |
 | A15 | KUnit/selftests and identified lockdep/KASAN/KCSAN runs | Bind unchanged selected module/hash/config and preserve nonphysical scope; not whole-release qualification. |
 | A16 | Latency/overhead/loss and competent userspace comparison without superiority threshold | The original FAILED79/80 result remains immutable and its exact BIND cause remains unproven. A separately frozen passcred10 successor passes two excluded pilots and all 80 comparison trials on six distinct pinned-kernel boots, with 78/78 matches in every traced run and zero recorded loss/discontinuities. Final packet binding remains; no superiority, WCET or physical claim follows. |
@@ -130,7 +130,7 @@ Every closure must name selected source/configuration/payload identities and imm
 - Ruling: existing tracked qualification packet remains an immutable checkpoint. New checks do not flip its historical flags or manufacture custodian approval.
 - Preflight: 16 GiB free on repository filesystem. No duplicate VM images or guest mutation before evidence custody is ready. Account quota telemetry unavailable.
 - Baseline: `cargo test --workspace --locked` passed; retained local log `/tmp/actryn-release-baseline-rust.log`.
-- In progress: maintainer rehearsal and signing-key recovery. A14 remains deferred; successor-packet rebinding, A12 packaged restart, corrected A13 software behavior, A16 successor, exact payload campaigns and successor external archive restoration are complete below.
+- In progress: maintainer rehearsal. A14 remains deferred; successor-packet rebinding, A12 packaged restart, corrected A13 software behavior, A16 successor, exact payload campaigns, successor external archive restoration and signing-key recovery are complete below.
 
 ### Checkpoint 1: host CI and evidence preservation
 
@@ -364,3 +364,16 @@ Every closure must name selected source/configuration/payload identities and imm
   1,081 addendum inventory hashes. The restored v2 checker verified 168 receipt
   files, all 107 historical receipts and both selected payload archives. The v3
   packet records ARCHIVE-RESTORE PASS; no physical or independent claim follows.
+
+### Checkpoint 9: dedicated release-key recovery
+
+- Utkarsh created a passphrase-encrypted Ed25519 identity in a private local path.
+  The encrypted key, public key and public hashes were copied to external filesystem
+  UUID `0347-DCDB`; the encrypted local, drive and restored files are byte-identical
+  at SHA256 `71d7be92…c6147b`.
+- The original and restored public keys have SPKI SHA256 `3bc25f59…ce6735`.
+  A fresh challenge verified with the restored key; the same signature was rejected
+  after the challenge changed. The [public custody record](release-key-custody.json)
+  contains no private key or passphrase.
+- The v4 packet records KEY-RECOVERY PASS. No release manifest has been signed;
+  final signing and distribution verification remain after maintainer attestation.

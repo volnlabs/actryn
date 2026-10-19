@@ -18,9 +18,9 @@ Plan: [approved execution plan](../superpowers/plans/2026-10-16-actryn-v0.0.1.md
   successor changes only CLI and serverd and separately passes fresh installation,
   two offline attempts, restart/export and stopped custody. See
   [the bounded receipt](live-observation-qualification.json). The versioned
-  [v3 packet](solo-preview-qualification-v3.json) binds that two-binary Server
-  successor, marks A13 PASS and records the restored successor evidence addendum
-  while preserving the predecessor and v2 packets unchanged.
+  [v4 packet](solo-preview-qualification-v4.json) binds that two-binary Server
+  successor, marks A13 PASS, records the restored successor evidence addendum and
+  binds the recovered release-key identity while preserving all earlier packets.
 - **Final qualification packet assembled, still incomplete.**
   The tracked [qualification packet](final-qualification.json) binds the selected
   unsigned Server9f/Robotda6, all44 payload entries,17 D2 predicates and16
